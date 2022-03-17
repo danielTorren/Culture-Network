@@ -27,7 +27,7 @@ behaviour_cap = 1
 delta_t = 0.1#time step size
 
 RUNNAME = "network_" + str(P) + "_" + str(K) + "_" +  str(prob_wire) + "_" + str(time_steps) + "_" + str(behaviour_cap) +  "_" + str(delta_t)
-
+print("testing GIT")
 name_list = ["pro_env_fuel", "anti_env_fuel","pro_env_transport", "anti_env_transport","pro_env_diet", "anti_env_diet"]
 behave_type_list = [0,1,0,1,0,1]
 Y = len(name_list)#number of behaviours
