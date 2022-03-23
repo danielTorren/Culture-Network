@@ -17,7 +17,7 @@ import time
     carbon_price = 1
     time_cost = 1
 """
-
+print("DEV")
 P = 50#number of agents
 K = 8 #k nearest neighbours
 prob_wire = 0.1 #re-wiring probability?
