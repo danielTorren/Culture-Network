@@ -29,7 +29,7 @@ class Individual():
         total_culture = 0
         #print("out")
         for i in range(self.len_behaviours_list):
-            if self.behaviours_list[i].behaviour_type == 0:
+            if self.behaviours_list[i].behaviour_type == 1:
                 total_culture += self.behaviours_list[i].value 
             else: 
                 total_culture -= self.behaviours_list[i].value
@@ -70,10 +70,39 @@ class Individual():
         
     def update_attracts(self,social_component_behaviours):
         #step 3, equation 2
+
+        """
+        #OPTION A: weighted difference
+        for i in range(self.len_behaviours_list):
+            #print(self.behaviours_list[i].attract, self.delta_t*(social_component_behaviours[i] - self.behaviours_list[i].attract), social_component_behaviours[i] - self.behaviours_list[i].attract, social_component_behaviours[i] )
+            self.behaviours_list[i].attract += self.delta_t*(social_component_behaviours[i] - self.behaviours_list[i].attract) # add in + IP + FA later
+        """ 
+
+        """
+        #OPTION B: weighted average, but its time independent
+        for i in range(self.len_behaviours_list):
+            self.behaviours_list[i].attract = (self.behaviours_list[i].attract + social_component_behaviours[i])/2 # add in + IP + FA later
+            #print(self.behaviours_list[i].attract)
+        """
+
+
+        """
+        #OPTION C: weighted average time
+        for i in range(self.len_behaviours_list):
+            self.behaviours_list[i].attract += self.delta_t*((self.behaviours_list[i].attract + social_component_behaviours[i])/2 ) # add in + IP + FA later
+        """
+
+        """
         for i in range(self.len_behaviours_list):
             #print("attract before",self.behaviours_list[i].attract)
             self.behaviours_list[i].attract += self.delta_t*(social_component_behaviours[i]) # add in + IP + FA later
             #print("attract after",self.behaviours_list[i].attract)
+        """
+
+        #OPTION D: RK2 weighted difference,  NEED TO CHECK, it looks wrong
+        for i in range(self.len_behaviours_list):
+            self.behaviours_list[i].attract += self.delta_t*(self.delta_t/2 + 1)*( self.behaviours_list[i].attract  - social_component_behaviours[i]) # add in + IP + FA later
+        #print("attract after",self.behaviours_list[i].attract)
 
     def update_costs(self):
         # step 3, equation 

@@ -10,7 +10,7 @@ class Network():
         Properties: Culture, Behaviours
     """
 
-    def __init__(self, P, K, prob_wire, delta_t, Y, name_list,behave_type_list, behaviour_cap):
+    def __init__(self, P, K, prob_wire, delta_t, Y, name_list,behave_type_list, behaviour_cap,set_seed):
         #self.network = self.create_network(network_properties)
         self.agent_number = P
         self.K = K
@@ -20,6 +20,9 @@ class Network():
         self.name_list = name_list
         self.behaviour_cap = behaviour_cap
         self.behave_type_list = behave_type_list
+        self.set_seed = set_seed
+        np.random.seed(self.set_seed)
+
         self.weighting_matrix, self.network = self.create_weighting_matrix()  
         self.init_data_behaviours = self.generate_init_data_behaviours()
         self.agent_list = self.create_agent_list() 
@@ -39,7 +42,7 @@ class Network():
 
     def create_weighting_matrix(self):# here is where i need to create a small world transmission matrix
         
-        ws = nx.watts_strogatz_graph(self.agent_number, self.K, self.prob_wire)# Watts–Strogatz small-world graph,watts_strogatz_graph( n, k, p[, seed])
+        ws = nx.watts_strogatz_graph(n=self.agent_number, k=self.K, p=self.prob_wire, seed=self.set_seed)# Watts–Strogatz small-world graph,watts_strogatz_graph( n, k, p[, seed])
         weighting_matrix = nx.to_numpy_array(ws)
 
         #print(ws)
@@ -67,7 +70,7 @@ class Network():
             row_init_data_behaviours = []
             #### HERE I WHERE I DEFINE THE STARTING VALUES!!
 
-            attract_list = (np.random.random_sample(self.num_behaviours) - 0.5)*2
+            attract_list = np.random.random_sample(self.num_behaviours) #(np.random.random_sample(self.num_behaviours) - 0.5)*2
             #print("attract_list", attract_list)
             cost_list = np.random.random_sample(self.num_behaviours)
             #print("cost list", cost_list)
