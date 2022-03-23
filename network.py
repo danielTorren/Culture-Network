@@ -28,9 +28,11 @@ class Network():
         self.agent_list = self.create_agent_list() 
         self.behavioural_attract_matrix = self.create_update_behavioural_attract_matrix()
         self.social_component_matrix = self.calc_social_component_matrix()
+        self.cultural_var = self.calc_cultural_var()
 
         self.history_weighting_matrix = [self.weighting_matrix]
         self.history_agent_list = [deepcopy(self.agent_list)]
+        self.history_cultural_var = [self.cultural_var]
 
     """
     def create_network(network_properties):
@@ -121,9 +123,16 @@ class Network():
                     self.weighting_matrix[i][j] = self.weighting_matrix[i][j]/i_total
                     #print('AFTER',self.weighting_matrix[i][j])
 
+    def calc_cultural_var(self):
+        culture_list = [x.culture for x in self.agent_list]
+        #print(culture_list, max(culture_list) - min(culture_list), max(culture_list),min(culture_list))
+        self.cultural_var = max(culture_list) - min(culture_list)
+        #print(self.cultural_var)
+
     def save_data_network(self):
         self.history_weighting_matrix.append(self.weighting_matrix)
         self.history_agent_list.append(deepcopy(self.agent_list))
+        self.history_cultural_var.append(self.cultural_var)
 
     def advance_time_step(self):
         #advance a time step
@@ -133,4 +142,5 @@ class Network():
         #self.update_weightings() # TURN OFF FOR NOW 
         self.behavioural_attract_matrix = self.create_update_behavioural_attract_matrix()
         self.social_component_matrix = self.calc_social_component_matrix()
+        self.calc_cultural_var()
         self.save_data_network()

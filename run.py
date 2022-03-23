@@ -17,30 +17,19 @@ import time
     carbon_price = 1
     time_cost = 1
 """
-print("DEV")
-P = 50#number of agents
-K = 8 #k nearest neighbours
+
+P = 10#number of agents
+K = 3 #k nearest neighbours
 prob_wire = 0.1 #re-wiring probability?
-time_steps = 500#number of time steps
 behaviour_cap = 1
 delta_t = 0.1#time step size
-
+time_steps_max = 20#number of time steps max, will stop if culture converges
+culture_var_min = 0.01#amount of cultural variation
 set_seed = 1#reproducibility
 
-RUNNAME = "network_" + str(P) + "_" + str(K) + "_" +  str(prob_wire) + "_" + str(time_steps) + "_" + str(behaviour_cap) +  "_" + str(delta_t) + "_" + str(set_seed)
 name_list = ["pro_env_fuel", "anti_env_fuel","pro_env_transport", "anti_env_transport","pro_env_diet", "anti_env_diet"]
 behave_type_list = [1,0,1,0,1,0]
 Y = len(name_list)#number of behaviours
-time_list = range(time_steps + 1)
-
-#plot variables
-node_size = 100
-cmap_culture = LinearSegmentedColormap.from_list("BrownGreen", ["sienna","white","olivedrab"])
-cmap_behaviour = "coolwarm"
-fps = 5
-interval = 300
-layout_type = "spring"
-frames_prints = [0, round(time_steps*1/5),round(time_steps*2/5), round(time_steps*3/5) ,round( time_steps*4/5), time_steps-1]
 
 if __name__ == "__main__":
 
@@ -62,45 +51,59 @@ if __name__ == "__main__":
     if gen_data:
         ### CREATE NETWORK
         social_network = Network( P,  K, prob_wire, delta_t, Y, name_list, behave_type_list, behaviour_cap,set_seed)
-        ### RUN TIME STEPS
-        for time_counter in range(time_steps):
+        
+        #### RUN TIME STEPS
+        convergence = False
+        time_counter = 0
+        while time_counter < time_steps_max and convergence == False:
             social_network.advance_time_step()
+            time_counter += 1
+            if social_network.cultural_var < culture_var_min:
+                convergence = True
+        
+        time_steps = len(social_network.history_cultural_var) -1#ITS A BODGE#use this to get the number of steps
+        time_list = range(time_steps + 1)
 
         if animate_culture_network or prints_culture_network:
             cultural_change_list = []
             for i in range(P):
                 cultural_change_list.append(social_network.agent_list[i].history_culture)
             cultural_change_transposed = (np.asarray(cultural_change_list)).transpose()
-            #print(cultural_change_transposed[0], cultural_change_transposed[-1])
-            #cultural_change_coloupmap_adjusted =  (cultural_change_transposed + behaviour_cap)/2 # needs to be between 0 an 1
-            #print(cultural_change_transposed[-1],cultural_change_transposed[-1] + behaviour_cap,(cultural_change_transposed[-1] + behaviour_cap)/2)
-            #print(cultural_change_coloupmap_adjusted[-1])
-            #print(cultural_change_coloupmap_adjusted[0], cultural_change_coloupmap_adjusted[5])
-
-            if layout_type == "circular":
-                pos_culture_network = nx.circular_layout(social_network.network)
-            elif layout_type == "spring":
-                pos_culture_network = nx.spring_layout(social_network.network)
-            elif layout_type == "kamada_kawai":
-                pos_culture_network = nx.kamada_kawai_layout(social_network.network)
-            elif layout_type == "planar":
-                pos_culture_network = nx.planar_layout(social_network.network)
-            else:
-                raise Exception('Invalid layout given')
 
         if animate_behavioural_matrix or prints_behavioural_matrix:
             behavioural_matrix_time = []
             for i in time_list: 
                 agents_row = []
                 for j in range(P):
-                    #print("printing first behavioru for agents over time:",social_network.agent_list[j].history_behaviours_list[i][0].value)
-
                     row = [x.value for x in social_network.agent_list[j].history_behaviours_list[i]]
                     agents_row.append(row)
                 behavioural_matrix_time.append(agents_row)
 
             #print(behavioural_matrix_time)
             behavioural_matrix_time = np.array(behavioural_matrix_time)
+
+    #plot variables
+    node_size = 100
+    cmap_culture = LinearSegmentedColormap.from_list("BrownGreen", ["sienna","white","olivedrab"])
+    cmap_behaviour = "coolwarm"
+    fps = 5
+    interval = 300
+    layout_type = "spring"
+    frames_prints = [0, round(time_steps*1/5),round(time_steps*2/5), round(time_steps*3/5) ,round( time_steps*4/5), time_steps-1]
+    RUNNAME = "network_" + str(P) + "_" + str(K) + "_" +  str(prob_wire) + "_" + str(time_steps) + "_" + str(behaviour_cap) +  "_" + str(delta_t) + "_" + str(set_seed)
+    print("RUNAME:", RUNNAME)
+
+    if animate_culture_network or prints_culture_network:
+        if layout_type == "circular":
+            pos_culture_network = nx.circular_layout(social_network.network)
+        elif layout_type == "spring":
+            pos_culture_network = nx.spring_layout(social_network.network)
+        elif layout_type == "kamada_kawai":
+            pos_culture_network = nx.kamada_kawai_layout(social_network.network)
+        elif layout_type == "planar":
+            pos_culture_network = nx.planar_layout(social_network.network)
+        else:
+            raise Exception('Invalid layout given')
 
     ### PLOT STUFF    
     if plots_gen:
@@ -111,6 +114,11 @@ if __name__ == "__main__":
         ax.set_ylabel('Culture')
         for i in range(P):
             ax.plot(time_list,social_network.agent_list[i].history_culture)
+
+        lines = [-1,-4/6,-2/6,0,2/6,4/6,1 ]
+        for i in lines:
+            ax.axhline(y = i, color = 'b', linestyle = '--', alpha=0.3)
+
         fig.savefig("results/figures/" + RUNNAME + "cultural_evolution.png")
 
     #make matrix animation
