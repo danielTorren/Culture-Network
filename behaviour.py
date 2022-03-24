@@ -11,6 +11,11 @@ class Behaviour():
         self.cost = init_cost
 
         self.behaviour_cap = behaviour_cap
+
+        self.history_value = [self.value]
+        self.history_attract = [self.attract]
+        self.history_cost= [self.cost]
+
         #print("init behaviour",self.behaviour_name, self.behaviour_type )
 
     def update_behaviour(self):
@@ -23,7 +28,15 @@ class Behaviour():
         elif value > self.behaviour_cap:
             value = self.behaviour_cap
             #print("more")
-
         
         self.value = value
+
+    def save_data_behaviour(self):
+        self.history_value.append(self.value)
+        self.history_attract.append(self.attract)
+        self.history_cost.append(self.cost)
+
+    def next_step(self):
+        self.update_behaviour()
+        self.save_data_behaviour()
 

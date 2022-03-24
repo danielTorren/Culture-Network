@@ -1,7 +1,6 @@
 import numpy as np
 import networkx as nx
 from individual import Individual
-from copy import deepcopy
 
 class Network():
 
@@ -31,36 +30,14 @@ class Network():
         self.cultural_var = self.calc_cultural_var()
 
         self.history_weighting_matrix = [self.weighting_matrix]
-        self.history_agent_list = [deepcopy(self.agent_list)]
+        self.history_behavioural_attract_matrix = [self.behavioural_attract_matrix]
+        self.history_social_component_matrix = [self.social_component_matrix]
         self.history_cultural_var = [self.cultural_var]
 
-    """
-    def create_network(network_properties):
-        #create the agents
-        #link the agents
-        #set agent network weightings
-        #needs a neighbourhood data section to easily feed into agents
-    """
-
     def create_weighting_matrix(self):# here is where i need to create a small world transmission matrix
-        
+        #SMALL WORLD
         ws = nx.watts_strogatz_graph(n=self.agent_number, k=self.K, p=self.prob_wire, seed=self.set_seed)# Watts–Strogatz small-world graph,watts_strogatz_graph( n, k, p[, seed])
         weighting_matrix = nx.to_numpy_array(ws)
-
-        #print(ws)
-        #print("weighting matrix")
-        #print(weighting_matrix )
-        """
-        weighting_matrix = np.empty([self.agent_number,self.agent_number])
-        init_val_weighting = 1/(self.agent_number - 1)
-
-        for i in range(self.agent_number):
-            for j in range(self.agent_number):
-                if i != j:
-                    weighting_matrix[i][j] = init_val_weighting # total connected uniform matrix 
-                else:
-                    weighting_matrix[i][j] = 0#no self interaction
-        """
 
         return weighting_matrix, ws 
     
@@ -73,13 +50,12 @@ class Network():
             #### HERE I WHERE I DEFINE THE STARTING VALUES!!
 
             attract_list = np.random.random_sample(self.num_behaviours) #(np.random.random_sample(self.num_behaviours) - 0.5)*2
-            #print("attract_list", attract_list)
             cost_list = np.random.random_sample(self.num_behaviours)
-            #print("cost list", cost_list)
 
             for v in range(self.num_behaviours):
                 row_init_data_behaviours.append([self.name_list[v],self.behave_type_list[v], attract_list[v] - cost_list[v],attract_list[v],cost_list[v], self.behaviour_cap])
             init_data_behaviours.append(row_init_data_behaviours)
+
         return init_data_behaviours
 
     def create_agent_list(self):
@@ -94,7 +70,7 @@ class Network():
         for i in range(self.agent_number):
             row_behavioural_attract_matrix= []
             for v in range(self.num_behaviours):
-                row_behavioural_attract_matrix.append(self.agent_list[i].behaviours_list[v].attract)#do i want attraction or behavioural value?
+                row_behavioural_attract_matrix.append(self.agent_list[i].behaviour_list[v].attract)#do i want attraction or behavioural value?
             behavioural_attract_matrix.append(row_behavioural_attract_matrix)
             
         return behavioural_attract_matrix
@@ -125,16 +101,15 @@ class Network():
 
     def calc_cultural_var(self):
         culture_list = [x.culture for x in self.agent_list]
-        #print(culture_list, max(culture_list) - min(culture_list), max(culture_list),min(culture_list))
         self.cultural_var = max(culture_list) - min(culture_list)
-        #print(self.cultural_var)
 
     def save_data_network(self):
         self.history_weighting_matrix.append(self.weighting_matrix)
-        self.history_agent_list.append(deepcopy(self.agent_list))
+        self.history_behavioural_attract_matrix.append(self.behavioural_attract_matrix)
+        self.history_social_component_matrix.append(self.social_component_matrix)
         self.history_cultural_var.append(self.cultural_var)
 
-    def advance_time_step(self):
+    def next_step(self):
         #advance a time step
 
         for i in range(self.agent_number):
