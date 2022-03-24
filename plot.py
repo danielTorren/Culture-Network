@@ -182,5 +182,74 @@ def prints_culture_network(FILENAME,Data,layout,cmap_culture,node_size,frames_pr
     f = FILENAME + "/Prints/prints_culture_network.png"
     fig.savefig(f, dpi = 600)
 
+def multi_animation(FILENAME,Data,P,time_list,cmap_behaviour,cmap_culture,layout,node_size,interval,fps):
+
+    ####ACUTAL
+
+
+    fig = plt.figure(figsize =[7,7])#figsize = [8,5]
+    ax1 = fig.add_subplot(2,2,1)
+    ax2 = fig.add_subplot(2,2,2)
+    ax3 = fig.add_subplot(2,1,2)
+
+    ax3.set_xlabel('Steps')
+    ax3.set_ylabel('Culture')
+    data = np.asarray(Data["individual_culture"])#bodge
+    for i in range(P):
+        ax3.plot(time_list,data[i])
+
+    lines = [-1,-4/6,-2/6,0,2/6,4/6,1 ]
+
+    for i in lines:
+        ax3.axhline(y = i, color = 'b', linestyle = '--', alpha=0.3)
+
+    ax3.grid()
+    time_line = ax3.axvline(x=0.0,linewidth=2, color='r')
+
+    ax1.set_xlabel('Behaviour')
+    ax1.set_ylabel('Agent')
+
+        ####CULTURE ANIMATION
+    def update(i):
+        ax2.clear()
+
+        ani_step_colours = cmap_culture(Data["individual_culture"][i])
+        nx.draw(G, node_color=ani_step_colours, ax=ax2, pos=pos_culture_network , node_size = node_size, edgecolors = "black")
+
+        M = Data["behaviour_value"][i]
+        #print("next frame!",M)
+        matrice.set_array(M)
+
+        time_line.set_xdata(time_list[i])
+
+        return matrice,time_line
+
+
+    cbar_behave = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap_behaviour, norm=Normalize(vmin=-Data["behaviour_cap"], vmax=Data["behaviour_cap"])), ax=ax1 )#This does a mapabble on the fly i think, not sure
+    cbar_behave.set_label('Behavioural Value')
+
+    #cbar = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap_culture), ax=ax)#This does a mapabble on the fly i think, not sure
+    cbar_culture = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap_culture, norm=Normalize(vmin=-Data["behaviour_cap"], vmax=Data["behaviour_cap"])), ax=ax2)#This does a mapabble on the fly i think, not sure
+    cbar_culture.set_label('Culture')
+
+    matrice = ax1.matshow(Data["behaviour_value"][0], cmap = cmap_behaviour, aspect='auto')
+
+    #need to generate the network from the matrix
+    G = nx.from_numpy_matrix(Data["network_weighting_matrix"][0])
+
+    #get pos
+    pos_culture_network = prod_pos(layout,G)
+
+    ani = animation.FuncAnimation(fig, update, frames= len(time_list), repeat_delay = 500, interval = interval)
+
+    #save the video
+    animateName = FILENAME + "/Animations"
+    f = animateName + "/" + "multi_animation.mp4"
+    writervideo = animation.FFMpegWriter(fps=fps) 
+    ani.save(f, writer=writervideo)
+
+
+
+
 
         
