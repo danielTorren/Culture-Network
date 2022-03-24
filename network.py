@@ -27,7 +27,8 @@ class Network():
         self.agent_list = self.create_agent_list() 
         self.behavioural_attract_matrix = self.create_update_behavioural_attract_matrix()
         self.social_component_matrix = self.calc_social_component_matrix()
-        self.cultural_var = self.calc_cultural_var()
+
+        self.cultural_var = np.NaN#WHY DOES THIS GIVE NONE?????
 
         self.history_weighting_matrix = [self.weighting_matrix]
         self.history_behavioural_attract_matrix = [self.behavioural_attract_matrix]

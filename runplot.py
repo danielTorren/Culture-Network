@@ -1,241 +1,83 @@
-from network import Network
-import networkx as nx
+from pickle import FALSE
+from run import run
+from plot import plot_culture_timeseries, animate_weighting_matrix, animate_behavioural_matrix, animate_culture_network, prints_behavioural_matrix, prints_culture_network
+from utility import loadData, get_run_properties
 import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-from matplotlib.colors import ListedColormap,LinearSegmentedColormap, Normalize
-import numpy as np
+from matplotlib.colors import LinearSegmentedColormap
 import time
-### set up stuff
-#plt.rcParams['animation.ffmpeg_path'] = 'C:/Users/daniel/ffmpeg/ffmpeg-5.0-essentials_build/bin/'#NEED TO SPECIFCY WHERE ffmpeg is 
-
-#exogenous variables
-
-"""
-    cultural_conformist = 1
-    information_provistion = 1
-    freq_attract = 1
-    carbon_price = 1
-    time_cost = 1
-"""
-
-P = 10#number of agents
-K = 3 #k nearest neighbours
-prob_wire = 0.1 #re-wiring probability?
-behaviour_cap = 1
-delta_t = 0.1#time step size
-time_steps_max = 20#number of time steps max, will stop if culture converges
-culture_var_min = 0.01#amount of cultural variation
-set_seed = 1#reproducibility
-
-name_list = ["pro_env_fuel", "anti_env_fuel","pro_env_transport", "anti_env_transport","pro_env_diet", "anti_env_diet"]
-behave_type_list = [1,0,1,0,1,0]
-Y = len(name_list)#number of behaviours
 
 if __name__ == "__main__":
 
-    gen_data = True
+    RUN = True
+    PLOT = True
+    SHOW_PLOT = False
 
-    plots_gen = True
-    animate_behavioural_matrix = True
-    animate_culture_network = True
-    prints_behavioural_matrix = True
-    prints_culture_network = True
+    if RUN == False:
+        FILENAME = "Results/network_12_3_0.1_21_1_0.1_1_6"
 
-    show_plots = True
+    if RUN:
+        ###RUN
+        P = 200#number of agents
+        K = 10 #k nearest neighbours
+        prob_wire = 0.1 #re-wiring probability?
+        behaviour_cap = 1
+        delta_t = 0.1#time step size
+        time_steps_max = 1000#number of time steps max, will stop if culture converges
+        culture_var_min = 0.01#amount of cultural variation
+        set_seed = 1#reproducibility
 
-    animate_weighting_matrix = False
+        name_list = ["pro_env_fuel", "anti_env_fuel","pro_env_transport", "anti_env_transport","pro_env_diet", "anti_env_diet"]
+        behave_type_list = [1,0,1,0,1,0]
+        Y = len(name_list)#number of behaviours
 
-    start_time = time.time()
-    print("start_time =", time.ctime(time.time()))
+        start_time = time.time()
+        print("start_time =", time.ctime(time.time()))
+        ###RUN MODEL
+        FILENAME = run(P,  K, prob_wire, delta_t, Y, name_list, behave_type_list, behaviour_cap,set_seed,time_steps_max,culture_var_min)
 
-    if gen_data:
-        ### CREATE NETWORK
-        social_network = Network( P,  K, prob_wire, delta_t, Y, name_list, behave_type_list, behaviour_cap,set_seed)
+        print ("RUN time taken: %s minutes" % ((time.time()-start_time)/60), "or %s s"%((time.time()-start_time)))
+
+    if PLOT:
+
+        node_size = 100
+        cmap_culture = LinearSegmentedColormap.from_list("BrownGreen", ["sienna","white","olivedrab"])
+        cmap_behaviour = "coolwarm"
+        fps = 5
+        interval = 300
+        layout_type = "spring"
+
+        start_time = time.time()
+        print("start_time =", time.ctime(time.time()))
+
+        #LOAD DATA
+        loadBooleanCSV = ["individual_culture"]#"network_cultural_var",
+        loadBooleanArray = ["network_weighting_matrix","network_social_component_matrix","network_behavioural_attract_matrix","behaviour_value", "behaviour_cost", "behaviour_attract"]
+        dataName = FILENAME + "/Data"
+        #P,  K, prob_wire, steps,behaviour_cap,delta_t,set_seed,Y
+        paramList = [ "P",  "K", "prob_wire","steps","behaviour_cap", "delta_t", "set_seed","Y","culture_var_min"]
+        Data = loadData(dataName, loadBooleanCSV,loadBooleanArray)
+        Data = get_run_properties(Data,FILENAME,paramList)
         
-        #### RUN TIME STEPS
-        convergence = False
-        time_counter = 0
-        while time_counter < time_steps_max and convergence == False:
-            social_network.advance_time_step()
-            time_counter += 1
-            if social_network.cultural_var < culture_var_min:
-                convergence = True
+        steps = int(Data["steps"])
+        Y = int(Data["Y"])
+        K = int(Data["K"])
+        P = int(Data["P"])
+        time_list = range(steps)
+        frames_prints = [0, round(steps*1/5),round(steps*2/5), round(steps*3/5) ,round( steps*4/5), steps-1]
         
-        time_steps = len(social_network.history_cultural_var) -1#ITS A BODGE#use this to get the number of steps
-        time_list = range(time_steps + 1)
+        ###PLOT STUFF
+        plot_culture_timeseries(FILENAME,Data,time_list,P)#NEED TO FIX!!
+        animate_weighting_matrix(FILENAME,Data,steps,interval,fps)
+        animate_behavioural_matrix(FILENAME,Data,steps,interval,fps,cmap_behaviour)
+        animate_culture_network(FILENAME,Data,layout_type,cmap_culture,node_size,steps,interval,fps)
+        prints_behavioural_matrix(FILENAME,Data,frames_prints,cmap_behaviour)
+        prints_culture_network(FILENAME,Data,layout_type,cmap_culture,node_size,frames_prints)
 
-        if animate_culture_network or prints_culture_network:
-            cultural_change_list = []
-            for i in range(P):
-                cultural_change_list.append(social_network.agent_list[i].history_culture)
-            cultural_change_transposed = (np.asarray(cultural_change_list)).transpose()
-
-        if animate_behavioural_matrix or prints_behavioural_matrix:
-            behavioural_matrix_time = []
-            for i in time_list: 
-                agents_row = []
-                for j in range(P):
-                    row = [x.value for x in social_network.agent_list[j].history_behaviours_list[i]]
-                    agents_row.append(row)
-                behavioural_matrix_time.append(agents_row)
-
-            #print(behavioural_matrix_time)
-            behavioural_matrix_time = np.array(behavioural_matrix_time)
-
-    #plot variables
-    node_size = 100
-    cmap_culture = LinearSegmentedColormap.from_list("BrownGreen", ["sienna","white","olivedrab"])
-    cmap_behaviour = "coolwarm"
-    fps = 5
-    interval = 300
-    layout_type = "spring"
-    frames_prints = [0, round(time_steps*1/5),round(time_steps*2/5), round(time_steps*3/5) ,round( time_steps*4/5), time_steps-1]
-    RUNNAME = "network_" + str(P) + "_" + str(K) + "_" +  str(prob_wire) + "_" + str(time_steps) + "_" + str(behaviour_cap) +  "_" + str(delta_t) + "_" + str(set_seed)
-    print("RUNAME:", RUNNAME)
-
-    if animate_culture_network or prints_culture_network:
-        if layout_type == "circular":
-            pos_culture_network = nx.circular_layout(social_network.network)
-        elif layout_type == "spring":
-            pos_culture_network = nx.spring_layout(social_network.network)
-        elif layout_type == "kamada_kawai":
-            pos_culture_network = nx.kamada_kawai_layout(social_network.network)
-        elif layout_type == "planar":
-            pos_culture_network = nx.planar_layout(social_network.network)
-        else:
-            raise Exception('Invalid layout given')
-
-    ### PLOT STUFF    
-    if plots_gen:
-
-        ##plot cultural evolution of agents
-        fig, ax = plt.subplots()
-        ax.set_xlabel('Steps')
-        ax.set_ylabel('Culture')
-        for i in range(P):
-            ax.plot(time_list,social_network.agent_list[i].history_culture)
-
-        lines = [-1,-4/6,-2/6,0,2/6,4/6,1 ]
-        for i in lines:
-            ax.axhline(y = i, color = 'b', linestyle = '--', alpha=0.3)
-
-        fig.savefig("results/figures/" + RUNNAME + "cultural_evolution.png")
-
-    #make matrix animation
-    if animate_weighting_matrix:
-
-        def update(i):
-            M = social_network.history_weighting_matrix[i]
-            #print("next frame!",M)
-            matrice.set_array(M)
-            # Set the title
-            ax.set_title("Step = {}".format(i))
-            return matrice
-
-        fig, ax = plt.subplots()
+        print ("PLOT time taken: %s minutes" % ((time.time()-start_time)/60), "or %s s"%((time.time()-start_time)))
         
-        matrice = ax.matshow(social_network.history_weighting_matrix[0])
-        plt.colorbar(matrice)
+        if SHOW_PLOT:
+            plt.show()
 
-        ani = animation.FuncAnimation(fig, update, frames = len(social_network.history_weighting_matrix), repeat_delay = 500, interval = interval)
-
-        #save the video
-        f = "results/videos/" + str(RUNNAME) + "_weighting_matrix_animation.mp4"
-        writervideo = animation.FFMpegWriter(fps=fps) 
-        ani.save(f, writer=writervideo)
-
-    #make behaviour evolution plot
-    if animate_behavioural_matrix:
-
-        def update(i):
-            M = behavioural_matrix_time[i]
-            #print("next frame!",M)
-            matrice.set_array(M)
-
-            # Set the title
-            ax.set_title("Step = {}".format(i))
-
-            return matrice
-
-        fig, ax = plt.subplots()
-        ax.set_xlabel('Behaviour')
-        ax.set_ylabel('Agent')
-        #c_map = plt.get_cmap('coolwarm')
-        matrice = ax.matshow(behavioural_matrix_time[0], cmap = cmap_behaviour, aspect='auto')
-        #cbar = fig.colorbar(matrice, ax=ax,, vmin=behaviour_cap, vmax=behaviour_cap)#This does a mapabble on the fly i think, not sure
-        cbar = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap_behaviour, norm=Normalize(vmin=-behaviour_cap, vmax=behaviour_cap)), ax=ax )#This does a mapabble on the fly i think, not sure
-        cbar.set_label('Behavioural Value')
-
-        ani = animation.FuncAnimation(fig, update, frames = len(behavioural_matrix_time), repeat_delay = 500, interval = interval)
-
-        #save the video
-        f = "results/videos/" + str(RUNNAME) + "behavioural_matrix_animation.mp4"
-        writervideo = animation.FFMpegWriter(fps=fps) 
-        ani.save(f, writer=writervideo)
-
-    #animation of changing culture
-    if animate_culture_network:
-
-        def update(i, G,pos, ax,cultural_change,cmap_culture):
-
-            ax.clear()
-            ani_step_colours = cmap_culture(cultural_change[i])
-            nx.draw(G, node_color=ani_step_colours, ax=ax, pos=pos, node_size = node_size, edgecolors = "black")
-            
-            # Set the title
-            ax.set_title("Step = {}".format(i))
-            
-        # Build plot
-        fig, ax = plt.subplots()
-	    #cbar = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap_culture), ax=ax)#This does a mapabble on the fly i think, not sure
-        cbar = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap_culture, norm=Normalize(vmin=-behaviour_cap, vmax=behaviour_cap)), ax=ax)#This does a mapabble on the fly i think, not sure
-        cbar.set_label('Culture')
-
-        ani = animation.FuncAnimation(fig, update, frames=time_steps, fargs=(social_network.network, pos_culture_network, ax, cultural_change_transposed, cmap_culture), repeat_delay = 500, interval = interval)
-
-        #save the video
-        f = "results/videos/" + str(RUNNAME) + "_cultural_animation.mp4"
-        writervideo = animation.FFMpegWriter(fps=fps) 
-        ani.save(f, writer=writervideo)
-
-    if prints_behavioural_matrix:
-        fig, axes = plt.subplots(nrows=2, ncols=3,figsize=(14,7))
-
-        for i, ax in enumerate(axes.flat):
-            matrice = ax.matshow(behavioural_matrix_time[frames_prints[i]], cmap = cmap_behaviour, aspect='auto')
-            # Set the title
-            ax.set_title("Step = {}".format(frames_prints[i]))
-            ax.set_xlabel('Behaviour')
-            ax.set_ylabel('Agent')
-        plt.tight_layout()
-
-        #colour bar axes
-        fig.subplots_adjust(right=0.8)
-        cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
-        cbar = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap_behaviour, norm=Normalize(vmin=-behaviour_cap, vmax=behaviour_cap)), cax=cbar_ax )#This does a mapabble on the fly i think, not sure
-        cbar.set_label('Behavioural Value')
-        fig.savefig("results/figures/" + RUNNAME + "prints_behavioural_matrix.png")
-        
-
-    if prints_culture_network:
-        fig, axes = plt.subplots(nrows=2, ncols=3,figsize=(14,7))
-
-        for i, ax in enumerate(axes.flat):
-            ax.set_title("Step =  {}".format(frames_prints[i]))
-            ani_step_colours = cmap_culture(cultural_change_transposed[frames_prints[i]])
-            nx.draw(social_network.network, node_color=ani_step_colours, ax=ax, pos=pos_culture_network, node_size = node_size, edgecolors = "black")
-        plt.tight_layout()
-
-        #colour bar axes
-        fig.subplots_adjust(right=0.8)
-        cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
-        cbar = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap_culture, norm=Normalize(vmin=-behaviour_cap, vmax=behaviour_cap)), cax=cbar_ax)#This does a mapabble on the fly i think, not sure
-        cbar.set_label('Culture')
-        fig.savefig("results/figures/" + RUNNAME + "prints_culture_network.png")
-
-    print ("time taken: %s minutes" % ((time.time()-start_time)/60), "or %s s"%((time.time()-start_time)))
-    if show_plots:
-        plt.show()
 
 
 
