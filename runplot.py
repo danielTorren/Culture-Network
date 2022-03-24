@@ -1,6 +1,6 @@
 from pickle import FALSE
 from run import run
-from plot import plot_culture_timeseries, animate_weighting_matrix, animate_behavioural_matrix, animate_culture_network, prints_behavioural_matrix, prints_culture_network,multi_animation
+from plot import plot_culture_timeseries, animate_weighting_matrix, animate_behavioural_matrix, animate_culture_network, prints_behavioural_matrix, prints_culture_network,multi_animation,multi_animation_alt,multi_animation_scaled
 from utility import loadData, get_run_properties
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
@@ -8,7 +8,7 @@ import time
 
 if __name__ == "__main__":
 
-    RUN = False
+    RUN = True
     PLOT = True
     SHOW_PLOT = True
 
@@ -17,12 +17,12 @@ if __name__ == "__main__":
 
     if RUN:
         ###RUN
-        P = 20#number of agents
-        K = 3 #k nearest neighbours
+        P = 5#number of agents
+        K = 5 #k nearest neighbours
         prob_wire = 0.1 #re-wiring probability?
         behaviour_cap = 1
         delta_t = 0.1#time step size
-        time_steps_max = 200#number of time steps max, will stop if culture converges
+        time_steps_max = 50#number of time steps max, will stop if culture converges
         culture_var_min = 0.01#amount of cultural variation
         set_seed = 1#reproducibility
 
@@ -64,6 +64,8 @@ if __name__ == "__main__":
         P = int(Data["P"])
         time_list = range(steps)
         frames_prints = [0, round(steps*1/5),round(steps*2/5), round(steps*3/5) ,round( steps*4/5), steps-1]
+        scale_factor = 0.5
+        frames_proportion = int(round(steps/2))
         
         ###PLOT STUFF
         #plot_culture_timeseries(FILENAME,Data,time_list,P)#NEED TO FIX!!
@@ -72,7 +74,9 @@ if __name__ == "__main__":
         #animate_culture_network(FILENAME,Data,layout_type,cmap_culture,node_size,steps,interval,fps)
         #prints_behavioural_matrix(FILENAME,Data,frames_prints,cmap_behaviour)
         #prints_culture_network(FILENAME,Data,layout_type,cmap_culture,node_size,frames_prints)
-        multi_animation(FILENAME,Data,P,time_list,cmap_behaviour,cmap_culture,layout_type,node_size,interval,fps)
+        #multi_animation(FILENAME,Data,P,time_list,cmap_behaviour,cmap_culture,layout_type,node_size,interval,fps)
+        multi_animation_alt(FILENAME,Data,P,time_list,cmap_behaviour,cmap_culture,layout_type,node_size,interval,fps)
+        #multi_animation_scaled(FILENAME,Data,P,time_list,cmap_behaviour,cmap_culture,layout_type,node_size,interval,fps,scale_factor,frames_proportion)
 
         print ("PLOT time taken: %s minutes" % ((time.time()-start_time)/60), "or %s s"%((time.time()-start_time)))
         
