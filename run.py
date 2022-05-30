@@ -1,9 +1,10 @@
 from network import Network
 from utility import produceName,saveObjects,saveData,createFolder
 
-def generate_data(P,  K, prob_wire, delta_t, Y, name_list, behave_type_list, behaviour_cap,set_seed,time_steps_max,culture_var_min):
+def generate_data(time_steps_max, culture_var_min, P, K, prob_wire, delta_t, Y, behaviour_cap,set_seed,culture_div,culture_momentum, nu, eta,attract_information_provision_list,t_IP_matrix ,psi,carbon_price_init,carbon_price_gradient,carbon_emissions):
     ### CREATE NETWORK
-    social_network = Network( P,  K, prob_wire, delta_t, Y, name_list, behave_type_list, behaviour_cap,set_seed)
+    #                         P, K, prob_wire, delta_t, Y, behaviour_cap,set_seed,culture_div,culture_momentum, nu, eta,attract_information_provision_list,t_IP_matrix ,psi,carbon_price_init,carbon_price_gradient,carbon_emissions
+    social_network = Network( P, K, prob_wire, delta_t, Y, behaviour_cap,set_seed,culture_div,culture_momentum, nu, eta,attract_information_provision_list,t_IP_matrix,psi,carbon_price_init,carbon_price_gradient,carbon_emissions)
 
     #### RUN TIME STEPS
     convergence = False
@@ -16,14 +17,15 @@ def generate_data(P,  K, prob_wire, delta_t, Y, name_list, behave_type_list, beh
 
     return social_network
 
-def run(P,  K, prob_wire, delta_t, Y, name_list, behave_type_list, behaviour_cap,set_seed,time_steps_max,culture_var_min):
+def run(time_steps_max, culture_var_min, P, K, prob_wire, delta_t, Y, behaviour_cap,set_seed,culture_div,culture_momentum, nu, eta,attract_information_provision_list,t_IP_matrix ,psi,carbon_price_init,carbon_price_gradient,carbon_emissions):
     
     ###GENERATE THE DATA TO BE SAVED
-    social_network = generate_data(P,  K, prob_wire, delta_t, Y, name_list, behave_type_list, behaviour_cap,set_seed,time_steps_max,culture_var_min)
-    steps = len(social_network.history_cultural_var)#len(social_network.history_cultural_var) - 1
+    social_network = generate_data(time_steps_max, culture_var_min, P, K, prob_wire, delta_t, Y, behaviour_cap,set_seed,culture_div,culture_momentum, nu, eta,attract_information_provision_list,t_IP_matrix ,psi,carbon_price_init,carbon_price_gradient,carbon_emissions)
+    steps = len(social_network.history_cultural_var)#bodge?
+    #print(steps)
     #print(social_network.history_cultural_var)
-    ###SAVE RUN DATA
-    fileName, runName = produceName(P,  K, prob_wire, steps,behaviour_cap,delta_t,set_seed,Y,culture_var_min)
+    ###SAVE RUN DATA                P,  K, prob_wire, steps,behaviour_cap,delta_t,set_seed,Y,culture_var_min,culture_div, nu, eta
+    fileName, runName = produceName(P,  K, prob_wire, steps,behaviour_cap,delta_t,set_seed,Y,culture_var_min,culture_div, nu, eta)
     dataName = createFolder(fileName)
     saveObjects(social_network, dataName)
     saveData(social_network, dataName,steps, P, Y)

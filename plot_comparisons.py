@@ -6,14 +6,10 @@ from matplotlib.colors import LinearSegmentedColormap,SymLogNorm
 import time
 import numpy as np
 
+
 if __name__ == "__main__":
-
-    RUN = True
-    PLOT = True
-    SHOW_PLOT = True
-
-    if RUN == False:
-        FILENAME = "results/network_20_3_0.1_201_1_0.1_1_6_0.01"
+    #dynamics: carbon_price, social_learing, individual_learning, conformity_bias, information_provision, 5! = 120, 4! = 
+    FILENAME_ = "results/network_20_3_0.1_201_1_0.1_1_6_0.01"
 
     if RUN:
         ###RUN
@@ -49,7 +45,7 @@ if __name__ == "__main__":
         
         #Carbon price parameters
         carbon_price_init = 0#
-        social_cost_carbon = 0
+        social_cost_carbon = 1
         carbon_price_gradient = social_cost_carbon/time_steps_max# social cost of carbon/total time
         carbon_emissions = [1]*Y# these should based on some paramters
 
@@ -64,7 +60,8 @@ if __name__ == "__main__":
     if PLOT:
 
         node_size = 50
-        cmap = LinearSegmentedColormap.from_list("BrownGreen", ["sienna","white","olivedrab"])
+        cmap_culture = LinearSegmentedColormap.from_list("BrownGreen", ["sienna","white","olivedrab"])
+        cmap_behaviour = "coolwarm"
         fps = 5
         interval = 300
         layout = "circular"
@@ -99,19 +96,11 @@ if __name__ == "__main__":
         frames_list = frame_distribution_prints(Data["network_time"],scale_factor,frame_num)
         
         ###PLOT STUFF
-        #plot_culture_timeseries(FILENAME,Data)
-        #plot_value_timeseries(FILENAME,Data,nrows_behave, ncols_behave)
-        #plot_threshold_timeseries(FILENAME,Data,nrows_behave, ncols_behave)
-        #plot_attract_timeseries(FILENAME,Data,nrows_behave, ncols_behave)
-        #plot_carbon_price_timeseries(FILENAME,Data)
-        #animate_weighting_matrix(FILENAME,Data,interval,fps)
-        #animate_behavioural_matrix(FILENAME,Data,interval,fps,cmap)
-        #animate_culture_network(FILENAME,Data,layout,cmap,node_size,interval,fps,log_norm)
-        #prints_behavioural_matrix(FILENAME,Data,cmap,nrows,ncols,frames_list,round_dec)
-        #prints_culture_network(FILENAME,Data,layout,cmap,node_size,nrows,ncols,log_norm,frames_list,round_dec)
-        #multi_animation(FILENAME,Data,cmap,cmap,layout,node_size,interval,fps,log_norm)
-        #multi_animation_alt(FILENAME,Data,cmap,cmap,layout,node_size,interval,fps,log_norm)
-        multi_animation_scaled(FILENAME,Data,cmap,cmap,layout,node_size,interval,fps,scale_factor,frames_proportion,log_norm)
+        plot_culture_timeseries(FILENAME,Data)
+        plot_value_timeseries(FILENAME,Data,nrows_behave, ncols_behave)
+        plot_threshold_timeseries(FILENAME,Data,nrows_behave, ncols_behave)
+        plot_attract_timeseries(FILENAME,Data,nrows_behave, ncols_behave)
+        plot_carbon_price_timeseries(FILENAME,Data)
 
         print ("PLOT time taken: %s minutes" % ((time.time()-start_time)/60), "or %s s"%((time.time()-start_time)))
         

@@ -4,8 +4,8 @@ import os
 import pandas as pd
 import numpy as np
 
-def produceName(P,  K, prob_wire, steps,behaviour_cap,delta_t,set_seed,Y,culture_var_min):
-    runName = "network_" + str(P) + "_" + str(K) + "_" +  str(prob_wire) + "_" + str(steps) + "_" + str(behaviour_cap) +  "_" + str(delta_t) + "_" + str(set_seed) + "_" + str(Y) + "_" + str(culture_var_min)
+def produceName(P,  K, prob_wire, steps,behaviour_cap,delta_t,set_seed,Y,culture_var_min,culture_div,nu, eta):
+    runName = "network_" + str(P) + "_" + str(K) + "_" +  str(prob_wire) + "_" + str(steps) + "_" + str(behaviour_cap) +  "_" + str(delta_t) + "_" + str(set_seed) + "_" + str(Y) + "_" + str(culture_var_min) + "_" + str(culture_div) + "_" + str(nu) + "_" + str(eta) 
     fileName = "results/"+ runName
     return fileName, runName
 
@@ -79,18 +79,18 @@ def save_behaviours(data,steps, P, Y):
     dataDict = {}
     data_behaviour_value = np.zeros([steps, P, Y])
     data_behaviour_attract = np.zeros([steps, P, Y])
-    data_behaviour_cost = np.zeros([steps, P, Y])
+    data_behaviour_threshold = np.zeros([steps, P, Y])
 
     for i in range(steps):
         for j in range(P):
             for k in range(Y):
                 data_behaviour_value[i][j][k] = data.agent_list[j].behaviour_list[k].history_value[i]
                 data_behaviour_attract[i][j][k] = data.agent_list[j].behaviour_list[k].history_attract[i]
-                data_behaviour_cost[i][j][k] = data.agent_list[j].behaviour_list[k].history_cost[i]
+                data_behaviour_threshold[i][j][k] = data.agent_list[j].behaviour_list[k].history_threshold[i]
 
     dataDict["value"] = data_behaviour_value
     dataDict["attract"] = data_behaviour_attract
-    dataDict["cost"] = data_behaviour_cost
+    dataDict["threshold"] = data_behaviour_threshold
 
     return dataDict
 
@@ -105,24 +105,11 @@ def saveData(data, dataName,steps, P, Y):
     ####TRANSPOSE STUFF SO THAT ITS AGGREGATED BY TIME STEP NOT INDIVIDUAL
 
     """save data from behaviours"""
-
-    """
-    flat_behaviour_data = []
-    for i in range(len(data.agent_list)):
-        for v in range(len(data.agent_list[i].behaviour_list)):
-            flat_behaviour_data.append(data.agent_list[i].behaviour_list[v])#could i write this as a list comprehension
-
-    #list of things to be saved
-    data_save_behaviour_list = ["value","attract","cost"]
-    #create dict with flatdata
-    data_behaviour_dict = saveDataDict(flat_behaviour_data, data_save_behaviour_list)
-    #TRANSPOSE
-    data_behaviour_dict = transpose_data_dict(data_behaviour_dict,data_save_behaviour_list)
-    """
-    data_save_behaviour_list = ["value","attract","cost"]
-    data_behaviour_dict = save_behaviours(data,steps, P, Y)
+    
+    data_save_behaviour_array_list = ["value","attract","threshold"]
+    data_behaviour_array_dict = save_behaviours(data,steps, P, Y)
     #save as array
-    save_list_array(dataName,data_save_behaviour_list,data_behaviour_dict,"behaviour")
+    save_list_array(dataName,data_save_behaviour_array_list,data_behaviour_array_dict,"behaviour")
 
     """save data from individuals"""
     #list of things to be saved
@@ -133,16 +120,21 @@ def saveData(data, dataName,steps, P, Y):
     #data_individual_dict = transpose_data_dict(data_individual_dict,data_save_individual_list)
     #save as CSV
     saveFromList(dataName,data_save_individual_list,data_individual_dict,"individual")
+    
     """SAVE DATA FROM NETWORK"""
-    #list of things to be saved
-    data_save_network_list = ["weighting_matrix","behavioural_attract_matrix","social_component_matrix"]
+
+    data_save_network_list = ["time","cultural_var","carbon_price"]
     #create dict with flatdata
     data_network_dict = saveDataDict([data],data_save_network_list)
-    #save as array
-    save_list_array(dataName,data_save_network_list,data_network_dict ,"network")
+    #save as CSV
+    saveFromList(dataName,data_save_network_list,data_network_dict,"network")
 
-    #need ot save the average culture # IM NOT SAVING THE CULTURE AT THE MOMENT FUCK IT
-    #saveFromList(dataName,["cultural_var"], {"cultural_var": data.history_cultural_var}, "network")
+    #list of things to be saved
+    data_save_network_array_list = ["weighting_matrix","behavioural_attract_matrix","social_component_matrix"]
+    #create dict with flatdata
+    data_network_array_dict = saveDataDict([data],data_save_network_array_list)
+    #save as array
+    save_list_array(dataName,data_save_network_array_list,data_network_array_dict ,"network")
 
 def loadDataCSV(dataName, loadBoolean):
     data = {}
@@ -182,6 +174,37 @@ def get_run_properties(Data,runName,paramList):
         Data[paramList[i]] = float(parameters[i])
 
     return Data
+
+def frame_distribution(time_list,scale_factor,frames_proportion):
+    select = np.random.exponential(scale = scale_factor, size = frames_proportion)
+    #print(select)
+    norm_select = select/max(select)
+    #print(norm_select)
+    scaled_select = np.round(norm_select*(len(time_list)-1))
+    #print(scaled_select)
+    frames_list = np.unique(scaled_select)
+    #print(frames_list)
+    frames_list_int = [int(x) for x in frames_list]
+    #print(frames_list_int)
+    return frames_list_int
+
+def frame_distribution_prints(time_list,scale_factor,frame_num):
+
+    select = np.random.exponential(scale = scale_factor, size = frame_num)
+    #print(select)
+    norm_select = select/max(select)
+    #print(norm_select)
+    #print(norm_select)
+    scaled_select = np.ceil(norm_select*(len(time_list)-1))#stops issues with zero
+    #print(np.ceil(norm_select*(len(time_list)-1)))
+    #print(scaled_select)
+    frames_list = np.unique(scaled_select)
+    #print(frames_list)
+    frames_list_int = [int(x) for x in frames_list]
+    #print(frames_list_int)
+    frames_list_int.insert(0,0)
+    
+    return frames_list_int
 
 
 
