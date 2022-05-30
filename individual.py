@@ -10,7 +10,7 @@ class Individual():
     """
     def __init__(self, init_data_behaviours, delta_t,culture_momentum,attract_information_provision_list,nu,eta,t,t_IP_list):
         self.behaviour_list = self.create_behaviours(init_data_behaviours)
-        self.Y = len(self.behaviour_list)
+        self.M = len(self.behaviour_list)
         self.av_behaviour = self.calc_behaviour_av()
         self.av_behaviour_list = [self.av_behaviour]
         self.culture_momentum = culture_momentum
@@ -36,15 +36,15 @@ class Individual():
         for i in range(len(init_data_behaviours)):
             #init_attract, init_threshold,behaviour_cap, carbon_emissions,attract_individual_learning,psi
             #print("attrct individ learn",init_data_behaviours[i][4])
-            behaviour_list.append(Behaviour(init_data_behaviours[i][0], init_data_behaviours[i][1], init_data_behaviours[i][2], init_data_behaviours[i][3],init_data_behaviours[i][4],init_data_behaviours[i][5]))
+            behaviour_list.append(Behaviour(init_data_behaviours[i][0], init_data_behaviours[i][1], init_data_behaviours[i][2], init_data_behaviours[i][3],init_data_behaviours[i][4],init_data_behaviours[i][5],init_data_behaviours[i][6]))
         return behaviour_list
 
     def calc_behaviour_av(self):
         total_behaviour = 0
-        for i in range(self.Y):
+        for i in range(self.M):
             #print(self.behaviour_list[i].value)
             total_behaviour += self.behaviour_list[i].value 
-        av_behaviour = total_behaviour/self.Y
+        av_behaviour = total_behaviour/self.M
         #print("av_behaviour", av_behaviour)
         return av_behaviour
         #the higher the cultural value the more it is pro envrionmental.
@@ -68,7 +68,7 @@ class Individual():
         return av_culture
     
     def update_behaviours(self): # cultural_data, add in later the conformity bias
-        for i in range(self.Y):
+        for i in range(self.M):
             self.behaviour_list[i].next_step()
 
     def calc_information_provision_boost(self,i):
@@ -79,7 +79,7 @@ class Individual():
 
     def calc_information_provision(self):
         information_provision = []
-        for i in range(self.Y):
+        for i in range(self.M):
             if self.t_IP_list[i] == self.t:
                 information_provision.append(self.calc_information_provision_boost(i))
             elif self.t_IP_list[i] < self.t:
@@ -89,18 +89,18 @@ class Individual():
         return information_provision
 
     def update_attracts(self,social_component_behaviours):#,attract_cultural_group,attract_cultural_group[i]
-        for i in range(self.Y):
+        for i in range(self.M):
             self.behaviour_list[i].update_attract(social_component_behaviours[i],self.information_provision[i],self.delta_t)
 
         #print("attract after",self.behaviour_list[i].attract)
 
     def update_thresholds(self, carbon_price_gradient):
-        for i in range(self.Y):
+        for i in range(self.M):
             self.behaviour_list[i].update_threshold(carbon_price_gradient)
 
     def calc_carbon_emissions(self):
         total_emissions = 0
-        for i in range(self.Y):
+        for i in range(self.M):
             if self.behaviour_list[i].performance == 0:
                 total_emissions += self.behaviour_list[i].carbon_emissions 
         return total_emissions 

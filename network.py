@@ -1,6 +1,7 @@
 import numpy as np
 import networkx as nx
 from individual import Individual
+#from scipy.stats import truncnorm
 
 class Network():
 
@@ -9,17 +10,17 @@ class Network():
         Properties: Culture, Behaviours
     """
 
-    def __init__(self, P, K, prob_wire, delta_t, Y, behaviour_cap,set_seed,culture_div,culture_momentum, nu, eta,attract_information_provision_list,t_IP_matrix ,psi,carbon_price_init,carbon_price_gradient,carbon_emissions):
+    def __init__(self, N, K, prob_wire, delta_t, M, set_seed,culture_div,culture_momentum, nu, eta,attract_information_provision_list,t_IP_matrix ,psi,carbon_price_init,carbon_price_gradient,carbon_emissions,alpha_attract, beta_attract, alpha_threshold, beta_threshold,phi_list,learning_error_scale):
 
-        self.P = P
+        self.N = N
         self.K = K
         self.prob_wire = prob_wire
-        self.Y = Y
+        self.M = M
         self.t = 0
+        self.alpha_attract, self.beta_attract, self.alpha_threshold, self.beta_threshold = alpha_attract, beta_attract, alpha_threshold, beta_threshold
     
         self.delta_t = delta_t
 
-        self.behaviour_cap = behaviour_cap
         self.set_seed = set_seed
         np.random.seed(self.set_seed)
 
@@ -37,7 +38,11 @@ class Network():
         self.nu = nu
         self.eta = eta
         self.t_IP_matrix  = t_IP_matrix 
-        self.t_IP_list = np.empty(self.Y)
+        self.t_IP_list = np.empty(self.M)
+
+        #social learning
+        self.phi_list =  phi_list 
+        self.learning_error_scale = learning_error_scale  
 
         #indivdiual learning
         self.psi = psi
@@ -73,9 +78,16 @@ class Network():
 
     def create_weighting_matrix(self):# here is where i need to create a small world transmission matrix
         #SMALL WORLD
-        ws = nx.watts_strogatz_graph(n=self.P, k=self.K, p=self.prob_wire, seed=self.set_seed)# Watts–Strogatz small-world graph,watts_strogatz_graph( n, k, p[, seed])
+        ws = nx.watts_strogatz_graph(n=self.N, k=self.K, p=self.prob_wire, seed=self.set_seed)# Watts–Strogatz small-world graph,watts_strogatz_graph( n, k, p[, seed])
 
         weighting_matrix = nx.to_numpy_array(ws)
+
+        actual_connections = weighting_matrix.sum()
+        #print("actual_connections",actual_connections)
+        potential_connections = (self.N*(self.N-1))/2
+        #print("potential_connections",potential_connections)
+        network_density = actual_connections/potential_connections
+        print("network_density = ",network_density)
 
         #I got this off the internet, I dont really understand how np.newaxis works
         row_sums =  weighting_matrix.sum(axis=1)
@@ -86,42 +98,41 @@ class Network():
     def generate_init_data_behaviours(self):
         #init_value, init_attract, init_threshold,behaviour_cap, carbon_emissions,attract_individual_learning
         init_data_behaviours = []            
-        attract_individual_learning = [1]*self.Y #np.random.random_sample(self.Y)
+        attract_individual_learning = [1]*self.M #np.random.random_sample(self.M)
 
-        for i in range(self.P):
+        for i in range(self.N):
             row_init_data_behaviours = []
             #### HERE I WHERE I DEFINE THE STARTING VALUES!!
 
-            attract_list = np.random.random_sample(self.Y) #(np.random.random_sample(self.Y) - 0.5)*2
-            threshold_list = np.random.random_sample(self.Y) #these are random samples between 0 and 1!
-            
+            attract_list = np.random.beta(self.alpha_attract, self.beta_attract, size= self.M)#np.random.random_sample(self.M) #(np.random.random_sample(self.M) - 0.5)*2
+            threshold_list = np.random.beta(self.alpha_threshold, self.beta_threshold, size= self.M)#np.random.random_sample(self.M) #these are random samples between 0 and 1
             #init_value, init_attract, init_threshold,behaviour_cap, carbon_emissions,attract_individual_learning,psi
-            for v in range(self.Y):
-                row_init_data_behaviours.append([attract_list[v], threshold_list[v], self.behaviour_cap, self.carbon_emissions[v], attract_individual_learning[v], self.psi])
+            for v in range(self.M):
+                row_init_data_behaviours.append([attract_list[v], threshold_list[v], self.carbon_emissions[v], attract_individual_learning[v], self.psi, self.phi_list[v],self.learning_error_scale])
             init_data_behaviours.append(row_init_data_behaviours)
 
         return init_data_behaviours
 
     def create_agent_list(self):
         agent_list = []
-        for i in range(self.P):
+        for i in range(self.N):
             agent_list.append(Individual(self.init_data_behaviours[i],self.delta_t,self.culture_momentum,self.attract_information_provision_list,self.nu,self.eta,self.t,self.t_IP_list))#init_data_behaviours, delta_t
 
         return agent_list
 
     def calc_behavioural_attract_matrix(self):
         behavioural_attract_matrix = []
-        #print("HEY1",self.P,self.Y,np.asarray(behavioural_attract_matrix).size)
+        #print("HEY1",self.N,self.M,np.asarray(behavioural_attract_matrix).size)
         #print(behavioural_attract_matrix)
         
-        for i in range(self.P):
+        for i in range(self.N):
             row_behavioural_attract_matrix = []
-            for v in range(self.Y):
+            for v in range(self.M):
                 row_behavioural_attract_matrix.append(self.agent_list[i].behaviour_list[v].attract)#do i want attraction or behavioural value?
             #print("row",row_behavioural_attract_matrix)
             behavioural_attract_matrix.append(row_behavioural_attract_matrix)
        
-        #print("HEY2",self.P,self.Y,np.asarray(behavioural_attract_matrix).size)
+        #print("HEY2",self.N,self.M,np.asarray(behavioural_attract_matrix).size)
         #print(behavioural_attract_matrix)
         return behavioural_attract_matrix
 
@@ -132,20 +143,20 @@ class Network():
         behavioural_attract_matrix_array = np.array(self.behavioural_attract_matrix)
         #print("behavioural_attract_matrix_array",behavioural_attract_matrix_array,behavioural_attract_matrix_array.size)
 
-        P_Y_matrix = np.matmul(weighting_matrix_array,behavioural_attract_matrix_array)
+        N_M_matrix = np.matmul(weighting_matrix_array,behavioural_attract_matrix_array)
 
-        return P_Y_matrix 
+        return N_M_matrix 
 
     """
     def calc_attract_cultural_group(self):
         N_green = 0
 
-        attract_cultural_group = np.zeros(self.Y)
+        attract_cultural_group = np.zeros(self.M)
 
-        for i in range(self.P):
+        for i in range(self.N):
             if self.agent_list[i].culture > self.culture_div:
                 N_green +=1
-                for j in range(self.Y):
+                for j in range(self.M):
                     attract_cultural_group[j] += self.agent_list[i].behaviour_list[j].attract
 
         if N_green == 0:
@@ -160,7 +171,7 @@ class Network():
             if(self.t in self.t_IP_matrix[i]):
                 self.t_IP_list[i] = self.t
         
-        for i in range(self.P):
+        for i in range(self.N):
             self.agent_list[i].t_IP_list = self.t_IP_list
     
     def update_carbon_price(self):
@@ -171,9 +182,9 @@ class Network():
         copy_weighting_matrix = np.copy(self.weighting_matrix)
         #print("STEP")
 
-        weighting_matrix = np.zeros((self.P,self.P))
-        for i in range(self.P):
-            for j in range(self.P):
+        weighting_matrix = np.zeros((self.N,self.N))
+        for i in range(self.N):
+            for j in range(self.N):
                 if self.weighting_matrix[i][j] > 0:#no self interaction (included in the min requiremetn)
                     #self.weighting_matrix[i][j] += self.delta_t*(1 - abs(self.agent_list[i].culture - self.agent_list[j].culture ))
                     #print(self.agent_list[i].culture - self.agent_list[j].culture)
@@ -182,10 +193,10 @@ class Network():
                     weighting_matrix[i][j] = 1 - 0.5*abs(self.agent_list[i].culture - self.agent_list[j].culture)
                     #print(self.agent_list[i].culture - self.agent_list[j].culture,weighting_matrix[i][j])
         
-        for i in range(self.P):
+        for i in range(self.N):
             i_total = sum(weighting_matrix[i])
             #print(i_total)
-            for j in range(self.P):
+            for j in range(self.N):
                     self.weighting_matrix[i][j] = weighting_matrix[i][j]/i_total
 
         #print(copy_weighting_matrix,self.weighting_matrix)
@@ -218,7 +229,7 @@ class Network():
         self.t += self.delta_t
         self.update_information_provision()
         self.update_carbon_price()
-        for i in range(self.P):
+        for i in range(self.N):
             self.agent_list[i].t = self.t
             self.agent_list[i].next_step(self.social_component_matrix[i], self.carbon_price_gradient)#, self.attract_cultural_group,
         self.weighting_matrix_convergence = self.update_weightings()

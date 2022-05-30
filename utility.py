@@ -4,13 +4,13 @@ import os
 import pandas as pd
 import numpy as np
 
-def produceName(P,  K, prob_wire, steps,behaviour_cap,delta_t,set_seed,Y,culture_var_min,culture_div,nu, eta):
-    runName = "network_" + str(P) + "_" + str(K) + "_" +  str(prob_wire) + "_" + str(steps) + "_" + str(behaviour_cap) +  "_" + str(delta_t) + "_" + str(set_seed) + "_" + str(Y) + "_" + str(culture_var_min) + "_" + str(culture_div) + "_" + str(nu) + "_" + str(eta) 
+def produceName(N,  K, prob_wire, steps,delta_t,set_seed,M,culture_var_min,culture_div,nu, eta,alpha_attract, beta_attract, alpha_threshold, beta_threshold,learning_error_scale):
+    runName = "network_" + str(N) + "_" + str(K) + "_" +  str(prob_wire) + "_" + str(steps)  +  "_" + str(delta_t) + "_" + str(set_seed) + "_" + str(M) + "_" + str(culture_var_min) + "_" + str(culture_div) + "_" + str(nu) + "_" + str(eta) + "_" + str(alpha_attract) + "_" + str(beta_attract) + "_" + str(alpha_threshold) + "_" + str(beta_threshold)   + "_" + str(learning_error_scale)
     fileName = "results/"+ runName
     return fileName
 
-def produceName_random(P,  K, prob_wire, behaviour_cap,delta_t,Y,culture_var_min,culture_div,nu, eta):
-    runName = "multirun_random_network_" + str(P) + "_" + str(K) + "_" +  str(prob_wire) + "_" + str(behaviour_cap) +  "_" + str(delta_t) + "_" + str(Y) + "_" + str(culture_var_min) + "_" + str(culture_div) + "_" + str(nu) + "_" + str(eta) 
+def produceName_random(N,  K, prob_wire, delta_t,M,culture_var_min,culture_div,nu, eta,alpha_attract, beta_attract, alpha_threshold, beta_threshold,learning_error_scale):
+    runName = "multirun_random_network_" + str(N) + "_" + str(K) + "_" +  str(prob_wire) +  "_" + str(delta_t) + "_" + str(M) + "_" + str(culture_var_min) + "_" + str(culture_div) + "_" + str(nu) + "_" + str(eta) + "_" + str(alpha_attract) + "_" + str(beta_attract) + "_" + str(alpha_threshold) + "_" + str(beta_threshold)  + "_" + str(learning_error_scale)
     fileName = "results/"+ runName
     return fileName
 
@@ -81,15 +81,15 @@ def saveFromList(dataName,dataSaveList,dataDict,agentClass):
         endName = "/" + agentClass + "_" + i + ".csv"  #'/Tenant_LandDet.csv'
         saveCSV(dataName,endName,dataDict[i])
 
-def save_behaviours(data,steps, P, Y):
+def save_behaviours(data,steps, N, M):
     dataDict = {}
-    data_behaviour_value = np.zeros([steps, P, Y])
-    data_behaviour_attract = np.zeros([steps, P, Y])
-    data_behaviour_threshold = np.zeros([steps, P, Y])
+    data_behaviour_value = np.zeros([steps, N, M])
+    data_behaviour_attract = np.zeros([steps, N, M])
+    data_behaviour_threshold = np.zeros([steps, N, M])
 
     for i in range(steps):
-        for j in range(P):
-            for k in range(Y):
+        for j in range(N):
+            for k in range(M):
                 data_behaviour_value[i][j][k] = data.agent_list[j].behaviour_list[k].history_value[i]
                 data_behaviour_attract[i][j][k] = data.agent_list[j].behaviour_list[k].history_attract[i]
                 data_behaviour_threshold[i][j][k] = data.agent_list[j].behaviour_list[k].history_threshold[i]
@@ -106,14 +106,14 @@ def save_list_array(dataName,dataSaveList,dataDict,agentClass):
         np.savez(arrayName,dataDict[i])
 
 
-def saveData(data, dataName,steps, P, Y):
+def saveData(data, dataName,steps, N, M):
     
     ####TRANSPOSE STUFF SO THAT ITS AGGREGATED BY TIME STEP NOT INDIVIDUAL
 
     """save data from behaviours"""
     
     data_save_behaviour_array_list = ["value","attract","threshold"]
-    data_behaviour_array_dict = save_behaviours(data,steps, P, Y)
+    data_behaviour_array_dict = save_behaviours(data,steps, N, M)
     #save as array
     save_list_array(dataName,data_save_behaviour_array_list,data_behaviour_array_dict,"behaviour")
 
@@ -175,7 +175,8 @@ def get_run_properties(Data,runName,paramList):
     parameters = runName.split("_")
     parameters.pop(0)#remove "network" and anything before
     #print("parameters",parameters)
-
+    #print(paramList)
+    #print(parameters)
     for i in range(len(parameters)):
         Data[paramList[i]] = float(parameters[i])
 
@@ -191,7 +192,7 @@ def frame_distribution(time_list,scale_factor,frames_proportion):
     frames_list = np.unique(scaled_select)
     #print(frames_list)
     frames_list_int = [int(x) for x in frames_list]
-    #print(frames_list_int)
+    print("frames:",frames_list_int)
     return frames_list_int
 
 def frame_distribution_prints(time_list,scale_factor,frame_num):
@@ -209,7 +210,7 @@ def frame_distribution_prints(time_list,scale_factor,frame_num):
     frames_list_int = [int(x) for x in frames_list]
     #print(frames_list_int)
     frames_list_int.insert(0,0)
-    #print(frames_list_int)
+    print("frames prints:",frames_list_int)
     
     return frames_list_int
 

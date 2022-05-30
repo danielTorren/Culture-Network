@@ -5,11 +5,11 @@ import matplotlib.pyplot as plt
 import time
 import numpy as np
 
-Y = 3#number of behaviours
+M = 3#number of behaviours
 nrows_behave = 1
 ncols_behave = 3
 
-P = 50#number of agents
+N = 50#number of agents
 K = 5 #k nearest neighbours
 prob_wire = 0.1 #re-wiring probability?
 behaviour_cap = 1
@@ -26,7 +26,7 @@ culture_div = 0#where do we draw the lien for green culture
 #Infromation provision parameters
 nu = 1# how rapidly extra gains in attractiveness are made
 eta = 1#decay rate of information provision boost
-attract_information_provision_list = [1]*Y#
+attract_information_provision_list = [1]*M#
 t_IP_matrix = [[],[],[],[],[],[]] #list of lists stating at which time steps an information provision policy should be aplied for each behaviour
 
 #Individual learning rate
@@ -36,7 +36,7 @@ psi = 1#
 carbon_price_init = 0#
 social_cost_carbon = 0
 carbon_price_gradient = social_cost_carbon/time_steps_max# social cost of carbon/total time
-carbon_emissions = [0.3,0.6,0.8]#np.random.random_sample(Y)#[1]*Y# these should based on some paramters
+carbon_emissions = [0.3,0.6,0.8]#np.random.random_sample(M)#[1]*M# these should based on some paramters
 
 ###PLOT STUFF
 
@@ -54,7 +54,7 @@ if __name__ == "__main__":
     PLOT = True
     SHOW_PLOT = True
 
-    #MULTIRUN_FILENAME = produceName_random(P, K, prob_wire,behaviour_cap,delta_t,Y,culture_var_min,culture_div,nu, eta)
+    #MULTIRUN_FILENAME = produceName_random(N, K, prob_wire,behaviour_cap,delta_t,M,culture_var_min,culture_div,nu, eta)
     
     if RUN == False:
         file_name_list = ["results/multirun_random_network_50_5_0.1_1001_1_0.01_1_3_0.01_0_1_1","results/multirun_random_network_50_5_0.1_1001_1_0.01_2_3_0.01_0_1_1"]
@@ -66,7 +66,7 @@ if __name__ == "__main__":
         ###RUN MULTIPLE RUNS
         file_name_list = []
 
-        MULTIRUN_FILENAME = produceName_random(P, K, prob_wire,behaviour_cap,delta_t,Y,culture_var_min,culture_div,nu, eta)
+        MULTIRUN_FILENAME = produceName_random(N, K, prob_wire,behaviour_cap,delta_t,M,culture_var_min,culture_div,nu, eta)
         print("MULTIRUN_FILENAME",MULTIRUN_FILENAME)
         
         createFolder(MULTIRUN_FILENAME)
@@ -76,7 +76,7 @@ if __name__ == "__main__":
 
         for i in range(len(set_seed_list)):
             set_seed = set_seed_list[i]
-            FILENAME = run(time_steps_max, culture_var_min, P, K, prob_wire, delta_t, Y, behaviour_cap,set_seed,culture_div,culture_momentum, nu, eta,attract_information_provision_list,t_IP_matrix ,psi,carbon_price_init,carbon_price_gradient,carbon_emissions)
+            FILENAME = run(time_steps_max, culture_var_min, N, K, prob_wire, delta_t, M, behaviour_cap,set_seed,culture_div,culture_momentum, nu, eta,attract_information_provision_list,t_IP_matrix ,psi,carbon_price_init,carbon_price_gradient,carbon_emissions)
             file_name_list.append(FILENAME)
 
         #print("FILE_NAME_LIST: [" + list(file_name_list +"]")

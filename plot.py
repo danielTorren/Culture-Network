@@ -14,7 +14,7 @@ def prints_behaviour_timeseries_plot(FILENAME,Data,property,y_title,nrows, ncols
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols,figsize=(14,7))
 
     for i, ax in enumerate(axes.flat):
-        for j in range(int(Data["P"])):
+        for j in range(int(Data["N"])):
             ax.plot(Data["network_time"], PropertyData[i][j])
         ax.set_xlabel(r"Time")
         ax.set_ylabel(r"%s" % y_title)
@@ -30,8 +30,8 @@ def standard_behaviour_timeseries_plot(FILENAME,Data,property,y_title):
     PropertyData = Data[property].transpose()
 
     fig, ax = plt.subplots()
-    for i in range(int(Data["P"])):
-        for v in range(int(Data["Y"])):
+    for i in range(int(Data["N"])):
+        for v in range(int(Data["M"])):
             ax.plot(Data["network_time"], PropertyData[i][v])
     ax.set_xlabel(r"Time")
     ax.set_ylabel(r"%s" % y_title)
@@ -54,14 +54,14 @@ def plot_av_carbon_emissions_timeseries(FILENAME,Data):
     property = "individual_carbon_emissions"
 
     fig, ax = plt.subplots()
-    av_network_total_carbon_emissions = [x/Data["P"] for x in np.asarray(Data["network_total_carbon_emissions"])[0]]
+    av_network_total_carbon_emissions = [x/Data["N"] for x in np.asarray(Data["network_total_carbon_emissions"])[0]]
     #print(av_network_total_carbon_emissions)
     #print(Data["network_total_carbon_emissions"])
     ax.plot(Data["network_time"], av_network_total_carbon_emissions, 'k-')
 
     data = np.asarray(Data["individual_carbon_emissions"])#bodge
     #print(data[0])
-    for i in range(int(int(Data["P"]))):
+    for i in range(int(int(Data["N"]))):
         ax.plot(Data["network_time"],data[i])
 
     ax.set_xlabel(r"Time")
@@ -134,7 +134,7 @@ def plot_culture_timeseries(FILENAME,Data):
     #print(Data["individual_culture"][0])
     data = np.asarray(Data["individual_culture"])#bodge
     #print(data)
-    for i in range(int(int(Data["P"]))):
+    for i in range(int(int(Data["N"]))):
         #print(Data["individual_culture"][i])
         ax.plot(Data["network_time"],data[i])
 
@@ -193,7 +193,7 @@ def animate_behavioural_matrix(FILENAME,Data,interval,fps,cmap_behaviour,round_d
 
     matrice = ax.matshow(Data["behaviour_value"][0], cmap = cmap_behaviour, aspect='auto')
 
-    cbar = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap_behaviour, norm=Normalize(vmin=-Data["behaviour_cap"], vmax=Data["behaviour_cap"])), ax=ax )#This does a mapabble on the fly i think, not sure
+    cbar = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap_behaviour, norm=Normalize(vmin=-1, vmax=1)), ax=ax )#This does a mapabble on the fly i think, not sure
     cbar.set_label('Behavioural Value')
 
     ani = animation.FuncAnimation(fig, update, frames = int(Data["steps"]), repeat_delay = 500, interval = interval)
@@ -288,7 +288,7 @@ def prints_behavioural_matrix(FILENAME,Data,cmap_behaviour,nrows,ncols,frames_li
 
         ax.matshow(Data["behaviour_value"][frames_list[i]], cmap = cmap_behaviour, aspect='auto')
         # Set the title
-        ax.set_title("Time= {}".format(round(Data["network_time"][frames_list[i]]),round_dec))
+        ax.set_title("Time= {}".format(round(Data["network_time"][frames_list[i]],round_dec)))
         ax.set_xlabel('Behaviour')
         ax.set_ylabel('Agent')
     plt.tight_layout()
@@ -296,7 +296,7 @@ def prints_behavioural_matrix(FILENAME,Data,cmap_behaviour,nrows,ncols,frames_li
     #colour bar axes
     fig.subplots_adjust(right=0.8)
     cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
-    cbar = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap_behaviour, norm=Normalize(vmin=-Data["behaviour_cap"], vmax=Data["behaviour_cap"])), cax=cbar_ax )#This does a mapabble on the fly i think, not sure
+    cbar = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap_behaviour, norm=Normalize(vmin=-1, vmax=1)), cax=cbar_ax )#This does a mapabble on the fly i think, not sure
     cbar.set_label('Behavioural Value')
 
     plotName = FILENAME + "/Prints"
@@ -315,7 +315,7 @@ def prints_culture_network(FILENAME,Data,layout,cmap_culture,node_size,nrows,nco
 
     for i, ax in enumerate(axes.flat):
         #print(i,ax)
-        ax.set_title("Time= {}".format(round(Data["network_time"][frames_list[i]]),round_dec))
+        ax.set_title("Time= {}".format(round(Data["network_time"][frames_list[i]],round_dec)))
         
         colour_adjust = log_norm(Data["individual_culture"][frames_list[i]])
         #colour_adjust = (Data["individual_culture"][frames_list[i]] + 1)/2
@@ -350,7 +350,7 @@ def multi_animation(FILENAME,Data,cmap_behaviour,cmap_culture,layout,node_size,i
     ax3.set_xlabel('Time')
     ax3.set_ylabel('Culture')
     data = np.asarray(Data["individual_culture"])#bodge
-    for i in range(int(Data["P"])):
+    for i in range(int(Data["N"])):
         ax3.plot(Data["network_time"],data[i])
 
     lines = [-1,-4/6,-2/6,0,2/6,4/6,1 ]
@@ -381,7 +381,7 @@ def multi_animation(FILENAME,Data,cmap_behaviour,cmap_culture,layout,node_size,i
         return matrice,time_line
 
 
-    cbar_behave = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap_behaviour, norm=Normalize(vmin=-Data["behaviour_cap"], vmax=Data["behaviour_cap"])), ax=ax1 )#This does a mapabble on the fly i think, not sure
+    cbar_behave = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap_behaviour, norm=Normalize(vmin=-1, vmax=1)), ax=ax1 )#This does a mapabble on the fly i think, not sure
     cbar_behave.set_label('Behavioural Value')
 
     #cbar = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap_culture), ax=ax)#This does a mapabble on the fly i think, not sure
@@ -451,7 +451,7 @@ def multi_animation_alt(FILENAME,Data,cmap_behaviour,cmap_culture,layout,node_si
         for i in lines:
             ax3.axhline(y = i, color = 'b', linestyle = '--', alpha=0.3)
 
-        for i in range(int(Data["P"])):
+        for i in range(int(Data["N"])):
             ax3.plot(Data["network_time"][:i],data[:i])
 
         ax3.grid()
@@ -461,7 +461,7 @@ def multi_animation_alt(FILENAME,Data,cmap_behaviour,cmap_culture,layout,node_si
         return matrice
 
 
-    cbar_behave = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap_behaviour, norm=Normalize(vmin=-Data["behaviour_cap"], vmax=Data["behaviour_cap"])), ax=ax1 )#This does a mapabble on the fly i think, not sure
+    cbar_behave = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap_behaviour, norm=Normalize(vmin=-1, vmax=1)), ax=ax1 )#This does a mapabble on the fly i think, not sure
     cbar_behave.set_label('Behavioural Value')
 
     #cbar = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap_culture), ax=ax)#This does a mapabble on the fly i think, not sure
@@ -498,7 +498,7 @@ def multi_animation_scaled(FILENAME,Data,cmap_behaviour,cmap_culture,layout,node
     ax3.set_xlabel('Time')
     ax3.set_ylabel('Culture')
     data = np.asarray(Data["individual_culture"])#bodge
-    for i in range(int(Data["P"])):
+    for i in range(int(Data["N"])):
         ax3.plot(Data["network_time"],data[i])
 
     lines = [-1,-4/6,-2/6,0,2/6,4/6,1 ]
@@ -529,7 +529,7 @@ def multi_animation_scaled(FILENAME,Data,cmap_behaviour,cmap_culture,layout,node
         return matrice,time_line
 
 
-    cbar_behave = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap_behaviour, norm=Normalize(vmin=-Data["behaviour_cap"], vmax=Data["behaviour_cap"])), ax=ax1 )#This does a mapabble on the fly i think, not sure
+    cbar_behave = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap_behaviour, norm=Normalize(vmin=-1, vmax=1)), ax=ax1 )#This does a mapabble on the fly i think, not sure
     cbar_behave.set_label('Behavioural Value')
 
     #cbar = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap_culture), ax=ax)#This does a mapabble on the fly i think, not sure
@@ -633,6 +633,20 @@ def multiplot_average_culture_timeseries(FILENAME,Data_list,seed_list):
     plotName = FILENAME + "/Plots"
     f =  plotName + "/" + property + "_timeseries.png"
     fig.savefig(f, dpi = 600)
+
+def plot_beta_distributions(FILENAME,alpha_attract,beta_attract,alpha_threshold,beta_threshold,bin_num,num_counts):
+    property = "beta_distribution"
+    fig, ax = plt.subplots()
+
+    ax.hist(np.random.beta(alpha_attract,beta_attract,num_counts),bin_num,density=True, facecolor='g', alpha=0.5,histtype = "stepfilled",label = "Attract: alpha = " + str(alpha_attract) + ", beta = " + str(beta_attract))
+    ax.hist(np.random.beta(alpha_threshold,beta_threshold,num_counts),bin_num,density=True, facecolor='b', alpha=0.5,histtype = "stepfilled",label = "Threshold: alpha = " + str(alpha_threshold) + ", beta = " + str(beta_threshold))
+    ax.set_xlabel(r"x")
+    ax.set_ylabel(r"PDF")
+    ax.legend()
+    plotName = FILENAME + "/Plots"
+    f =  plotName + "/" + property + "_timeseries.png"
+    fig.savefig(f, dpi = 600)
+
 
 
 
