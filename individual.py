@@ -25,8 +25,11 @@ class Individual():
         self.t_IP_list = t_IP_list
         self.information_provision = self.calc_information_provision()
 
+        self.carbon_emissions = self.calc_carbon_emissions()
+
         self.history_av_behaviour = [self.av_behaviour]
         self.history_culture = [self.culture]
+        self.history_carbon_emissions = [self.carbon_emissions]
 
     def create_behaviours(self,init_data_behaviours):
         behaviour_list = []
@@ -85,12 +88,9 @@ class Individual():
                 information_provision.append(0) #this means that no information provision policy is ever present in this behaviour
         return information_provision
 
-    def update_information_provision(self):
-        self.information_provision = self.calc_information_provision()
-
-    def update_attracts(self,social_component_behaviours,attract_cultural_group):
+    def update_attracts(self,social_component_behaviours):#,attract_cultural_group,attract_cultural_group[i]
         for i in range(self.Y):
-            self.behaviour_list[i].update_attract(social_component_behaviours[i],attract_cultural_group[i],self.information_provision[i],self.delta_t)
+            self.behaviour_list[i].update_attract(social_component_behaviours[i],self.information_provision[i],self.delta_t)
 
         #print("attract after",self.behaviour_list[i].attract)
 
@@ -98,23 +98,26 @@ class Individual():
         for i in range(self.Y):
             self.behaviour_list[i].update_threshold(carbon_price_gradient)
 
-    def update_culture(self):
-        #print("before",self.culture )
-        self.culture = self.calc_culture()
-        #print("after",self.culture )
+    def calc_carbon_emissions(self):
+        total_emissions = 0
+        for i in range(self.Y):
+            if self.behaviour_list[i].performance == 0:
+                total_emissions += self.behaviour_list[i].carbon_emissions 
+        return total_emissions 
 
     def save_data_individual(self):
         #self.history_behaviour_list.append(deepcopy(self.behaviour_list))
         self.history_culture.append(self.culture)
         self.history_av_behaviour.append(self.av_behaviour)
+        self.history_carbon_emissions.append(self.carbon_emissions)
 
-    def next_step(self,social_component_behaviours,attract_cultural_group,carbon_price_gradient):
-        self.update_information_provision()
+    def next_step(self,social_component_behaviours,carbon_price_gradient):
+        self.calc_information_provision()
         self.update_behaviours()#update the behaviours of agent
-        self.update_attracts(social_component_behaviours,attract_cultural_group)
+        self.update_attracts(social_component_behaviours)#,attract_cultural_group
         self.update_thresholds(carbon_price_gradient)
         self.update_av_behaviour()
         self.update_av_behaviour_list()
-        self.update_culture()
-        
+        self.culture = self.calc_culture()
+        self.carbon_emissions = self.calc_carbon_emissions()
         self.save_data_individual()

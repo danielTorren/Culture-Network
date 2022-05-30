@@ -43,19 +43,19 @@ class Behaviour():
         else:
             self.performance = 0
 
-    def update_attract(self,social_component_behaviours,attract_cultural_group,information_provision,delta_t):
+    def update_attract(self,social_component_behaviours,information_provision,delta_t):#,attract_cultural_group
             
             social_learing = (social_component_behaviours - self.attract) 
             individual_learning = self.individual_learning 
-            conformity_bias =  (attract_cultural_group - self.attract) 
+            #conformity_bias =  (attract_cultural_group - self.attract) 
             information_provision = information_provision 
 
-            total = social_learing  + individual_learning #+ conformity_bias + information_provision
+            #total = social_learing  + individual_learning #+ conformity_bias + information_provision
             #print("PROPORTIONS (S,IL,CG,IP):", social_learing, individual_learning)#,conformity_bias/total,information_provision/total
 
             #print("attract components!",social_learing,individual_learning,conformity_bias,information_provision)
                 #social_learing + individual_learning + 
-            self.attract += delta_t*(conformity_bias) #  social_learing + individual_learning + conformity_bias + information_provision
+            self.attract += delta_t*(social_learing + individual_learning + information_provision) 
 
     def update_threshold(self, carbon_price_gradient):
         #print(self.threshold , carbon_price_gradient*self.carbon_emissions)

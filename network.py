@@ -50,11 +50,14 @@ class Network():
         self.behavioural_attract_matrix = self.calc_behavioural_attract_matrix()
         self.social_component_matrix = self.calc_social_component_matrix()
 
-        self.attract_cultural_group = self.calc_attract_cultural_group()
+        #self.attract_cultural_group = self.calc_attract_cultural_group()
 
-        self.cultural_var = self.calc_cultural_var()
+        self.total_carbon_emissions = self.calc_total_emissions()
+        self.average_culture,self.cultural_var,self.min_culture,self.max_culture = self.calc_culture()
+
 
         self.update_information_provision()
+        self.weighting_matrix_convergence = np.nan#there is no convergence in the first step, to deal with time issues when plotting
 
         self.history_weighting_matrix = [self.weighting_matrix]
         self.history_behavioural_attract_matrix = [self.behavioural_attract_matrix]
@@ -62,6 +65,11 @@ class Network():
         self.history_cultural_var = [self.cultural_var]
         self.history_time = [self.t]
         self.history_carbon_price = [self.carbon_price]
+        self.history_total_carbon_emissions = [self.total_carbon_emissions]
+        self.history_weighting_matrix_convergence = [self.weighting_matrix_convergence]
+        self.history_average_culture = [self.average_culture]
+        self.history_min_culture = [self.min_culture]
+        self.history_max_culture = [self.max_culture]
 
     def create_weighting_matrix(self):# here is where i need to create a small world transmission matrix
         #SMALL WORLD
@@ -128,6 +136,7 @@ class Network():
 
         return P_Y_matrix 
 
+    """
     def calc_attract_cultural_group(self):
         N_green = 0
 
@@ -144,7 +153,7 @@ class Network():
         else:
             attract_cultural_group = attract_cultural_group/N_green
             return attract_cultural_group
-
+    """
     
     def update_information_provision(self):
         for i in range(len(self.t_IP_matrix)):
@@ -156,37 +165,53 @@ class Network():
     
     def update_carbon_price(self):
         self.carbon_price += self.carbon_price_gradient
-    
-    """
+
     def update_weightings(self):
         #step4, equation 8
+        copy_weighting_matrix = np.copy(self.weighting_matrix)
+        #print("STEP")
 
+        weighting_matrix = np.zeros((self.P,self.P))
         for i in range(self.P):
             for j in range(self.P):
                 if self.weighting_matrix[i][j] > 0:#no self interaction (included in the min requiremetn)
-                   self.weighting_matrix[i][j] += self.delta_t*(1 - abs(self.agent_list[i].culture - self.agent_list[j].culture ))
-                #self.weighting_matrix[i][j] = np.exp(-abs(self.agent_list[i].culture - self.agent_list[j].culture))
+                    #self.weighting_matrix[i][j] += self.delta_t*(1 - abs(self.agent_list[i].culture - self.agent_list[j].culture ))
+                    #print(self.agent_list[i].culture - self.agent_list[j].culture)
+                    #print(np.exp(-abs(self.agent_list[i].culture - self.agent_list[j].culture)))
+                    #weighting_matrix[i][j] = np.exp(-abs(self.agent_list[i].culture - self.agent_list[j].culture))
+                    weighting_matrix[i][j] = 1 - 0.5*abs(self.agent_list[i].culture - self.agent_list[j].culture)
+                    #print(self.agent_list[i].culture - self.agent_list[j].culture,weighting_matrix[i][j])
         
         for i in range(self.P):
-            i_total = sum(self.weighting_matrix[i])
+            i_total = sum(weighting_matrix[i])
+            #print(i_total)
             for j in range(self.P):
-                    self.weighting_matrix[i][j] = self.weighting_matrix[i][j]/i_total
-    """
+                    self.weighting_matrix[i][j] = weighting_matrix[i][j]/i_total
 
-    def calc_cultural_var(self):
+        #print(copy_weighting_matrix,self.weighting_matrix)
+        difference_matrix = np.subtract(copy_weighting_matrix,self.weighting_matrix)
+        #print(difference_matrix)
+        return (np.abs(difference_matrix)).sum()
+
+    def calc_total_emissions(self):
+        return sum([x.carbon_emissions for x in self.agent_list])
+    
+    def calc_culture(self):
         culture_list = [x.culture for x in self.agent_list]
-        return max(culture_list) - min(culture_list)
-
-    def update_cultural_var(self):
-        self.cultural_var = self.calc_cultural_var()
+        return np.mean(culture_list), max(culture_list) - min(culture_list), max(culture_list), min(culture_list)
 
     def save_data_network(self):
+        self.history_time.append(self.t)
         self.history_weighting_matrix.append(self.weighting_matrix)
         self.history_behavioural_attract_matrix.append(self.behavioural_attract_matrix)
         self.history_social_component_matrix.append(self.social_component_matrix)
-        self.history_cultural_var.append(self.cultural_var)
-        self.history_time.append(self.t)
         self.history_carbon_price.append(self.carbon_price)
+        self.history_total_carbon_emissions.append(self.total_carbon_emissions)
+        self.history_weighting_matrix_convergence.append(self.weighting_matrix_convergence)
+        self.history_average_culture.append(self.average_culture)
+        self.history_cultural_var.append(self.cultural_var)
+        self.history_min_culture.append(self.min_culture)
+        self.history_max_culture.append(self.max_culture)
 
     def next_step(self):
         #advance a time step
@@ -195,10 +220,12 @@ class Network():
         self.update_carbon_price()
         for i in range(self.P):
             self.agent_list[i].t = self.t
-            self.agent_list[i].next_step(self.social_component_matrix[i], self.attract_cultural_group, self.carbon_price_gradient)
-        #self.update_weightings()
+            self.agent_list[i].next_step(self.social_component_matrix[i], self.carbon_price_gradient)#, self.attract_cultural_group,
+        self.weighting_matrix_convergence = self.update_weightings()
         self.behavioural_attract_matrix = self.calc_behavioural_attract_matrix()
         self.social_component_matrix = self.calc_social_component_matrix()
-        self.attract_cultural_group = self.calc_attract_cultural_group()
-        self.update_cultural_var()
+        #self.attract_cultural_group = self.calc_attract_cultural_group()
+
+        self.average_culture,self.cultural_var,self.min_culture,self.max_culture = self.calc_culture()
+        self.total_carbon_emissions = self.calc_total_emissions()
         self.save_data_network()

@@ -49,13 +49,21 @@ def plot_threshold_timeseries(FILENAME,Data,nrows, ncols):
 def plot_attract_timeseries(FILENAME,Data,nrows, ncols):
     prints_behaviour_timeseries_plot(FILENAME,Data,"behaviour_attract","Attractiveness",nrows, ncols)
 
-def plot_carbon_price_timeseries(FILENAME,Data):
-    y_title = "Carbon Price"
-    property = "network_carbon_price"
+def plot_av_carbon_emissions_timeseries(FILENAME,Data):
+    y_title = "Carbon Emissions"
+    property = "individual_carbon_emissions"
 
     fig, ax = plt.subplots()
-    #print(Data["network_carbon_price"])
-    ax.plot(Data["network_time"], Data["network_carbon_price"])
+    av_network_total_carbon_emissions = [x/Data["P"] for x in np.asarray(Data["network_total_carbon_emissions"])[0]]
+    #print(av_network_total_carbon_emissions)
+    #print(Data["network_total_carbon_emissions"])
+    ax.plot(Data["network_time"], av_network_total_carbon_emissions, 'k-')
+
+    data = np.asarray(Data["individual_carbon_emissions"])#bodge
+    #print(data[0])
+    for i in range(int(int(Data["P"]))):
+        ax.plot(Data["network_time"],data[i])
+
     ax.set_xlabel(r"Time")
     ax.set_ylabel(r"%s" % y_title)
 
@@ -63,6 +71,57 @@ def plot_carbon_price_timeseries(FILENAME,Data):
     f =  plotName + "/" + property + "_timeseries.png"
     fig.savefig(f, dpi = 600)
 
+def plot_network_timeseries(FILENAME,Data,y_title,property):
+    
+    fig, ax = plt.subplots()
+    data = np.asarray(Data[property])[0]#bodge
+    ax.plot(Data["network_time"], data)
+    ax.set_xlabel(r"Time")
+    ax.set_ylabel(r"%s" % y_title)
+
+    plotName = FILENAME + "/Plots"
+    f =  plotName + "/" + property + "_timeseries.png"
+    fig.savefig(f, dpi = 600)
+
+def plot_carbon_price_timeseries(FILENAME,Data):
+    y_title = "Carbon Price"
+    property = "network_carbon_price"
+
+    plot_network_timeseries(FILENAME,Data,y_title,property)
+
+def plot_cultural_range_timeseries(FILENAME,Data):
+    y_title = "Cultural Range"
+    property = "network_cultural_var"
+    plot_network_timeseries(FILENAME,Data,y_title,property)
+
+def plot_weighting_matrix_convergence_timeseries(FILENAME,Data):
+    y_title = "Change in Agent Link Strength"
+    property = "network_weighting_matrix_convergence"
+    plot_network_timeseries(FILENAME,Data,y_title,property)
+
+def plot_total_carbon_emissions_timeseries(FILENAME,Data):
+    y_title = "Carbon Emissions"
+    property = "network_total_carbon_emissions"
+    plot_network_timeseries(FILENAME,Data,y_title,property)
+
+def plot_average_culture_timeseries(FILENAME,Data):
+    y_title = "Average Culture"
+    property = "network_average_culture"
+    #plot_network_timeseries(FILENAME,Data,y_title,property)
+
+    fig, ax = plt.subplots()
+    data = np.asarray(Data[property])[0]#bodge
+    culture_min = np.asarray(Data["network_min_culture"])[0]#bodge
+    culture_max = np.asarray(Data["network_max_culture"])[0]#bodge
+    ax.plot(Data["network_time"], data)
+    ax.set_xlabel(r"Time")
+    ax.set_ylabel(r"%s" % y_title)
+    ax.fill_between(Data["network_time"], culture_min, culture_max, alpha=.5, linewidth=0)
+
+    plotName = FILENAME + "/Plots"
+    f =  plotName + "/" + property + "_timeseries.png"
+    fig.savefig(f, dpi = 600)
+    
 
 def plot_culture_timeseries(FILENAME,Data):
 
@@ -90,18 +149,21 @@ def plot_culture_timeseries(FILENAME,Data):
 
 
 #make matrix animation
-def animate_weighting_matrix(FILENAME,Data,interval,fps):
+def animate_weighting_matrix(FILENAME,Data,interval,fps,round_dec,cmap_weighting):
 
     def update(i):
         M = Data["network_weighting_matrix"][i]
         #print("next frame!",M)
         matrice.set_array(M)
         # Set the title
-        ax.set_title("Time= {}".format(Data["network_time"][i]))
+        ax.set_title("Time= {}".format(round(Data["network_time"][i]),round_dec))
         return matrice
 
     fig, ax = plt.subplots()
-    matrice = ax.matshow(Data["network_weighting_matrix"][0])
+    #matrice = ax.matshow(Data["behaviour_value"][0], cmap = cmap_behaviour, aspect='auto')
+    #cbar = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap_behaviour, norm=Normalize(vmin=-Data["behaviour_cap"], vmax=Data["behaviour_cap"])), ax=ax )#This does a mapabble on the fly i think, not sure
+
+    matrice = ax.matshow(Data["network_weighting_matrix"][0], cmap = cmap_weighting)
     plt.colorbar(matrice)
 
     ani = animation.FuncAnimation(fig, update, frames = int(Data["steps"]), repeat_delay = 500, interval = interval )
@@ -113,7 +175,7 @@ def animate_weighting_matrix(FILENAME,Data,interval,fps):
     ani.save(f, writer=writervideo)
 
 #make behaviour evolution plot
-def animate_behavioural_matrix(FILENAME,Data,interval,fps,cmap_behaviour):
+def animate_behavioural_matrix(FILENAME,Data,interval,fps,cmap_behaviour,round_dec):
 
     def update(i):
         M = Data["behaviour_value"][i]
@@ -121,7 +183,7 @@ def animate_behavioural_matrix(FILENAME,Data,interval,fps,cmap_behaviour):
         matrice.set_array(M)
 
         # Set the title
-        ax.set_title("Time= {}".format(Data["network_time"][i]))
+        ax.set_title("Time= {}".format(round(Data["network_time"][i]),round_dec))
 
         return matrice
 
@@ -159,7 +221,7 @@ def prod_pos(layout_type,network):
     return pos_culture_network
 
 #animation of changing culture
-def animate_culture_network(FILENAME,Data,layout,cmap_culture,node_size,interval,fps,log_norm):
+def animate_culture_network(FILENAME,Data,layout,cmap_culture,node_size,interval,fps,log_norm,round_dec):
 
     def update(i, G,pos, ax,cmap_culture):
 
@@ -170,7 +232,7 @@ def animate_culture_network(FILENAME,Data,layout,cmap_culture,node_size,interval
         nx.draw(G, node_color=ani_step_colours, ax=ax, pos=pos, node_size = node_size, edgecolors = "black")
         
         # Set the title
-        ax.set_title("Time= {}".format(Data["network_time"][i]))
+        ax.set_title("Time= {}".format(round(Data["network_time"][i],round_dec)))
         
     # Build plot
     fig, ax = plt.subplots()
@@ -191,6 +253,32 @@ def animate_culture_network(FILENAME,Data,layout,cmap_culture,node_size,interval
     f = animateName + "/" + "cultural_animation.mp4"
     writervideo = animation.FFMpegWriter(fps=fps) 
     ani.save(f, writer=writervideo)
+
+
+def prints_weighting_matrix(FILENAME,Data,cmap_behaviour,nrows,ncols,frames_list,round_dec):
+
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols,figsize=(14,7))
+
+    for i, ax in enumerate(axes.flat):
+
+        ax.matshow(Data["network_weighting_matrix"][frames_list[i]], cmap = cmap_behaviour, aspect='auto')
+        # Set the title
+        #print("Time= {}".format(round(Data["network_time"][frames_list[i]],round_dec)))
+        ax.set_title("Time= {}".format(round(Data["network_time"][frames_list[i]],round_dec)))
+        ax.set_xlabel('Agent Link Strength')
+        ax.set_ylabel('Agent Link Strength')
+    plt.tight_layout()
+
+    #colour bar axes
+    fig.subplots_adjust(right=0.8)
+    cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
+    cbar = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap_behaviour, norm=Normalize(vmin=0, vmax=1)), cax=cbar_ax )#This does a mapabble on the fly i think, not sure
+    cbar.set_label('Weighting matrix')
+
+    plotName = FILENAME + "/Prints"
+    f =  plotName + "/" + "prints_weighting_matrix.png"
+    fig.savefig(f, dpi = 600)
+
 
 def prints_behavioural_matrix(FILENAME,Data,cmap_behaviour,nrows,ncols,frames_list,round_dec):
 
@@ -463,6 +551,92 @@ def multi_animation_scaled(FILENAME,Data,cmap_behaviour,cmap_culture,layout,node
     f = animateName + "/" + "multi_animation_scaled.mp4"
     writervideo = animation.FFMpegWriter(fps=fps) 
     ani.save(f, writer=writervideo)
+
+
+def multiplot_print_average_culture_timeseries(FILENAME,Data_list,seed_list,nrows,ncols):
+    y_title = "Average Culture"
+    property = "seed_list_print_network_average_culture"
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols,figsize=(14,7))
+
+    for i, ax in enumerate(axes.flat):
+        ax.plot(Data_list[i][0], Data_list[i][1])
+        ax.set_xlabel(r"Time")
+        ax.set_ylabel(r"%s" % y_title)
+        ax.fill_between(Data_list[i][0], Data_list[i][2], Data_list[i][3], alpha=0.3, linewidth=0)
+        ax.set_title("Seed = {}".format(seed_list[i]))
+
+    plt.tight_layout()
+
+    #colour bar axes
+    #fig.subplots_adjust(right=0.8)
+
+    plotName = FILENAME + "/Plots"
+    f =  plotName + "/" + property + "_timeseries.png"
+    fig.savefig(f, dpi = 600)
+
+def multiplot_print_total_carbon_emissions_timeseries(FILENAME,Data_list,seed_list,nrows,ncols):
+    y_title = "Total Carbon Emissions"
+    property = "seed_list_print_network_total_carbon_emissions"
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols,figsize=(14,7))
+
+    for i, ax in enumerate(axes.flat):
+        ax.plot(Data_list[i][0], Data_list[i][1])
+        ax.set_xlabel(r"Time")
+        ax.set_ylabel(r"%s" % y_title)
+        ax.set_title("Seed = {}".format(seed_list[i]))
+
+    plt.tight_layout()
+
+    #colour bar axes
+    #fig.subplots_adjust(right=0.8)
+
+    plotName = FILENAME + "/Plots"
+    f =  plotName + "/" + property + "_timeseries.png"
+    fig.savefig(f, dpi = 600)
+
+def multiplot_total_carbon_emissions_timeseries(FILENAME,Data_list,seed_list):
+    y_title = "Total Carbon Emissions"
+    property = "seed_list_network_total_carbon_emissions"
+
+    fig, ax = plt.subplots()
+
+    for i in range(len(Data_list)):
+        ax.plot(Data_list[i][0], Data_list[i][1])
+        
+    ax.set_xlabel(r"Time")
+    ax.set_ylabel(r"%s" % y_title)
+    ax.set_title("Seed = {}".format(seed_list[i]))
+
+    plt.tight_layout()
+
+    plotName = FILENAME + "/Plots"
+    f =  plotName + "/" + property + "_timeseries.png"
+    fig.savefig(f, dpi = 600)
+
+def multiplot_average_culture_timeseries(FILENAME,Data_list,seed_list):
+    y_title = "Average Culture"
+    property = "seed_list_network_average_culture"
+    fig, ax = plt.subplots()
+
+    for i in range(len(Data_list)):
+        ax.plot(Data_list[i][0], Data_list[i][1])
+        ax.fill_between(Data_list[i][0], Data_list[i][2], Data_list[i][3], alpha=0.3, linewidth=0)
+
+    ax.set_xlabel(r"Time")
+    ax.set_ylabel(r"%s" % y_title)
+
+    plt.tight_layout()
+
+    #colour bar axes
+    #fig.subplots_adjust(right=0.8)
+
+    plotName = FILENAME + "/Plots"
+    f =  plotName + "/" + property + "_timeseries.png"
+    fig.savefig(f, dpi = 600)
+
+
+
+
 
 
 

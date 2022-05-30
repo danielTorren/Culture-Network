@@ -7,9 +7,15 @@ import numpy as np
 def produceName(P,  K, prob_wire, steps,behaviour_cap,delta_t,set_seed,Y,culture_var_min,culture_div,nu, eta):
     runName = "network_" + str(P) + "_" + str(K) + "_" +  str(prob_wire) + "_" + str(steps) + "_" + str(behaviour_cap) +  "_" + str(delta_t) + "_" + str(set_seed) + "_" + str(Y) + "_" + str(culture_var_min) + "_" + str(culture_div) + "_" + str(nu) + "_" + str(eta) 
     fileName = "results/"+ runName
-    return fileName, runName
+    return fileName
+
+def produceName_random(P,  K, prob_wire, behaviour_cap,delta_t,Y,culture_var_min,culture_div,nu, eta):
+    runName = "multirun_random_network_" + str(P) + "_" + str(K) + "_" +  str(prob_wire) + "_" + str(behaviour_cap) +  "_" + str(delta_t) + "_" + str(Y) + "_" + str(culture_var_min) + "_" + str(culture_div) + "_" + str(nu) + "_" + str(eta) 
+    fileName = "results/"+ runName
+    return fileName
 
 def createFolder(fileName):
+    #print(fileName)
     #check for resutls folder
     if str(os.path.exists("Results")) == "False":
         os.mkdir("Results")
@@ -113,7 +119,7 @@ def saveData(data, dataName,steps, P, Y):
 
     """save data from individuals"""
     #list of things to be saved
-    data_save_individual_list = ["culture"]
+    data_save_individual_list = ["culture","carbon_emissions"]
     #create dict with flatdata
     data_individual_dict = saveDataDict(data.agent_list,data_save_individual_list)
     #TRANSPOSE
@@ -123,7 +129,7 @@ def saveData(data, dataName,steps, P, Y):
     
     """SAVE DATA FROM NETWORK"""
 
-    data_save_network_list = ["time","cultural_var","carbon_price"]
+    data_save_network_list = ["time","cultural_var","carbon_price","total_carbon_emissions","weighting_matrix_convergence","average_culture","min_culture","max_culture"]
     #create dict with flatdata
     data_network_dict = saveDataDict([data],data_save_network_list)
     #save as CSV
@@ -203,6 +209,7 @@ def frame_distribution_prints(time_list,scale_factor,frame_num):
     frames_list_int = [int(x) for x in frames_list]
     #print(frames_list_int)
     frames_list_int.insert(0,0)
+    #print(frames_list_int)
     
     return frames_list_int
 

@@ -25,7 +25,7 @@ def run(time_steps_max, culture_var_min, P, K, prob_wire, delta_t, Y, behaviour_
     #print(steps)
     #print(social_network.history_cultural_var)
     ###SAVE RUN DATA                P,  K, prob_wire, steps,behaviour_cap,delta_t,set_seed,Y,culture_var_min,culture_div, nu, eta
-    fileName, runName = produceName(P,  K, prob_wire, steps,behaviour_cap,delta_t,set_seed,Y,culture_var_min,culture_div, nu, eta)
+    fileName = produceName(P, K, prob_wire, steps,behaviour_cap,delta_t,set_seed,Y,culture_var_min,culture_div, nu, eta)
     dataName = createFolder(fileName)
     saveObjects(social_network, dataName)
     saveData(social_network, dataName,steps, P, Y)
