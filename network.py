@@ -10,7 +10,7 @@ class Network():
         Properties: Culture, Behaviours
     """
 
-    def __init__(self, N, K, prob_wire, delta_t, M, set_seed,culture_div,culture_momentum, nu, eta,attract_information_provision_list,t_IP_matrix ,psi,carbon_price_init,carbon_price_gradient,carbon_emissions,alpha_attract, beta_attract, alpha_threshold, beta_threshold,phi_list,learning_error_scale):
+    def __init__(self, N, K, prob_wire, delta_t, M, set_seed,culture_div,culture_momentum, nu, eta,attract_information_provision_list,t_IP_matrix ,psi,carbon_price_policy_start,carbon_price_init,carbon_price_gradient,carbon_emissions,alpha_attract, beta_attract, alpha_threshold, beta_threshold,phi_list,learning_error_scale):
 
         self.N = N
         self.K = K
@@ -25,7 +25,9 @@ class Network():
         np.random.seed(self.set_seed)
 
         #carbon price
-        self.carbon_price = carbon_price_init
+        self.carbon_price_policy_start = carbon_price_policy_start
+        self.carbon_price_init = carbon_price_init
+        self.carbon_price = 0
         self.carbon_price_gradient = carbon_price_gradient
         self.carbon_emissions = carbon_emissions
 
@@ -175,7 +177,12 @@ class Network():
             self.agent_list[i].t_IP_list = self.t_IP_list
     
     def update_carbon_price(self):
-        self.carbon_price += self.carbon_price_gradient
+        #print("time, start ,carbon price",self.t,round(self.t,3), self.carbon_price_policy_start,self.carbon_price)
+        if round(self.t,3) == self.carbon_price_policy_start:
+            self.carbon_price = self.carbon_price_init
+        elif self.t > self.carbon_price_policy_start:
+            self.carbon_price += self.carbon_price_gradient
+        
 
     def update_weightings(self):
         #step4, equation 8
@@ -231,7 +238,7 @@ class Network():
         self.update_carbon_price()
         for i in range(self.N):
             self.agent_list[i].t = self.t
-            self.agent_list[i].next_step(self.social_component_matrix[i], self.carbon_price_gradient)#, self.attract_cultural_group,
+            self.agent_list[i].next_step(self.social_component_matrix[i], self.carbon_price)#, self.attract_cultural_group,
         self.weighting_matrix_convergence = self.update_weightings()
         self.behavioural_attract_matrix = self.calc_behavioural_attract_matrix()
         self.social_component_matrix = self.calc_social_component_matrix()

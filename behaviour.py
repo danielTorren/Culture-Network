@@ -8,14 +8,17 @@ class Behaviour():
     def __init__(self, init_attract, init_threshold,carbon_emissions,attract_individual_learning,psi,phi,learning_error_scale):
         
         self.attract = init_attract
+        self.init_threshold = init_threshold #for the sake of being able to fix the carbon price
         self.threshold = init_threshold
         self.value = self.calc_behaviour()
         self.carbon_emissions = carbon_emissions
         self.attract_individual_learning = attract_individual_learning
-        self.performance = 0# AT SOME POINT THIS SHOUDL BE SET RADNOMLY
-        self.individual_learning = 0# AT SOME POINT THIS SHOUDL BE SET RADNOMLY
+        self.performance = self.calc_perform()# AT SOME POINT THIS SHOUDL BE SET RADNOMLY
 
+        #individual learning
         self.psi = psi
+        self.individual_learning = self.calc_individual_learning()# AT SOME POINT THIS SHOUDL BE SET RADNOMLY
+
         self.phi = phi
         self.learning_error_scale = learning_error_scale
         self.gamma = self.calc_gamma()
@@ -29,16 +32,16 @@ class Behaviour():
         value = self.attract - self.threshold 
         return value
 
-    def perform_behaviour(self):
+    def calc_perform(self):
         """
         #TRYING TO USE LOGIT MODEL
         prob_performance = 1/(1 + np.exp(-self.value))
         self.performance = np.random.binomial(1, prob_performance)
         """
         if self.value > 0:
-            self.performance = 1
+            return 1
         else:
-            self.performance = 0
+            return 0
 
     def calc_gamma(self):
         #print(np.random.normal(loc = 1, scale = self.learning_error_scale))
@@ -58,12 +61,11 @@ class Behaviour():
                 #social_learing + individual_learning + 
             self.attract += delta_t*(social_learing + individual_learning + information_provision) 
 
-    def update_threshold(self, carbon_price_gradient):
-        #print(self.threshold , carbon_price_gradient*self.carbon_emissions)
-        if self.threshold < carbon_price_gradient*self.carbon_emissions:
+    def update_threshold(self, carbon_price):
+        if self.init_threshold < carbon_price*self.carbon_emissions:
             self.threshold = 0 
         else:
-            self.threshold += -carbon_price_gradient*self.carbon_emissions
+            self.threshold = self.init_threshold - carbon_price*self.carbon_emissions
 
     def calc_individual_learning(self):
 
@@ -90,7 +92,7 @@ class Behaviour():
 
     def next_step(self):
         self.value = self.calc_behaviour()
-        self.perform_behaviour()
+        self.performance = self.calc_perform()
         self.individual_learning = self.calc_individual_learning()
         self.calc_gamma()
         self.save_data_behaviour()

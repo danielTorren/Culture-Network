@@ -8,7 +8,7 @@ import numpy as np
 
 M = 3#number of behaviours
 N = 100#number of agents
-K = 20 #k nearest neighbours
+K = 15 #k nearest neighbours
 prob_wire = 0.2 #re-wiring probability?
 total_time = 10
 delta_t = 0.01#time step size
@@ -24,8 +24,10 @@ alpha_threshold = 8
 beta_threshold = 2
 
 #calc culture parameters
-culture_momentum = 5#number of time steps used in calculating culture
-culture_div = 0#where do we draw the lien for green culture
+culture_momentum = 0.1
+culture_momentum_steps = int(culture_momentum/delta_t)#number of time steps used in calculating culture
+print(culture_momentum_steps)
+culture_div = 0#where do we draw the lien for green culture #USELESS
 
 #Infromation provision parameters
 nu = 1# how rapidly extra gains in attractiveness are made
@@ -42,9 +44,12 @@ learning_error_scale = 0.02#1 standard distribution is 2% error
 psi = 1#Individual learning rate
 
 #Carbon price parameters
-carbon_price_init = 0#
-social_cost_carbon = 0
-carbon_price_gradient = social_cost_carbon/time_steps_max# social cost of carbon/total time
+carbon_price_policy_start = 5#in simualation time to start the policy
+carbon_price_init = 0.5#
+#social_cost_carbon = 0.5
+carbon_price_gradient = 0#social_cost_carbon/time_steps_max# social cost of carbon/total time
+
+#carbon_price = 0.5
 
 
 #[0.3,0.6,0.8]#np.random.random_sample(M)#[1]*M# these should based on some paramters
@@ -55,15 +60,15 @@ def calc_carbon_emissions(N,M):
     carbon_emissions_norm = (carbon_emissions/(carbon_emissions.sum()))*carbon_emissions_const
     return carbon_emissions_norm
 
-carbon_emissions = calc_carbon_emissions(N,M)
-#print(carbon_emissions)
+carbon_emissions = [0.2,0.5,0.75]#calc_carbon_emissions(N,M)
+print("carbon_emissions: ",carbon_emissions)
 
 #LOAD DATA
 loadBooleanCSV = ["individual_culture","individual_carbon_emissions","network_total_carbon_emissions","network_time","network_cultural_var","network_carbon_price","network_weighting_matrix_convergence","network_average_culture","network_min_culture","network_max_culture"]#"network_cultural_var",
 loadBooleanArray = ["network_weighting_matrix","network_social_component_matrix","network_behavioural_attract_matrix","behaviour_value", "behaviour_threshold", "behaviour_attract"]
 
               #N,  K, prob_wire, steps,delta_t,set_seed,M,culture_var_min,culture_div,nu, eta,alpha_attract, beta_attract, alpha_threshold, beta_threshold
-paramList = [ "N",  "K", "prob_wire","steps", "delta_t", "set_seed","M","culture_var_min","culture_div","nu", "eta","alpha_attract", "beta_attract", "alpha_threshold", "beta_threshold","learning_error_scale"]
+paramList = [ "N",  "K", "prob_wire","steps", "delta_t", "set_seed","M","culture_var_min","culture_div","nu", "eta","alpha_attract", "beta_attract", "alpha_threshold", "beta_threshold","learning_error_scale","carbon_price_policy_start"]
 
 ###PLOT STUFF
 nrows_behave = 1
@@ -96,7 +101,7 @@ if __name__ == "__main__":
         print("start_time =", time.ctime(time.time()))
         ###RUN MODEL
         #FILENAME = run(N,  K, prob_wire, delta_t, M, ,set_seed,time_steps_max,culture_var_min,culture_div,culture_momentum, nu, eta,attract_information_provision_list,t_IP_matrix,psi,carbon_price_init,carbon_price_gradient,carbon_emissions
-        FILENAME = run(time_steps_max, culture_var_min, N, K, prob_wire, delta_t, M, set_seed,culture_div,culture_momentum, nu, eta,attract_information_provision_list,t_IP_matrix ,psi,carbon_price_init,carbon_price_gradient,carbon_emissions,alpha_attract, beta_attract, alpha_threshold, beta_threshold,phi_list,learning_error_scale)
+        FILENAME = run(time_steps_max, culture_var_min, N, K, prob_wire, delta_t, M, set_seed,culture_div,culture_momentum_steps, nu, eta,attract_information_provision_list,t_IP_matrix ,psi,carbon_price_policy_start,carbon_price_init,carbon_price_gradient,carbon_emissions,alpha_attract, beta_attract, alpha_threshold, beta_threshold,phi_list,learning_error_scale)
 
         print ("RUN time taken: %s minutes" % ((time.time()-start_time)/60), "or %s s"%((time.time()-start_time)))
 

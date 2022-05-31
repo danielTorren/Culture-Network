@@ -4,13 +4,13 @@ import os
 import pandas as pd
 import numpy as np
 
-def produceName(N,  K, prob_wire, steps,delta_t,set_seed,M,culture_var_min,culture_div,nu, eta,alpha_attract, beta_attract, alpha_threshold, beta_threshold,learning_error_scale):
-    runName = "network_" + str(N) + "_" + str(K) + "_" +  str(prob_wire) + "_" + str(steps)  +  "_" + str(delta_t) + "_" + str(set_seed) + "_" + str(M) + "_" + str(culture_var_min) + "_" + str(culture_div) + "_" + str(nu) + "_" + str(eta) + "_" + str(alpha_attract) + "_" + str(beta_attract) + "_" + str(alpha_threshold) + "_" + str(beta_threshold)   + "_" + str(learning_error_scale)
+def produceName(N,  K, prob_wire, steps,delta_t,set_seed,M,culture_var_min,culture_div,nu, eta,alpha_attract, beta_attract, alpha_threshold, beta_threshold,learning_error_scale,carbon_price_policy_start):
+    runName = "network_" + str(N) + "_" + str(K) + "_" +  str(prob_wire) + "_" + str(steps)  +  "_" + str(delta_t) + "_" + str(set_seed) + "_" + str(M) + "_" + str(culture_var_min) + "_" + str(culture_div) + "_" + str(nu) + "_" + str(eta) + "_" + str(alpha_attract) + "_" + str(beta_attract) + "_" + str(alpha_threshold) + "_" + str(beta_threshold)   + "_" + str(learning_error_scale) + "_" + str(carbon_price_policy_start)
     fileName = "results/"+ runName
     return fileName
 
-def produceName_random(N,  K, prob_wire, delta_t,M,culture_var_min,culture_div,nu, eta,alpha_attract, beta_attract, alpha_threshold, beta_threshold,learning_error_scale):
-    runName = "multirun_random_network_" + str(N) + "_" + str(K) + "_" +  str(prob_wire) +  "_" + str(delta_t) + "_" + str(M) + "_" + str(culture_var_min) + "_" + str(culture_div) + "_" + str(nu) + "_" + str(eta) + "_" + str(alpha_attract) + "_" + str(beta_attract) + "_" + str(alpha_threshold) + "_" + str(beta_threshold)  + "_" + str(learning_error_scale)
+def produceName_random(N,  K, prob_wire, delta_t,M,culture_var_min,culture_div,nu, eta,alpha_attract, beta_attract, alpha_threshold, beta_threshold,learning_error_scale,carbon_price_policy_start):
+    runName = "multirun_random_network_" + str(N) + "_" + str(K) + "_" +  str(prob_wire) +  "_" + str(delta_t) + "_" + str(M) + "_" + str(culture_var_min) + "_" + str(culture_div) + "_" + str(nu) + "_" + str(eta) + "_" + str(alpha_attract) + "_" + str(beta_attract) + "_" + str(alpha_threshold) + "_" + str(beta_threshold)  + "_" + str(learning_error_scale) + "_" + str(carbon_price_policy_start)
     fileName = "results/"+ runName
     return fileName
 

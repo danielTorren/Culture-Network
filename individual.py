@@ -94,9 +94,9 @@ class Individual():
 
         #print("attract after",self.behaviour_list[i].attract)
 
-    def update_thresholds(self, carbon_price_gradient):
+    def update_thresholds(self, carbon_price):
         for i in range(self.M):
-            self.behaviour_list[i].update_threshold(carbon_price_gradient)
+            self.behaviour_list[i].update_threshold(carbon_price)
 
     def calc_carbon_emissions(self):
         total_emissions = 0
@@ -111,11 +111,11 @@ class Individual():
         self.history_av_behaviour.append(self.av_behaviour)
         self.history_carbon_emissions.append(self.carbon_emissions)
 
-    def next_step(self,social_component_behaviours,carbon_price_gradient):
+    def next_step(self,social_component_behaviours,carbon_price):
         self.calc_information_provision()
         self.update_behaviours()#update the behaviours of agent
         self.update_attracts(social_component_behaviours)#,attract_cultural_group
-        self.update_thresholds(carbon_price_gradient)
+        self.update_thresholds(carbon_price)
         self.update_av_behaviour()
         self.update_av_behaviour_list()
         self.culture = self.calc_culture()
