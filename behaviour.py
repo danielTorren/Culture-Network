@@ -49,8 +49,9 @@ class Behaviour():
 
     def update_attract(self,social_component_behaviours,information_provision,delta_t):#,attract_cultural_group
             
-            social_learing = self.gamma*self.phi*(social_component_behaviours - self.attract) 
-            individual_learning = self.individual_learning 
+            #social_learing = self.gamma*self.phi*(social_component_behaviours - self.attract) 
+            social_learing = social_component_behaviours
+            #individual_learning = self.individual_learning 
             #conformity_bias =  (attract_cultural_group - self.attract) 
             information_provision = information_provision 
 
@@ -59,7 +60,7 @@ class Behaviour():
 
             #print("attract components!",social_learing,individual_learning,conformity_bias,information_provision)
                 #social_learing + individual_learning + 
-            self.attract += delta_t*(social_learing + individual_learning + information_provision) 
+            self.attract += delta_t*(social_learing + information_provision) #+ individual_learning 
 
     def update_threshold(self, carbon_price):
         if self.init_threshold < carbon_price*self.carbon_emissions:

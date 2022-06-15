@@ -32,11 +32,7 @@ class Individual():
         self.history_carbon_emissions = [self.carbon_emissions]
 
     def create_behaviours(self,init_data_behaviours):
-        behaviour_list = []
-        for i in range(len(init_data_behaviours)):
-            #init_attract, init_threshold,behaviour_cap, carbon_emissions,attract_individual_learning,psi
-            #print("attrct individ learn",init_data_behaviours[i][4])
-            behaviour_list.append(Behaviour(init_data_behaviours[i][0], init_data_behaviours[i][1], init_data_behaviours[i][2], init_data_behaviours[i][3],init_data_behaviours[i][4],init_data_behaviours[i][5],init_data_behaviours[i][6]))
+        behaviour_list = [Behaviour(init_data_behaviours[i][0], init_data_behaviours[i][1], init_data_behaviours[i][2], init_data_behaviours[i][3],init_data_behaviours[i][4],init_data_behaviours[i][5],init_data_behaviours[i][6]) for i in range(len(init_data_behaviours))]
         return behaviour_list
 
     def calc_behaviour_av(self):

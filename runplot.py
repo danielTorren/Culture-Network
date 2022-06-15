@@ -6,15 +6,15 @@ from matplotlib.colors import LinearSegmentedColormap,SymLogNorm
 import time
 import numpy as np
 
-M = 3#number of behaviours
+M = 4#number of behaviours
 N = 100#number of agents
-K = 15 #k nearest neighbours
+K = 10 #k nearest neighbours
 prob_wire = 0.2 #re-wiring probability?
 total_time = 10
 delta_t = 0.01#time step size
 time_steps_max = int(total_time/delta_t)#number of time steps max, will stop if culture converges
 culture_var_min = 0.01#amount of cultural variation
-set_seed = 2##reproducibility
+set_seed = 5##reproducibility
 np.random.seed(set_seed)
 
 ##inital distribution parameters - doing the inverse inverts it!
@@ -26,7 +26,7 @@ beta_threshold = 2
 #calc culture parameters
 culture_momentum = 0.1
 culture_momentum_steps = int(culture_momentum/delta_t)#number of time steps used in calculating culture
-print(culture_momentum_steps)
+#print(culture_momentum_steps)
 culture_div = 0#where do we draw the lien for green culture #USELESS
 
 #Infromation provision parameters
@@ -37,7 +37,7 @@ t_IP_matrix = [[],[],[],[],[],[]] #list of lists stating at which time steps an 
 
 #social learing
 phi_list = np.random.random_sample(M)#conscpicous consumption
-print("phi_list",phi_list)
+print("phi_list = ",phi_list)
 learning_error_scale = 0.02#1 standard distribution is 2% error
 
 #Individual learning
@@ -45,7 +45,7 @@ psi = 1#Individual learning rate
 
 #Carbon price parameters
 carbon_price_policy_start = 5#in simualation time to start the policy
-carbon_price_init = 0.5#
+carbon_price_init = 0#
 #social_cost_carbon = 0.5
 carbon_price_gradient = 0#social_cost_carbon/time_steps_max# social cost of carbon/total time
 
@@ -60,8 +60,8 @@ def calc_carbon_emissions(N,M):
     carbon_emissions_norm = (carbon_emissions/(carbon_emissions.sum()))*carbon_emissions_const
     return carbon_emissions_norm
 
-carbon_emissions = [0.2,0.5,0.75]#calc_carbon_emissions(N,M)
-print("carbon_emissions: ",carbon_emissions)
+carbon_emissions = [0.2,0.5,0.75,1]#calc_carbon_emissions(N,M)
+print("carbon_emissions = ",carbon_emissions)
 
 #LOAD DATA
 loadBooleanCSV = ["individual_culture","individual_carbon_emissions","network_total_carbon_emissions","network_time","network_cultural_var","network_carbon_price","network_weighting_matrix_convergence","network_average_culture","network_min_culture","network_max_culture"]#"network_cultural_var",
@@ -72,7 +72,7 @@ paramList = [ "N",  "K", "prob_wire","steps", "delta_t", "set_seed","M","culture
 
 ###PLOT STUFF
 nrows_behave = 1
-ncols_behave = 3
+ncols_behave = 4
 node_size = 50
 cmap = LinearSegmentedColormap.from_list("BrownGreen", ["sienna","white","olivedrab"])
 cmap_weighting = "Reds"
