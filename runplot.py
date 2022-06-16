@@ -1,3 +1,4 @@
+from sqlite3.dbapi2 import _Parameters
 from run import run
 from plot import plot_culture_timeseries, animate_weighting_matrix, animate_behavioural_matrix, animate_culture_network, prints_behavioural_matrix, prints_culture_network,multi_animation,multi_animation_alt, multi_animation_scaled,plot_value_timeseries, plot_threshold_timeseries, plot_attract_timeseries,standard_behaviour_timeseries_plot,plot_carbon_price_timeseries,plot_total_carbon_emissions_timeseries,plot_av_carbon_emissions_timeseries,prints_weighting_matrix,plot_weighting_matrix_convergence_timeseries,plot_cultural_range_timeseries,plot_average_culture_timeseries,plot_beta_distributions
 from utility import loadData, get_run_properties,frame_distribution_prints
@@ -26,42 +27,37 @@ beta_threshold = 2
 #calc culture parameters
 culture_momentum = 0.1
 culture_momentum_steps = int(culture_momentum/delta_t)#number of time steps used in calculating culture
-#print(culture_momentum_steps)
-culture_div = 0#where do we draw the lien for green culture #USELESS
-
-#Infromation provision parameters
-nu = 1# how rapidly extra gains in attractiveness are made
-eta = 1#decay rate of information provision boost
-attract_information_provision_list = [1]*M#
-t_IP_matrix = [[],[],[],[],[],[]] #list of lists stating at which time steps an information provision policy should be aplied for each behaviour
 
 #social learing
-phi_list = np.random.random_sample(M)#conscpicous consumption
-print("phi_list = ",phi_list)
+phi_list = []#conscpicous consumption
+
 learning_error_scale = 0.02#1 standard distribution is 2% error
 
-#Individual learning
-psi = 1#Individual learning rate
-
-#Carbon price parameters
-carbon_price_policy_start = 5#in simualation time to start the policy
-carbon_price_init = 0#
-#social_cost_carbon = 0.5
-carbon_price_gradient = 0#social_cost_carbon/time_steps_max# social cost of carbon/total time
-
-#carbon_price = 0.5
-
-
-#[0.3,0.6,0.8]#np.random.random_sample(M)#[1]*M# these should based on some paramters
-
-def calc_carbon_emissions(N,M):
-    carbon_emissions_const = 1/N
-    carbon_emissions = np.random.random_sample(M)
-    carbon_emissions_norm = (carbon_emissions/(carbon_emissions.sum()))*carbon_emissions_const
-    return carbon_emissions_norm
 
 carbon_emissions = [0.2,0.5,0.75,1]#calc_carbon_emissions(N,M)
-print("carbon_emissions = ",carbon_emissions)
+
+
+    prob_rewire = 0.1 #re-wiring probability?
+    set_seed = 2##reproducibility INTEGER
+    culture_momentum = 1#real time over which culture is calculated for INTEGER
+    learning_error_scale = 0.02#1 standard distribution is 2% error
+
+    #Fixed params
+    K = 10 #k nearest neighbours INTEGER
+    M = 3#number of behaviours
+    N = 100#number of agents
+    phi_list = [1]*M
+    carbon_emissions = [1]*M
+    alpha_attract =  2##inital distribution parameters - doing the inverse inverts it!
+    beta_attract = 8
+    alpha_threshold = 8
+    beta_threshold = 2
+    total_time = 10
+    delta_t = 0.1#time step size
+    time_steps_max = int(total_time/delta_t)#number of time steps max, will stop if culture converges
+    
+    fixed_params = [time_steps_max,M,N,phi_list,carbon_emissions,alpha_attract,beta_attract,alpha_threshold,beta_threshold,delta_t,K]#10 params
+
 
 #LOAD DATA
 loadBooleanCSV = ["individual_culture","individual_carbon_emissions","network_total_carbon_emissions","network_time","network_cultural_var","network_carbon_price","network_weighting_matrix_convergence","network_average_culture","network_min_culture","network_max_culture"]#"network_cultural_var",
@@ -101,7 +97,9 @@ if __name__ == "__main__":
         print("start_time =", time.ctime(time.time()))
         ###RUN MODEL
         #FILENAME = run(N,  K, prob_wire, delta_t, M, ,set_seed,time_steps_max,culture_var_min,culture_div,culture_momentum, nu, eta,attract_information_provision_list,t_IP_matrix,psi,carbon_price_init,carbon_price_gradient,carbon_emissions
-        FILENAME = run(time_steps_max, culture_var_min, N, K, prob_wire, delta_t, M, set_seed,culture_div,culture_momentum_steps, nu, eta,attract_information_provision_list,t_IP_matrix ,psi,carbon_price_policy_start,carbon_price_init,carbon_price_gradient,carbon_emissions,alpha_attract, beta_attract, alpha_threshold, beta_threshold,phi_list,learning_error_scale)
+        
+        parameters = [time_steps_max,M,N,phi_list,carbon_emissions,alpha_attract,beta_attract,alpha_threshold,beta_threshold,delta_t,K] + [prob_rewire,set_seed,culture_momentum,learning_error_scale]
+        FILENAME = run(parameters)
 
         print ("RUN time taken: %s minutes" % ((time.time()-start_time)/60), "or %s s"%((time.time()-start_time)))
 

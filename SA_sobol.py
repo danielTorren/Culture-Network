@@ -1,69 +1,81 @@
 from run import generate_data
-from utility import produceName_random,createFolder
-import time
 import numpy as np
 from SALib.sample import saltelli
 from SALib.analyze import sobol
+import time
+import matplotlib.pyplot as plt
+from SALib.plotting.bar import plot as barplot
 
 if __name__ == "__main__":
+    N_samples = 32#1024
+    D_vars = 4
+    samples = N_samples*(D_vars + 2)
+    print("number of runs = ", samples)
+
+    #variable parameters
+    """
+    
+    prob_rewire = 0.1 #re-wiring probability?
+    set_seed = 2##reproducibility INTEGER
+    culture_momentum = 1#real time over which culture is calculated for INTEGER
+    learning_error_scale = 0.02#1 standard distribution is 2% error
+    """
 
     problem = {
-        'num_vars': 3,
-        'names': ['x1', 'x2', 'x3'],
-        'bounds': [[-3.14159265359, 3.14159265359],
-                [-3.14159265359, 3.14159265359],
-                [-3.14159265359, 3.14159265359]]
+        'num_vars': D_vars,
+        'names': ['prob_rewire','set_seed','culture_momentum','learning_error_scale'],
+        'bounds': [
+                [0.01, 0.3],#[3, 30],
+                [1, 2*samples],#done so i dont use the same run twice? maybe make this a fixed variable
+                [1,50],
+                [0.01,0.3]
+                ]
     }
-
+    
+    #Fixed params
+    K = 10 #k nearest neighbours INTEGER
     M = 3#number of behaviours
-    N = 50#number of agents
-    K = 5 #k nearest neighbours
-    prob_wire = 0.1 #re-wiring probability?
-    behaviour_cap = 1
+    N = 100#number of agents
+    phi_list = [1]*M
+    carbon_emissions = [1]*M
+    alpha_attract =  2##inital distribution parameters - doing the inverse inverts it!
+    beta_attract = 8
+    alpha_threshold = 8
+    beta_threshold = 2
     total_time = 10
-    delta_t = 0.01#time step size
+    delta_t = 0.1#time step size
     time_steps_max = int(total_time/delta_t)#number of time steps max, will stop if culture converges
-    culture_var_min = 0.01#amount of cultural variation
-    set_seed = 2##reproducibility
+    
+    fixed_params = [time_steps_max,M,N,phi_list,carbon_emissions,alpha_attract,beta_attract,alpha_threshold,beta_threshold,delta_t,K]#10 params
 
-    #calc culture parameters
-    culture_momentum = 1#number of time steps used in calculating culture
-    culture_div = 0#where do we draw the lien for green culture
-
-    #Infromation provision parameters
-    nu = 1# how rapidly extra gains in attractiveness are made
-    eta = 1#decay rate of information provision boost
-    attract_information_provision_list = [1]*M#
-    t_IP_matrix = [[],[],[],[],[],[]] #list of lists stating at which time steps an information provision policy should be aplied for each behaviour
-
-    #Individual learning rate
-    psi = 1#
-
-    #Carbon price parameters
-    carbon_price_init = 0#
-    social_cost_carbon = 0
-    carbon_price_gradient = social_cost_carbon/time_steps_max# social cost of carbon/total time
-    carbon_emissions = [0.3,0.6,0.8]#np.random.random_sample(M)#[1]*M# these should based on some paramters
-
-
+    time_per_step = 0.2
+    print("Predicted run time = ", time_per_step*time_steps_max*samples)
 
     #GENERATE PARAMETER VALUES
-    param_values = saltelli.sample(problem, 1024)#NumPy matrix. #N(2D +2) samples where N is 1024 and D is the number of parameters
+    param_values = saltelli.sample(problem, N_samples)#NumPy matrix. #N(2D +2) samples where N is 1024 and D is the number of parameters
+    #print("param_values = ",param_values)
     Y = np.zeros([param_values.shape[0]])
-
+    
+    #run the thing 
+    start_time = time.time()
+    print("start_time =", time.ctime(time.time()))
     for i, X in enumerate(param_values):
-        social_network = generate_data(time_steps_max, culture_var_min, N, K, prob_wire, delta_t, M, set_seed,culture_div,culture_momentum, nu, eta,attract_information_provision_list,t_IP_matrix ,psi,carbon_price_policy_start,carbon_price_init,carbon_price_gradient,carbon_emissions,alpha_attract, beta_attract, alpha_threshold, beta_threshold,phi_list,learning_error_scale)
-
-        Y[i] = social_network.evaluate_model(X)
-
-    #run the thing
-    social_network = generate_data(time_steps_max, culture_var_min, N, K, prob_wire, delta_t, M, set_seed,culture_div,culture_momentum, nu, eta,attract_information_provision_list,t_IP_matrix ,psi,carbon_price_policy_start,carbon_price_init,carbon_price_gradient,carbon_emissions,alpha_attract, beta_attract, alpha_threshold, beta_threshold,phi_list,learning_error_scale)
-
-    #GET RESULTS FOR EACH RUN AND PUT INTO TXT
-    Y = np.loadtxt("outputs.txt", float)# I NEED TO LOAD IN THE RESUTLS
+       # print("I,X: ",i,X)
+        social_network = generate_data(fixed_params + X)
+        Y[i] = social_network.total_carbon_emissions
+    print(Y)
+    print ("RUN time taken: %s minutes" % ((time.time()-start_time)/60), "or %s s"%((time.time()-start_time)))
 
     ## ANALYZE RESULTS
+    start_time = time.time()
+    print("start_time =", time.ctime(time.time()))
     Si = sobol.analyze(problem, Y) # Si is a Python dict with the keys "S1", "S2", "ST", "S1_conf", "S2_conf", and "ST_conf". The _conf keys store the corresponding confidence intervals, typically with a confidence level of 95%.
+    print ("ANALYZE time taken: %s minutes" % ((time.time()-start_time)/60), "or %s s"%((time.time()-start_time)))
+    
+    print(Si)
 
     #Visualize
-    Si.plot()
+    total, first, second = Si.to_df()
+    barplot(total)
+    #Si.plot()
+    plt.show()
