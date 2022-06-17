@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from SALib.plotting.bar import plot as barplot
 
 if __name__ == "__main__":
-    N_samples = 32#1024
+    N_samples = 64#1024
     D_vars = 4
     samples = N_samples*(D_vars + 2)
     print("number of runs = ", samples)
@@ -33,6 +33,7 @@ if __name__ == "__main__":
     }
     
     #Fixed params
+    save_data  = False
     K = 10 #k nearest neighbours INTEGER
     M = 3#number of behaviours
     N = 100#number of agents
@@ -46,7 +47,7 @@ if __name__ == "__main__":
     delta_t = 0.1#time step size
     time_steps_max = int(total_time/delta_t)#number of time steps max, will stop if culture converges
     
-    fixed_params = [time_steps_max,M,N,phi_list,carbon_emissions,alpha_attract,beta_attract,alpha_threshold,beta_threshold,delta_t,K]#10 params
+    fixed_params = [save_data,time_steps_max,M,N,phi_list,carbon_emissions,alpha_attract,beta_attract,alpha_threshold,beta_threshold,delta_t,K]#10 params
 
     time_per_step = 0.2
     print("Predicted run time = ", time_per_step*time_steps_max*samples)
@@ -60,11 +61,13 @@ if __name__ == "__main__":
     start_time = time.time()
     print("start_time =", time.ctime(time.time()))
     for i, X in enumerate(param_values):
-       # print("I,X: ",i,X)
-        social_network = generate_data(fixed_params + X)
+        fixed_params.extend(X)#add the two lists together i think X isnt a list which is why the + doesnt work
+        social_network = generate_data(fixed_params)
         Y[i] = social_network.total_carbon_emissions
-    print(Y)
-    print ("RUN time taken: %s minutes" % ((time.time()-start_time)/60), "or %s s"%((time.time()-start_time)))
+    #print(Y)
+    time_taken = time.time()-start_time
+    print ("RUN time taken: %s minutes" % ((time_taken )/60), "or %s s"%((time_taken )))
+    print("Actual time per step= ", time_taken/(time_steps_max*samples))
 
     ## ANALYZE RESULTS
     start_time = time.time()
@@ -72,7 +75,7 @@ if __name__ == "__main__":
     Si = sobol.analyze(problem, Y) # Si is a Python dict with the keys "S1", "S2", "ST", "S1_conf", "S2_conf", and "ST_conf". The _conf keys store the corresponding confidence intervals, typically with a confidence level of 95%.
     print ("ANALYZE time taken: %s minutes" % ((time.time()-start_time)/60), "or %s s"%((time.time()-start_time)))
     
-    print(Si)
+    print("Si",Si)
 
     #Visualize
     total, first, second = Si.to_df()

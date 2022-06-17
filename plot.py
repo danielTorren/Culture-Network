@@ -8,13 +8,17 @@ from utility import frame_distribution,frame_distribution_prints
 
 ###DEFINE PLOTS
 
-def prints_behaviour_timeseries_plot(FILENAME,Data,property,y_title,nrows, ncols):
+def prints_behaviour_timeseries_plot(FILENAME,Data,property,y_title,nrows, ncols,dpi_save):
     PropertyData = Data[property].transpose()
 
+    #print(PropertyData,np.shape(PropertyData))
+
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols,figsize=(14,7))
+    #print("property = ", property)
 
     for i, ax in enumerate(axes.flat):
         for j in range(int(Data["N"])):
+            #print("accepteance",PropertyData[i][j], i,j)
             ax.plot(Data["network_time"], PropertyData[i][j])
         ax.set_xlabel(r"Time")
         ax.set_ylabel(r"%s" % y_title)
@@ -23,10 +27,10 @@ def prints_behaviour_timeseries_plot(FILENAME,Data,property,y_title,nrows, ncols
 
     plotName = FILENAME + "/Plots"
     f =  plotName + "/" + property + "_prints_timeseries.png"
-    fig.savefig(f, dpi = 600)
+    fig.savefig(f, dpi = dpi_save)
 
 
-def standard_behaviour_timeseries_plot(FILENAME,Data,property,y_title):
+def standard_behaviour_timeseries_plot(FILENAME,Data,property,y_title,dpi_save):
     PropertyData = Data[property].transpose()
 
     fig, ax = plt.subplots()
@@ -38,18 +42,18 @@ def standard_behaviour_timeseries_plot(FILENAME,Data,property,y_title):
 
     plotName = FILENAME + "/Plots"
     f =  plotName + "/" + property + "_timeseries.png"
-    fig.savefig(f, dpi = 600)
+    fig.savefig(f, dpi = dpi_save)
 
-def plot_value_timeseries(FILENAME,Data,nrows, ncols):
-    prints_behaviour_timeseries_plot(FILENAME,Data,"behaviour_value","Trait Value",nrows, ncols)
+def plot_value_timeseries(FILENAME,Data,nrows, ncols,dpi_save):
+    prints_behaviour_timeseries_plot(FILENAME,Data,"behaviour_value","Trait Value",nrows, ncols,dpi_save)
 
-def plot_threshold_timeseries(FILENAME,Data,nrows, ncols):
-    prints_behaviour_timeseries_plot(FILENAME,Data,"behaviour_threshold","Threshold",nrows, ncols)
+def plot_threshold_timeseries(FILENAME,Data,nrows, ncols,dpi_save):
+    prints_behaviour_timeseries_plot(FILENAME,Data,"behaviour_threshold","Threshold",nrows, ncols,dpi_save)
 
-def plot_attract_timeseries(FILENAME,Data,nrows, ncols):
-    prints_behaviour_timeseries_plot(FILENAME,Data,"behaviour_attract","Attractiveness",nrows, ncols)
+def plot_attract_timeseries(FILENAME,Data,nrows, ncols,dpi_save):
+    prints_behaviour_timeseries_plot(FILENAME,Data,"behaviour_attract","Attractiveness",nrows, ncols,dpi_save)
 
-def plot_av_carbon_emissions_timeseries(FILENAME,Data):
+def plot_av_carbon_emissions_timeseries(FILENAME,Data,dpi_save):
     y_title = "Carbon Emissions"
     property = "individual_carbon_emissions"
 
@@ -69,9 +73,9 @@ def plot_av_carbon_emissions_timeseries(FILENAME,Data):
 
     plotName = FILENAME + "/Plots"
     f =  plotName + "/" + property + "_timeseries.png"
-    fig.savefig(f, dpi = 600)
+    fig.savefig(f, dpi = dpi_save)
 
-def plot_network_timeseries(FILENAME,Data,y_title,property):
+def plot_network_timeseries(FILENAME,Data,y_title,property,dpi_save):
     
     fig, ax = plt.subplots()
     data = np.asarray(Data[property])[0]#bodge
@@ -81,30 +85,30 @@ def plot_network_timeseries(FILENAME,Data,y_title,property):
 
     plotName = FILENAME + "/Plots"
     f =  plotName + "/" + property + "_timeseries.png"
-    fig.savefig(f, dpi = 600)
+    fig.savefig(f, dpi = dpi_save)
 
-def plot_carbon_price_timeseries(FILENAME,Data):
+def plot_carbon_price_timeseries(FILENAME,Data,dpi_save):
     y_title = "Carbon Price"
     property = "network_carbon_price"
 
-    plot_network_timeseries(FILENAME,Data,y_title,property)
+    plot_network_timeseries(FILENAME,Data,y_title,property,dpi_save)
 
-def plot_cultural_range_timeseries(FILENAME,Data):
+def plot_cultural_range_timeseries(FILENAME,Data,dpi_save):
     y_title = "Cultural Range"
     property = "network_cultural_var"
-    plot_network_timeseries(FILENAME,Data,y_title,property)
+    plot_network_timeseries(FILENAME,Data,y_title,property,dpi_save)
 
-def plot_weighting_matrix_convergence_timeseries(FILENAME,Data):
+def plot_weighting_matrix_convergence_timeseries(FILENAME,Data,dpi_save):
     y_title = "Change in Agent Link Strength"
     property = "network_weighting_matrix_convergence"
-    plot_network_timeseries(FILENAME,Data,y_title,property)
+    plot_network_timeseries(FILENAME,Data,y_title,property,dpi_save)
 
-def plot_total_carbon_emissions_timeseries(FILENAME,Data):
+def plot_total_carbon_emissions_timeseries(FILENAME,Data,dpi_save):
     y_title = "Carbon Emissions"
     property = "network_total_carbon_emissions"
-    plot_network_timeseries(FILENAME,Data,y_title,property)
+    plot_network_timeseries(FILENAME,Data,y_title,property,dpi_save)
 
-def plot_average_culture_timeseries(FILENAME,Data):
+def plot_average_culture_timeseries(FILENAME,Data,dpi_save):
     y_title = "Average Culture"
     property = "network_average_culture"
     #plot_network_timeseries(FILENAME,Data,y_title,property)
@@ -120,10 +124,10 @@ def plot_average_culture_timeseries(FILENAME,Data):
 
     plotName = FILENAME + "/Plots"
     f =  plotName + "/" + property + "_timeseries.png"
-    fig.savefig(f, dpi = 600)
+    fig.savefig(f, dpi = dpi_save)
     
 
-def plot_culture_timeseries(FILENAME,Data):
+def plot_culture_timeseries(FILENAME,Data,dpi_save):
 
     ##plot cultural evolution of agents
     fig, ax = plt.subplots()
@@ -145,7 +149,7 @@ def plot_culture_timeseries(FILENAME,Data):
 
     plotName = FILENAME + "/Plots"
     f =  plotName + "/" + "cultural_evolution.png"
-    fig.savefig(f, dpi = 600)
+    fig.savefig(f, dpi =dpi_save)
 
 
 #make matrix animation
@@ -166,7 +170,7 @@ def animate_weighting_matrix(FILENAME,Data,interval,fps,round_dec,cmap_weighting
     matrice = ax.matshow(Data["network_weighting_matrix"][0], cmap = cmap_weighting)
     plt.colorbar(matrice)
 
-    ani = animation.FuncAnimation(fig, update, frames = int(Data["steps"]), repeat_delay = 500, interval = interval )
+    ani = animation.FuncAnimation(fig, update, frames = int(Data["time_steps_max"]), repeat_delay = 500, interval = interval )
 
     #save the video
     animateName = FILENAME + "/Animations"
@@ -196,7 +200,7 @@ def animate_behavioural_matrix(FILENAME,Data,interval,fps,cmap_behaviour,round_d
     cbar = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap_behaviour, norm=Normalize(vmin=-1, vmax=1)), ax=ax )#This does a mapabble on the fly i think, not sure
     cbar.set_label('Behavioural Value')
 
-    ani = animation.FuncAnimation(fig, update, frames = int(Data["steps"]), repeat_delay = 500, interval = interval)
+    ani = animation.FuncAnimation(fig, update, frames = int(Data["time_steps_max"]), repeat_delay = 500, interval = interval)
 
     #save the video
     animateName = FILENAME + "/Animations"
@@ -246,7 +250,7 @@ def animate_culture_network(FILENAME,Data,layout,cmap_culture,node_size,interval
     #get pos
     pos_culture_network = prod_pos(layout,G)
 
-    ani = animation.FuncAnimation(fig, update, frames= int(Data["steps"]), fargs=(G, pos_culture_network, ax, cmap_culture), repeat_delay = 500, interval = interval)
+    ani = animation.FuncAnimation(fig, update, frames= int(Data["time_steps_max"]), fargs=(G, pos_culture_network, ax, cmap_culture), repeat_delay = 500, interval = interval)
 
     #save the video
     animateName = FILENAME + "/Animations"
@@ -255,12 +259,12 @@ def animate_culture_network(FILENAME,Data,layout,cmap_culture,node_size,interval
     ani.save(f, writer=writervideo)
 
 
-def prints_weighting_matrix(FILENAME,Data,cmap_behaviour,nrows,ncols,frames_list,round_dec):
+def prints_weighting_matrix(FILENAME,Data,cmap_behaviour,nrows,ncols,frames_list,round_dec,dpi_save):
 
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols,figsize=(14,7))
-
+    #print(frames_list,Data["network_time"],Data["network_weighting_matrix"][20])
     for i, ax in enumerate(axes.flat):
-
+        #print(i)
         ax.matshow(Data["network_weighting_matrix"][frames_list[i]], cmap = cmap_behaviour, aspect='auto')
         # Set the title
         #print("Time= {}".format(round(Data["network_time"][frames_list[i]],round_dec)))
@@ -277,10 +281,10 @@ def prints_weighting_matrix(FILENAME,Data,cmap_behaviour,nrows,ncols,frames_list
 
     plotName = FILENAME + "/Prints"
     f =  plotName + "/" + "prints_weighting_matrix.png"
-    fig.savefig(f, dpi = 600)
+    fig.savefig(f, dpi = dpi_save)
 
 
-def prints_behavioural_matrix(FILENAME,Data,cmap_behaviour,nrows,ncols,frames_list,round_dec):
+def prints_behavioural_matrix(FILENAME,Data,cmap_behaviour,nrows,ncols,frames_list,round_dec,dpi_save):
 
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols,figsize=(14,7))
 
@@ -301,9 +305,9 @@ def prints_behavioural_matrix(FILENAME,Data,cmap_behaviour,nrows,ncols,frames_li
 
     plotName = FILENAME + "/Prints"
     f =  plotName + "/" + "prints_behavioural_matrix.png"
-    fig.savefig(f, dpi = 600)
+    fig.savefig(f, dpi = dpi_save)
 
-def prints_culture_network(FILENAME,Data,layout,cmap_culture,node_size,nrows,ncols,log_norm,frames_list,round_dec):
+def prints_culture_network(FILENAME,Data,layout,cmap_culture,node_size,nrows,ncols,log_norm,frames_list,round_dec,dpi_save):
 
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols,figsize=(14,7))
 
@@ -334,7 +338,7 @@ def prints_culture_network(FILENAME,Data,layout,cmap_culture,node_size,nrows,nco
     cbar.set_label('Culture')
     
     f = FILENAME + "/Prints/prints_culture_network.png"
-    fig.savefig(f, dpi = 600)
+    fig.savefig(f, dpi = dpi_save)
 
 
 def multi_animation(FILENAME,Data,cmap_behaviour,cmap_culture,layout,node_size,interval,fps,log_norm):
@@ -553,7 +557,7 @@ def multi_animation_scaled(FILENAME,Data,cmap_behaviour,cmap_culture,layout,node
     ani.save(f, writer=writervideo)
 
 
-def multiplot_print_average_culture_timeseries(FILENAME,Data_list,seed_list,nrows,ncols):
+def multiplot_print_average_culture_timeseries(FILENAME,Data_list,seed_list,nrows,ncols,dpi_save):
     y_title = "Average Culture"
     property = "seed_list_print_network_average_culture"
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols,figsize=(14,7))
@@ -572,9 +576,9 @@ def multiplot_print_average_culture_timeseries(FILENAME,Data_list,seed_list,nrow
 
     plotName = FILENAME + "/Plots"
     f =  plotName + "/" + property + "_timeseries.png"
-    fig.savefig(f, dpi = 600)
+    fig.savefig(f, dpi = dpi_save)
 
-def multiplot_print_total_carbon_emissions_timeseries(FILENAME,Data_list,seed_list,nrows,ncols):
+def multiplot_print_total_carbon_emissions_timeseries(FILENAME,Data_list,seed_list,nrows,ncols,dpi_save):
     y_title = "Total Carbon Emissions"
     property = "seed_list_print_network_total_carbon_emissions"
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols,figsize=(14,7))
@@ -592,9 +596,9 @@ def multiplot_print_total_carbon_emissions_timeseries(FILENAME,Data_list,seed_li
 
     plotName = FILENAME + "/Plots"
     f =  plotName + "/" + property + "_timeseries.png"
-    fig.savefig(f, dpi = 600)
+    fig.savefig(f, dpi = dpi_save)
 
-def multiplot_total_carbon_emissions_timeseries(FILENAME,Data_list,seed_list):
+def multiplot_total_carbon_emissions_timeseries(FILENAME,Data_list,seed_list,dpi_save):
     y_title = "Total Carbon Emissions"
     property = "seed_list_network_total_carbon_emissions"
 
@@ -611,9 +615,9 @@ def multiplot_total_carbon_emissions_timeseries(FILENAME,Data_list,seed_list):
 
     plotName = FILENAME + "/Plots"
     f =  plotName + "/" + property + "_timeseries.png"
-    fig.savefig(f, dpi = 600)
+    fig.savefig(f, dpi = dpi_save)
 
-def multiplot_average_culture_timeseries(FILENAME,Data_list,seed_list):
+def multiplot_average_culture_timeseries(FILENAME,Data_list,seed_list,dpi_save):
     y_title = "Average Culture"
     property = "seed_list_network_average_culture"
     fig, ax = plt.subplots()
@@ -632,9 +636,9 @@ def multiplot_average_culture_timeseries(FILENAME,Data_list,seed_list):
 
     plotName = FILENAME + "/Plots"
     f =  plotName + "/" + property + "_timeseries.png"
-    fig.savefig(f, dpi = 600)
+    fig.savefig(f, dpi = dpi_save)
 
-def plot_beta_distributions(FILENAME,alpha_attract,beta_attract,alpha_threshold,beta_threshold,bin_num,num_counts):
+def plot_beta_distributions(FILENAME,alpha_attract,beta_attract,alpha_threshold,beta_threshold,bin_num,num_counts,dpi_save):
     property = "beta_distribution"
     fig, ax = plt.subplots()
 
@@ -645,7 +649,7 @@ def plot_beta_distributions(FILENAME,alpha_attract,beta_attract,alpha_threshold,
     ax.legend()
     plotName = FILENAME + "/Plots"
     f =  plotName + "/" + property + "_timeseries.png"
-    fig.savefig(f, dpi = 600)
+    fig.savefig(f, dpi = dpi_save)
 
 
 

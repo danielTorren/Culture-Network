@@ -3,6 +3,13 @@ import csv
 import os
 import pandas as pd
 import numpy as np
+import time
+
+def produceName_alt(parameters):
+    fileName = "results/"
+    for i in parameters:
+        fileName = fileName + "_" + str(i) 
+    return fileName
 
 def produceName(N,  K, prob_wire, steps,delta_t,set_seed,M,culture_var_min,culture_div,nu, eta,alpha_attract, beta_attract, alpha_threshold, beta_threshold,learning_error_scale,carbon_price_policy_start):
     runName = "network_" + str(N) + "_" + str(K) + "_" +  str(prob_wire) + "_" + str(steps)  +  "_" + str(delta_t) + "_" + str(set_seed) + "_" + str(M) + "_" + str(culture_var_min) + "_" + str(culture_div) + "_" + str(nu) + "_" + str(eta) + "_" + str(alpha_attract) + "_" + str(beta_attract) + "_" + str(alpha_threshold) + "_" + str(beta_threshold)   + "_" + str(learning_error_scale) + "_" + str(carbon_price_policy_start)
@@ -70,7 +77,6 @@ def transpose_data_dict(data,dataSaveList):
         data[dataSaveList[i]] = (np.asarray(data[dataSaveList[i]])).transpose()
     return data
 
-
 def saveCSV(dataName,endName,dataSave):
     with open(dataName + endName, 'w', newline="") as fout:
         writer = csv.writer(fout)
@@ -82,10 +88,13 @@ def saveFromList(dataName,dataSaveList,dataDict,agentClass):
         saveCSV(dataName,endName,dataDict[i])
 
 def save_behaviours(data,steps, N, M):
+    #steps = steps + 1# include zeroth step BODGE!!!
+    #print("steps",steps)
     dataDict = {}
     data_behaviour_value = np.zeros([steps, N, M])
     data_behaviour_attract = np.zeros([steps, N, M])
     data_behaviour_threshold = np.zeros([steps, N, M])
+    #print("steps",steps,N,M)
 
     for i in range(steps):
         for j in range(N):
@@ -98,7 +107,24 @@ def save_behaviours(data,steps, N, M):
     dataDict["attract"] = data_behaviour_attract
     dataDict["threshold"] = data_behaviour_threshold
 
+    #print(np.shape(dataDict["value"]))
+
     return dataDict
+
+"""
+
+def save_behaviours_alt(data,steps, N, M):
+    steps = steps + 1
+    dataDict = {
+
+    "value" : np.asarray( [[[data.agent_list[n].behaviour_list[m].history_value[t] for m in range(M)] for n in range(N)] for t in range(steps)] ) ,
+    "attract" : np.asarray([[[data.agent_list[n].behaviour_list[m].history_attract[t] for m in range(M)] for n in range(N)] for t in range(steps)]  ),
+    "threshold" : np.asarray([[[data.agent_list[n].behaviour_list[m].history_threshold[t] for m in range(M)] for n in range(N)] for t in range(steps)])
+    }
+    print(np.shape(dataDict["value"]))
+
+    return dataDict
+"""
 
 def save_list_array(dataName,dataSaveList,dataDict,agentClass):
     for i in dataSaveList:
@@ -106,20 +132,25 @@ def save_list_array(dataName,dataSaveList,dataDict,agentClass):
         np.savez(arrayName,dataDict[i])
 
 
-def saveData(data, dataName,steps, N, M):
+def saveData(data, dataName,steps, N, M,data_save_behaviour_array_list, data_save_individual_list,data_save_network_list,data_save_network_array_list):
     
     ####TRANSPOSE STUFF SO THAT ITS AGGREGATED BY TIME STEP NOT INDIVIDUAL
 
     """save data from behaviours"""
-    
-    data_save_behaviour_array_list = ["value","attract","threshold"]
+    """
+    start_time = time.time()
+    save_behaviours(data,steps, N, M)
+    print ("og time taken: %s minutes" % ((time.time()-start_time)/60), "or %s s"%((time.time()-start_time)))
+
+    start_time = time.time()
+    save_behaviours_alt(data, steps,N, M)
+    print ("alt time taken: %s minutes" % ((time.time()-start_time)/60), "or %s s"%((time.time()-start_time)))
+    """
     data_behaviour_array_dict = save_behaviours(data,steps, N, M)
     #save as array
     save_list_array(dataName,data_save_behaviour_array_list,data_behaviour_array_dict,"behaviour")
 
     """save data from individuals"""
-    #list of things to be saved
-    data_save_individual_list = ["culture","carbon_emissions"]
     #create dict with flatdata
     data_individual_dict = saveDataDict(data.agent_list,data_save_individual_list)
     #TRANSPOSE
@@ -128,15 +159,10 @@ def saveData(data, dataName,steps, N, M):
     saveFromList(dataName,data_save_individual_list,data_individual_dict,"individual")
     
     """SAVE DATA FROM NETWORK"""
-
-    data_save_network_list = ["time","cultural_var","carbon_price","total_carbon_emissions","weighting_matrix_convergence","average_culture","min_culture","max_culture"]
     #create dict with flatdata
     data_network_dict = saveDataDict([data],data_save_network_list)
     #save as CSV
     saveFromList(dataName,data_save_network_list,data_network_dict,"network")
-
-    #list of things to be saved
-    data_save_network_array_list = ["weighting_matrix","behavioural_attract_matrix","social_component_matrix"]
     #create dict with flatdata
     data_network_array_dict = saveDataDict([data],data_save_network_array_list)
     #save as array
@@ -174,9 +200,7 @@ def loadData(dataName, loadBooleanCSV,loadBooleanArray):
 def get_run_properties(Data,runName,paramList):
     parameters = runName.split("_")
     parameters.pop(0)#remove "network" and anything before
-    #print("parameters",parameters)
-    #print(paramList)
-    #print(parameters)
+
     for i in range(len(parameters)):
         Data[paramList[i]] = float(parameters[i])
 
@@ -195,6 +219,8 @@ def frame_distribution(time_list,scale_factor,frames_proportion):
     print("frames:",frames_list_int)
     return frames_list_int
 
+
+
 def frame_distribution_prints(time_list,scale_factor,frame_num):
 
     select = np.random.exponential(scale = scale_factor, size = frame_num)
@@ -205,14 +231,24 @@ def frame_distribution_prints(time_list,scale_factor,frame_num):
     scaled_select = np.ceil(norm_select*(len(time_list)-1))#stops issues with zero
     #print(np.ceil(norm_select*(len(time_list)-1)))
     #print(scaled_select)
-    frames_list = np.unique(scaled_select)
+    frames_list = list(np.unique(scaled_select))
+
+    #print(type(frames_list),frames_list)
+
+    while len(frames_list) < frame_num:
+        select_in = np.random.exponential(scale = scale_factor, size = 1)
+        norm_select_in = select_in/max(select)
+        scaled_select = np.ceil(norm_select_in*(len(time_list)-1))
+        frames_list = list(frames_list + list(scaled_select))
+        #print("in", select_in ,norm_select_in, scaled_select ,frames_list)
+
     #print(frames_list)
     frames_list_int = [int(x) for x in frames_list]
     #print(frames_list_int)
     frames_list_int.insert(0,0)
-    print("frames prints:",frames_list_int)
+    #print("frames prints:",sorted(frames_list_int))
     
-    return frames_list_int
+    return sorted(frames_list_int)
 
 
 
