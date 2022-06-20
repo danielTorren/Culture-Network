@@ -1,10 +1,7 @@
-from logging import raiseExceptions
 import numpy as np
 import networkx as nx
 from individual import Individual
-import time
 import numpy.typing as npt
-
 
 class Network:
 
@@ -16,37 +13,46 @@ class Network:
     def __init__(self, parameters:list):
         # save_data,time_steps_max,M,N,phi_list,carbon_emissions,alpha_attract,beta_attract,alpha_threshold,beta_threshold,delta_t,K,prob_rewire,set_seed,culture_momentum,learning_error_scale
         #print(parameters)
-        self.opinion_dyanmics = parameters[0]
-        self.save_data = parameters[1]
-        self.M = parameters[3]
-        self.N = parameters[4]
-        self.phi_list = parameters[5]
-        self.carbon_emissions = parameters[6]
-        self.delta_t = parameters[7]
+        #print(parameters)
+        #opinion_dynamics,save_data,time_steps_max,delta_t, ("phi_list_lower",0,0.7),("phi_list_upper",0.7,1)("N",50,500),("M",1,10),("K",2,50),("prob_rewire",0.001,0.5), ("set_seed",0,10000), ("culture_momentum",0,20),("learning_error_scale",0,0.5),("alpha_attract",0.1,10),("beta_attract",0.1,10),("alpha_threshold",0.1,10),("beta_threshold",0.1,10)]
+        self.set_seed = int(round(parameters["set_seed"]))
+        np.random.seed(
+            self.set_seed
+        )  # not sure if i have to be worried about the randomness of the system being reproducible
+        
+        self.opinion_dyanmics = parameters["opinion_dynamics"]
+        self.save_data = parameters["save_data"]
+        self.M = int(round(parameters["M"]))
+        self.N = int(round(parameters["N"]))
+
+        self.phi_list = np.linspace(parameters["phi_list_lower"], parameters["phi_list_upper"], num=self.M)
+        np.random.shuffle(self.phi_list)
+        
+        self.carbon_emissions = [1]*self.M#parameters[6]
+        self.delta_t = parameters["delta_t"]
         self.K = int(
-            round(parameters[8])
+            round(parameters["K"])
         )  # round due to the sampling method producing floats, lets hope this works
-        self.prob_rewire = parameters[9]
-        self.set_seed = int(round(parameters[10]))
+        self.prob_rewire = parameters["prob_rewire"]
+        
         self.culture_momentum = int(
-            round(parameters[11]) / self.delta_t
+            round(parameters["culture_momentum"]) / self.delta_t
         )  # round due to the sampling method producing floats, lets hope this works
-        self.learning_error_scale = parameters[12]
+        self.learning_error_scale = parameters["learning_error_scale"]
         (
             self.alpha_attract,
             self.beta_attract,
             self.alpha_threshold,
             self.beta_threshold,
-        ) = (parameters[13], parameters[14], parameters[15], parameters[16])
+        ) = (parameters["alpha_attract"], parameters["beta_attract"], parameters["alpha_threshold"], parameters["beta_threshold"])
 
         self.t = 0
         self.list_people = range(self.N)
-        np.random.seed(
-            self.set_seed
-        )  # not sure if i have to be worried about the randomness of the system being reproducible
 
+        
         # create network
         (
+            self.adjacency_matrix,
             self.weighting_matrix,
             self.network,
             self.ego_networks,
@@ -66,7 +72,7 @@ class Network:
         else:
             raise Exception("Invalid opinion dynamics model")
 
-        self.update_weightings()  # Should I update the weighting matrix? I feel like it makes sense if its not time dependant.
+        self.weighting_matrix,__ = self.update_weightings()  # Should I update the weighting matrix? I feel like it makes sense if its not time dependant.
 
         self.total_carbon_emissions = self.calc_total_emissions()
 
@@ -120,6 +126,7 @@ class Network:
         ]  # create list of neighbours of individuals by index
         neighbours_list = [[i for i in ws.neighbors(n)] for n in self.list_people]
         return (
+            weighting_matrix,
             norm_weighting_matrix,
             ws,
             ego_networks,
@@ -201,40 +208,26 @@ class Network:
             - self.behavioural_attract_matrix
         )
 
-    def calc_alpha(self, i:int, j:int)-> float:
-        return 1 - 0.5 * abs(
-            self.agent_list[i].culture - self.agent_list[j].culture
-        )  # calc the un-normalized weighting matrix
-
     def calc_total_weighting_matrix_difference(self, matrix_before: npt.NDArray, matrix_after: npt.NDArray)-> float:
         difference_matrix = np.subtract(matrix_before, matrix_after)
         total_difference = (np.abs(difference_matrix)).sum()
         return total_difference
 
     def update_weightings(self)-> float:
-
-        weighting_matrix = np.zeros((self.N, self.N))
-        for i in self.list_people:
-            for j in self.list_people:
-                if (
-                    j in self.ego_networks[i]
-                ):  # no self interaction (included in the min requiremetn)
-                    weighting_matrix[i][j] = self.calc_alpha(i, j)
+        culture_list = np.array([x.culture for x in self.agent_list])
+        difference_matrix = np.subtract.outer(culture_list, culture_list)
+        alpha = (1 - 0.5*np.abs(difference_matrix))
+        diagonal = self.adjacency_matrix*alpha
+        norm_weighting_matrix = self.normlize_matrix(diagonal)
 
         if self.save_data:
-            norm_weighting_matrix = self.normlize_matrix(weighting_matrix)
+            
             total_difference = self.calc_total_weighting_matrix_difference(
                 self.weighting_matrix, norm_weighting_matrix
             )
-
-            # set the new weightign matrix
-            self.weighting_matrix = norm_weighting_matrix
-
-            return total_difference
+            return norm_weighting_matrix,total_difference
         else:
-            self.weighting_matrix = self.normlize_matrix(weighting_matrix)
-
-            return 0.0#bodge for mypy
+            return norm_weighting_matrix,0#bodge for mypy
 
     def calc_total_emissions(self) -> int:
         return sum([x.carbon_emissions for x in self.agent_list])
@@ -276,9 +269,10 @@ class Network:
 
         # update network parameters for next step
         if self.save_data:
-            self.weighting_matrix_convergence = self.update_weightings()
+            self.weighting_matrix,self.weighting_matrix_convergence = self.update_weightings()
         else:
-            self.update_weightings()
+            self.weighting_matrix,__ = self.update_weightings()
+        
 
         self.behavioural_attract_matrix = self.calc_behavioural_attract_matrix()
 

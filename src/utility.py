@@ -17,119 +17,6 @@ def  produceName_SA(parameters_tuples: list) -> str:
         fileName = fileName + "_" + str(i[0]) + "_" + str(i[1]) + "_" + str(i[2])
     return fileName
 
-"""
-def produceName(
-    N,
-    K,
-    prob_wire,
-    steps,
-    delta_t,
-    set_seed,
-    M,
-    culture_var_min,
-    culture_div,
-    nu,
-    eta,
-    alpha_attract,
-    beta_attract,
-    alpha_threshold,
-    beta_threshold,
-    learning_error_scale,
-    carbon_price_policy_start,
-):
-    runName = (
-        "network_"
-        + str(N)
-        + "_"
-        + str(K)
-        + "_"
-        + str(prob_wire)
-        + "_"
-        + str(steps)
-        + "_"
-        + str(delta_t)
-        + "_"
-        + str(set_seed)
-        + "_"
-        + str(M)
-        + "_"
-        + str(culture_var_min)
-        + "_"
-        + str(culture_div)
-        + "_"
-        + str(nu)
-        + "_"
-        + str(eta)
-        + "_"
-        + str(alpha_attract)
-        + "_"
-        + str(beta_attract)
-        + "_"
-        + str(alpha_threshold)
-        + "_"
-        + str(beta_threshold)
-        + "_"
-        + str(learning_error_scale)
-        + "_"
-        + str(carbon_price_policy_start)
-    )
-    fileName = "results/" + runName
-    return fileName
-
-
-def produceName_random(
-    N,
-    K,
-    prob_wire,
-    delta_t,
-    M,
-    culture_var_min,
-    culture_div,
-    nu,
-    eta,
-    alpha_attract,
-    beta_attract,
-    alpha_threshold,
-    beta_threshold,
-    learning_error_scale,
-    carbon_price_policy_start,
-):
-    runName = (
-        "multirun_random_network_"
-        + str(N)
-        + "_"
-        + str(K)
-        + "_"
-        + str(prob_wire)
-        + "_"
-        + str(delta_t)
-        + "_"
-        + str(M)
-        + "_"
-        + str(culture_var_min)
-        + "_"
-        + str(culture_div)
-        + "_"
-        + str(nu)
-        + "_"
-        + str(eta)
-        + "_"
-        + str(alpha_attract)
-        + "_"
-        + str(beta_attract)
-        + "_"
-        + str(alpha_threshold)
-        + "_"
-        + str(beta_threshold)
-        + "_"
-        + str(learning_error_scale)
-        + "_"
-        + str(carbon_price_policy_start)
-    )
-    fileName = "results/" + runName
-    return fileName
-"""
-
 def createFolder(fileName: str) -> str:
     # print(fileName)
     # check for resutls folder
@@ -199,7 +86,7 @@ def saveDataDict(flatData: list, dataSaveList: list) -> dict:
             dataDict[v].append(
                 eval("flatData[i].history_" + v)
             )  # work out variable name and append this data usign eval to ge the variable
-    print("JJSJSJS",dataDict)
+    #print("JJSJSJS",dataDict)
 
     return dataDict
 
@@ -227,6 +114,7 @@ def save_behaviours(data: Network, steps: int, N: int, M: int) -> dict:
     # steps = steps + 1# include zeroth step BODGE!!!
     # print("steps",steps)
     dataDict = {}
+    #print(steps, N, M)
     data_behaviour_value = np.zeros([steps, N, M])
     data_behaviour_attract = np.zeros([steps, N, M])
     data_behaviour_threshold = np.zeros([steps, N, M])

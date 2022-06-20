@@ -1,6 +1,5 @@
 from behaviour import Behaviour
 import numpy.typing as npt
-import numpy as np
 
 class Individual:
 

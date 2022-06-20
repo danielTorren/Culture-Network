@@ -29,54 +29,62 @@ import time
 import numpy as np
 
 # Params
+# fixed_params = [opinion_dynamics,save_data, time_steps_max, delta_t]
+#[("phi_list_lower",0,0.7),("phi_list_upper",0.7,1),("N",50,500),("M",1,10),("K",2,50),("prob_rewire",0.001,0.5), ("set_seed",0,10000), ("culture_momentum",0,20),("learning_error_scale",0,0.5),("alpha_attract",0.1,10),("beta_attract",0.1,10),("alpha_threshold",0.1,10),("beta_threshold",0.1,10)]
+
+
 save_data = True
 opinion_dynamics = "DEGROOT"  # "SELECT"
-K = 10  # k nearest neighbours INTEGER
-M = 5  # number of behaviours
-N = 100  # number of agents
-total_time = 1
+K = 80  # k nearest neighbours INTEGER
+M = 3  # number of behaviours
+N = 500  # number of agents
+total_time = 100
 
-alpha_attract = 8  ##inital distribution parameters - doing the inverse inverts it!
-beta_attract = 2
-alpha_threshold = 2
-beta_threshold = 8
+alpha_attract = 1  ##inital distribution parameters - doing the inverse inverts it!
+beta_attract = 1
+alpha_threshold = 1
+beta_threshold = 1
 delta_t = 0.1  # time step size
 time_steps_max = int(
     total_time / delta_t
 )  # number of time steps max, will stop if culture converges
 culture_momentum = 5
 set_seed = 1  ##reproducibility INTEGER
-np.random.seed(set_seed)
-phi_list = np.linspace(0.9, 1, num=M)
-carbon_emissions = np.linspace(0.5, 1, num=M)
-np.random.shuffle(phi_list)
-np.random.shuffle(carbon_emissions)
+#np.random.seed(set_seed)
+#phi_list = np.linspace(0.9, 1, num=M)
+#carbon_emissions = np.linspace(0.5, 1, num=M)
+#np.random.shuffle(phi_list)
+#np.random.shuffle(carbon_emissions)
+phi_list_lower,phi_list_upper = 0.8,1
 # print("phi carbon = ",phi_list,carbon_emissions)
 prob_rewire = 0.1  # re-wiring probability?
 culture_momentum = 1  # real time over which culture is calculated for INTEGER
 learning_error_scale = 0.01  # 1 standard distribution is 2% error
 
-params = [
-    opinion_dynamics,
-    save_data,
-    time_steps_max,
-    M,
-    N,
-    phi_list,
-    carbon_emissions,
-    delta_t,
-    K,
-    prob_rewire,
-    set_seed,
-    culture_momentum,
-    learning_error_scale,
-    alpha_attract,
-    beta_attract,
-    alpha_threshold,
-    beta_threshold,
-]
+#params = [opinion_dynamics,save_data, time_steps_max, delta_t,phi_list_lower,phi_list_upper,N,M,K,prob_rewire,set_seed,culture_momentum,learning_error_scale,alpha_attract,beta_attract,alpha_threshold,beta_threshold]
 
-params_name = [
+
+params = {
+    "opinion_dynamics": opinion_dynamics,
+    "save_data": save_data, 
+    "time_steps_max": time_steps_max, 
+    "delta_t": delta_t,
+    "phi_list_lower": phi_list_lower,
+    "phi_list_upper": phi_list_upper,
+    "N": N,
+    "M": M,
+    "K": K,
+    "prob_rewire": prob_rewire,
+    "set_seed": set_seed,
+    "culture_momentum": culture_momentum,
+    "learning_error_scale": learning_error_scale,
+    "alpha_attract": alpha_attract,
+    "beta_attract": beta_attract,
+    "alpha_threshold": alpha_threshold,
+    "beta_threshold": beta_threshold
+}
+
+params_name = [#THOSE USEd to create the save list?
     opinion_dynamics,
     time_steps_max,
     M,
@@ -91,22 +99,6 @@ params_name = [
     beta_attract,
     alpha_threshold,
     beta_threshold,
-]
-paramList = [
-    "opinion_dynamics",
-    "time_steps_max",
-    "M",
-    "N",
-    "delta_t",
-    "K",
-    "prob_rewire",
-    "set_seed",
-    "culture_momentum",
-    "learning_error_scale",
-    "alpha_attract",
-    "beta_attract",
-    "alpha_threshold",
-    "beta_threshold"
 ]
 
 # SAVING DATA
@@ -135,6 +127,22 @@ to_save_list = [
 ]
 
 # LOAD DATA
+paramList = [
+    "opinion_dynamics",
+    "time_steps_max",
+    "M",
+    "N",
+    "delta_t",
+    "K",
+    "prob_rewire",
+    "set_seed",
+    "culture_momentum",
+    "learning_error_scale",
+    "alpha_attract",
+    "beta_attract",
+    "alpha_threshold",
+    "beta_threshold"
+]
 loadBooleanCSV = [
     "individual_culture",
     "individual_carbon_emissions",
@@ -225,20 +233,20 @@ if __name__ == "__main__":
             num_counts,
             dpi_save,
         )
-        #plot_culture_timeseries(FILENAME, Data, dpi_save)
-        #plot_value_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save)
-        # plot_threshold_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save)
-        #plot_attract_timeseries(FILENAME, Data, nrows_behave, ncols_behave, dpi_save)
+        plot_culture_timeseries(FILENAME, Data, dpi_save)
+        plot_value_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save)
+        #plot_threshold_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save)
+        plot_attract_timeseries(FILENAME, Data, nrows_behave, ncols_behave, dpi_save)
         # plot_carbon_price_timeseries(FILENAME,Data,dpi_save)
-        #plot_total_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
-        #plot_av_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
-        #plot_weighting_matrix_convergence_timeseries(FILENAME, Data, dpi_save)
-        #plot_cultural_range_timeseries(FILENAME, Data, dpi_save)
-        # plot_average_culture_timeseries(FILENAME,Data,dpi_save)
+        plot_total_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
+        plot_av_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
+        plot_weighting_matrix_convergence_timeseries(FILENAME, Data, dpi_save)
+        plot_cultural_range_timeseries(FILENAME, Data, dpi_save)
+        plot_average_culture_timeseries(FILENAME,Data,dpi_save)
 
         ###PRINTS
-        # prints_weighting_matrix(FILENAME,Data,cmap_weighting,nrows,ncols,frames_list,round_dec,dpi_save)
-        # prints_behavioural_matrix(FILENAME,Data,cmap,nrows,ncols,frames_list,round_dec,dpi_save)
+        prints_weighting_matrix(FILENAME,Data,cmap_weighting,nrows,ncols,frames_list,round_dec,dpi_save)
+        prints_behavioural_matrix(FILENAME,Data,cmap,nrows,ncols,frames_list,round_dec,dpi_save)
         # prints_culture_network(FILENAME,Data,layout,cmap,node_size,nrows,ncols,log_norm,frames_list,round_dec,dpi_save)
 
         ###ANIMATIONS

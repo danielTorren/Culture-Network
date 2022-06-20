@@ -9,12 +9,13 @@ from SALib.plotting.morris import horizontal_bar_plot
 from utility import  produceName_SA,createFolderSA
 
 if __name__ == "__main__":
-    N_samples = 128  # 1024
+    N_samples = 32  # 1024
     
     # variable parameters
-    variable_parameters = [("K",2,50),("prob_rewire",0.001,0.5), ("set_seed",0,10000), ("culture_momentum",0,20),("learning_error_scale",0,0.5),("alpha_attract",0.1,10),("beta_attract",0.1,10),("alpha_threshold",0.1,10),("beta_threshold",0.1,10)]
+    variable_parameters = [("phi_list_lower",0,0.7),("phi_list_upper",0.7,1),("N",50,500),("M",1,10),("K",2,50),("prob_rewire",0.001,0.5), ("set_seed",0,10000), ("culture_momentum",0,20),("learning_error_scale",0,0.5),("alpha_attract",0.1,10),("beta_attract",0.1,10),("alpha_threshold",0.1,10),("beta_threshold",0.1,10)]
     D_vars = len(variable_parameters)
     samples = N_samples * (D_vars + 2)
+    #print("samples",samples)
     names_list = [x[0] for x in variable_parameters]
     bounds_list = [[x[1],x[2]] for x in variable_parameters]
     #print(D_vars,names_list,bounds_list)
@@ -27,15 +28,15 @@ if __name__ == "__main__":
     # Fixed params
     save_data = False
     opinion_dynamics = "DEGROOT"  # "SELECT"
-    K = 20  # k nearest neighbours INTEGER
-    M = 3  # number of behaviours
-    N = 100  # number of agents
+    #K = 20  # k nearest neighbours INTEGER
+    #M = 3  # number of behaviours
+    #N = 100  # number of agents
     set_seed = 1  ##reproducibility INTEGER
     np.random.seed(set_seed)
-    phi_list = np.linspace(0.9, 1, num=M)
-    carbon_emissions = np.linspace(0.5, 1, num=M)
-    np.random.shuffle(phi_list)
-    np.random.shuffle(carbon_emissions)
+    #phi_list = #np.linspace(0.9, 1, num=M)
+    #carbon_emissions = []#np.linspace(0.5, 1, num=M)
+    
+    #np.random.shuffle(carbon_emissions)
     #alpha_attract = 2  ##inital distribution parameters - doing the inverse inverts it!
     #beta_attract = 8
     #alpha_threshold = 8
@@ -53,15 +54,15 @@ if __name__ == "__main__":
         opinion_dynamics,
         save_data,
         time_steps_max,
-        M,
-        N,
-        phi_list,
-        carbon_emissions,
-        delta_t,
+        delta_t
     ]
+            #M,
+        #N,
+        #phi_list,
+        #carbon_emissions,
 
     #fileName = produceName_SA(variable_parameters)
-    fileName = "results/SA_test"
+    fileName = "results/SA_test_lots"
     createFolderSA(fileName)
 
     time_per_step = 0.02034465771507133
@@ -79,7 +80,7 @@ if __name__ == "__main__":
     print("start_time =", time.ctime(time.time()))
     for i, X in enumerate(param_values):
         social_network = generate_data(list(fixed_params) + list(X))
-        Y[i] = social_network.total_carbon_emissions
+        Y[i] = social_network.total_carbon_emissions/(social_network.N*social_network.M)
     # print(Y)
     time_taken = time.time() - start_time
     print(

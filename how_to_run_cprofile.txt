@@ -1,0 +1,2 @@
+1. in command line to generatre the program.prof file:      python -m cProfile -o Results/program.prof src/profile.py
+2. create the snake viz environment: snakeviz Results/program.prof
