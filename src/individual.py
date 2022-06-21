@@ -1,6 +1,5 @@
 from behaviour import Behaviour
 import numpy.typing as npt
-
 class Individual:
 
     """
@@ -51,12 +50,9 @@ class Individual:
             self.av_behaviour_list.append(self.av_behaviour)
 
     def calc_culture(self) -> float:
-        total_culture = 0
-        for i in self.av_behaviour_list:
-            total_culture += i
-        av_culture = total_culture / self.culture_momentum
-        #print("JOJKJ",type(av_culture))
-        return av_culture
+        self.update_av_behaviour_list(self)
+        return sum(self.av_behaviour_list)/ self.culture_momentum
+
 
     def init_calc_carbon_emissions(self) -> float:
         total_emissions = 0
@@ -104,7 +100,7 @@ class Individual:
         self.carbon_emissions, self.av_behaviour = self.behaviours_next_step(
             social_component_behaviours
         )
-        self.update_av_behaviour_list()
         self.culture = self.calc_culture()
+
         if self.save_data:
             self.save_data_individual()

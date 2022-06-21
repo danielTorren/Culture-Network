@@ -221,7 +221,6 @@ class Network:
         norm_weighting_matrix = self.normlize_matrix(diagonal)
 
         if self.save_data:
-            
             total_difference = self.calc_total_weighting_matrix_difference(
                 self.weighting_matrix, norm_weighting_matrix
             )

@@ -33,7 +33,7 @@ import numpy as np
 #[("phi_list_lower",0,0.7),("phi_list_upper",0.7,1),("N",50,500),("M",1,10),("K",2,50),("prob_rewire",0.001,0.5), ("set_seed",0,10000), ("culture_momentum",0,20),("learning_error_scale",0,0.5),("alpha_attract",0.1,10),("beta_attract",0.1,10),("alpha_threshold",0.1,10),("beta_threshold",0.1,10)]
 
 
-save_data = True
+save_data = False
 opinion_dynamics = "DEGROOT"  # "SELECT"
 K = 80  # k nearest neighbours INTEGER
 M = 3  # number of behaviours
@@ -188,8 +188,8 @@ num_counts = 100000
 dpi_save = 1200
 
 RUN = True
-PLOT = True
-SHOW_PLOT = True
+PLOT = False
+SHOW_PLOT = False
 
 if __name__ == "__main__":
 

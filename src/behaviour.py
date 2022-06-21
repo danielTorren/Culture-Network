@@ -24,15 +24,12 @@ class Behaviour:
             self.history_threshold = [self.threshold]
 
     def calc_behaviour(self) -> float:
-        value = self.attract - self.threshold
-        return value
+        return self.attract - self.threshold
 
     def update_attract(self, social_learing: float):
-        # print("attract cahnge: ",self.attract,social_learing,self.delta_t*(self.phi*(self.attract - social_learing)))
         self.attract += self.delta_t * (
             social_learing
-        )  # self.delta_t*(self.phi*(self.attract - social_learing))
-        # quit()
+        )  
 
     def save_data_behaviour(self):
         self.history_value.append(self.value)

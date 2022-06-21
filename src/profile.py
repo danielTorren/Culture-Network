@@ -1,4 +1,5 @@
 from network import Network
+import time
 
 if __name__ == "__main__":
     save_data = False
@@ -23,6 +24,9 @@ if __name__ == "__main__":
     learning_error_scale = 0.01  # 1 standard distribution is 2% error
 
 
+    #CURRENT RECORD: 0.3097529411315918
+    #DO NOT TOUCH PARAMETER VALUES
+
     params = {
         "opinion_dynamics": opinion_dynamics,
         "save_data": save_data, 
@@ -42,7 +46,7 @@ if __name__ == "__main__":
         "alpha_threshold": alpha_threshold,
         "beta_threshold": beta_threshold
     }
-
+    #start_time = time.time()
     social_network = Network(params)
     
     #### RUN TIME STEPS
@@ -50,5 +54,10 @@ if __name__ == "__main__":
     while time_counter < params["time_steps_max"]:
         social_network.next_step()
         time_counter += 1
+    
+    #print(
+    #    "SIMULATION time taken: %s minutes" % ((time.time() - start_time) / 60),
+    #    "or %s s" % ((time.time() - start_time)),
+    #)
 
  
