@@ -110,6 +110,7 @@ def save_behaviours(data: Network, steps: int, N: int, M: int) -> dict:
     data_behaviour_value = np.zeros([steps, N, M])
     data_behaviour_attract = np.zeros([steps, N, M])
     data_behaviour_threshold = np.zeros([steps, N, M])
+    data_behaviour_information_provision = np.zeros([steps, N, M])
     # print("steps",steps,N,M)
     for t in range(steps):
         for n in range(N):
@@ -123,10 +124,14 @@ def save_behaviours(data: Network, steps: int, N: int, M: int) -> dict:
                 data_behaviour_threshold[t][n][m] = (
                     data.agent_list[n].history_behaviour_thresholds[t][m]
                 )
+                data_behaviour_information_provision[t][n][m] = (
+                    data.agent_list[n].history_information_provision[t][m]
+                )
 
     dataDict["value"] = data_behaviour_value
     dataDict["attract"] = data_behaviour_attract
     dataDict["threshold"] = data_behaviour_threshold
+    dataDict["information_provision"] = data_behaviour_information_provision
 
     # print(np.shape(dataDict["value"]))
 
