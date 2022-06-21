@@ -1,4 +1,4 @@
-from network_alt import Network
+from network import Network
 import time
 
 if __name__ == "__main__":
