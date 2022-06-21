@@ -1,6 +1,6 @@
 import numpy as np
 import networkx as nx
-from individual import Individual
+from individuals_alt import Individual_ALT
 import numpy.typing as npt
 
 class Network:
@@ -25,8 +25,8 @@ class Network:
         self.M = int(round(parameters["M"]))
         self.N = int(round(parameters["N"]))
 
-        self.phi_list = np.linspace(parameters["phi_list_lower"], parameters["phi_list_upper"], num=self.M)
-        np.random.shuffle(self.phi_list)
+        self.phi_array = np.linspace(parameters["phi_list_lower"], parameters["phi_list_upper"], num=self.M)
+        np.random.shuffle(self.phi_array)
         
         self.carbon_emissions = [1]*self.M#parameters[6]
         self.delta_t = parameters["delta_t"]
@@ -49,7 +49,6 @@ class Network:
         self.t = 0
         self.list_people = range(self.N)
 
-        
         # create network
         (
             self.adjacency_matrix,
@@ -61,9 +60,11 @@ class Network:
         # calc_netork density
         # self.calc_network_density()
         # create indviduals
-        self.init_data_behaviours = self.generate_init_data_behaviours()
+        #self.init_data_behaviours = self.generate_init_data_behaviours_alt()
+        self.attract_matrix_init, self.threshold_matrix_init = self.generate_init_data_behaviours_alt()
         self.agent_list = self.create_agent_list()
-        self.behavioural_attract_matrix = self.calc_behavioural_attract_matrix()
+
+        self.behavioural_attract_matrix = self.calc_behavioural_attract_matrix()#need to leave outside as its a thing being saved, why is it being saved???
 
         if self.opinion_dyanmics == "SELECT":
             self.social_component_matrix = self.calc_social_component_matrix_alt()
@@ -156,32 +157,43 @@ class Network:
         ]
         return init_data_behaviours
 
+    def generate_init_data_behaviours_alt(self) -> tuple:
+        ###init_attract, init_threshold,carbon_emissions
+        attract_matrix = np.asarray([np.random.beta(self.alpha_attract, self.beta_attract, size=self.M) for n in self.list_people])
+        threshold_matrix = np.asarray(
+            [
+                np.random.beta(self.alpha_threshold, self.beta_threshold, size=self.M)
+                for n in self.list_people
+            ]
+        )
+        return np.asarray(attract_matrix),np.asarray(threshold_matrix)
+
     def create_agent_list(self) -> list:
         agent_list = [
-            Individual(
-                self.init_data_behaviours[i],
+            Individual_ALT(
+                self.attract_matrix_init[i],
+                self.threshold_matrix_init[i],
                 self.delta_t,
                 self.culture_momentum,
                 self.t,
                 self.M,
                 self.save_data,
-                self.phi_list
+                self.carbon_emissions
             )
             for i in self.list_people
         ]
         return agent_list
 
     def calc_behavioural_attract_matrix(self) ->  npt.NDArray:
-        behavioural_attract_matrix = np.array(
-            [
-                [n.behaviour_list[m].attract for m in range(self.M)]
-                for n in self.agent_list
-            ]
-        )
+        behavioural_attract_matrix = np.array([n.attracts for n in self.agent_list])
         return behavioural_attract_matrix
+    
+    def calc_behavioural_attract_matrix_re_order(self,re_order_list) ->  npt.NDArray:
+        behavioural_attract_matrix_k = np.array([k.attracts for k in re_order_list])
+        return behavioural_attract_matrix_k
 
     def calc_social_component_matrix_degroot(self) ->  npt.NDArray:
-        return self.phi_list*(
+        return self.phi_array*(
             np.matmul(self.weighting_matrix, self.behavioural_attract_matrix)
             + np.random.normal(
                 loc=0, scale=self.learning_error_scale, size=(self.N, self.M)
@@ -195,13 +207,8 @@ class Network:
             for n in self.list_people
         ]
         re_order_list = [self.agent_list[k] for k in k_list]
-        behavioural_attract_matrix_k = np.array(
-            [
-                [k.behaviour_list[m].attract for m in range(self.M)]
-                for k in re_order_list
-            ]
-        )
-        return self.phi_list*(
+        behavioural_attract_matrix_k = self.calc_behavioural_attract_matrix_re_order(re_order_list)
+        return self.phi_array*(
             behavioural_attract_matrix_k
             + np.random.normal(
                 loc=0, scale=self.learning_error_scale, size=(self.N, self.M)
@@ -222,7 +229,6 @@ class Network:
         norm_weighting_matrix = self.normlize_matrix(diagonal)
 
         if self.save_data:
-            
             total_difference = self.calc_total_weighting_matrix_difference(
                 self.weighting_matrix, norm_weighting_matrix
             )
@@ -274,12 +280,10 @@ class Network:
         else:
             self.weighting_matrix,__ = self.update_weightings()
         
-
-        self.behavioural_attract_matrix = self.calc_behavioural_attract_matrix()
-
         if self.opinion_dyanmics == "SELECT":
             self.social_component_matrix = self.calc_social_component_matrix_alt()
         elif self.opinion_dyanmics == "DEGROOT":
+            self.behavioural_attract_matrix = self.calc_behavioural_attract_matrix()
             self.social_component_matrix = self.calc_social_component_matrix_degroot()
         else:
             raise Exception("Invalid opinion dynamics model")

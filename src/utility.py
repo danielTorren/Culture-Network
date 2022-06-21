@@ -141,21 +141,36 @@ def save_behaviours(data: Network, steps: int, N: int, M: int) -> dict:
 
     return dataDict
 
+def save_behaviours(data: Network, steps: int, N: int, M: int) -> dict:
+    #print("YO", type(data))
+    # steps = steps + 1# include zeroth step BODGE!!!
+    # print("steps",steps)
+    dataDict = {}
+    #print(steps, N, M)
+    data_behaviour_value = np.zeros([steps, N, M])
+    data_behaviour_attract = np.zeros([steps, N, M])
+    data_behaviour_threshold = np.zeros([steps, N, M])
+    # print("steps",steps,N,M)
+    for t in range(steps):
+        for n in range(N):
+            for m in range(M):
+                data_behaviour_value[t][n][m] = (
+                    data.agent_list[n].history_behaviour_values[t][m]
+                )
+                data_behaviour_attract[t][n][m] = (
+                    data.agent_list[n].history_behaviour_attracts[t][m]
+                )
+                data_behaviour_threshold[t][n][m] = (
+                    data.agent_list[n].history_behaviour_thresholds[t][m]
+                )
 
-"""
+    dataDict["value"] = data_behaviour_value
+    dataDict["attract"] = data_behaviour_attract
+    dataDict["threshold"] = data_behaviour_threshold
 
-def save_behaviours_alt(data,steps, N, M):
-    steps = steps + 1
-    dataDict = {
-
-    "value" : np.asarray( [[[data.agent_list[n].behaviour_list[m].history_value[t] for m in range(M)] for n in range(N)] for t in range(steps)] ) ,
-    "attract" : np.asarray([[[data.agent_list[n].behaviour_list[m].history_attract[t] for m in range(M)] for n in range(N)] for t in range(steps)]  ),
-    "threshold" : np.asarray([[[data.agent_list[n].behaviour_list[m].history_threshold[t] for m in range(M)] for n in range(N)] for t in range(steps)])
-    }
-    print(np.shape(dataDict["value"]))
+    # print(np.shape(dataDict["value"]))
 
     return dataDict
-"""
 
 
 def save_list_array(dataName: str, dataSaveList: list, dataDict: dict, agentClass: str):
@@ -180,7 +195,7 @@ def saveData(
     ####TRANSPOSE STUFF SO THAT ITS AGGREGATED BY TIME STEP NOT INDIVIDUAL
 
     """save data from behaviours"""
-    data_behaviour_array_dict = save_behaviours(data, steps, N, M)
+    data_behaviour_array_dict = save_behaviours_alt(data, steps, N, M)
     # save as array
     save_list_array(
         dataName, data_save_behaviour_array_list, data_behaviour_array_dict, "behaviour"

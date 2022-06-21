@@ -8,13 +8,13 @@ class Individual:
     """
 
     def __init__(
-        self, init_data_behaviours: list, delta_t: float, culture_momentum: int, t: float, M: int, save_data: bool
+        self, init_data_behaviours: list, delta_t: float, culture_momentum: int, t: float, M: int, save_data: bool, carbon_intensive_list: list
     ):
         self.M = M
         self.t = t
         self.delta_t = delta_t
         self.save_data = save_data
-
+        self.carbon_intensive_list = carbon_intensive_list
         self.behaviour_list = self.create_behaviours(init_data_behaviours)
 
         self.carbon_emissions = self.init_calc_carbon_emissions()
@@ -50,7 +50,7 @@ class Individual:
             self.av_behaviour_list.append(self.av_behaviour)
 
     def calc_culture(self) -> float:
-        self.update_av_behaviour_list(self)
+        self.update_av_behaviour_list()
         return sum(self.av_behaviour_list)/ self.culture_momentum
 
 
@@ -89,7 +89,17 @@ class Individual:
                 ].carbon_emissions  # calc_carbon_emissions
 
         av_behaviour = total_behaviour / self.M  # calc_behaviour_av
-        return total_emissions, av_behaviour  # calc_carbon_emissions #calc_behaviour_av
+        return total_emissions, av_behaviour  # calc_carbon_emissions #calc_behaviour_a
+
+    def behaviours_next_step_alt(self, social_component_behaviours: npt.NDArray) -> tuple[float, float]:
+        for i in range(self.M):
+
+            self.behaviour_list[i].next_step()  # update_behaviours
+            self.behaviour_list[i].update_attract(
+                social_component_behaviours[i]
+            )  # update_attracts
+
+        return sum(self.carbon_intensive_list[i] for i in range(self.M) if self.behaviour_list[i].value <= 0), sum(self.behaviour_list[i].value for i in range(self.M))/self.M  # calc_carbon_emissions #calc_behaviour_av
 
     def save_data_individual(self):
         self.history_culture.append(self.culture)
@@ -97,7 +107,7 @@ class Individual:
         self.history_carbon_emissions.append(self.carbon_emissions)
 
     def next_step(self, social_component_behaviours: npt.NDArray):
-        self.carbon_emissions, self.av_behaviour = self.behaviours_next_step(
+        self.carbon_emissions, self.av_behaviour = self.behaviours_next_step_alt(
             social_component_behaviours
         )
         self.culture = self.calc_culture()
