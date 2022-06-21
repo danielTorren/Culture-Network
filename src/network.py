@@ -1,6 +1,6 @@
 import numpy as np
 import networkx as nx
-from individuals import Individual_ALT
+from individuals import Individual
 import numpy.typing as npt
 
 class Network:
@@ -11,10 +11,8 @@ class Network:
     """
 
     def __init__(self, parameters:list):
-        # save_data,time_steps_max,M,N,phi_list,carbon_emissions,alpha_attract,beta_attract,alpha_threshold,beta_threshold,delta_t,K,prob_rewire,set_seed,culture_momentum,learning_error_scale
         #print(parameters)
-        #print(parameters)
-        #opinion_dynamics,save_data,time_steps_max,delta_t, ("phi_list_lower",0,0.7),("phi_list_upper",0.7,1)("N",50,500),("M",1,10),("K",2,50),("prob_rewire",0.001,0.5), ("set_seed",0,10000), ("culture_momentum",0,20),("learning_error_scale",0,0.5),("alpha_attract",0.1,10),("beta_attract",0.1,10),("alpha_threshold",0.1,10),("beta_threshold",0.1,10)]
+        
         self.set_seed = int(round(parameters["set_seed"]))
         np.random.seed(
             self.set_seed
@@ -27,6 +25,8 @@ class Network:
 
         self.phi_array = np.linspace(parameters["phi_list_lower"], parameters["phi_list_upper"], num=self.M)
         np.random.shuffle(self.phi_array)
+
+
         
         self.carbon_emissions = [1]*self.M#parameters[6]
         self.delta_t = parameters["delta_t"]
@@ -39,12 +39,16 @@ class Network:
             round(parameters["culture_momentum"]) / self.delta_t
         )  # round due to the sampling method producing floats, lets hope this works
         self.learning_error_scale = parameters["learning_error_scale"]
+
+        self.discount_factor_list = np.linspace(1, 0.1, num=self.culture_momentum)
+
         (
             self.alpha_attract,
             self.beta_attract,
             self.alpha_threshold,
             self.beta_threshold,
         ) = (parameters["alpha_attract"], parameters["beta_attract"], parameters["alpha_threshold"], parameters["beta_threshold"])
+
 
         self.t = 0
         self.list_people = range(self.N)
@@ -57,8 +61,7 @@ class Network:
             self.ego_networks,
             self.neighbours_list,
         ) = self.create_weighting_matrix()
-        # calc_netork density
-        # self.calc_network_density()
+
         # create indviduals
         #self.init_data_behaviours = self.generate_init_data_behaviours_alt()
         self.attract_matrix_init, self.threshold_matrix_init = self.generate_init_data_behaviours_alt()
@@ -67,29 +70,33 @@ class Network:
         self.behavioural_attract_matrix = self.calc_behavioural_attract_matrix()#need to leave outside as its a thing being saved, why is it being saved???
 
         if self.opinion_dyanmics == "SELECT":
-            self.social_component_matrix = self.calc_social_component_matrix_alt()
+            ego_influence = self.calc_ego_influence_alt()
         elif self.opinion_dyanmics == "DEGROOT":
-            self.social_component_matrix = self.calc_social_component_matrix_degroot()
+            ego_influence = self.calc_ego_influence_degroot()
         else:
             raise Exception("Invalid opinion dynamics model")
+
+        self.social_component_matrix = self.calc_social_component_matrix(ego_influence)
 
         self.weighting_matrix,__ = self.update_weightings()  # Should I update the weighting matrix? I feel like it makes sense if its not time dependant.
 
         self.total_carbon_emissions = self.calc_total_emissions()
 
         if self.save_data:
+            # calc_netork density
+            self.calc_network_density()
+
             (
                 self.average_culture,
                 self.cultural_var,
                 self.min_culture,
                 self.max_culture,
-            ) = self.calc_culture()
+            ) = self.calc_network_culture()
             self.weighting_matrix_convergence = (
                 np.nan
             )  # there is no convergence in the first step, to deal with time issues when plotting
 
             self.history_weighting_matrix = [self.weighting_matrix]
-            self.history_behavioural_attract_matrix = [self.behavioural_attract_matrix]
             self.history_social_component_matrix = [self.social_component_matrix]
             self.history_cultural_var = [self.cultural_var]
             self.history_time = [self.t]
@@ -170,7 +177,7 @@ class Network:
 
     def create_agent_list(self) -> list:
         agent_list = [
-            Individual_ALT(
+            Individual(
                 self.attract_matrix_init[i],
                 self.threshold_matrix_init[i],
                 self.delta_t,
@@ -178,7 +185,8 @@ class Network:
                 self.t,
                 self.M,
                 self.save_data,
-                self.carbon_emissions
+                self.carbon_emissions,
+                self.discount_factor_list
             )
             for i in self.list_people
         ]
@@ -187,34 +195,16 @@ class Network:
     def calc_behavioural_attract_matrix(self) ->  npt.NDArray:
         behavioural_attract_matrix = np.array([n.attracts for n in self.agent_list])
         return behavioural_attract_matrix
-    
-    def calc_behavioural_attract_matrix_re_order(self,re_order_list) ->  npt.NDArray:
-        behavioural_attract_matrix_k = np.array([k.attracts for k in re_order_list])
-        return behavioural_attract_matrix_k
 
-    def calc_social_component_matrix_degroot(self) ->  npt.NDArray:
-        return self.phi_array*(
-            np.matmul(self.weighting_matrix, self.behavioural_attract_matrix)
-            + np.random.normal(
-                loc=0, scale=self.learning_error_scale, size=(self.N, self.M)
-            )
-            - self.behavioural_attract_matrix
-        )
+    def calc_ego_influence_degroot(self) ->  npt.NDArray:
+        return np.matmul(self.weighting_matrix, self.behavioural_attract_matrix)
 
-    def calc_social_component_matrix_alt(self) ->  npt.NDArray:
-        k_list = [
-            np.random.choice(self.list_people, 1, p=self.weighting_matrix[n])[0]
-            for n in self.list_people
-        ]
-        re_order_list = [self.agent_list[k] for k in k_list]
-        behavioural_attract_matrix_k = self.calc_behavioural_attract_matrix_re_order(re_order_list)
-        return self.phi_array*(
-            behavioural_attract_matrix_k
-            + np.random.normal(
-                loc=0, scale=self.learning_error_scale, size=(self.N, self.M)
-            )
-            - self.behavioural_attract_matrix
-        )
+    def calc_ego_influence_alt(self) ->  npt.NDArray:
+        k_list = [np.random.choice(self.list_people, 1, p=self.weighting_matrix[n])[0] for n in self.list_people]#for each indiviudal select a neighbour using the row of the alpha matrix as the probability
+        return np.array([self.agent_list[k].attracts for k in k_list])#make a new NxM where each row is what agent n is going to learn from their selected agent k
+
+    def calc_social_component_matrix(self,ego_influence: npt.NDArray) ->  npt.NDArray:
+        return self.phi_array*(ego_influence + np.random.normal(loc=0, scale=self.learning_error_scale, size=(self.N, self.M)) - self.behavioural_attract_matrix)
 
     def calc_total_weighting_matrix_difference(self, matrix_before: npt.NDArray, matrix_after: npt.NDArray)-> float:
         difference_matrix = np.subtract(matrix_before, matrix_after)
@@ -223,8 +213,11 @@ class Network:
 
     def update_weightings(self)-> float:
         culture_list = np.array([x.culture for x in self.agent_list])
+        #print("culture_list",culture_list)
         difference_matrix = np.subtract.outer(culture_list, culture_list)
+        #print("difference_matrix",difference_matrix)
         alpha = (1 - 0.5*np.abs(difference_matrix))
+        #print("alpha",alpha)
         diagonal = self.adjacency_matrix*alpha
         norm_weighting_matrix = self.normlize_matrix(diagonal)
 
@@ -239,7 +232,7 @@ class Network:
     def calc_total_emissions(self) -> int:
         return sum([x.carbon_emissions for x in self.agent_list])
 
-    def calc_culture(self) ->  tuple[float, float, float, float]:
+    def calc_network_culture(self) ->  tuple[float, float, float, float]:
         culture_list = [x.culture for x in self.agent_list]
         return (
             np.mean(culture_list),
@@ -256,8 +249,9 @@ class Network:
     def save_data_network(self):
         self.history_time.append(self.t)
         self.history_weighting_matrix.append(self.weighting_matrix)
-        self.history_behavioural_attract_matrix.append(self.behavioural_attract_matrix)
+
         self.history_social_component_matrix.append(self.social_component_matrix)
+
         self.history_total_carbon_emissions.append(self.total_carbon_emissions)
         self.history_weighting_matrix_convergence.append(
             self.weighting_matrix_convergence
@@ -280,13 +274,16 @@ class Network:
         else:
             self.weighting_matrix,__ = self.update_weightings()
         
+        self.behavioural_attract_matrix = self.calc_behavioural_attract_matrix()
+
         if self.opinion_dyanmics == "SELECT":
-            self.social_component_matrix = self.calc_social_component_matrix_alt()
+            ego_influence = self.calc_ego_influence_alt()
         elif self.opinion_dyanmics == "DEGROOT":
-            self.behavioural_attract_matrix = self.calc_behavioural_attract_matrix()
-            self.social_component_matrix = self.calc_social_component_matrix_degroot()
+            ego_influence = self.calc_ego_influence_degroot()
         else:
             raise Exception("Invalid opinion dynamics model")
+
+        self.social_component_matrix = self.calc_social_component_matrix(ego_influence)
 
         self.total_carbon_emissions = self.calc_total_emissions()
         # print(self.save_data)
@@ -296,5 +293,5 @@ class Network:
                 self.cultural_var,
                 self.min_culture,
                 self.max_culture,
-            ) = self.calc_culture()
+            ) = self.calc_network_culture()
             self.save_data_network()

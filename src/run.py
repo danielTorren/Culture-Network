@@ -8,7 +8,11 @@ def generate_data(parameters: dict) -> Network:
     ##params = [save_data,time_steps_max,M,N,phi_list,carbon_emissions,alpha_attract,beta_attract,alpha_threshold,beta_threshold,delta_t,K,prob_rewire,set_seed,culture_momentum,learning_error_scale]
     #rint(parameters)
     #if parameters["save_data"]:
-    start_time = time.time()
+
+    print_simu = True
+    
+    if print_simu:
+        start_time = time.time()
     # print("start_time =", time.ctime(time.time()))
     social_network = Network(parameters)
     
@@ -18,10 +22,11 @@ def generate_data(parameters: dict) -> Network:
         social_network.next_step()
         time_counter += 1
     #if parameters["save_data"]:
-    print(
-        "SIMULATION time taken: %s minutes" % ((time.time() - start_time) / 60),
-        "or %s s" % ((time.time() - start_time)),
-    )
+    if print_simu:
+        print(
+            "SIMULATION time taken: %s minutes" % ((time.time() - start_time) / 60),
+            "or %s s" % ((time.time() - start_time)),
+        )
     return social_network
 
 

@@ -21,6 +21,8 @@ from plot import (
     plot_cultural_range_timeseries,
     plot_average_culture_timeseries,
     plot_beta_distributions,
+    print_network_social_component_matrix,
+    animate_network_social_component_matrix,
 )
 from utility import loadData, get_run_properties, frame_distribution_prints
 import matplotlib.pyplot as plt
@@ -34,35 +36,28 @@ import numpy as np
 
 
 save_data = True
-opinion_dynamics = "DEGROOT"  # "SELECT"
-K = 80  # k nearest neighbours INTEGER
+opinion_dynamics =  "DEGROOT" #  "DEGROOT"  "SELECT"
+
+K = 10  # k nearest neighbours INTEGER
 M = 3  # number of behaviours
-N = 500  # number of agents
-total_time = 100
+N = 100  # number of agents
+total_time = 10
+delta_t = 0.01  # time step size
+
+prob_rewire = 0.1  # re-wiring probability?
 
 alpha_attract = 1  ##inital distribution parameters - doing the inverse inverts it!
 beta_attract = 1
-alpha_threshold = 1
-beta_threshold = 1
-delta_t = 0.1  # time step size
+alpha_threshold = 8
+beta_threshold = 2
 time_steps_max = int(
     total_time / delta_t
 )  # number of time steps max, will stop if culture converges
 culture_momentum = 5
 set_seed = 1  ##reproducibility INTEGER
-#np.random.seed(set_seed)
-#phi_list = np.linspace(0.9, 1, num=M)
-#carbon_emissions = np.linspace(0.5, 1, num=M)
-#np.random.shuffle(phi_list)
-#np.random.shuffle(carbon_emissions)
 phi_list_lower,phi_list_upper = 0.8,1
-# print("phi carbon = ",phi_list,carbon_emissions)
-prob_rewire = 0.1  # re-wiring probability?
 culture_momentum = 1  # real time over which culture is calculated for INTEGER
 learning_error_scale = 0.01  # 1 standard distribution is 2% error
-
-#params = [opinion_dynamics,save_data, time_steps_max, delta_t,phi_list_lower,phi_list_upper,N,M,K,prob_rewire,set_seed,culture_momentum,learning_error_scale,alpha_attract,beta_attract,alpha_threshold,beta_threshold]
-
 
 params = {
     "opinion_dynamics": opinion_dynamics,
@@ -116,7 +111,6 @@ data_save_network_list = [
 ]  # "carbon_price"
 data_save_network_array_list = [
     "weighting_matrix",
-    "behavioural_attract_matrix",
     "social_component_matrix",
 ]
 to_save_list = [
@@ -157,7 +151,6 @@ loadBooleanCSV = [
 loadBooleanArray = [
     "network_weighting_matrix",
     "network_social_component_matrix",
-    "network_behavioural_attract_matrix",
     "behaviour_value",
     "behaviour_threshold",
     "behaviour_attract",
@@ -188,18 +181,18 @@ num_counts = 100000
 dpi_save = 1200
 
 RUN = True
-PLOT = False
-SHOW_PLOT = False
+PLOT = True
+SHOW_PLOT = True
 
 if __name__ == "__main__":
 
     if RUN == False:
-        FILENAME = "results/network_100_20_0.2_1001_0.01_5_3_0.01_0_1_1_2_8_8_2_0.02"
+        FILENAME = "results/_DEGROOT_1000_3_50_0.01_10_0.1_1_1_0.01_1_1_8_2"
     else:
         # start_time = time.time()
         # print("start_time =", time.ctime(time.time()))
         ###RUN MODEL
-        print("start_time =", time.ctime(time.time()))
+        #print("start_time =", time.ctime(time.time()))
         FILENAME = run(params, to_save_list, params_name)
         # print ("RUN time taken: %s minutes" % ((time.time()-start_time)/60), "or %s s"%((time.time()-start_time)))
 
@@ -218,38 +211,29 @@ if __name__ == "__main__":
         ]  # for some reason pandas does weird shit
 
         frames_proportion = int(round(len(Data["network_time"]) / 2))
-        frames_list = frame_distribution_prints(
-            Data["network_time"], scale_factor, frame_num
-        )
+        frames_list = frame_distribution_prints(Data["network_time"], scale_factor, frame_num)
 
         ###PLOTS
-        plot_beta_distributions(
-            FILENAME,
-            alpha_attract,
-            beta_attract,
-            alpha_threshold,
-            beta_threshold,
-            bin_num,
-            num_counts,
-            dpi_save,
-        )
-        plot_culture_timeseries(FILENAME, Data, dpi_save)
-        plot_value_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save)
+        #plot_beta_distributions(FILENAME,alpha_attract,beta_attract,alpha_threshold,beta_threshold,bin_num,num_counts,dpi_save,)
+        #plot_culture_timeseries(FILENAME, Data, dpi_save)
+        #plot_value_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save)
         #plot_threshold_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save)
-        plot_attract_timeseries(FILENAME, Data, nrows_behave, ncols_behave, dpi_save)
+        #plot_attract_timeseries(FILENAME, Data, nrows_behave, ncols_behave, dpi_save)
         # plot_carbon_price_timeseries(FILENAME,Data,dpi_save)
-        plot_total_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
-        plot_av_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
-        plot_weighting_matrix_convergence_timeseries(FILENAME, Data, dpi_save)
-        plot_cultural_range_timeseries(FILENAME, Data, dpi_save)
-        plot_average_culture_timeseries(FILENAME,Data,dpi_save)
+        #plot_total_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
+        #plot_av_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
+        #plot_weighting_matrix_convergence_timeseries(FILENAME, Data, dpi_save)
+        #plot_cultural_range_timeseries(FILENAME, Data, dpi_save)
+        #plot_average_culture_timeseries(FILENAME,Data,dpi_save)
 
         ###PRINTS
-        prints_weighting_matrix(FILENAME,Data,cmap_weighting,nrows,ncols,frames_list,round_dec,dpi_save)
-        prints_behavioural_matrix(FILENAME,Data,cmap,nrows,ncols,frames_list,round_dec,dpi_save)
-        # prints_culture_network(FILENAME,Data,layout,cmap,node_size,nrows,ncols,log_norm,frames_list,round_dec,dpi_save)
+        #prints_weighting_matrix(FILENAME,Data,cmap_weighting,nrows,ncols,frames_list,round_dec,dpi_save)
+        #prints_behavioural_matrix(FILENAME,Data,cmap,nrows,ncols,frames_list,round_dec,dpi_save)
+        #prints_culture_network(FILENAME,Data,layout,cmap,node_size,nrows,ncols,log_norm,frames_list,round_dec,dpi_save)
+        #print_network_social_component_matrix(FILENAME,Data,cmap,nrows,ncols,frames_list,round_dec,dpi_save)
 
         ###ANIMATIONS
+        #animate_network_social_component_matrix(FILENAME,Data,interval,fps,round_dec,cmap)
         # animate_weighting_matrix(FILENAME,Data,interval,fps,round_dec,cmap_weighting)
         # animate_behavioural_matrix(FILENAME,Data,interval,fps,cmap,round_dec)
         # animate_culture_network(FILENAME,Data,layout,cmap,node_size,interval,fps,log_norm,round_dec)

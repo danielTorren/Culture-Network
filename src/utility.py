@@ -261,10 +261,13 @@ def frame_distribution_prints(time_list: list, scale_factor: int, frame_num: int
 
     while len(frames_list) < frame_num:
         select_in = np.random.exponential(scale=scale_factor, size=1)
-        norm_select_in = select_in / max(select)
-        scaled_select = np.ceil(norm_select_in * (len(time_list) - 1))
-        frames_list = list(frames_list + list(scaled_select))
-        # print("in", select_in ,norm_select_in, scaled_select ,frames_list)
+        if select_in > max(select):
+            continue# FIX THIS SO THAT IF A LARGER NUMEBR GETS PRODUCED IT TRIES AGAIN!
+        else:
+            norm_select_in = select_in / max(select)
+            scaled_select = np.ceil(norm_select_in * (len(time_list) - 1))
+            frames_list = list(frames_list + list(scaled_select))
+            # print("in", select_in ,norm_select_in, scaled_select ,frames_list)
 
     # print(frames_list)
     frames_list_int = [int(x) for x in frames_list]

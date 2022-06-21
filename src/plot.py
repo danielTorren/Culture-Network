@@ -162,17 +162,60 @@ def plot_culture_timeseries(FILENAME: str, Data: DataFrame, dpi_save:int):
     f = plotName + "/" + "cultural_evolution.png"
     fig.savefig(f, dpi=dpi_save)
 
+# make animate_network_social_component_matrix
+def animate_network_social_component_matrix(FILENAME: str, Data: DataFrame, interval:int, fps:int, round_dec:int, cmap: Union[LinearSegmentedColormap,str]):
+    
+    def update(i):
+        M = Data["network_social_component_matrix"][i]
+        # print("next frame!",M)        
+        matrice.set_array(M)
+        # Set the title        
+        ax.set_title(
+            "Time= {}".format(round(Data["network_time"][i], round_dec))
+            )
+        return matrice
+
+    fig, ax = plt.subplots()
+
+    matrice = ax.matshow(Data["network_social_component_matrix"][0], cmap=cmap, aspect="auto")
+    ax.set_xlabel("Agent")
+    ax.set_ylabel("Behaviour")
+    #plt.colorbar(matrice)
+    cbar = fig.colorbar(
+        plt.cm.ScalarMappable(cmap=cmap, norm=Normalize(vmin=-1, vmax=1)),
+        ax=ax,
+    )  # This does a mapabble on the fly i think, not sure
+    cbar.set_label("Social Learning")
+
+    ani = animation.FuncAnimation(
+        fig,
+        update,
+        frames=int(Data["time_steps_max"]),
+        repeat_delay=500,
+        interval=interval,
+    )
+
+    # save the video
+    animateName = FILENAME + "/Animations"
+    f = animateName + "/" + "network_social_component_matrix_animation.mp4"
+    writervideo = animation.FFMpegWriter(fps=fps)
+    ani.save(f, writer=writervideo)
 
 # make matrix animation
 def animate_weighting_matrix(FILENAME: str, Data: DataFrame, interval:int, fps:int, round_dec:int, cmap_weighting: Union[LinearSegmentedColormap,str]):
     def update(i):
         M = Data["network_weighting_matrix"][i]
-        # print("next frame!",M)        matrice.set_array(M)
+        # print("next frame!",M)        
+        matrice.set_array(M)
         # Set the title
-        ax.set_title("Time= {}".format(str(round(Data["network_time"][i]), round_dec)))
+        ax.set_title(
+            "Time= {}".format(round(Data["network_time"][i], round_dec))
+            )
         return matrice
 
     fig, ax = plt.subplots()
+    ax.set_xlabel("Agent")
+    ax.set_ylabel("Agent")
     matrice = ax.matshow(Data["network_weighting_matrix"][0], cmap=cmap_weighting)
     plt.colorbar(matrice)
 
@@ -201,7 +244,9 @@ def animate_behavioural_matrix(
         matrice.set_array(M)
 
         # Set the title
-        ax.set_title("Time= {}".format(str(round(Data["network_time"][i]), round_dec)))
+        ax.set_title(
+            "Time= {}".format(round(Data["network_time"][i], round_dec))
+            )
 
         return matrice
 
@@ -306,6 +351,7 @@ def prints_weighting_matrix(
 
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
     # print(frames_list,Data["network_time"],Data["network_weighting_matrix"][20])
+    #print( len(Data["network_weighting_matrix"]),frames_list)
     for i, ax in enumerate(axes.flat):
         # print(i)
         ax.matshow(
@@ -366,6 +412,42 @@ def prints_behavioural_matrix(
 
     plotName = FILENAME + "/Prints"
     f = plotName + "/" + "prints_behavioural_matrix.png"
+    fig.savefig(f, dpi=dpi_save)
+
+def print_network_social_component_matrix(
+    FILENAME: str, Data: DataFrame, cmap_behaviour: Union[LinearSegmentedColormap,str], nrows:int, ncols:int, frames_list:list[int], round_dec:int, dpi_save:int
+):
+
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
+    # print(frames_list,Data["network_time"],Data["network_weighting_matrix"][20])
+    #print( len(Data[ "network_social_component_matrix"]),frames_list)
+    for i, ax in enumerate(axes.flat):
+        # print(i)
+        ax.matshow(
+            Data["network_social_component_matrix"][frames_list[i]],
+            cmap=cmap_behaviour,
+            aspect="auto",
+        )
+        # Set the title
+        # print("Time= {}".format(round(Data["network_time"][frames_list[i]],round_dec)))
+        ax.set_title(
+            "Time= {}".format(round(Data["network_time"][frames_list[i]], round_dec))
+        )
+        ax.set_xlabel("Agent")
+        ax.set_ylabel("Agent")
+    plt.tight_layout()
+
+    # colour bar axes
+    fig.subplots_adjust(right=0.8)
+    cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
+    cbar = fig.colorbar(
+        plt.cm.ScalarMappable(cmap=cmap_behaviour, norm=Normalize(vmin=-1, vmax=1)),
+        cax=cbar_ax,
+    )  # This does a mapabble on the fly i think, not sure
+    cbar.set_label("Social Learning")
+
+    plotName = FILENAME + "/Prints"
+    f = plotName + "/" + "prints_network_social_component_matrix.png"
     fig.savefig(f, dpi=dpi_save)
 
 
