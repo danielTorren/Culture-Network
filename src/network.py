@@ -26,6 +26,7 @@ class Network:
         self.phi_array = np.linspace(parameters["phi_list_lower"], parameters["phi_list_upper"], num=self.M)
         np.random.shuffle(self.phi_array)
 
+        
         #carbon price
         self.carbon_price_policy_start = parameters["carbon_price_policy_start"]
         self.carbon_price_init = parameters["carbon_price_init"]
@@ -265,6 +266,7 @@ class Network:
         self.history_max_culture.append(self.max_culture)
 
     def next_step(self):
+        #print("HEYE")
         # advance a time step
         self.t += self.delta_t
 

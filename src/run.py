@@ -37,6 +37,9 @@ def run(parameters: dict, to_save_list: list, params_name: list) -> str:
     ###GENERATE THE DATA TO BE SAVED
 
     social_network = generate_data(parameters)
+    #print(social_network.agent_list[0].history_behaviour_values )
+    #print(social_network.agent_list[0].history_behaviour_attracts )
+    #quit()
     #print("carbon emissions = ", social_network.total_carbon_emissions)
     if parameters["save_data"]:
         steps = len(social_network.history_cultural_var)

@@ -38,11 +38,11 @@ import numpy as np
 
 
 save_data = True
-opinion_dynamics =  "DEGROOT" #  "DEGROOT"  "SELECT"
+opinion_dynamics =  "SELECT" #  "DEGROOT"  "SELECT"
 
-K = 40  # k nearest neighbours INTEGER
+K = 5  # k nearest neighbours INTEGER
 M = 3  # number of behaviours
-N = 100  # number of agents
+N = 20  # number of agents
 total_time = 10
 delta_t = 0.01  # time step size
 
@@ -69,7 +69,7 @@ t_IP_matrix = np.array([[],[],[]]) #REAL TIME; list stating at which time steps 
 
 #Carbon price parameters
 carbon_price_policy_start = 5#in simualation time to start the policy
-carbon_price_init = 0.#
+carbon_price_init = 0.5#
 #social_cost_carbon = 0.5
 carbon_price_gradient = 0#social_cost_carbon/time_steps_max# social cost of carbon/total time
 carbon_emissions = [1]*M
@@ -213,7 +213,7 @@ SHOW_PLOT = True
 if __name__ == "__main__":
 
     if RUN == False:
-        FILENAME = "results/_DEGROOT_500_3_100_0.01_30_0.1_1_1_0.01_1_1_8_2"
+        FILENAME = "results/_DEGROOT_1000_3_100_0.01_40_0.1_1_1_0.01_1_1_8_2"
     else:
         # start_time = time.time()
         # print("start_time =", time.ctime(time.time()))
@@ -244,9 +244,9 @@ if __name__ == "__main__":
         #plot_beta_distributions(FILENAME,alpha_attract,beta_attract,alpha_threshold,beta_threshold,bin_num,num_counts,dpi_save,)
         #plot_culture_timeseries(FILENAME, Data, dpi_save)
         plot_value_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save)
-        #plot_threshold_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save)
-        #plot_attract_timeseries(FILENAME, Data, nrows_behave, ncols_behave, dpi_save)
-        #plot_carbon_price_timeseries(FILENAME,Data,dpi_save)
+        plot_threshold_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save)
+        plot_attract_timeseries(FILENAME, Data, nrows_behave, ncols_behave, dpi_save)
+        plot_carbon_price_timeseries(FILENAME,Data,dpi_save)
         plot_total_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
         #plot_av_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
         #plot_weighting_matrix_convergence_timeseries(FILENAME, Data, dpi_save)

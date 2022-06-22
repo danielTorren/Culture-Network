@@ -9,10 +9,10 @@ from SALib.plotting.morris import horizontal_bar_plot
 from utility import  produceName_SA,createFolderSA
 
 if __name__ == "__main__":
-    N_samples = 128  # 1024
+    N_samples = 2  # 1024
     
     # variable parameters
-    variable_parameters = [("phi_list_lower",0,0.7),("phi_list_upper",0.7,1),("N",50,500),("M",1,10),("K",2,50),("prob_rewire",0.001,0.5), ("set_seed",0,10000), ("culture_momentum",1,20),("learning_error_scale",0,0.5)]
+    variable_parameters = [("time_steps_max", 10,1000),("phi_list_lower",0,0.7),("phi_list_upper",0.7,1),("N",50,500),("M",1,10),("K",2,50),("prob_rewire",0.001,0.5), ("set_seed",0,10000), ("culture_momentum",1,20),("learning_error_scale",0,0.5)]
     D_vars = len(variable_parameters)
     samples = N_samples * (D_vars + 2)
     #print("samples",samples)
@@ -27,15 +27,15 @@ if __name__ == "__main__":
 
     # Fixed params
     total_time = 10
-    delta_t = 0.1  # time step size
+    delta_t = 0.01  # time step size
     time_steps_max = int(
         total_time / delta_t
     )  # number of time steps max, will stop if culture converges
 
+    
     params = {
         "opinion_dynamics": "DEGROOT",
         "save_data": False, 
-        "time_steps_max": time_steps_max, 
         "delta_t": delta_t,
         "alpha_attract":1,
         "beta_attract":1,
@@ -54,7 +54,7 @@ if __name__ == "__main__":
     createFolderSA(fileName)
 
     time_per_step = 0.015515416612227757
-    print("Predicted run time = ", time_per_step * time_steps_max * samples, "s")
+    #print("Predicted run time = ", time_per_step * time_steps_max * samples, "s")
 
     # GENERATE PARAMETER VALUES
     param_values = saltelli.sample(

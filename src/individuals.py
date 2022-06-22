@@ -36,9 +36,9 @@ class Individual:
         self.culture = self.calc_culture()
 
         if self.save_data:
-            self.history_behaviour_values = [self.values]
-            self.history_behaviour_attracts = [self.attracts]
-            self.history_behaviour_thresholds = [self.thresholds]
+            self.history_behaviour_values = [list(self.values)]
+            self.history_behaviour_attracts = [list(self.attracts)]
+            self.history_behaviour_thresholds = [list(self.thresholds)]
             self.history_av_behaviour = [self.av_behaviour]
             self.history_culture = [self.culture]
             self.history_carbon_emissions = [self.carbon_emissions]
@@ -66,13 +66,9 @@ class Individual:
         self.values = self.attracts - self.thresholds
 
     def update_attracts(self,social_component_behaviours):
-        #print("update attracts",social_component_behaviours,self.information_provision, type(self.information_provision))
-        #print("before",self.attracts)
         self.attracts += self.delta_t*(social_component_behaviours + self.information_provision)  
-        #print("after",self.attracts)
 
     def update_thresholds(self, carbon_price):
-
         for m in range(self.M):
             if self.init_thresholds[m] < carbon_price*self.carbon_intensive_list[m]:
                 self.thresholds[m] = 0 
@@ -89,7 +85,6 @@ class Individual:
 
             if (self.values[i] <= 0):  # calc_carbon_emissions if less than or equal to 0 then it is a less environmetally friendly behaviour(brown)
                 total_emissions += self.carbon_intensive_list[i]  # calc_carbon_emissions
-        #print("total_behaviour:",total_behaviour)
         average_behaviour = total_behaviour/self.M
         return total_emissions, average_behaviour  # calc_carbon_emissions #calc_behaviour_a
 
@@ -123,9 +118,12 @@ class Individual:
                 self.information_provision[i] = 0 #this means that no information provision policy is ever present in this behaviour
 
     def save_data_individual(self):
-        self.history_behaviour_values.append(self.values)
-        self.history_behaviour_attracts.append(self.attracts)
-        self.history_behaviour_thresholds.append(self.thresholds)
+        #print("YO",self.values,self.attracts)
+        #the order afftes what the resukl??
+        self.history_behaviour_attracts.append(list(self.attracts))
+        self.history_behaviour_thresholds.append(list(self.thresholds))
+        self.history_behaviour_values.append(list(self.values))
+
         self.history_culture.append(self.culture)
         self.history_av_behaviour.append(self.av_behaviour)
         self.history_carbon_emissions.append(self.carbon_emissions)
@@ -135,7 +133,9 @@ class Individual:
         self.t = t
         self.update_information_provision()
         self.update_values()
+        #print("before", self.attracts)
         self.update_attracts(social_component_behaviours)
+        #print("after", self.attracts)
         self.update_thresholds(carbon_price)
 
         self.carbon_emissions, self.av_behaviour = self.update_total_emissions_av_behaviour()
