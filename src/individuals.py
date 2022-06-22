@@ -14,6 +14,7 @@ class Individual:
         eta: float,
         t_IP_list: list,
     ):
+
         self.M = M
         self.t = t
         self.delta_t = delta_t
@@ -25,7 +26,6 @@ class Individual:
         self.nu = nu
         self.eta = eta
         self.t_IP_list = t_IP_list
-
         self.init_thresholds = init_data_thresholds
         self.attracts, self.thresholds, self.values = self.create_behaviours(init_data_attracts, init_data_thresholds)
         
@@ -67,7 +67,9 @@ class Individual:
 
     def update_attracts(self,social_component_behaviours):
         #print("update attracts",social_component_behaviours,self.information_provision, type(self.information_provision))
+        #print("before",self.attracts)
         self.attracts += self.delta_t*(social_component_behaviours + self.information_provision)  
+        #print("after",self.attracts)
 
     def update_thresholds(self, carbon_price):
 
@@ -107,8 +109,18 @@ class Individual:
                 information_provision.append(self.calc_information_provision_decay(i))
             else:
                 information_provision.append(0) #this means that no information provision policy is ever present in this behaviour
+        
         #print("information_provision:",information_provision)
         return np.array(information_provision)
+
+    def update_information_provision(self):
+        for i in range(self.M):
+            if self.t_IP_list[i] == self.t:
+                self.information_provision[i] = self.calc_information_provision_boost(i)
+            elif self.t_IP_list[i] < self.t and self.information_provision[i] > 0.00000001:
+                self.information_provision[i] = self.calc_information_provision_decay(i)
+            else:
+                self.information_provision[i] = 0 #this means that no information provision policy is ever present in this behaviour
 
     def save_data_individual(self):
         self.history_behaviour_values.append(self.values)
@@ -121,7 +133,7 @@ class Individual:
 
     def next_step(self, t:float, social_component_behaviours: npt.NDArray, carbon_price:float):
         self.t = t
-        self.information_provision = self.calc_information_provision()
+        self.update_information_provision()
         self.update_values()
         self.update_attracts(social_component_behaviours)
         self.update_thresholds(carbon_price)

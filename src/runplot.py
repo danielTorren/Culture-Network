@@ -43,7 +43,7 @@ opinion_dynamics =  "DEGROOT" #  "DEGROOT"  "SELECT"
 K = 40  # k nearest neighbours INTEGER
 M = 3  # number of behaviours
 N = 100  # number of agents
-total_time = 5
+total_time = 10
 delta_t = 0.01  # time step size
 
 prob_rewire = 0.1  # re-wiring probability?
@@ -63,13 +63,13 @@ learning_error_scale = 0.01  # 1 standard distribution is 2% error
 
 #Infromation provision parameters
 nu = 1# how rapidly extra gains in attractiveness are made
-eta = 0.3#decay rate of information provision boost
-attract_information_provision_list = np.array([1]*M)#
-t_IP_matrix = np.array([[1.000,2.000,3.000],[1.0000,3.000],[1.000,4.000]]) #REAL TIME; list stating at which time steps an information provision policy should be aplied for each behaviour
+eta = 0.2#decay rate of information provision boost
+attract_information_provision_list = np.array([0.5*(1/delta_t)]*M)#
+t_IP_matrix = np.array([[],[],[]]) #REAL TIME; list stating at which time steps an information provision policy should be aplied for each behaviour
 
 #Carbon price parameters
 carbon_price_policy_start = 5#in simualation time to start the policy
-carbon_price_init = 0#
+carbon_price_init = 0.#
 #social_cost_carbon = 0.5
 carbon_price_gradient = 0#social_cost_carbon/time_steps_max# social cost of carbon/total time
 carbon_emissions = [1]*M
@@ -231,6 +231,7 @@ if __name__ == "__main__":
         Data = loadData(dataName, loadBooleanCSV, loadBooleanArray)
         Data = get_run_properties(Data, FILENAME, paramList)
 
+
         #####BODGES!!
         Data["network_time"] = np.asarray(Data["network_time"])[
             0
@@ -242,15 +243,15 @@ if __name__ == "__main__":
         ###PLOTS
         #plot_beta_distributions(FILENAME,alpha_attract,beta_attract,alpha_threshold,beta_threshold,bin_num,num_counts,dpi_save,)
         #plot_culture_timeseries(FILENAME, Data, dpi_save)
-        #plot_value_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save)
+        plot_value_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save)
         #plot_threshold_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save)
         #plot_attract_timeseries(FILENAME, Data, nrows_behave, ncols_behave, dpi_save)
         #plot_carbon_price_timeseries(FILENAME,Data,dpi_save)
-        #plot_total_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
+        plot_total_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
         #plot_av_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
         #plot_weighting_matrix_convergence_timeseries(FILENAME, Data, dpi_save)
-        #plot_cultural_range_timeseries(FILENAME, Data, dpi_save)
-        #plot_average_culture_timeseries(FILENAME,Data,dpi_save)
+        plot_cultural_range_timeseries(FILENAME, Data, dpi_save)
+        plot_average_culture_timeseries(FILENAME,Data,dpi_save)
 
         ###PRINTS
         
@@ -261,7 +262,7 @@ if __name__ == "__main__":
         #print_network_information_provision(FILENAME,Data,cmap,nrows,ncols,frames_list,round_dec,dpi_save)
 
         ###ANIMATIONS
-        animate_network_information_provision(FILENAME,Data,interval,fps,round_dec,cmap)
+        #animate_network_information_provision(FILENAME,Data,interval,fps,round_dec,cmap_weighting)
         #animate_network_social_component_matrix(FILENAME,Data,interval,fps,round_dec,cmap)
         # animate_weighting_matrix(FILENAME,Data,interval,fps,round_dec,cmap_weighting)
         # animate_behavioural_matrix(FILENAME,Data,interval,fps,cmap,round_dec)

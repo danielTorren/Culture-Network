@@ -60,6 +60,10 @@ def plot_threshold_timeseries(FILENAME: str, Data: DataFrame, nrows:int, ncols:i
 
 
 def plot_attract_timeseries(FILENAME: str, Data: DataFrame, nrows:int, ncols:int, dpi_save:int):
+    
+    print(Data["behaviour_attract"],np.shape(Data["behaviour_attract"]))
+
+
     prints_behaviour_timeseries_plot(
         FILENAME, Data, "behaviour_attract", "Attractiveness", nrows, ncols, dpi_save
     )
