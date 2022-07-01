@@ -49,8 +49,10 @@ class Network:
         self.prob_rewire = parameters["prob_rewire"]
         
         self.culture_momentum = int(
-            round(parameters["culture_momentum"]) / self.delta_t
+            round(parameters["culture_momentum"]/ self.delta_t)
         )  # round due to the sampling method producing floats, lets hope this works
+        print("cul mom:", parameters["culture_momentum"],self.culture_momentum )
+
         self.learning_error_scale = parameters["learning_error_scale"]
 
         self.discount_factor_list = np.linspace(1, 0.1, num=self.culture_momentum)
@@ -265,6 +267,7 @@ class Network:
         self.history_max_culture.append(self.max_culture)
 
     def next_step(self):
+        #print("TIME")
         # advance a time step
         self.t += self.delta_t
 
