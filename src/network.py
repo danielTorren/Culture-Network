@@ -18,6 +18,8 @@ class Network:
             self.set_seed
         )  # not sure if i have to be worried about the randomness of the system being reproducible
         
+        self.alpha_change = parameters["alpha_change"]
+
         self.opinion_dyanmics = parameters["opinion_dynamics"]
         self.save_data = parameters["save_data"]
         self.M = int(round(parameters["M"]))
@@ -51,7 +53,7 @@ class Network:
         self.culture_momentum = int(
             round(parameters["culture_momentum"]/ self.delta_t)
         )  # round due to the sampling method producing floats, lets hope this works
-        print("cul mom:", parameters["culture_momentum"],self.culture_momentum )
+        #print("cul mom:", parameters["culture_momentum"],self.culture_momentum )
 
         self.learning_error_scale = parameters["learning_error_scale"]
 
@@ -92,7 +94,8 @@ class Network:
 
         self.social_component_matrix = self.calc_social_component_matrix(ego_influence)
 
-        self.weighting_matrix,__ = self.update_weightings()  # Should I update the weighting matrix? I feel like it makes sense if its not time dependant.
+        if self.alpha_change == 1 or 0.5:
+            self.weighting_matrix,__ = self.update_weightings()  # Should I update the weighting matrix? I feel like it makes sense if its not time dependant.
 
         self.total_carbon_emissions = self.calc_total_emissions()
 
@@ -279,10 +282,11 @@ class Network:
         self.update_individuals()
 
         # update network parameters for next step
-        if self.save_data:
-            self.weighting_matrix,self.weighting_matrix_convergence = self.update_weightings()
-        else:
-            self.weighting_matrix,__ = self.update_weightings()
+        if self.alpha_change == 1:
+                if self.save_data:
+                        self.weighting_matrix,self.weighting_matrix_convergence = self.update_weightings()
+                else:
+                        self.weighting_matrix,__ = self.update_weightings()
         
         self.behavioural_attract_matrix = self.calc_behavioural_attract_matrix()
 
