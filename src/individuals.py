@@ -8,78 +8,91 @@ class Individual:
     """
 
     def __init__(
-        self, init_data_attracts: npt.NDArray, init_data_thresholds: npt.NDArray, delta_t: float, culture_momentum: int, t: float, M: int, save_data: bool, carbon_intensive_list: list, discount_factor_list: list,
-        attract_information_provision_list: list,
-        nu: float,
-        eta: float,
-        t_IP_list: list,
+        self, individual_params, init_data_attracts, init_data_thresholds
     ):
 
-        self.M = M
-        self.t = t
-        self.delta_t = delta_t
-        self.save_data = save_data
-        self.carbon_intensive_list = carbon_intensive_list
-        self.culture_momentum = culture_momentum
-        self.discount_factor_list = discount_factor_list
-        self.attract_information_provision_list = attract_information_provision_list
-        self.nu = nu
-        self.eta = eta
-        self.t_IP_list = t_IP_list
         self.init_thresholds = init_data_thresholds
-        self.attracts, self.thresholds, self.values = self.create_behaviours(init_data_attracts, init_data_thresholds)
+        self.attracts = init_data_attracts
+        self.thresholds = init_data_thresholds
+
+        self.M = individual_params["M"]
+        self.t = individual_params["t"]
+        self.delta_t = individual_params["delta_t"]
+        self.save_data = individual_params["save_data"]
+        self.carbon_intensive_list = individual_params["carbon_emissions"]
+        self.culture_momentum = individual_params["culture_momentum"]
+        self.discount_factor = individual_params["discount_factor"]
+
+        self.carbon_price_state = individual_params["carbon_price_state"]
+        self.information_provision_state = individual_params["information_provision_state"]
+
+        if self.carbon_price_state:
+            self.carbon_price = individual_params["carbon_price"]
+
+        if self.information_provision_state:
+            self.attract_information_provision_list = individual_params["attract_information_provision_list"]
+            self.nu = individual_params["nu"]
+            self.eta = individual_params["eta"]
+            self.t_IP_list = individual_params["t_IP_list"]
+
+        #print(self.attracts,self.thresholds, type(self.thresholds))
+        self.values = self.attracts - self.thresholds
+        #print(self.values)
+
+        #print("intia values",self.values, type(self.attracts ),self.attracts )
+        if self.information_provision_state:
+            self.information_provision = self.calc_information_provision()
         
-        self.information_provision = self.calc_information_provision()
-        
-        self.carbon_emissions, self.av_behaviour  = self.update_total_emissions_av_behaviour()
-        self.av_behaviour_list = [self.av_behaviour]
+        self.total_carbon_emissions, self.av_behaviour  = self.update_total_emissions_av_behaviour()
+
+        self.av_behaviour_list = [self.av_behaviour]*self.culture_momentum
         self.culture = self.calc_culture()
 
         if self.save_data:
-            self.history_behaviour_values = [self.values]
-            self.history_behaviour_attracts = [self.attracts]
-            self.history_behaviour_thresholds = [self.thresholds]
+            self.history_behaviour_values = [list(self.values)]
+            self.history_behaviour_attracts = [list(self.attracts)]
+            self.history_behaviour_thresholds = [list(self.thresholds)]
             self.history_av_behaviour = [self.av_behaviour]
             self.history_culture = [self.culture]
-            self.history_carbon_emissions = [self.carbon_emissions]
-            self.history_information_provision = [self.information_provision]
-
-    def create_behaviours(self, init_data_attracts: list, init_data_thresholds: list) -> tuple:
-        return init_data_attracts, init_data_thresholds,init_data_attracts - init_data_thresholds
-
+            self.history_carbon_emissions = [self.total_carbon_emissions]
+            if self.information_provision_state:
+                self.history_information_provision = [self.information_provision]
 
     def update_av_behaviour_list(self):
-        #print("av behav: ",self.av_behaviour_list)
         if len(self.av_behaviour_list) < self.culture_momentum:
             self.av_behaviour_list.append(self.av_behaviour)
         else:
             self.av_behaviour_list.pop(0)
             self.av_behaviour_list.append(self.av_behaviour)
 
+    def update_av_behaviour_list_alt(self):
+        self.av_behaviour_list.pop(0)
+        self.av_behaviour_list.append(self.av_behaviour)
+
     def calc_culture(self) -> float:
         weighted_sum_behaviours = 0
         for i in range(len(self.av_behaviour_list)):
-            weighted_sum_behaviours += self.discount_factor_list[i]*self.av_behaviour_list[i]
+            weighted_sum_behaviours += (self.discount_factor)**(i)*self.av_behaviour_list[i]
         normalized_culture = weighted_sum_behaviours/len(self.av_behaviour_list)
         #print(len(self.av_behaviour_list))
         return normalized_culture
 
     def update_values(self):
+        
         self.values = self.attracts - self.thresholds
 
     def update_attracts(self,social_component_behaviours):
-        #print("update attracts",social_component_behaviours,self.information_provision, type(self.information_provision))
-        #print("before",self.attracts)
-        self.attracts += self.delta_t*(social_component_behaviours + self.information_provision)  
-        #print("after",self.attracts)
+        if self.information_provision_state:
+            self.attracts += self.delta_t*(social_component_behaviours + self.information_provision)  
+        else:
+            self.attracts += self.delta_t*(social_component_behaviours)  
 
-    def update_thresholds(self, carbon_price):
-
+    def update_thresholds(self):
         for m in range(self.M):
-            if self.init_thresholds[m] < carbon_price*self.carbon_intensive_list[m]:
+            if self.init_thresholds[m] < self.carbon_price*self.carbon_intensive_list[m]:
                 self.thresholds[m] = 0 
             else:
-                self.thresholds[m] = self.init_thresholds[m] - carbon_price*self.carbon_intensive_list[m]
+                self.thresholds[m] = self.init_thresholds[m] - self.carbon_price*self.carbon_intensive_list[m]
 
     def update_total_emissions_av_behaviour(self):
         total_emissions = 0  # calc_carbon_emission
@@ -125,25 +138,33 @@ class Individual:
                 self.information_provision[i] = 0 #this means that no information provision policy is ever present in this behaviour
 
     def save_data_individual(self):
-        self.history_behaviour_values.append(self.values)
-        self.history_behaviour_attracts.append(self.attracts)
-        self.history_behaviour_thresholds.append(self.thresholds)
+        self.history_behaviour_values.append(list(self.values))
+        #print("test", list(self.attracts)[0])
+        self.history_behaviour_attracts.append(list(self.attracts))
+        self.history_behaviour_thresholds.append(list(self.thresholds))
         self.history_culture.append(self.culture)
         self.history_av_behaviour.append(self.av_behaviour)
-        self.history_carbon_emissions.append(self.carbon_emissions)
-        self.history_information_provision.append(self.information_provision)
+        self.history_carbon_emissions.append(self.total_carbon_emissions)
+        if self.information_provision_state:
+            self.history_information_provision.append(self.information_provision)
 
-    def next_step(self, t:float, social_component_behaviours: npt.NDArray, carbon_price:float):
+    def next_step(self, t:float, social_component_behaviours: npt.NDArray):
         self.t = t
-        self.update_information_provision()
+        if self.information_provision_state:
+            self.update_information_provision()
+
         self.update_values()
         self.update_attracts(social_component_behaviours)
-        self.update_thresholds(carbon_price)
 
-        self.carbon_emissions, self.av_behaviour = self.update_total_emissions_av_behaviour()
-        self.update_av_behaviour_list()
+        if self.carbon_price_state:
+            self.update_thresholds()
+
+        self.total_carbon_emissions, self.av_behaviour = self.update_total_emissions_av_behaviour()
+        self.update_av_behaviour_list_alt()
         self.culture = self.calc_culture()
+        #print("inv culture", self.culture)
         if self.save_data:
             self.save_data_individual()
+        
 
 

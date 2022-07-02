@@ -29,7 +29,7 @@ from plot import (
 )
 from utility import loadData, get_run_properties, frame_distribution_prints
 import matplotlib.pyplot as plt
-from matplotlib.colors import LinearSegmentedColormap, SymLogNorm
+from matplotlib.colors import LinearSegmentedColormap, SymLogNorm, Normalize
 import time
 import numpy as np
 
@@ -40,44 +40,50 @@ import numpy as np
 
 save_data = True
 opinion_dynamics =  "DEGROOT" #  "DEGROOT"  "SELECT"
+carbon_price_state = False
+information_provision_state = False
 
-K = 10  # k nearest neighbours INTEGER
+#Social emissions model
+K = 30  # k nearest neighbours INTEGER
 M = 3  # number of behaviours
-N = 40  # number of agents
-total_time = 8
+N = 100  # number of agents
+total_time = 10
 delta_t = 0.01  # time step size
-
-prob_rewire = 0.1  # re-wiring probability?
-
-alpha_attract = 1  ##inital distribution parameters - doing the inverse inverts it!
-beta_attract = 1
-alpha_threshold = 8
-beta_threshold = 2
+prob_rewire = 0.2  # re-wiring probability?
+alpha_attract = 1#2  ##inital distribution parameters - doing the inverse inverts it!
+beta_attract = 1#3
+alpha_threshold = 1#3
+beta_threshold = 1#2
 time_steps_max = int(
     total_time / delta_t
 )  # number of time steps max, will stop if culture converges
-culture_momentum = 0.5# real time over which culture is calculated for INTEGER
+culture_momentum_real = 0.5# real time over which culture is calculated for INTEGER
 set_seed = 1  ##reproducibility INTEGER
 phi_list_lower,phi_list_upper = 0.1,1
-learning_error_scale = 0.01  # 1 standard distribution is 2% error
+learning_error_scale = 0.05  # 1 standard distribution is 2% error
+carbon_emissions = [1]*M
+discount_factor = 0.8
 
 #Infromation provision parameters
-nu = 1# how rapidly extra gains in attractiveness are made
-eta = 0.2#decay rate of information provision boost
-attract_information_provision_list = np.array([0.5*(1/delta_t)]*M)#
-t_IP_matrix = np.array([[],[],[]]) #REAL TIME; list stating at which time steps an information provision policy should be aplied for each behaviour
+if information_provision_state:
+    nu = 1# how rapidly extra gains in attractiveness are made
+    eta = 0.2#decay rate of information provision boost
+    attract_information_provision_list = np.array([0.5*(1/delta_t)]*M)#
+    t_IP_matrix = np.array([[],[],[]]) #REAL TIME; list stating at which time steps an information provision policy should be aplied for each behaviour
 
 #Carbon price parameters
-carbon_price_policy_start = 5#in simualation time to start the policy
-carbon_price_init = 0.0#
-#social_cost_carbon = 0.5
-carbon_price_gradient = 0#social_cost_carbon/time_steps_max# social cost of carbon/total time
-carbon_emissions = [1]*M
+if carbon_price_state:
+    carbon_price_policy_start = 5#in simualation time to start the policy
+    carbon_price_init = 0.0#
+    #social_cost_carbon = 0.5
+    carbon_price_gradient = 0#social_cost_carbon/time_steps_max# social cost of carbon/total time
 
 params = {
     "opinion_dynamics": opinion_dynamics,
     "save_data": save_data, 
     "time_steps_max": time_steps_max, 
+    "carbon_price_state" : carbon_price_state,
+    "information_provision_state" : information_provision_state,
     "delta_t": delta_t,
     "phi_list_lower": phi_list_lower,
     "phi_list_upper": phi_list_upper,
@@ -86,21 +92,28 @@ params = {
     "K": K,
     "prob_rewire": prob_rewire,
     "set_seed": set_seed,
-    "culture_momentum": culture_momentum,
+    "culture_momentum_real": culture_momentum_real,
     "learning_error_scale": learning_error_scale,
     "alpha_attract": alpha_attract,
     "beta_attract": beta_attract,
     "alpha_threshold": alpha_threshold,
     "beta_threshold": beta_threshold,
-    "nu":nu,
-    "eta": eta,
-    "attract_information_provision_list":attract_information_provision_list,
-    "t_IP_matrix": t_IP_matrix,
-    "carbon_price_init": carbon_price_init,
-    "carbon_price_policy_start": carbon_price_policy_start,
-    "carbon_price_gradient": carbon_price_gradient,
     "carbon_emissions" : carbon_emissions,
+    "alpha_change" : 1,
+    "discount_factor": discount_factor
 }
+
+if carbon_price_state:
+    params["carbon_price_init"] = carbon_price_init
+    params["carbon_price_policy_start"] =  carbon_price_policy_start
+    params["carbon_price_gradient"] =  carbon_price_gradient
+
+if information_provision_state:
+    params["nu"] = nu
+    params["eta"] =  eta
+    params["attract_information_provision_list"] = attract_information_provision_list
+    params["t_IP_matrix"] =  t_IP_matrix
+
 
 params_name = [#THOSE USEd to create the save list?
     opinion_dynamics,
@@ -111,17 +124,18 @@ params_name = [#THOSE USEd to create the save list?
     K,
     prob_rewire,
     set_seed,
-    culture_momentum,
     learning_error_scale,
     alpha_attract,
     beta_attract,
     alpha_threshold,
     beta_threshold,
+    culture_momentum_real
 ]
 
 # SAVING DATA
 # THINGS TO SAVE
-data_save_behaviour_array_list = ["value", "attract", "threshold", "information_provision"]
+
+data_save_behaviour_array_list = ["value", "attract", "threshold"]
 data_save_individual_list = ["culture", "carbon_emissions"]
 data_save_network_list = [
     "time",
@@ -131,12 +145,18 @@ data_save_network_list = [
     "average_culture",
     "min_culture",
     "max_culture",
-    "carbon_price",
 ] 
 data_save_network_array_list = [
     "weighting_matrix",
     "social_component_matrix",
 ]
+
+if information_provision_state:
+    data_save_behaviour_array_list.append( "information_provision")
+
+if carbon_price_state:
+    data_save_network_list.append("carbon_price")
+
 to_save_list = [
     data_save_behaviour_array_list,
     data_save_individual_list,
@@ -154,20 +174,20 @@ paramList = [
     "K",
     "prob_rewire",
     "set_seed",
-    "culture_momentum",
     "learning_error_scale",
     "alpha_attract",
     "beta_attract",
     "alpha_threshold",
-    "beta_threshold"
+    "beta_threshold",
+    "culture_momentum_real",
 ]
+
 loadBooleanCSV = [
     "individual_culture",
     "individual_carbon_emissions",
     "network_total_carbon_emissions",
     "network_time",
     "network_cultural_var",
-    "network_carbon_price",
     "network_weighting_matrix_convergence",
     "network_average_culture",
     "network_min_culture",
@@ -179,15 +199,22 @@ loadBooleanArray = [
     "behaviour_value",
     "behaviour_threshold",
     "behaviour_attract",
-    "behaviour_information_provision"
+
 ]
-# "carbon_price_policy_start""culture_var_min","culture_div","nu", "eta"
+if information_provision_state:
+    loadBooleanArray.append("behaviour_information_provision")
+    
+if carbon_price_state:
+    loadBooleanCSV.append("network_carbon_price")
 
 ###PLOT STUFF
 nrows_behave = 1
 ncols_behave = M
 node_size = 50
 cmap = LinearSegmentedColormap.from_list("BrownGreen", ["sienna", "white", "olivedrab"])
+#norm_neg_pos = plt.cm.ScalarMappable(cmap=cmap, norm=Normalize(vmin=-1, vmax=1))
+norm_neg_pos = Normalize(vmin=-1, vmax=1)
+#log_norm = SymLogNorm(linthresh=0.15, linscale=1, vmin=-1.0, vmax=1.0, base=10)  # this works at least its correct
 cmap_weighting = "Reds"
 fps = 5
 interval = 300
@@ -197,13 +224,14 @@ round_dec = 2
 nrows = 2
 ncols = 3
 
+#print("time_steps_max", time_steps_max)
 frame_num = ncols * nrows - 1
-log_norm = SymLogNorm(
-    linthresh=0.15, linscale=1, vmin=-1.0, vmax=1.0, base=10
-)  # this works at least its correct
-scale_factor = 100
+scale_factor = time_steps_max
+
+
 bin_num = 1000
 num_counts = 100000
+
 dpi_save = 1200
 
 RUN = True
@@ -213,7 +241,7 @@ SHOW_PLOT = True
 if __name__ == "__main__":
 
     if RUN == False:
-        FILENAME = "results/_DEGROOT_1000_3_100_0.01_40_0.1_1_1_0.01_1_1_8_2"
+        FILENAME = "results/_DEGROOT_1000_3_100_0.01_30_0.2_10_0.05_0.2_0.3_0.3_0.2_0.1"
     else:
         # start_time = time.time()
         # print("start_time =", time.ctime(time.time()))
@@ -238,26 +266,26 @@ if __name__ == "__main__":
         ]  # for some reason pandas does weird shit
 
         frames_proportion = int(round(len(Data["network_time"]) / 2))
-        frames_list = frame_distribution_prints(Data["network_time"], scale_factor, frame_num)
+        frames_list = frame_distribution_prints( Data["network_time"], scale_factor, frame_num )
 
         ###PLOTS
-        #plot_beta_distributions(FILENAME,alpha_attract,beta_attract,alpha_threshold,beta_threshold,bin_num,num_counts,dpi_save,)
-        #plot_culture_timeseries(FILENAME, Data, dpi_save)
-        #plot_value_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save)
+        plot_beta_distributions(FILENAME,alpha_attract,beta_attract,alpha_threshold,beta_threshold,bin_num,num_counts,dpi_save,)
+        plot_culture_timeseries(FILENAME, Data, dpi_save)
+        plot_value_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save)
         #plot_threshold_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save)
-        #plot_attract_timeseries(FILENAME, Data, nrows_behave, ncols_behave, dpi_save)
+        plot_attract_timeseries(FILENAME, Data, nrows_behave, ncols_behave, dpi_save)
         #plot_carbon_price_timeseries(FILENAME,Data,dpi_save)
         #plot_total_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
-        #plot_av_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
-        #plot_weighting_matrix_convergence_timeseries(FILENAME, Data, dpi_save)
+        plot_av_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
+        plot_weighting_matrix_convergence_timeseries(FILENAME, Data, dpi_save)
         #plot_cultural_range_timeseries(FILENAME, Data, dpi_save)
         #plot_average_culture_timeseries(FILENAME,Data,dpi_save)
 
         ###PRINTS
         
-        #prints_weighting_matrix(FILENAME,Data,cmap_weighting,nrows,ncols,frames_list,round_dec,dpi_save)
+        prints_weighting_matrix(FILENAME,Data,cmap_weighting,nrows,ncols,frames_list,round_dec,dpi_save)
         #prints_behavioural_matrix(FILENAME,Data,cmap,nrows,ncols,frames_list,round_dec,dpi_save)
-        #prints_culture_network(FILENAME,Data,layout,cmap,node_size,nrows,ncols,log_norm,frames_list,round_dec,dpi_save)
+        #prints_culture_network(FILENAME,Data,layout,cmap,node_size,nrows,ncols,norm_neg_pos,frames_list,round_dec,dpi_save)
         #print_network_social_component_matrix(FILENAME,Data,cmap,nrows,ncols,frames_list,round_dec,dpi_save)
         #print_network_information_provision(FILENAME,Data,cmap,nrows,ncols,frames_list,round_dec,dpi_save)
 
@@ -266,11 +294,11 @@ if __name__ == "__main__":
         #animate_network_social_component_matrix(FILENAME,Data,interval,fps,round_dec,cmap)
         # animate_weighting_matrix(FILENAME,Data,interval,fps,round_dec,cmap_weighting)
         # animate_behavioural_matrix(FILENAME,Data,interval,fps,cmap,round_dec)
-        # animate_culture_network(FILENAME,Data,layout,cmap,node_size,interval,fps,log_norm,round_dec)
-        #multi_animation(FILENAME,Data,cmap,cmap,layout,node_size,interval,fps,log_norm)
-        multi_animation_four(FILENAME,Data,cmap,cmap,layout,node_size,interval,fps,log_norm)
-        # multi_animation_alt(FILENAME,Data,cmap,cmap,layout,node_size,interval,fps,log_norm)
-        # multi_animation_scaled(FILENAME,Data,cmap,cmap,layout,node_size,interval,fps,scale_factor,frames_proportion,log_norm)
+        #animate_culture_network(FILENAME,Data,layout,cmap,node_size,interval,fps,norm_neg_pos,round_dec)
+        #multi_animation(FILENAME,Data,cmap,cmap,layout,node_size,interval,fps,norm_neg_pos)
+        #multi_animation_four(FILENAME,Data,cmap,cmap,layout,node_size,interval,fps,norm_neg_pos)
+        # multi_animation_alt(FILENAME,Data,cmap,cmap,layout,node_size,interval,fps,norm_neg_pos)
+        # multi_animation_scaled(FILENAME,Data,cmap,cmap,layout,node_size,interval,fps,scale_factor,frames_proportion,norm_neg_pos)
 
         print(
             "PLOT time taken: %s minutes" % ((time.time() - start_time) / 60),

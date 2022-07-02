@@ -8,6 +8,7 @@ from pandas import DataFrame
 from matplotlib.colors import LinearSegmentedColormap,SymLogNorm
 from typing import Union
 from networkx import Graph
+from network import Network
 ###DEFINE PLOTS
 
 
@@ -25,6 +26,7 @@ def prints_behaviour_timeseries_plot(
         ax.set_xlabel(r"Time")
         ax.set_ylabel(r"%s" % y_title)
         ax.set_title(r"Trait %s" % (i + 1))  # avoid 0 in the title
+        ax.axvline(Data["culture_momentum_real"], color='r',linestyle = "--")
     plt.tight_layout()
 
     plotName = FILENAME + "/Plots"
@@ -39,6 +41,7 @@ def standard_behaviour_timeseries_plot(FILENAME: str, Data: DataFrame, property:
     for i in range(int(Data["N"])):
         for v in range(int(Data["M"])):
             ax.plot(Data["network_time"], PropertyData[i][v])
+    ax.axvline(Data["culture_momentum_real"], color='r',linestyle = "--")
     ax.set_xlabel(r"Time")
     ax.set_ylabel(r"%s" % y_title)
 
@@ -61,7 +64,7 @@ def plot_threshold_timeseries(FILENAME: str, Data: DataFrame, nrows:int, ncols:i
 
 def plot_attract_timeseries(FILENAME: str, Data: DataFrame, nrows:int, ncols:int, dpi_save:int):
     
-    print(Data["behaviour_attract"],np.shape(Data["behaviour_attract"]))
+    #print(Data["behaviour_attract"],np.shape(Data["behaviour_attract"]))
 
 
     prints_behaviour_timeseries_plot(
@@ -78,7 +81,7 @@ def plot_av_carbon_emissions_timeseries(FILENAME: str, Data: DataFrame, dpi_save
         x / Data["N"] for x in np.asarray(Data["network_total_carbon_emissions"])[0]
     ]
     ax.plot(Data["network_time"], av_network_total_carbon_emissions, "k-")
-
+    ax.axvline(Data["culture_momentum_real"], color='r',linestyle = "--")
     data = np.asarray(Data["individual_carbon_emissions"])  # bodge
 
     for i in range(int(int(Data["N"]))):
@@ -98,7 +101,7 @@ def plot_network_timeseries(FILENAME: str, Data: DataFrame,y_title:str, property
     ax.plot(Data["network_time"], data)
     ax.set_xlabel(r"Time")
     ax.set_ylabel(r"%s" % y_title)
-
+    ax.axvline(Data["culture_momentum_real"], color='r',linestyle = "--")
     plotName = FILENAME + "/Plots"
     f = plotName + "/" + property + "_timeseries.png"
     fig.savefig(f, dpi=dpi_save)
@@ -140,6 +143,7 @@ def plot_average_culture_timeseries(FILENAME: str, Data: DataFrame, dpi_save:int
     ax.plot(Data["network_time"], data)
     ax.set_xlabel(r"Time")
     ax.set_ylabel(r"%s" % y_title)
+    ax.axvline(Data["culture_momentum_real"], color='r',linestyle = "--")
     ax.fill_between(
         Data["network_time"], culture_min, culture_max, alpha=0.5, linewidth=0
     )
@@ -161,6 +165,7 @@ def plot_culture_timeseries(FILENAME: str, Data: DataFrame, dpi_save:int):
     for i in range(int(int(Data["N"]))):
         # print(Data["individual_culture"][i])
         ax.plot(Data["network_time"], data[i])
+    ax.axvline(Data["culture_momentum_real"], color='r',linestyle = "--")
 
     plotName = FILENAME + "/Plots"
     f = plotName + "/" + "cultural_evolution.png"
@@ -338,13 +343,13 @@ def prod_pos(layout_type:str, network:Graph) -> Graph:
 
 # animation of changing culture
 def animate_culture_network(
-    FILENAME: str, Data: DataFrame, layout:str, cmap_culture: Union[LinearSegmentedColormap,str], node_size:int, interval:int, fps:int, log_norm: SymLogNorm, round_dec:int
+    FILENAME: str, Data: DataFrame, layout:str, cmap_culture: Union[LinearSegmentedColormap,str], node_size:int, interval:int, fps:int, norm_neg_pos: SymLogNorm, round_dec:int
 ):
     def update(i, G, pos, ax, cmap_culture):
 
         ax.clear()
         # print(Data["individual_culture"][i],Data["individual_culture"][i].shape)
-        colour_adjust = log_norm(Data["individual_culture"][i])
+        colour_adjust = norm_neg_pos(Data["individual_culture"][i])
         ani_step_colours = cmap_culture(colour_adjust)
         nx.draw(
             G,
@@ -362,7 +367,7 @@ def animate_culture_network(
     fig, ax = plt.subplots()
     # cbar = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap_culture), ax=ax)#This does a mapabble on the fly i think, not sure
     cbar = fig.colorbar(
-        plt.cm.ScalarMappable(cmap=cmap_culture, norm=log_norm), ax=ax
+        plt.cm.ScalarMappable(cmap=cmap_culture), ax=ax
     )  # This does a mapabble on the fly i think, not sure
     cbar.set_label("Culture")
 
@@ -534,7 +539,7 @@ def print_network_information_provision(
 
 
 def prints_culture_network(
-    FILENAME: str, Data: DataFrame,layout:str, cmap_culture: LinearSegmentedColormap,node_size:int, nrows:int, ncols:int, log_norm: SymLogNorm, frames_list:list[int], round_dec:int, dpi_save:int
+    FILENAME: str, Data: DataFrame,layout:str, cmap_culture: LinearSegmentedColormap,node_size:int, nrows:int, ncols:int, norm_neg_pos: SymLogNorm, frames_list:list[int], round_dec:int, dpi_save:int
 ):
 
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
@@ -551,8 +556,9 @@ def prints_culture_network(
             "Time= {}".format(round(Data["network_time"][frames_list[i]], round_dec))
         )
 
-        colour_adjust = log_norm(Data["individual_culture"][frames_list[i]])
-        # colour_adjust = (Data["individual_culture"][frames_list[i]] + 1)/2
+        colour_adjust = norm_neg_pos(Data["individual_culture"][frames_list[i]])
+        #colour_adjust = (Data["individual_culture"][frames_list[i]] + 1)/2
+        #colour_adjust = Data["individual_culture"][frames_list[i]]
         ani_step_colours = cmap_culture(colour_adjust)
 
         nx.draw(
@@ -572,7 +578,7 @@ def prints_culture_network(
     fig.subplots_adjust(right=0.8)
     cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
     cbar = fig.colorbar(
-        plt.cm.ScalarMappable(cmap=cmap_culture, norm=log_norm), cax=cbar_ax
+        plt.cm.ScalarMappable(cmap=cmap_culture, norm=Normalize(vmin=-1, vmax=1)), cax=cbar_ax
     )  # This does a mapabble on the fly i think, not sure
     cbar.set_label("Culture")
 
@@ -582,7 +588,7 @@ def prints_culture_network(
 
 def multi_animation(
     FILENAME: str, Data: DataFrame, cmap_behaviour: Union[LinearSegmentedColormap,str], cmap_culture: Union[LinearSegmentedColormap,str], layout: str, node_size:int,  interval:int,
-    fps:int, log_norm: SymLogNorm,
+    fps:int, norm_neg_pos: SymLogNorm,
 ):
 
     ####ACUTAL
@@ -613,7 +619,7 @@ def multi_animation(
     def update(i):
         ax2.clear()
 
-        colour_adjust = log_norm(Data["individual_culture"][i])
+        colour_adjust = norm_neg_pos(Data["individual_culture"][i])
         ani_step_colours = cmap_culture(colour_adjust)
         nx.draw(
             G,
@@ -640,7 +646,7 @@ def multi_animation(
 
     # cbar = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap_culture), ax=ax)#This does a mapabble on the fly i think, not sure
     cbar_culture = fig.colorbar(
-        plt.cm.ScalarMappable(cmap=cmap_culture, norm=log_norm), ax=ax2
+        plt.cm.ScalarMappable(cmap=cmap_culture, norm=norm_neg_pos), ax=ax2
     )  # This does a mapabble on the fly i think, not sure
     cbar_culture.set_label("Culture")
 
@@ -671,7 +677,7 @@ def multi_animation(
 
 def multi_animation_alt(
     FILENAME: str, Data: DataFrame, cmap_behaviour: Union[LinearSegmentedColormap,str], cmap_culture: Union[LinearSegmentedColormap,str], layout: str, node_size:int,  interval:int,
-    fps:int, log_norm: SymLogNorm,
+    fps:int, norm_neg_pos: SymLogNorm,
 ):
 
     ####ACUTAL
@@ -705,7 +711,7 @@ def multi_animation_alt(
 
         ###AX2
         ax2.clear()
-        colour_adjust = log_norm(Data["individual_culture"][i])
+        colour_adjust = norm_neg_pos(Data["individual_culture"][i])
         ani_step_colours = cmap_culture(colour_adjust)
         nx.draw(
             G,
@@ -741,7 +747,7 @@ def multi_animation_alt(
 
     # cbar = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap_culture), ax=ax)#This does a mapabble on the fly i think, not sure
     cbar_culture = fig.colorbar(
-        plt.cm.ScalarMappable(cmap=cmap_culture, norm=log_norm), ax=ax2
+        plt.cm.ScalarMappable(cmap=cmap_culture, norm=norm_neg_pos), ax=ax2
     )  # This does a mapabble on the fly i think, not sure
     cbar_culture.set_label("Culture")
 
@@ -772,7 +778,7 @@ def multi_animation_alt(
 
 def multi_animation_scaled(
     FILENAME: str, Data: DataFrame, cmap_behaviour: Union[LinearSegmentedColormap,str], cmap_culture: Union[LinearSegmentedColormap,str], layout: str, node_size:int,  interval:int,
-    fps:int, scale_factor: int, frames_proportion: int, log_norm: SymLogNorm
+    fps:int, scale_factor: int, frames_proportion: int, norm_neg_pos: SymLogNorm
 ):
 
     ####ACUTAL
@@ -807,7 +813,7 @@ def multi_animation_scaled(
     def update(i):
         ax2.clear()
 
-        colour_adjust = log_norm(Data["individual_culture"][frames_list[i]])
+        colour_adjust = norm_neg_pos(Data["individual_culture"][frames_list[i]])
         ani_step_colours = cmap_culture(colour_adjust)
         nx.draw(
             G,
@@ -834,7 +840,7 @@ def multi_animation_scaled(
 
     # cbar = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap_culture), ax=ax)#This does a mapabble on the fly i think, not sure
     cbar_culture = fig.colorbar(
-        plt.cm.ScalarMappable(cmap=cmap_culture, norm=log_norm), ax=ax2
+        plt.cm.ScalarMappable(cmap=cmap_culture, norm=norm_neg_pos), ax=ax2
     )  # This does a mapabble on the fly i think, not sure
     cbar_culture.set_label("Culture")
 
@@ -1000,7 +1006,7 @@ def plot_beta_distributions(
 
 def multi_animation_four(
     FILENAME: str, Data: DataFrame, cmap_behaviour: Union[LinearSegmentedColormap,str], cmap_culture: Union[LinearSegmentedColormap,str], layout: str, node_size:int,  interval:int,
-    fps:int, log_norm: SymLogNorm,
+    fps:int, norm_neg_pos: SymLogNorm,
 ):
 
     ####ACUTAL
@@ -1033,7 +1039,7 @@ def multi_animation_four(
     def update(i):
         ax2.clear()
 
-        colour_adjust = log_norm(Data["individual_culture"][i])
+        colour_adjust = norm_neg_pos(Data["individual_culture"][i])
         ani_step_colours = cmap_culture(colour_adjust)
         nx.draw(
             G,
@@ -1061,7 +1067,7 @@ def multi_animation_four(
 
     # cbar = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap_culture), ax=ax)#This does a mapabble on the fly i think, not sure
     cbar_culture = fig.colorbar(
-        plt.cm.ScalarMappable(cmap=cmap_culture, norm=log_norm), ax=ax2
+        plt.cm.ScalarMappable(cmap=cmap_culture, norm=norm_neg_pos), ax=ax2
     )  # This does a mapabble on the fly i think, not sure
     cbar_culture.set_label("Culture")
 
@@ -1090,3 +1096,116 @@ def multi_animation_four(
     f = animateName + "/" + "multi_animation_four.mp4"
     writervideo = animation.FFMpegWriter(fps=fps)
     ani.save(f, writer=writervideo)
+
+def plot_carbon_emissions_total_prob_rewire(fileName: str, Data_list: list[Network], dpi_save:int, culture_momentum: float):
+    y_title = "Total Emissions"
+
+    fig, ax = plt.subplots()
+    ax.set_ylabel(r"%s" % y_title)
+    for i in range(len(Data_list)):
+        ax.plot(np.asarray(Data_list[i].history_time), np.asarray(Data_list[i].history_total_carbon_emissions), label = Data_list[i].prob_rewire)
+        ax.set_xlabel(r"Time")
+    ax.axvline(culture_momentum, color='r',linestyle = "--")
+    ax.legend()
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/comparing_total_emissions_prob_rewire.png"
+    fig.savefig(f, dpi=dpi_save)
+
+def plot_weighting_convergence_prob_rewire(fileName: str, Data_list: list[Network], dpi_save:int, culture_momentum: float):
+    y_title = "Weighting matrix convergence"
+
+    fig, ax = plt.subplots()
+    ax.set_ylabel(r"%s" % y_title)
+    for i in range(len(Data_list)):
+        ax.plot(np.asarray(Data_list[i].history_time), np.asarray(Data_list[i].history_weighting_matrix_convergence), label = Data_list[i].prob_rewire)
+        ax.set_xlabel(r"Time")
+    ax.axvline(culture_momentum, color='r',linestyle = "--")
+    ax.legend()
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/comparing_weighting_matrix_convergence_prob_rewire.png"
+    fig.savefig(f, dpi=dpi_save)
+
+def print_culture_time_series_prob_rewire(fileName: str, Data_list: list[Network], dpi_save:int,nrows: int, ncols:int, culture_momentum: float):
+    
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
+    y_title = "Culture"
+
+    for i, ax in enumerate(axes.flat):
+        for v in Data_list[i].agent_list:
+            ax.plot(np.asarray(Data_list[i].history_time), np.asarray(v.history_culture))
+
+        ax.set_xlabel(r"Time")
+        ax.set_ylabel(r"%s" % y_title)
+        ax.set_title("Prob rewire = {}".format(Data_list[i].prob_rewire))
+        ax.axvline(culture_momentum, color='r',linestyle = "--")
+
+    plt.tight_layout()
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/print_culture_time_series_prob_rewire.png"
+    fig.savefig(f, dpi=dpi_save)
+
+
+
+def print_intial_culture_networks_prob_rewire(fileName: str, Data_list: list[Network], dpi_save:int,nrows: int, ncols:int , layout: str, norm_neg_pos, cmap, node_size):
+    
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
+
+    for i, ax in enumerate(axes.flat):
+
+        G = nx.from_numpy_matrix(Data_list[i].history_weighting_matrix[0])
+        pos_culture_network = prod_pos(layout, G)
+        # print(i,ax)
+        ax.set_title("Prob rewire = {}".format(Data_list[i].prob_rewire))
+
+        indiv_culutre_list = [v.history_culture[0] for v in Data_list[i].agent_list]
+        #print(indiv_culutre_list)
+        colour_adjust = norm_neg_pos(indiv_culutre_list)
+        ani_step_colours = cmap(colour_adjust)
+
+        nx.draw(
+            G,
+            node_color=ani_step_colours,
+            ax=ax,
+            pos=pos_culture_network,
+            node_size=node_size,
+            edgecolors="black",
+        )
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/print_culture_time_series_prob_rewire.png"
+    fig.savefig(f, dpi=dpi_save)
+
+def prints_init_weighting_matrix_prob_rewire(
+    fileName: str, Data_list: list[Network], dpi_save:int,nrows: int, ncols:int, cmap, 
+):
+
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
+    # print(frames_list,Data["network_time"],Data["network_weighting_matrix"][20])
+    #print( len(Data["network_weighting_matrix"]),frames_list)
+    for i, ax in enumerate(axes.flat):
+        # print(i)
+        ax.matshow(
+            Data_list[i].history_weighting_matrix[0],
+            cmap=cmap,
+            aspect="auto",
+        )
+        ax.set_title("Prob rewire = {}".format(Data_list[i].prob_rewire))
+        ax.set_xlabel("Agent Link Strength")
+        ax.set_ylabel("Agent Link Strength")
+    plt.tight_layout()
+
+    # colour bar axes
+    fig.subplots_adjust(right=0.8)
+    cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
+    cbar = fig.colorbar(
+        plt.cm.ScalarMappable(cmap=cmap, norm=Normalize(vmin=0, vmax=1)),
+        cax=cbar_ax,
+    )  # This does a mapabble on the fly i think, not sure
+    cbar.set_label("Weighting matrix")
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/prints_init_weighting_matrix_prob_rewire.png"
+    fig.savefig(f, dpi=dpi_save)
