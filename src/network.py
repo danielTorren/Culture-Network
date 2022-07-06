@@ -11,13 +11,15 @@ class Network:
     """
 
     def __init__(self, parameters:list):
-        print(parameters)
+        #print(parameters)
         
         self.set_seed = int(round(parameters["set_seed"]))
         np.random.seed(
             self.set_seed
         )  # not sure if i have to be worried about the randomness of the system being reproducible
         
+        self.alpha_change = parameters["alpha_change"]
+
         self.opinion_dyanmics = parameters["opinion_dynamics"]
         self.save_data = parameters["save_data"]
         self.M = int(round(parameters["M"]))
@@ -26,37 +28,42 @@ class Network:
         self.phi_array = np.linspace(parameters["phi_list_lower"], parameters["phi_list_upper"], num=self.M)
         np.random.shuffle(self.phi_array)
 
-        
+        self.carbon_emissions = parameters["carbon_emissions"]#emissions associated with each behaviour
+
         #carbon price
-        self.carbon_price_policy_start = parameters["carbon_price_policy_start"]
-        self.carbon_price_init = parameters["carbon_price_init"]
-        self.carbon_price = 0
-        self.carbon_price_gradient = parameters["carbon_price_gradient"]
-        self.carbon_emissions = parameters["carbon_emissions"]
-
-        #infromation provision
-        self.attract_information_provision_list = parameters["attract_information_provision_list"]
-        self.nu = parameters["nu"]
-        self.eta = parameters["eta"]
-        self.t_IP_matrix  = parameters["t_IP_matrix"]
-        self.t_IP_list = np.empty(self.M)
+        self.carbon_price_state = parameters["carbon_price_state"]
+        if self.carbon_price_state:
+            self.carbon_price_policy_start = parameters["carbon_price_policy_start"]
+            self.carbon_price_init = parameters["carbon_price_init"]
+            self.carbon_price = 0
+            self.carbon_price_gradient = parameters["carbon_price_gradient"]
 
         
-        self.carbon_emissions = [1]*self.M#parameters[6]
+
+        #information provision
+        self.information_provision_state = parameters["information_provision_state"]
+        if self.information_provision_state:
+            self.attract_information_provision_list = parameters["attract_information_provision_list"]
+            self.nu = parameters["nu"]
+            self.eta = parameters["eta"]
+            self.t_IP_matrix  = parameters["t_IP_matrix"]
+            self.t_IP_list = np.empty(self.M)
+
         self.delta_t = parameters["delta_t"]
         self.K = int(
             round(parameters["K"])
         )  # round due to the sampling method producing floats, lets hope this works
         self.prob_rewire = parameters["prob_rewire"]
         
+        self.culture_momentum_real = parameters["culture_momentum_real"]
         self.culture_momentum = int(
-            round(parameters["culture_momentum"]/ self.delta_t)
+            round(self.culture_momentum_real/ self.delta_t)
         )  # round due to the sampling method producing floats, lets hope this works
-        print("cul mom:", parameters["culture_momentum"],self.culture_momentum )
+        #print("cul mom:", parameters["culture_momentum"],self.culture_momentum )
 
         self.learning_error_scale = parameters["learning_error_scale"]
 
-        self.discount_factor_list = np.linspace(1, 0.1, num=self.culture_momentum)
+        self.discount_factor = parameters["discount_factor"]
 
         (
             self.alpha_attract,
@@ -69,6 +76,13 @@ class Network:
         self.t = 0
         self.list_people = range(self.N)
 
+        # create indviduals#Do a homophilly
+        self.attract_matrix_init, self.threshold_matrix_init = self.generate_init_data_behaviours()#self.generate_init_data_behaviours_homo()
+
+        self.agent_list = self.create_agent_list()
+
+        self.behavioural_attract_matrix = self.calc_behavioural_attract_matrix()#need to leave outside as its a thing being saved, why is it being saved???
+
         # create network
         (
             self.adjacency_matrix,
@@ -77,12 +91,6 @@ class Network:
             self.ego_networks,
             self.neighbours_list,
         ) = self.create_weighting_matrix()
-
-        # create indviduals
-        self.attract_matrix_init, self.threshold_matrix_init = self.generate_init_data_behaviours()
-        self.agent_list = self.create_agent_list()
-
-        self.behavioural_attract_matrix = self.calc_behavioural_attract_matrix()#need to leave outside as its a thing being saved, why is it being saved???
 
         if self.opinion_dyanmics == "SELECT":
             ego_influence = self.calc_ego_influence_alt()
@@ -93,7 +101,8 @@ class Network:
 
         self.social_component_matrix = self.calc_social_component_matrix(ego_influence)
 
-        self.weighting_matrix,__ = self.update_weightings()  # Should I update the weighting matrix? I feel like it makes sense if its not time dependant.
+        if self.alpha_change == 1 or 0.5:
+            self.weighting_matrix,__ = self.update_weightings_alt()  # Should I update the weighting matrix? I feel like it makes sense if its not time dependant.
 
         self.total_carbon_emissions = self.calc_total_emissions()
 
@@ -113,8 +122,6 @@ class Network:
 
             self.history_weighting_matrix = [self.weighting_matrix]
             self.history_social_component_matrix = [self.social_component_matrix]
-            self.history_carbon_price = [self.carbon_price]
-            self.history_information_provision = []
             self.history_cultural_var = [self.cultural_var]
             self.history_time = [self.t]
             self.history_total_carbon_emissions = [self.total_carbon_emissions]
@@ -122,6 +129,11 @@ class Network:
             self.history_average_culture = [self.average_culture]
             self.history_min_culture = [self.min_culture]
             self.history_max_culture = [self.max_culture]
+
+            if self.carbon_price_state:
+                self.history_carbon_price = [self.carbon_price]
+            if self.information_provision_state:
+                self.history_information_provision = []
 
     def normlize_matrix(self, matrix: npt.NDArray) ->  npt.NDArray:
         row_sums = matrix.sum(axis=1)
@@ -167,25 +179,57 @@ class Network:
         )
         return np.asarray(attract_matrix),np.asarray(threshold_matrix)
 
+    def produce_circular_list(self,list):
+        first_half = list[::2]
+        second_half =  (list[1::2])[::-1]
+        circular = first_half + second_half
+        return circular
+
+    def generate_init_data_behaviours_homo(self) -> tuple:
+        ###init_attract, init_threshold,carbon_emissions
+        attract_list = [np.random.beta(self.alpha_attract, self.beta_attract, size=self.M) for n in self.list_people]
+        threshold_list = [np.random.beta(self.alpha_threshold, self.beta_threshold, size=self.M) for n in self.list_people]
+        attract_matrix = np.asarray(attract_list)
+        threshold_matrix = np.asarray(threshold_list)
+
+        behave_value_matrix = attract_matrix - threshold_matrix
+        culture_list = behave_value_matrix.sum(axis=1)/behave_value_matrix.shape[1]
+
+
+        attract_list_sorted = [x for _,x in sorted(zip(culture_list,attract_list))]
+        threshold_list_sorted = [x for _,x in sorted(zip(culture_list,threshold_list))]
+
+        attract_array_circular = np.asarray(self.produce_circular_list(attract_list_sorted))
+        threshold_array_circular = np.asarray(self.produce_circular_list(threshold_list_sorted))
+
+        return attract_array_circular,threshold_array_circular
+
     def create_agent_list(self) -> list:
-        agent_list = [
-            Individual(
-                self.attract_matrix_init[i],
-                self.threshold_matrix_init[i],
-                self.delta_t,
-                self.culture_momentum,
-                self.t,
-                self.M,
-                self.save_data,
-                self.carbon_emissions,
-                self.discount_factor_list,
-                self.attract_information_provision_list,
-                self.nu,
-                self.eta,
-                self.t_IP_list
-            )
-            for i in self.list_people
-        ]
+
+        individual_params = {
+                "delta_t" : self.delta_t,
+                "culture_momentum" : self.culture_momentum,
+                "t" : self.t,
+                "M": self.M,
+                "save_data" : self.save_data,
+                "carbon_emissions" : self.carbon_emissions,
+                "discount_factor" : self.discount_factor,
+                "carbon_price_state" : self.carbon_price_state,
+                "information_provision_state" : self.information_provision_state,
+        }
+
+        if self.carbon_price_state:
+            individual_params["carbon_price"] = self.carbon_price
+
+        if self.information_provision_state:
+            individual_params["attract_information_provision_list"] =  self.attract_information_provision_list
+            individual_params["nu"] =  self.nu
+            individual_params["eta"] = self.eta
+            individual_params["t_IP_list"] = self.t_IP_list
+
+
+        agent_list = [Individual(individual_params,self.attract_matrix_init[n],self.threshold_matrix_init[n]) for n in self.list_people]
+
         return agent_list
 
     def calc_behavioural_attract_matrix(self) ->  npt.NDArray:
@@ -223,9 +267,13 @@ class Network:
 
     def update_weightings(self)-> float:
         culture_list = np.array([x.culture for x in self.agent_list])
+
+        #use the chosen method
         difference_matrix = np.subtract.outer(culture_list, culture_list)
         alpha = (1 - 0.5*np.abs(difference_matrix))
         diagonal = self.adjacency_matrix*alpha
+
+        #
         norm_weighting_matrix = self.normlize_matrix(diagonal)
 
         if self.save_data:
@@ -236,8 +284,31 @@ class Network:
         else:
             return norm_weighting_matrix,0#BODGE! bodge for mypy
 
+    def update_weightings_alt(self)-> float:
+        culture_list = np.array([x.culture for x in self.agent_list])
+
+        #use the chosen method
+        difference_matrix = np.subtract.outer(culture_list, culture_list)
+        alpha = np.exp(-np.abs(difference_matrix))
+        #print(alpha)
+        diagonal = self.adjacency_matrix*alpha
+        #print(diagonal)
+
+        #
+        norm_weighting_matrix = self.normlize_matrix(diagonal)
+        #print(norm_weighting_matrix)
+        
+
+        if self.save_data:
+            total_difference = self.calc_total_weighting_matrix_difference(
+                self.weighting_matrix, norm_weighting_matrix
+            )
+            return norm_weighting_matrix,total_difference
+        else:
+            return norm_weighting_matrix,0#BODGE! bodge for mypy
+
     def calc_total_emissions(self) -> int:
-        return sum([x.carbon_emissions for x in self.agent_list])
+        return sum([x.total_carbon_emissions for x in self.agent_list])
 
     def calc_network_culture(self) ->  tuple[float, float, float, float]:
         culture_list = [x.culture for x in self.agent_list]
@@ -250,14 +321,14 @@ class Network:
 
     def update_individuals(self):
         for i in self.list_people:
-            self.agent_list[i].next_step(self.t,self.social_component_matrix[i],self.carbon_price)
+            if self.carbon_price_state:
+                self.agent_list[i].carbon_price = self.carbon_price
+            self.agent_list[i].next_step(self.t,self.social_component_matrix[i])
 
     def save_data_network(self):
         self.history_time.append(self.t)
         self.history_weighting_matrix.append(self.weighting_matrix)
-
         self.history_social_component_matrix.append(self.social_component_matrix)
-        self.history_carbon_price.append(self.carbon_price)
         self.history_total_carbon_emissions.append(self.total_carbon_emissions)
         self.history_weighting_matrix_convergence.append(
             self.weighting_matrix_convergence
@@ -267,23 +338,30 @@ class Network:
         self.history_min_culture.append(self.min_culture)
         self.history_max_culture.append(self.max_culture)
 
+        if self.carbon_price_state:
+            self.history_carbon_price.append(self.carbon_price)
+
     def next_step(self):
         #print("HEYE")
         # advance a time step
         self.t += self.delta_t
 
         #unsure where this step should go SORT THIS OUT
-        self.update_information_provision()
-        self.update_carbon_price()
+        
+        if self.information_provision_state:
+            self.update_information_provision()
+        if self.carbon_price_state:
+            self.update_carbon_price()
 
         # execute step
         self.update_individuals()
 
         # update network parameters for next step
-        if self.save_data:
-            self.weighting_matrix,self.weighting_matrix_convergence = self.update_weightings()
-        else:
-            self.weighting_matrix,__ = self.update_weightings()
+        if self.alpha_change == 1:
+                if self.save_data:
+                        self.weighting_matrix,self.weighting_matrix_convergence = self.update_weightings_alt()
+                else:
+                        self.weighting_matrix,__ = self.update_weightings_alt()
         
         self.behavioural_attract_matrix = self.calc_behavioural_attract_matrix()
 
