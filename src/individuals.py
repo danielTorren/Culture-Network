@@ -49,6 +49,7 @@ class Individual:
 
 
     def update_av_behaviour_list(self):
+        #print("av behav: ",self.av_behaviour_list)
         if len(self.av_behaviour_list) < self.culture_momentum:
             self.av_behaviour_list.append(self.av_behaviour)
         else:
@@ -59,7 +60,8 @@ class Individual:
         weighted_sum_behaviours = 0
         for i in range(len(self.av_behaviour_list)):
             weighted_sum_behaviours += self.discount_factor_list[i]*self.av_behaviour_list[i]
-        normalized_culture = weighted_sum_behaviours/self.culture_momentum
+        normalized_culture = weighted_sum_behaviours/len(self.av_behaviour_list)
+        #print(len(self.av_behaviour_list))
         return normalized_culture
 
     def update_values(self):
