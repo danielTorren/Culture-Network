@@ -9,10 +9,10 @@ from utility import createFolderSA
 save_data = True
 opinion_dynamics =  "DEGROOT" #  "DEGROOT"  "SELECT"
 
-K = 50  # k nearest neighbours INTEGER
+K = 2  # k nearest neighbours INTEGER
 M = 3  # number of behaviours
-N = 1000  # number of agents
-total_time = 20
+N = 10  # number of agents
+total_time = 1
 delta_t = 0.01  # time step size
 
 prob_rewire = 0.1  # re-wiring probability?

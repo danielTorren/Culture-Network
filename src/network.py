@@ -77,7 +77,7 @@ class Network:
         self.list_people = range(self.N)
 
         # create indviduals#Do a homophilly
-        self.attract_matrix_init, self.threshold_matrix_init = self.generate_init_data_behaviours_homo()
+        self.attract_matrix_init, self.threshold_matrix_init = self.generate_init_data_behaviours()#self.generate_init_data_behaviours_homo()
 
         self.agent_list = self.create_agent_list()
 
