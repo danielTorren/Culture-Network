@@ -559,7 +559,9 @@ def prints_culture_network(
         colour_adjust = norm_neg_pos(Data["individual_culture"][frames_list[i]])
         #colour_adjust = (Data["individual_culture"][frames_list[i]] + 1)/2
         #colour_adjust = Data["individual_culture"][frames_list[i]]
+        #print("colour_adjust", colour_adjust)
         ani_step_colours = cmap_culture(colour_adjust)
+        #print("ani_step_colours",ani_step_colours)
 
         nx.draw(
             G,
@@ -1209,3 +1211,102 @@ def prints_init_weighting_matrix_prob_rewire(
     plotName = fileName + "/Plots"
     f = plotName + "/prints_init_weighting_matrix_prob_rewire.png"
     fig.savefig(f, dpi=dpi_save)
+
+
+def print_intial_culture_networks_homophily_fischer(fileName: str, Data_list: list[Network], dpi_save:int,nrows: int, ncols:int , layout: str, norm_neg_pos, cmap, node_size):
+    
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
+
+    for i, ax in enumerate(axes.flat):
+
+        G = nx.from_numpy_matrix(Data_list[i].history_weighting_matrix[0])
+        pos_culture_network = prod_pos(layout, G)
+        # print(i,ax)
+        ax.set_title("inverse_homophily = {}".format(Data_list[i].inverse_homophily))
+
+        indiv_culutre_list = [v.history_culture[0] for v in Data_list[i].agent_list]
+        #print(indiv_culutre_list)
+        colour_adjust = norm_neg_pos(indiv_culutre_list)
+        ani_step_colours = cmap(colour_adjust)
+
+        nx.draw(
+            G,
+            node_color=ani_step_colours,
+            ax=ax,
+            pos=pos_culture_network,
+            node_size=node_size,
+            edgecolors="black",
+        )
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/print_intial_culture_networks_homophily_fischer.png"
+    fig.savefig(f, dpi=dpi_save)
+
+def print_culture_time_series_homophily_fischer(fileName: str, Data_list: list[Network], dpi_save:int,nrows: int, ncols:int):
+    
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
+    y_title = "Culture"
+
+    for i, ax in enumerate(axes.flat):
+        for v in Data_list[i].agent_list:
+            ax.plot(np.asarray(Data_list[i].history_time), np.asarray(v.history_culture))
+
+        ax.set_xlabel(r"Time")
+        ax.set_ylabel(r"%s" % y_title)
+        ax.set_title("inverse homophily = {}".format(Data_list[i].inverse_homophily))
+        #ax.axvline(culture_momentum, color='r',linestyle = "--")
+
+    plt.tight_layout()
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/print_culture_time_series_homophily_fischer.png"
+    fig.savefig(f, dpi=dpi_save)
+
+def prints_culture_network_homophily_fischer(
+    FILENAME: str, Data: DataFrame,layout:str, cmap_culture: LinearSegmentedColormap,node_size:int, nrows:int, ncols:int, norm_neg_pos: SymLogNorm, frames_list:list[int], round_dec:int, dpi_save:int
+):
+
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
+
+    # need to generate the network from the matrix
+    G = nx.from_numpy_matrix(Data.history_weighting_matrix[0])
+
+    # get pos
+    pos_culture_network = prod_pos(layout, G)
+
+    for i, ax in enumerate(axes.flat):
+        # print(i,ax)
+        ax.set_title(
+            "Time= {}".format(round(Data.history_time[frames_list[i]], round_dec))
+        )
+
+        culture_list = [x.history_culture[frames_list[i]] for x in Data.agent_list]
+        print(culture_list)
+        colour_adjust = norm_neg_pos(np.asarray(culture_list))
+        #colour_adjust = (Data["individual_culture"][frames_list[i]] + 1)/2
+        #colour_adjust = Data["individual_culture"][frames_list[i]]
+        ani_step_colours = cmap_culture(colour_adjust)
+
+        nx.draw(
+            G,
+            node_color=ani_step_colours,
+            ax=ax,
+            pos=pos_culture_network,
+            node_size=node_size,
+            edgecolors="black",
+        )
+
+    plt.tight_layout()
+
+    # print("cmap_culture", cmap_culture)
+
+    # colour bar axes
+    fig.subplots_adjust(right=0.8)
+    cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
+    cbar = fig.colorbar(
+        plt.cm.ScalarMappable(cmap=cmap_culture, norm=Normalize(vmin=-1, vmax=1)), cax=cbar_ax
+    )  # This does a mapabble on the fly i think, not sure
+    cbar.set_label("Culture")
+
+    #f = FILENAME + "/Plots/prints_culture_network_homophily_fischer.png"
+    #fig.savefig(f, dpi=dpi_save)

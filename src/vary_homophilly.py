@@ -7,41 +7,37 @@ from network import Network
 from utility import createFolderSA
 import networkx as nx
 from plot import ( 
-    prod_pos,
-    plot_carbon_emissions_total_prob_rewire,
-    plot_weighting_convergence_prob_rewire,
-    print_culture_time_series_prob_rewire,
-    print_intial_culture_networks_prob_rewire,
-    plot_beta_distributions,
-    prints_init_weighting_matrix_prob_rewire,
+    print_intial_culture_networks_homophily_fischer,
+    print_culture_time_series_homophily_fischer,
+    prints_culture_network_homophily_fischer
     )
 from matplotlib.colors import LinearSegmentedColormap,  Normalize
 
 save_data = True
-opinion_dynamics =  "SELECT" #  "DEGROOT"  "SELECT"
+opinion_dynamics =  "DEGROOT" #  "DEGROOT"  "SELECT"
 carbon_price_state = False
 information_provision_state = False
 
 #Social emissions model
-K = 15  # k nearest neighbours INTEGER
+K = 5  # k nearest neighbours INTEGER
 M = 3  # number of behaviours
-N = 50  # number of agents
-total_time = 20
+N = 20  # number of agents
+total_time = 1
 delta_t = 0.01  # time step size
-#prob_rewire = 0.2  # re-wiring probability?
-alpha_attract = 0.2#2  ##inital distribution parameters - doing the inverse inverts it!
-beta_attract = 0.2#3
-alpha_threshold = 0.2#3
-beta_threshold = 0.2#2
+prob_rewire = 0.2  # re-wiring probability?
+alpha_attract = 1#2  ##inital distribution parameters - doing the inverse inverts it!
+beta_attract = 1#3
+alpha_threshold = 1#3
+beta_threshold = 1#2
 time_steps_max = int(
     total_time / delta_t
 )  # number of time steps max, will stop if culture converges
-culture_momentum = 0.1# real time over which culture is calculated for INTEGER
-culture_momentum_steps = round(culture_momentum/ delta_t)
-set_seed = 10  ##reproducibility INTEGER
+culture_momentum_real = 0.5# real time over which culture is calculated for INTEGER
+set_seed = 1  ##reproducibility INTEGER
 phi_list_lower,phi_list_upper = 0.1,1
-learning_error_scale = 0.01  # 1 standard distribution is 2% error
+learning_error_scale = 0.05  # 1 standard distribution is 2% error
 carbon_emissions = [1]*M
+discount_factor = 0.8
 
 #Infromation provision parameters
 if information_provision_state:
@@ -69,9 +65,9 @@ params = {
     "N": N,
     "M": M,
     "K": K,
-    #"prob_rewire": prob_rewire,
+    "prob_rewire": prob_rewire,
     "set_seed": set_seed,
-    "culture_momentum": culture_momentum,
+    "culture_momentum_real": culture_momentum_real,
     "learning_error_scale": learning_error_scale,
     "alpha_attract": alpha_attract,
     "beta_attract": beta_attract,
@@ -79,6 +75,7 @@ params = {
     "beta_threshold": beta_threshold,
     "carbon_emissions" : carbon_emissions,
     "alpha_change" : 1,
+    "discount_factor": discount_factor,
 }
 
 if carbon_price_state:
@@ -99,36 +96,46 @@ cmap_weighting = "Reds"
 #norm_neg_pos = plt.cm.ScalarMappable(cmap=cmap, norm=Normalize(vmin=-1, vmax=1))
 norm_neg_pos = Normalize(vmin=-1, vmax=1)
 node_size = 50
-
+nrows = 2
+ncols = 2
+layout = "circular"
+round_dec = 2
+frame_num = ncols * nrows - 1
 bin_num = 1000
+
 num_counts = 100000
 
 
 if __name__ == "__main__":
 
-        fileName = "results/homophilly_variation_%s_%s_%s" % (str(params["N"]),str(params["time_steps_max"]),str(params["K"]))
+        fileName = "results/fischer_homophilly_variation_%s_%s_%s" % (str(params["N"]),str(params["time_steps_max"]),str(params["K"]))
         data = []
-        reps = 9
-        nrows = 3
-        ncols = 3
+        reps = 6
+
         
-        prob_rewire_list = np.linspace(0,1,reps)
+        inverse_homophily_list = np.linspace(0,1,reps)
 
         #print(list(prob_rewire_list))
-        for i in prob_rewire_list:
+        for i in inverse_homophily_list:
             #print(i)
-            params["prob_rewire"] = i
+            params["inverse_homophily"] = i
             social_network = generate_data(params)
             data.append(social_network)
 
         createFolderSA(fileName)
 
-        plot_beta_distributions(fileName,alpha_attract,beta_attract,alpha_threshold,beta_threshold,bin_num,num_counts,dpi_save)
+        #plot_beta_distributions(fileName,alpha_attract,beta_attract,alpha_threshold,beta_threshold,bin_num,num_counts,dpi_save)
 
-        plot_carbon_emissions_total_prob_rewire(fileName, data, dpi_save,culture_momentum)
-        plot_weighting_convergence_prob_rewire(fileName, data, dpi_save,culture_momentum)
-        print_culture_time_series_prob_rewire(fileName, data, dpi_save, nrows, ncols,culture_momentum)
-        print_intial_culture_networks_prob_rewire(fileName, data, dpi_save, nrows, ncols , layout, norm_neg_pos, cmap, node_size)
-        prints_init_weighting_matrix_prob_rewire(fileName, data, dpi_save,nrows, ncols, cmap_weighting)
+        #plot_carbon_emissions_total_prob_rewire(fileName, data, dpi_save,culture_momentum)
+        #plot_weighting_convergence_prob_rewire(fileName, data, dpi_save,culture_momentum)
+        #print_culture_time_series_homophily_fischer(fileName, data, dpi_save, nrows, ncols)
+        #print_intial_culture_networks_homophily_fischer(fileName, data, dpi_save, nrows, ncols , layout, norm_neg_pos, cmap, node_size)
+        #prints_init_weighting_matrix_prob_rewire(fileName, data, dpi_save,nrows, ncols, cmap_weighting)
 
+        frames_list = [0,int(round(time_steps_max/3)),int(round(2*time_steps_max/3)),time_steps_max]
+        print(frames_list)
+
+        prints_culture_network_homophily_fischer(fileName, data[0],layout, cmap ,node_size,  nrows, ncols ,  norm_neg_pos,frames_list, round_dec, dpi_save)
+        prints_culture_network_homophily_fischer(fileName, data[3],layout, cmap ,node_size,  nrows, ncols ,  norm_neg_pos,frames_list, round_dec, dpi_save)
+        prints_culture_network_homophily_fischer(fileName, data[-1],layout, cmap ,node_size,  nrows, ncols ,  norm_neg_pos,frames_list, round_dec, dpi_save)
         plt.show()

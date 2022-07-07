@@ -44,16 +44,19 @@ carbon_price_state = False
 information_provision_state = False
 
 #Social emissions model
-K = 30  # k nearest neighbours INTEGER
+K = 10  # k nearest neighbours INTEGER
 M = 3  # number of behaviours
 N = 100  # number of agents
 total_time = 10
 delta_t = 0.01  # time step size
+
 prob_rewire = 0.2  # re-wiring probability?
-alpha_attract = 1#2  ##inital distribution parameters - doing the inverse inverts it!
-beta_attract = 1#3
-alpha_threshold = 1#3
-beta_threshold = 1#2
+
+alpha_attract = 8#2  ##inital distribution parameters - doing the inverse inverts it!
+beta_attract = 2#3
+alpha_threshold = 2#3
+beta_threshold = 4#2
+
 time_steps_max = int(
     total_time / delta_t
 )  # number of time steps max, will stop if culture converges
@@ -62,7 +65,8 @@ set_seed = 1  ##reproducibility INTEGER
 phi_list_lower,phi_list_upper = 0.1,1
 learning_error_scale = 0.05  # 1 standard distribution is 2% error
 carbon_emissions = [1]*M
-discount_factor = 0.8
+discount_factor = 0.2
+inverse_homophily = 0.5
 
 #Infromation provision parameters
 if information_provision_state:
@@ -100,7 +104,8 @@ params = {
     "beta_threshold": beta_threshold,
     "carbon_emissions" : carbon_emissions,
     "alpha_change" : 1,
-    "discount_factor": discount_factor
+    "discount_factor": discount_factor,
+    "inverse_homophily": inverse_homophily#1 is total mixing, 0 is no mixing
 }
 
 if carbon_price_state:
@@ -226,7 +231,7 @@ ncols = 3
 
 #print("time_steps_max", time_steps_max)
 frame_num = ncols * nrows - 1
-scale_factor = time_steps_max
+scale_factor = time_steps_max*2
 
 
 bin_num = 1000
@@ -271,21 +276,21 @@ if __name__ == "__main__":
         ###PLOTS
         plot_beta_distributions(FILENAME,alpha_attract,beta_attract,alpha_threshold,beta_threshold,bin_num,num_counts,dpi_save,)
         plot_culture_timeseries(FILENAME, Data, dpi_save)
-        plot_value_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save)
+        #plot_value_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save)
         #plot_threshold_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save)
-        plot_attract_timeseries(FILENAME, Data, nrows_behave, ncols_behave, dpi_save)
+        #plot_attract_timeseries(FILENAME, Data, nrows_behave, ncols_behave, dpi_save)
         #plot_carbon_price_timeseries(FILENAME,Data,dpi_save)
         #plot_total_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
-        plot_av_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
-        plot_weighting_matrix_convergence_timeseries(FILENAME, Data, dpi_save)
+        #plot_av_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
+        #plot_weighting_matrix_convergence_timeseries(FILENAME, Data, dpi_save)
         #plot_cultural_range_timeseries(FILENAME, Data, dpi_save)
         #plot_average_culture_timeseries(FILENAME,Data,dpi_save)
 
         ###PRINTS
         
-        prints_weighting_matrix(FILENAME,Data,cmap_weighting,nrows,ncols,frames_list,round_dec,dpi_save)
+        #prints_weighting_matrix(FILENAME,Data,cmap_weighting,nrows,ncols,frames_list,round_dec,dpi_save)
         #prints_behavioural_matrix(FILENAME,Data,cmap,nrows,ncols,frames_list,round_dec,dpi_save)
-        #prints_culture_network(FILENAME,Data,layout,cmap,node_size,nrows,ncols,norm_neg_pos,frames_list,round_dec,dpi_save)
+        prints_culture_network(FILENAME,Data,layout,cmap,node_size,nrows,ncols,norm_neg_pos,frames_list,round_dec,dpi_save)
         #print_network_social_component_matrix(FILENAME,Data,cmap,nrows,ncols,frames_list,round_dec,dpi_save)
         #print_network_information_provision(FILENAME,Data,cmap,nrows,ncols,frames_list,round_dec,dpi_save)
 

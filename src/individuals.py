@@ -21,7 +21,7 @@ class Individual:
         self.save_data = individual_params["save_data"]
         self.carbon_intensive_list = individual_params["carbon_emissions"]
         self.culture_momentum = individual_params["culture_momentum"]
-        self.discount_factor = individual_params["discount_factor"]
+        self.discount_list = individual_params["discount_list"]
 
         self.carbon_price_state = individual_params["carbon_price_state"]
         self.information_provision_state = individual_params["information_provision_state"]
@@ -72,7 +72,7 @@ class Individual:
     def calc_culture(self) -> float:
         weighted_sum_behaviours = 0
         for i in range(len(self.av_behaviour_list)):
-            weighted_sum_behaviours += (self.discount_factor)**(i)*self.av_behaviour_list[i]
+            weighted_sum_behaviours += self.discount_list[i]*self.av_behaviour_list[i]
         normalized_culture = weighted_sum_behaviours/len(self.av_behaviour_list)
         #print(len(self.av_behaviour_list))
         return normalized_culture
