@@ -8,40 +8,55 @@ from utility import createFolderSA
 import networkx as nx
 from plot import ( 
     prod_pos,
-    plot_carbon_emissions_total_prob_rewire,
-    plot_weighting_convergence_prob_rewire,
-    print_culture_time_series_prob_rewire,
-    print_intial_culture_networks_prob_rewire,
+    plot_carbon_emissions_total_orderliness,
+    plot_weighting_convergence_orderliness,
+    print_culture_time_series_orderliness,
+    print_intial_culture_networks_orderliness,
     plot_beta_distributions,
-    prints_init_weighting_matrix_prob_rewire,
+    prints_init_weighting_matrix_orderliness,
     )
 from matplotlib.colors import LinearSegmentedColormap,  Normalize
 
 save_data = True
-opinion_dynamics =  "SELECT" #  "DEGROOT"  "SELECT"
+opinion_dynamics =  "DEGROOT" #  "DEGROOT"  "SELECT"
 carbon_price_state = False
 information_provision_state = False
+linear_alpha_diff_state = True
+homophily_state = True
 
 #Social emissions model
-K = 15  # k nearest neighbours INTEGER
+K = 10  # k nearest neighbours INTEGER
 M = 3  # number of behaviours
-N = 50  # number of agents
-total_time = 20
+N = 100  # number of agents
+total_time = 10
+
 delta_t = 0.01  # time step size
-#prob_rewire = 0.2  # re-wiring probability?
-alpha_attract = 0.2#2  ##inital distribution parameters - doing the inverse inverts it!
-beta_attract = 0.2#3
-alpha_threshold = 0.2#3
-beta_threshold = 0.2#2
+culture_momentum_real = 1# real time over which culture is calculated for INTEGER, NEEDS TO BE MROE THAN DELTA t
+
+prob_rewire = 0.2  # re-wiring probability?
+#orderliness = 0.5
+
+alpha_attract = 0.1#2  ##inital distribution parameters - doing the inverse inverts it!
+beta_attract = 0.1#3
+alpha_threshold = 0.1#3
+beta_threshold = 0.1#2
+
 time_steps_max = int(
     total_time / delta_t
 )  # number of time steps max, will stop if culture converges
-culture_momentum = 0.1# real time over which culture is calculated for INTEGER
-culture_momentum_steps = round(culture_momentum/ delta_t)
-set_seed = 10  ##reproducibility INTEGER
+
+set_seed = 1  ##reproducibility INTEGER
 phi_list_lower,phi_list_upper = 0.1,1
-learning_error_scale = 0.01  # 1 standard distribution is 2% error
+learning_error_scale = 0.05  # 1 standard distribution is 2% error
 carbon_emissions = [1]*M
+
+discount_factor = 0.6
+present_discount_factor = 0.8
+
+confirmation_bias = 2
+
+
+
 
 #Infromation provision parameters
 if information_provision_state:
@@ -63,15 +78,17 @@ params = {
     "time_steps_max": time_steps_max, 
     "carbon_price_state" : carbon_price_state,
     "information_provision_state" : information_provision_state,
+    "linear_alpha_diff_state": linear_alpha_diff_state,
+    "homophily_state": homophily_state,
     "delta_t": delta_t,
     "phi_list_lower": phi_list_lower,
     "phi_list_upper": phi_list_upper,
     "N": N,
     "M": M,
     "K": K,
-    #"prob_rewire": prob_rewire,
+    "prob_rewire": prob_rewire,
     "set_seed": set_seed,
-    "culture_momentum": culture_momentum,
+    "culture_momentum_real": culture_momentum_real,
     "learning_error_scale": learning_error_scale,
     "alpha_attract": alpha_attract,
     "beta_attract": beta_attract,
@@ -79,6 +96,11 @@ params = {
     "beta_threshold": beta_threshold,
     "carbon_emissions" : carbon_emissions,
     "alpha_change" : 1,
+    "discount_factor": discount_factor,
+    "present_discount_factor": present_discount_factor,
+    "confirmation_bias": confirmation_bias,
+    #"orderliness": orderliness
+
 }
 
 if carbon_price_state:
@@ -108,16 +130,17 @@ if __name__ == "__main__":
 
         fileName = "results/homophilly_variation_%s_%s_%s" % (str(params["N"]),str(params["time_steps_max"]),str(params["K"]))
         data = []
+        
         reps = 9
         nrows = 3
         ncols = 3
-        
-        prob_rewire_list = np.linspace(0,1,reps)
+
+        orderliness_list = np.linspace(0,1,reps)
 
         #print(list(prob_rewire_list))
-        for i in prob_rewire_list:
+        for i in orderliness_list:
             #print(i)
-            params["prob_rewire"] = i
+            params["orderliness"] = i
             social_network = generate_data(params)
             data.append(social_network)
 
@@ -125,10 +148,10 @@ if __name__ == "__main__":
 
         plot_beta_distributions(fileName,alpha_attract,beta_attract,alpha_threshold,beta_threshold,bin_num,num_counts,dpi_save)
 
-        plot_carbon_emissions_total_prob_rewire(fileName, data, dpi_save,culture_momentum)
-        plot_weighting_convergence_prob_rewire(fileName, data, dpi_save,culture_momentum)
-        print_culture_time_series_prob_rewire(fileName, data, dpi_save, nrows, ncols,culture_momentum)
-        print_intial_culture_networks_prob_rewire(fileName, data, dpi_save, nrows, ncols , layout, norm_neg_pos, cmap, node_size)
-        prints_init_weighting_matrix_prob_rewire(fileName, data, dpi_save,nrows, ncols, cmap_weighting)
+        plot_carbon_emissions_total_orderliness(fileName, data, dpi_save)
+        plot_weighting_convergence_orderliness(fileName, data, dpi_save)
+        print_culture_time_series_orderliness(fileName, data, dpi_save, nrows, ncols)
+        print_intial_culture_networks_orderliness(fileName, data, dpi_save, nrows, ncols , layout, norm_neg_pos, cmap, node_size)
+        #prints_init_weighting_matrix_orderliness(fileName, data, dpi_save,nrows, ncols, cmap_weighting)
 
         plt.show()

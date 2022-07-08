@@ -1097,37 +1097,37 @@ def multi_animation_four(
     writervideo = animation.FFMpegWriter(fps=fps)
     ani.save(f, writer=writervideo)
 
-def plot_carbon_emissions_total_prob_rewire(fileName: str, Data_list: list[Network], dpi_save:int, culture_momentum: float):
+def plot_carbon_emissions_total_orderliness(fileName: str, Data_list: list[Network], dpi_save:int ):
     y_title = "Total Emissions"
 
     fig, ax = plt.subplots()
     ax.set_ylabel(r"%s" % y_title)
     for i in range(len(Data_list)):
-        ax.plot(np.asarray(Data_list[i].history_time), np.asarray(Data_list[i].history_total_carbon_emissions), label = Data_list[i].prob_rewire)
+        ax.plot(np.asarray(Data_list[i].history_time), np.asarray(Data_list[i].history_total_carbon_emissions), label = Data_list[i].orderliness)
         ax.set_xlabel(r"Time")
-    ax.axvline(culture_momentum, color='r',linestyle = "--")
+    #ax.axvline(culture_momentum, color='r',linestyle = "--")
     ax.legend()
 
     plotName = fileName + "/Plots"
-    f = plotName + "/comparing_total_emissions_prob_rewire.png"
+    f = plotName + "/comparing_total_emissions_orderliness.png"
     fig.savefig(f, dpi=dpi_save)
 
-def plot_weighting_convergence_prob_rewire(fileName: str, Data_list: list[Network], dpi_save:int, culture_momentum: float):
+def plot_weighting_convergence_orderliness(fileName: str, Data_list: list[Network], dpi_save:int):
     y_title = "Weighting matrix convergence"
 
     fig, ax = plt.subplots()
     ax.set_ylabel(r"%s" % y_title)
     for i in range(len(Data_list)):
-        ax.plot(np.asarray(Data_list[i].history_time), np.asarray(Data_list[i].history_weighting_matrix_convergence), label = Data_list[i].prob_rewire)
+        ax.plot(np.asarray(Data_list[i].history_time), np.asarray(Data_list[i].history_weighting_matrix_convergence), label = Data_list[i].orderliness)
         ax.set_xlabel(r"Time")
-    ax.axvline(culture_momentum, color='r',linestyle = "--")
+    #ax.axvline(culture_momentum, color='r',linestyle = "--")
     ax.legend()
 
     plotName = fileName + "/Plots"
-    f = plotName + "/comparing_weighting_matrix_convergence_prob_rewire.png"
+    f = plotName + "/comparing_weighting_matrix_convergence_orderliness.png"
     fig.savefig(f, dpi=dpi_save)
 
-def print_culture_time_series_prob_rewire(fileName: str, Data_list: list[Network], dpi_save:int,nrows: int, ncols:int, culture_momentum: float):
+def print_culture_time_series_orderliness(fileName: str, Data_list: list[Network], dpi_save:int,nrows: int, ncols:int):
     
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
     y_title = "Culture"
@@ -1138,18 +1138,18 @@ def print_culture_time_series_prob_rewire(fileName: str, Data_list: list[Network
 
         ax.set_xlabel(r"Time")
         ax.set_ylabel(r"%s" % y_title)
-        ax.set_title("Prob rewire = {}".format(Data_list[i].prob_rewire))
-        ax.axvline(culture_momentum, color='r',linestyle = "--")
+        ax.set_title("Orderliness = {}".format(Data_list[i].orderliness))
+        #ax.axvline(culture_momentum, color='r',linestyle = "--")
 
     plt.tight_layout()
 
     plotName = fileName + "/Plots"
-    f = plotName + "/print_culture_time_series_prob_rewire.png"
+    f = plotName + "/print_culture_time_series_orderliness.png"
     fig.savefig(f, dpi=dpi_save)
 
 
 
-def print_intial_culture_networks_prob_rewire(fileName: str, Data_list: list[Network], dpi_save:int,nrows: int, ncols:int , layout: str, norm_neg_pos, cmap, node_size):
+def print_intial_culture_networks_orderliness(fileName: str, Data_list: list[Network], dpi_save:int,nrows: int, ncols:int , layout: str, norm_neg_pos, cmap, node_size):
     
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
 
@@ -1158,7 +1158,7 @@ def print_intial_culture_networks_prob_rewire(fileName: str, Data_list: list[Net
         G = nx.from_numpy_matrix(Data_list[i].history_weighting_matrix[0])
         pos_culture_network = prod_pos(layout, G)
         # print(i,ax)
-        ax.set_title("Prob rewire = {}".format(Data_list[i].prob_rewire))
+        ax.set_title("Orderliness = {}".format(Data_list[i].orderliness))
 
         indiv_culutre_list = [v.history_culture[0] for v in Data_list[i].agent_list]
         #print(indiv_culutre_list)
@@ -1175,10 +1175,10 @@ def print_intial_culture_networks_prob_rewire(fileName: str, Data_list: list[Net
         )
 
     plotName = fileName + "/Plots"
-    f = plotName + "/print_culture_time_series_prob_rewire.png"
+    f = plotName + "/print_intial_culture_networks_orderliness.png"
     fig.savefig(f, dpi=dpi_save)
 
-def prints_init_weighting_matrix_prob_rewire(
+def prints_init_weighting_matrix_orderliness(
     fileName: str, Data_list: list[Network], dpi_save:int,nrows: int, ncols:int, cmap, 
 ):
 
@@ -1192,7 +1192,7 @@ def prints_init_weighting_matrix_prob_rewire(
             cmap=cmap,
             aspect="auto",
         )
-        ax.set_title("Prob rewire = {}".format(Data_list[i].prob_rewire))
+        ax.set_title("orderliness = {}".format(Data_list[i].orderliness))
         ax.set_xlabel("Agent Link Strength")
         ax.set_ylabel("Agent Link Strength")
     plt.tight_layout()
@@ -1207,5 +1207,168 @@ def prints_init_weighting_matrix_prob_rewire(
     cbar.set_label("Weighting matrix")
 
     plotName = fileName + "/Plots"
-    f = plotName + "/prints_init_weighting_matrix_prob_rewire.png"
+    f = plotName + "/prints_init_weighting_matrix_orderliness.png"
     fig.savefig(f, dpi=dpi_save)
+
+
+
+def print_intial_culture_networks_confirmation_bias(fileName: str, Data_list: list[Network], dpi_save:int,nrows: int, ncols:int , layout: str, norm_neg_pos, cmap, node_size):
+    
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
+
+    for i, ax in enumerate(axes.flat):
+
+        G = nx.from_numpy_matrix(Data_list[i].history_weighting_matrix[0])
+        pos_culture_network = prod_pos(layout, G)
+        # print(i,ax)
+        ax.set_title("Confirmation bias = {}".format(Data_list[i].confirmation_bias))
+
+        indiv_culutre_list = [v.history_culture[0] for v in Data_list[i].agent_list]
+        #print(indiv_culutre_list)
+        colour_adjust = norm_neg_pos(indiv_culutre_list)
+        ani_step_colours = cmap(colour_adjust)
+
+        nx.draw(
+            G,
+            node_color=ani_step_colours,
+            ax=ax,
+            pos=pos_culture_network,
+            node_size=node_size,
+            edgecolors="black",
+        )
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/print_culture_time_series_confirmation_bias.png"
+    fig.savefig(f, dpi=dpi_save)
+
+def prints_init_weighting_matrix_confirmation_bias(
+    fileName: str, Data_list: list[Network], dpi_save:int,nrows: int, ncols:int, cmap, 
+):
+
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
+    # print(frames_list,Data["network_time"],Data["network_weighting_matrix"][20])
+    #print( len(Data["network_weighting_matrix"]),frames_list)
+    for i, ax in enumerate(axes.flat):
+        # print(i)
+        ax.matshow(
+            Data_list[i].history_weighting_matrix[0],
+            cmap=cmap,
+            aspect="auto",
+        )
+        ax.set_title("Confirmation bias = {}".format(Data_list[i].confirmation_bias))
+        ax.set_xlabel("Agent Link Strength")
+        ax.set_ylabel("Agent Link Strength")
+    plt.tight_layout()
+
+    # colour bar axes
+    fig.subplots_adjust(right=0.8)
+    cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
+    cbar = fig.colorbar(
+        plt.cm.ScalarMappable(cmap=cmap, norm=Normalize(vmin=0, vmax=1)),
+        cax=cbar_ax,
+    )  # This does a mapabble on the fly i think, not sure
+    cbar.set_label("Weighting matrix")
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/prints_init_weighting_matrix_confirmation_bias.png"
+    fig.savefig(f, dpi=dpi_save)
+
+    
+def plot_carbon_emissions_total_confirmation_bias(fileName: str, Data_list: list[Network], dpi_save:int):
+    y_title = "Total Emissions"
+
+    fig, ax = plt.subplots()
+    ax.set_ylabel(r"%s" % y_title)
+    for i in range(len(Data_list)):
+        ax.plot(np.asarray(Data_list[i].history_time), np.asarray(Data_list[i].history_total_carbon_emissions), label = Data_list[i].confirmation_bias)
+        ax.set_xlabel(r"Time")
+    #ax.axvline(culture_momentum, color='r',linestyle = "--")
+    ax.legend()
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/comparing_total_emissions_confirmation_bias.png"
+    fig.savefig(f, dpi=dpi_save)
+
+def plot_weighting_convergence_confirmation_bias(fileName: str, Data_list: list[Network], dpi_save:int):
+    y_title = "Weighting matrix convergence"
+
+    fig, ax = plt.subplots()
+    ax.set_ylabel(r"%s" % y_title)
+    for i in range(len(Data_list)):
+        ax.plot(np.asarray(Data_list[i].history_time), np.asarray(Data_list[i].history_weighting_matrix_convergence), label = Data_list[i].confirmation_bias)
+        ax.set_xlabel(r"Time")
+    #ax.axvline(culture_momentum, color='r',linestyle = "--")
+    ax.legend()
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/comparing_weighting_matrix_convergence_confirmation_bias.png"
+    fig.savefig(f, dpi=dpi_save)
+
+def print_culture_time_series_confirmation_bias(fileName: str, Data_list: list[Network], dpi_save:int,nrows: int, ncols:int):
+    
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
+    y_title = "Culture"
+
+    for i, ax in enumerate(axes.flat):
+        for v in Data_list[i].agent_list:
+            ax.plot(np.asarray(Data_list[i].history_time), np.asarray(v.history_culture))
+
+        ax.set_xlabel(r"Time")
+        ax.set_ylabel(r"%s" % y_title)
+        ax.set_title("Confirmation bias = {}".format(Data_list[i].confirmation_bias))
+        #ax.axvline(culture_momentum, color='r',linestyle = "--")
+
+    plt.tight_layout()
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/print_culture_time_series_confirmation_bias.png"
+    fig.savefig(f, dpi=dpi_save)
+
+
+def multi_animation_weighting(FILENAME: str, data_list: list, cmap: Union[LinearSegmentedColormap,str],  interval:int, fps:int, round_dec:int ,nrows: int, ncols:int, time_steps_max:int):
+    ####ACUTAL
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
+
+    def update(i, data_list, axes):
+        matrices_list = []
+        for v, ax in enumerate(axes.flat):
+            M = data_list[v].history_weighting_matrix[i]
+            # print("next frame!",M)        
+            matrice.set_array(M)
+            # Set the title
+            matrices_list.append(matrice)
+        #time_ax.text(0, 0, "Time= {}".format(round(data_list[0].history_time[i])), ha="center", va="center")
+        #time_ax.annotate("Time= {}".format(round(data_list[0].history_time[i], round_dec)),xy=(0, 0), ha="center")
+        #time_ax.set_title("Time= {}".format(round(data_list[0].history_time[i], round_dec)))
+        return matrices_list
+
+    for v, ax in enumerate(axes.flat):
+        ax.set_xlabel("Agent")
+        ax.set_ylabel("Agent")
+        matrice = ax.matshow(data_list[v].history_weighting_matrix[0], cmap=cmap)
+    # colour bar axes
+    fig.subplots_adjust(right=0.8)
+    cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
+    cbar = fig.colorbar(
+        plt.cm.ScalarMappable(cmap=cmap, norm=Normalize(vmin=0, vmax=1)),
+        cax=cbar_ax,
+    )  # This does a mapabble on the fly i think, not sure
+    cbar.set_label("Agent Link Strength")
+
+    ani = animation.FuncAnimation(
+        fig,
+        update,
+        fargs=(data_list,axes),
+        frames=int(time_steps_max),
+        repeat_delay=500,
+        interval=interval,
+    )
+    #print("ani: ",ani)
+    
+    #plt.tight_layout()
+
+    # save the video
+    animateName = FILENAME + "/Animations"
+    f = animateName + "/" + "multi_weighting_matrix_animation.mp4"
+    writervideo = animation.FFMpegWriter(fps=fps)
+    ani.save(f, writer=writervideo)

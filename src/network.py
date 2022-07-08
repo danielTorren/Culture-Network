@@ -2,6 +2,7 @@ import numpy as np
 import networkx as nx
 from individuals import Individual
 import numpy.typing as npt
+from random import gauss
 
 class Network:
 
@@ -19,12 +20,45 @@ class Network:
         )  # not sure if i have to be worried about the randomness of the system being reproducible
         
         self.alpha_change = parameters["alpha_change"]
-
         self.opinion_dyanmics = parameters["opinion_dynamics"]
         self.save_data = parameters["save_data"]
+        self.linear_alpha_diff_state = parameters["linear_alpha_diff_state"]
+
+        #time
+        self.delta_t = parameters["delta_t"]
+        self.discount_factor = parameters["discount_factor"]
+        self.present_discount_factor = parameters["present_discount_factor"]
+
+        #network
         self.M = int(round(parameters["M"]))
         self.N = int(round(parameters["N"]))
+        self.K = int(
+            round(parameters["K"])
+        )  # round due to the sampling method producing floats, lets hope this works
+        (
+            self.alpha_attract,
+            self.beta_attract,
+            self.alpha_threshold,
+            self.beta_threshold,
+        ) = (parameters["alpha_attract"], parameters["beta_attract"], parameters["alpha_threshold"], parameters["beta_threshold"])
+        self.prob_rewire = parameters["prob_rewire"]
+        self.orderliness = parameters["orderliness"]
+        
+        #culture
+        self.culture_momentum_real = parameters["culture_momentum_real"]
+        self.culture_momentum = int(
+            round(self.culture_momentum_real/ self.delta_t)
+        )  # round due to the sampling method producing floats, lets hope this works
+        
+        #hyperbolic discounting
+        time_list_beahviours =  np.asarray([self.delta_t*x for x in range(self.culture_momentum)])
+        self.time_weightings = self.present_discount_factor*(self.discount_factor)**(time_list_beahviours)
+        self.time_weightings[0] = 1
+        #print(self.time_weightings)
 
+        #social learning and bias
+        self.confirmation_bias = parameters["confirmation_bias"]
+        self.learning_error_scale = parameters["learning_error_scale"]
         self.phi_array = np.linspace(parameters["phi_list_lower"], parameters["phi_list_upper"], num=self.M)
         np.random.shuffle(self.phi_array)
 
@@ -49,35 +83,16 @@ class Network:
             self.t_IP_matrix  = parameters["t_IP_matrix"]
             self.t_IP_list = np.empty(self.M)
 
-        self.delta_t = parameters["delta_t"]
-        self.K = int(
-            round(parameters["K"])
-        )  # round due to the sampling method producing floats, lets hope this works
-        self.prob_rewire = parameters["prob_rewire"]
-        
-        self.culture_momentum_real = parameters["culture_momentum_real"]
-        self.culture_momentum = int(
-            round(self.culture_momentum_real/ self.delta_t)
-        )  # round due to the sampling method producing floats, lets hope this works
-        #print("cul mom:", parameters["culture_momentum"],self.culture_momentum )
-
-        self.learning_error_scale = parameters["learning_error_scale"]
-
-        self.discount_factor = parameters["discount_factor"]
-
-        (
-            self.alpha_attract,
-            self.beta_attract,
-            self.alpha_threshold,
-            self.beta_threshold,
-        ) = (parameters["alpha_attract"], parameters["beta_attract"], parameters["alpha_threshold"], parameters["beta_threshold"])
-
 
         self.t = 0
         self.list_people = range(self.N)
 
+        self.homophily_state = parameters["homophily_state"]
         # create indviduals#Do a homophilly
-        self.attract_matrix_init, self.threshold_matrix_init = self.generate_init_data_behaviours()#self.generate_init_data_behaviours_homo()
+        if self.homophily_state: 
+            self.attract_matrix_init, self.threshold_matrix_init = self.generate_init_data_behaviours_homo_alt()#self.generate_init_data_behaviours_homo()
+        else:
+            self.attract_matrix_init, self.threshold_matrix_init = self.generate_init_data_behaviours()#self.generate_init_data_behaviours_homo()
 
         self.agent_list = self.create_agent_list()
 
@@ -102,7 +117,7 @@ class Network:
         self.social_component_matrix = self.calc_social_component_matrix(ego_influence)
 
         if self.alpha_change == 1 or 0.5:
-            self.weighting_matrix,__ = self.update_weightings_alt()  # Should I update the weighting matrix? I feel like it makes sense if its not time dependant.
+            self.weighting_matrix,__ = self.update_weightings()  # Should I update the weighting matrix? I feel like it makes sense if its not time dependant.
 
         self.total_carbon_emissions = self.calc_total_emissions()
 
@@ -204,6 +219,45 @@ class Network:
 
         return attract_array_circular,threshold_array_circular
 
+    def lightly_shuffle(self, ordered_list):
+
+        def tuplify(x, y):
+            a = gauss(0,1)
+            b = self.orderliness * y 
+            print(a, b, y )
+            c = b + a #self.orderliness * y + gauss(0,1)
+            return (c, x)
+        
+        pairs = list(map(tuplify, ordered_list, range(len(ordered_list))))
+        print("pairs", pairs)
+        pairs.sort()
+        print("pairs soted",pairs)
+        partially_ordered_values = [p[1] for p in pairs]
+        print("partially_ordered_values", partially_ordered_values)
+        
+        quit()
+        return partially_ordered_values
+
+    def generate_init_data_behaviours_homo_alt(self) -> tuple:
+        ###init_attract, init_threshold,carbon_emissions
+        attract_list = [np.random.beta(self.alpha_attract, self.beta_attract, size=self.M) for n in self.list_people]
+        threshold_list = [np.random.beta(self.alpha_threshold, self.beta_threshold, size=self.M) for n in self.list_people]
+        attract_matrix = np.asarray(attract_list)
+        threshold_matrix = np.asarray(threshold_list)
+
+        behave_value_matrix = attract_matrix - threshold_matrix
+        culture_list = behave_value_matrix.sum(axis=1)/behave_value_matrix.shape[1]
+        #print("BEFORE", culture_list )
+        culture_list = self.lightly_shuffle(culture_list)
+        #print("AFTER", culture_list )
+        attract_list_sorted = [x for _,x in sorted(zip(culture_list,attract_list))]
+        threshold_list_sorted = [x for _,x in sorted(zip(culture_list,threshold_list))]
+
+        attract_array_circular = np.asarray(self.produce_circular_list(attract_list_sorted))
+        threshold_array_circular = np.asarray(self.produce_circular_list(threshold_list_sorted))
+
+        return attract_array_circular,threshold_array_circular
+
     def create_agent_list(self) -> list:
 
         individual_params = {
@@ -214,8 +268,10 @@ class Network:
                 "save_data" : self.save_data,
                 "carbon_emissions" : self.carbon_emissions,
                 "discount_factor" : self.discount_factor,
+                "present_discount_factor": self.present_discount_factor,
                 "carbon_price_state" : self.carbon_price_state,
                 "information_provision_state" : self.information_provision_state,
+                "time_weightings": self.time_weightings
         }
 
         if self.carbon_price_state:
@@ -265,39 +321,26 @@ class Network:
         elif self.t > self.carbon_price_policy_start:
             self.carbon_price += self.carbon_price_gradient
 
+    def cultural_difference_factor_linear(self,difference_matrix):
+        return (1 - 0.5*self.confirmation_bias*np.abs(difference_matrix))
+
+    def cultural_difference_factor_exponential(self,difference_matrix):
+        return np.exp(-self.confirmation_bias*np.abs(difference_matrix))
+
     def update_weightings(self)-> float:
         culture_list = np.array([x.culture for x in self.agent_list])
 
         #use the chosen method
         difference_matrix = np.subtract.outer(culture_list, culture_list)
-        alpha = (1 - 0.5*np.abs(difference_matrix))
-        diagonal = self.adjacency_matrix*alpha
-
-        #
-        norm_weighting_matrix = self.normlize_matrix(diagonal)
-
-        if self.save_data:
-            total_difference = self.calc_total_weighting_matrix_difference(
-                self.weighting_matrix, norm_weighting_matrix
-            )
-            return norm_weighting_matrix,total_difference
+        if self.linear_alpha_diff_state:
+            #linear
+            alpha = self.cultural_difference_factor_linear(difference_matrix)
         else:
-            return norm_weighting_matrix,0#BODGE! bodge for mypy
+            #exponential
+            alpha = self.cultural_difference_factor_exponential(difference_matrix)
 
-    def update_weightings_alt(self)-> float:
-        culture_list = np.array([x.culture for x in self.agent_list])
-
-        #use the chosen method
-        difference_matrix = np.subtract.outer(culture_list, culture_list)
-        alpha = np.exp(-np.abs(difference_matrix))
-        #print(alpha)
         diagonal = self.adjacency_matrix*alpha
-        #print(diagonal)
-
-        #
         norm_weighting_matrix = self.normlize_matrix(diagonal)
-        #print(norm_weighting_matrix)
-        
 
         if self.save_data:
             total_difference = self.calc_total_weighting_matrix_difference(
@@ -359,9 +402,9 @@ class Network:
         # update network parameters for next step
         if self.alpha_change == 1:
                 if self.save_data:
-                        self.weighting_matrix,self.weighting_matrix_convergence = self.update_weightings_alt()
+                        self.weighting_matrix,self.weighting_matrix_convergence = self.update_weightings()
                 else:
-                        self.weighting_matrix,__ = self.update_weightings_alt()
+                        self.weighting_matrix,__ = self.update_weightings()
         
         self.behavioural_attract_matrix = self.calc_behavioural_attract_matrix()
 
