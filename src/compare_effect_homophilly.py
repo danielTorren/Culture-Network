@@ -13,38 +13,49 @@ from plot import (
     )
 from matplotlib.colors import LinearSegmentedColormap,  Normalize
 
+# Params
+reps = 9
+
 save_data = True
 opinion_dynamics =  "DEGROOT" #  "DEGROOT"  "SELECT"
 carbon_price_state = False
 information_provision_state = False
-linear_alpha_diff_state = True
+linear_alpha_diff_state = False#if true use the exponential form instead like theo
 homophily_state = True
+alpha_change = True
 
 #Social emissions model
-K = 5  # k nearest neighbours INTEGER
+K = 10  # k nearest neighbours INTEGER
 M = 3  # number of behaviours
-N = 20  # number of agents
-total_time = 1
+N = 100  # number of agents
+total_time = 10.2
+
 delta_t = 0.01  # time step size
+culture_momentum_real = 1# real time over which culture is calculated for INTEGER, NEEDS TO BE MROE THAN DELTA t
+
 prob_rewire = 0.2  # re-wiring probability?
+
 alpha_attract = 1#2  ##inital distribution parameters - doing the inverse inverts it!
 beta_attract = 1#3
 alpha_threshold = 1#3
 beta_threshold = 1#2
+
 time_steps_max = int(
     total_time / delta_t
 )  # number of time steps max, will stop if culture converges
-culture_momentum_real = 0.5# real time over which culture is calculated for INTEGER
+
 set_seed = 1  ##reproducibility INTEGER
 phi_list_lower,phi_list_upper = 0.1,1
 learning_error_scale = 0.05  # 1 standard distribution is 2% error
 carbon_emissions = [1]*M
 
-discount_factor = 0.8
+#inverse_homophily = 0.1#0.2
+homophilly_rate = 1.5
+
+discount_factor = 0.6
 present_discount_factor = 0.8
-confirmation_bias = 2
 
-
+confirmation_bias = 1.5
 
 #Infromation provision parameters
 if information_provision_state:
@@ -68,6 +79,7 @@ params = {
     "information_provision_state" : information_provision_state,
     "linear_alpha_diff_state": linear_alpha_diff_state,
     "homophily_state": homophily_state,
+    "alpha_change" : alpha_change,
     "delta_t": delta_t,
     "phi_list_lower": phi_list_lower,
     "phi_list_upper": phi_list_upper,
@@ -83,13 +95,12 @@ params = {
     "alpha_threshold": alpha_threshold,
     "beta_threshold": beta_threshold,
     "carbon_emissions" : carbon_emissions,
-    "alpha_change" : 1,
     "discount_factor": discount_factor,
+    #"inverse_homophily": inverse_homophily,#1 is total mixing, 0 is no mixing
+    "homophilly_rate": homophilly_rate,
     "present_discount_factor": present_discount_factor,
     "confirmation_bias": confirmation_bias,
-    #"orderliness": orderliness
 }
-
 if carbon_price_state:
     params["carbon_price_init"] = carbon_price_init
     params["carbon_price_policy_start"] =  carbon_price_policy_start
@@ -108,22 +119,21 @@ cmap_weighting = "Reds"
 #norm_neg_pos = plt.cm.ScalarMappable(cmap=cmap, norm=Normalize(vmin=-1, vmax=1))
 norm_neg_pos = Normalize(vmin=-1, vmax=1)
 node_size = 50
-nrows = 2
-ncols = 2
+nrows = 3
+ncols = 3
 layout = "circular"
 round_dec = 2
 frame_num = ncols * nrows - 1
 bin_num = 1000
 
 num_counts = 100000
-
+frames_list = [int(round(x)) for x in np.linspace(0,time_steps_max, num=frame_num + 1)]
+print("frames_list: ", frames_list)
 
 if __name__ == "__main__":
 
-        fileName = "results/fischer_homophilly_variation_%s_%s_%s" % (str(params["N"]),str(params["time_steps_max"]),str(params["K"]))
+        fileName = "results/fischer_homophilly_variation_%s_%s_%s_%s" % (str(params["N"]),str(params["time_steps_max"]),str(params["K"]), str(reps))
         data = []
-        reps = 6
-
         
         inverse_homophily_list = np.linspace(0,1,reps)
 
@@ -136,18 +146,7 @@ if __name__ == "__main__":
 
         createFolderSA(fileName)
 
-        #plot_beta_distributions(fileName,alpha_attract,beta_attract,alpha_threshold,beta_threshold,bin_num,num_counts,dpi_save)
-
-        #plot_carbon_emissions_total_prob_rewire(fileName, data, dpi_save,culture_momentum)
-        #plot_weighting_convergence_prob_rewire(fileName, data, dpi_save,culture_momentum)
-        #print_culture_time_series_homophily_fischer(fileName, data, dpi_save, nrows, ncols)
-        #print_intial_culture_networks_homophily_fischer(fileName, data, dpi_save, nrows, ncols , layout, norm_neg_pos, cmap, node_size)
-        #prints_init_weighting_matrix_prob_rewire(fileName, data, dpi_save,nrows, ncols, cmap_weighting)
-
-        frames_list = [0,int(round(time_steps_max/3)),int(round(2*time_steps_max/3)),time_steps_max]
-        print(frames_list)
-
-        prints_culture_network_homophily_fischer(fileName, data[0],layout, cmap ,node_size,  nrows, ncols ,  norm_neg_pos,frames_list, round_dec, dpi_save)
-        prints_culture_network_homophily_fischer(fileName, data[3],layout, cmap ,node_size,  nrows, ncols ,  norm_neg_pos,frames_list, round_dec, dpi_save)
-        prints_culture_network_homophily_fischer(fileName, data[-1],layout, cmap ,node_size,  nrows, ncols ,  norm_neg_pos,frames_list, round_dec, dpi_save)
-        plt.show()
+        print_culture_time_series_homophily_fischer(fileName, data, dpi_save, nrows, ncols)
+        print_intial_culture_networks_homophily_fischer(fileName, data, dpi_save, nrows, ncols , layout, norm_neg_pos, cmap, node_size)
+        #prints_culture_network_homophily_fischer(fileName, data[0],layout, cmap ,node_size,  nrows, ncols ,  norm_neg_pos,frames_list, round_dec, dpi_save)
+        #plt.show()

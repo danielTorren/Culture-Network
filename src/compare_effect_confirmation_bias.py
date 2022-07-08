@@ -19,17 +19,17 @@ save_data = True
 opinion_dynamics =  "DEGROOT" #  "DEGROOT"  "SELECT"
 carbon_price_state = False
 information_provision_state = False
-linear_alpha_diff_state = True
+linear_alpha_diff_state = False#if true use the exponential form instead like theo
 homophily_state = True
 
 #Social emissions model
-K = 10  # k nearest neighbours INTEGER
+K = 5  # k nearest neighbours INTEGER
 M = 3  # number of behaviours
-N = 100  # number of agents
-total_time = 10
+N = 20  # number of agents
+total_time = 1.2
 
 delta_t = 0.01  # time step size
-culture_momentum_real = 5# real time over which culture is calculated for INTEGER, NEEDS TO BE MROE THAN DELTA t
+culture_momentum_real = 1# real time over which culture is calculated for INTEGER, NEEDS TO BE MROE THAN DELTA t
 
 prob_rewire = 0.2  # re-wiring probability?
 
@@ -49,8 +49,8 @@ carbon_emissions = [1]*M
 
 discount_factor = 1#0.6
 present_discount_factor = 1#0.8
-
 #confirmation_bias = 0.90
+inverse_homophily = 0.1
 
 #Infromation provision parameters
 if information_provision_state:
@@ -72,6 +72,7 @@ params = {
     "time_steps_max": time_steps_max, 
     "carbon_price_state" : carbon_price_state,
     "information_provision_state" : information_provision_state,
+    "linear_alpha_diff_state": linear_alpha_diff_state,
     "homophily_state": homophily_state,
     "delta_t": delta_t,
     "phi_list_lower": phi_list_lower,
@@ -90,9 +91,9 @@ params = {
     "carbon_emissions" : carbon_emissions,
     "alpha_change" : 1,
     "discount_factor": discount_factor,
+    "inverse_homophily": inverse_homophily,#1 is total mixing, 0 is no mixing
     "present_discount_factor": present_discount_factor,
     #"confirmation_bias": confirmation_bias,
-    "linear_alpha_diff_state": linear_alpha_diff_state
 }
 
 dpi_save = 1200
@@ -111,11 +112,11 @@ round_dec = 2
 
 if __name__ == "__main__":
         
-        confirmation_bias_max = 2
+        confirmation_bias_max = 10
         reps = 9
 
         fileName = "results/confrimation_bias_variation_%s_%s_%s_%s_%s" % (str(params["N"]),str(params["time_steps_max"]),str(params["K"]), str(confirmation_bias_max), str(reps))
-        
+        print("fileName: ", fileName)
 
         nrows = 3
         ncols = 3
@@ -124,20 +125,22 @@ if __name__ == "__main__":
         data = []
         for i in confirmation_bias_list:
             params["confirmation_bias"] = i
-            data.append(generate_data(params))
+            res = generate_data(params)
+            data.append(res)
+            #print("RES:", res.history_weighting_matrix[0])
+            #print("RES LATER",res.history_weighting_matrix[-1])
 
         createFolderSA(fileName)
 
-
-        plot_carbon_emissions_total_confirmation_bias(fileName, data, dpi_save)
-        plot_weighting_convergence_confirmation_bias(fileName, data, dpi_save)
-        print_culture_time_series_confirmation_bias(fileName, data, dpi_save, nrows, ncols)
+        #plot_carbon_emissions_total_confirmation_bias(fileName, data, dpi_save)
+        #plot_weighting_convergence_confirmation_bias(fileName, data, dpi_save)
+        #print_culture_time_series_confirmation_bias(fileName, data, dpi_save, nrows, ncols)
         print_intial_culture_networks_confirmation_bias(fileName, data, dpi_save, nrows, ncols , layout, norm_neg_pos, cmap, node_size)
         prints_init_weighting_matrix_confirmation_bias(fileName, data, dpi_save,nrows, ncols, cmap_weighting)
 
         #multi_animation_weighting(fileName,data, cmap_weighting,  interval, fps, round_dec, nrows, ncols, time_steps_max)
 
-        plt.show()
+        #plt.show()
 
 
 

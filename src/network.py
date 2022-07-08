@@ -2,8 +2,7 @@ import numpy as np
 import networkx as nx
 from individuals import Individual
 import numpy.typing as npt
-from random import randrange
-from random import gauss
+from random import randrange,seed
 
 class Network:
 
@@ -16,6 +15,7 @@ class Network:
         #print(parameters)
         
         self.set_seed = int(round(parameters["set_seed"]))
+        seed(self.set_seed)
         np.random.seed(
             self.set_seed
         )  # not sure if i have to be worried about the randomness of the system being reproducible
@@ -29,11 +29,19 @@ class Network:
         #time
         self.t = 0
         self.delta_t = parameters["delta_t"]
+
+        #culture
+        self.culture_momentum_real = parameters["culture_momentum_real"]
+        self.culture_momentum = int(
+            round(self.culture_momentum_real/ self.delta_t)
+        )  # round due to the sampling method producing floats, lets hope this works
+
+        #time discounting 
         self.discount_factor = parameters["discount_factor"]
         self.present_discount_factor = parameters["present_discount_factor"]
         time_list_beahviours =  np.asarray([self.delta_t*x for x in range(self.culture_momentum)])
-        self.time_weightings = self.present_discount_factor*(self.discount_factor)**(time_list_beahviours)
-        self.time_weightings[0] = 1
+        self.discount_list = self.present_discount_factor*(self.discount_factor)**(time_list_beahviours)
+        self.discount_list[0] = 1
 
         #network
         self.M = int(round(parameters["M"]))
@@ -50,11 +58,6 @@ class Network:
         ) = (parameters["alpha_attract"], parameters["beta_attract"], parameters["alpha_threshold"], parameters["beta_threshold"])
         self.prob_rewire = parameters["prob_rewire"]
         
-        #culture
-        self.culture_momentum_real = parameters["culture_momentum_real"]
-        self.culture_momentum = int(
-            round(self.culture_momentum_real/ self.delta_t)
-        )  # round due to the sampling method producing floats, lets hope this works
         
         #social learning and bias
         self.confirmation_bias = parameters["confirmation_bias"]
@@ -63,11 +66,12 @@ class Network:
         #social influence of behaviours
         self.phi_array = np.linspace(parameters["phi_list_lower"], parameters["phi_list_upper"], num=self.M)
         #emissions associated with each behaviour
-        self.carbon_emissions = parameters["carbon_emissions"]
+        self.carbon_emissions = [1]*self.M #parameters["carbon_emissions"], removed for the sake of the SA
 
         #network homophily
         self.inverse_homophily = parameters["inverse_homophily"]#0-1
-        self.shuffle_reps = int(round((self.N**2)*self.inverse_homophily))#im going to square it
+        self.homophilly_rate = parameters["homophilly_rate"]
+        self.shuffle_reps = int(round((self.N**self.homophilly_rate)*self.inverse_homophily))#int(round((self.N)*self.inverse_homophily))#im going to square it
         (
             self.alpha_attract,
             self.beta_attract,
@@ -130,7 +134,7 @@ class Network:
 
         if self.save_data:
             # calc_netork density
-            self.calc_network_density()
+            #self.calc_network_density()
 
             (
                 self.average_culture,
@@ -159,7 +163,7 @@ class Network:
 
     def normlize_matrix(self, matrix: npt.NDArray) ->  npt.NDArray:
         row_sums = matrix.sum(axis=1)
-        norm_matrix = matrix / row_sums[:, np.newaxis]
+        norm_matrix = matrix/row_sums[:, np.newaxis]
 
         return norm_matrix
 
@@ -178,6 +182,8 @@ class Network:
         )  # Watts–Strogatz small-world graph,watts_strogatz_graph( n, k, p[, seed])
         weighting_matrix = nx.to_numpy_array(ws)
         norm_weighting_matrix = self.normlize_matrix(weighting_matrix)
+        #print("init NOT CULTURED norm_weighting_matrix:",norm_weighting_matrix)
+
         ego_networks = [
             [i for i in ws[n]] for n in self.list_people
         ]  # create list of neighbours of individuals by index
@@ -268,7 +274,7 @@ class Network:
         #print("attract_list_sorted_shuffle",attract_list_sorted_shuffle)
         threshold_list_sorted_shuffle = [x for _,x in sorted(zip(attract_array_circular_indexes_shuffled,threshold_array_circular))]
         
-        print( "init culture list",self.quick_calc_culture(np.asarray(attract_list_sorted_shuffle),np.asarray(threshold_list_sorted_shuffle)))
+        #print( "init culture list",self.quick_calc_culture(np.asarray(attract_list_sorted_shuffle),np.asarray(threshold_list_sorted_shuffle)))
 
         #quit()
         return np.asarray(attract_list_sorted_shuffle),np.asarray(threshold_list_sorted_shuffle)
@@ -285,7 +291,6 @@ class Network:
                 "discount_list" : self.discount_list,
                 "carbon_price_state" : self.carbon_price_state,
                 "information_provision_state" : self.information_provision_state,
-                "time_weightings": self.time_weightings
         }
 
         if self.carbon_price_state:
@@ -344,7 +349,6 @@ class Network:
     def update_weightings(self)-> float:
         culture_list = np.array([x.culture for x in self.agent_list])
 
-        #use the chosen method
         difference_matrix = np.subtract.outer(culture_list, culture_list)
         if self.linear_alpha_diff_state:
             #linear
@@ -354,8 +358,10 @@ class Network:
             alpha = self.cultural_difference_factor_exponential(difference_matrix)
 
         diagonal = self.adjacency_matrix*alpha
+        
         norm_weighting_matrix = self.normlize_matrix(diagonal)
 
+        
         if self.save_data:
             total_difference = self.calc_total_weighting_matrix_difference(
                 self.weighting_matrix, norm_weighting_matrix
