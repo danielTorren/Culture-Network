@@ -42,31 +42,40 @@ save_data = True
 opinion_dynamics =  "DEGROOT" #  "DEGROOT"  "SELECT"
 carbon_price_state = False
 information_provision_state = False
+linear_alpha_diff_state = True
+homophily_state = True
 
 #Social emissions model
 K = 10  # k nearest neighbours INTEGER
 M = 3  # number of behaviours
-N = 100  # number of agents
+N = 30  # number of agents
 total_time = 10
-delta_t = 0.01  # time step size
+
+delta_t = 0.1  # time step size
+culture_momentum_real = 5# real time over which culture is calculated for INTEGER, NEEDS TO BE MROE THAN DELTA t
 
 prob_rewire = 0.2  # re-wiring probability?
 
-alpha_attract = 8#2  ##inital distribution parameters - doing the inverse inverts it!
-beta_attract = 2#3
-alpha_threshold = 2#3
-beta_threshold = 4#2
+alpha_attract = 1#2  ##inital distribution parameters - doing the inverse inverts it!
+beta_attract = 1#3
+alpha_threshold = 1#3
+beta_threshold = 1#2
 
 time_steps_max = int(
     total_time / delta_t
 )  # number of time steps max, will stop if culture converges
-culture_momentum_real = 0.5# real time over which culture is calculated for INTEGER
+
 set_seed = 1  ##reproducibility INTEGER
 phi_list_lower,phi_list_upper = 0.1,1
 learning_error_scale = 0.05  # 1 standard distribution is 2% error
 carbon_emissions = [1]*M
-discount_factor = 0.2
+
 inverse_homophily = 0.5
+discount_factor = 0.6
+present_discount_factor = 0.8
+confirmation_bias = 2
+
+
 
 #Infromation provision parameters
 if information_provision_state:
@@ -88,6 +97,8 @@ params = {
     "time_steps_max": time_steps_max, 
     "carbon_price_state" : carbon_price_state,
     "information_provision_state" : information_provision_state,
+    "linear_alpha_diff_state": linear_alpha_diff_state,
+    "homophily_state": homophily_state,
     "delta_t": delta_t,
     "phi_list_lower": phi_list_lower,
     "phi_list_upper": phi_list_upper,
@@ -105,7 +116,10 @@ params = {
     "carbon_emissions" : carbon_emissions,
     "alpha_change" : 1,
     "discount_factor": discount_factor,
-    "inverse_homophily": inverse_homophily#1 is total mixing, 0 is no mixing
+    "inverse_homophily": inverse_homophily,#1 is total mixing, 0 is no mixing
+    "present_discount_factor": present_discount_factor,
+    "confirmation_bias": confirmation_bias,
+
 }
 
 if carbon_price_state:
@@ -242,6 +256,7 @@ dpi_save = 1200
 RUN = True
 PLOT = True
 SHOW_PLOT = True
+frames_list_exponetial = False
 
 if __name__ == "__main__":
 
@@ -270,8 +285,14 @@ if __name__ == "__main__":
             0
         ]  # for some reason pandas does weird shit
 
-        frames_proportion = int(round(len(Data["network_time"]) / 2))
-        frames_list = frame_distribution_prints( Data["network_time"], scale_factor, frame_num )
+        
+        if frames_list_exponetial: 
+            frames_proportion = int(round(len(Data["network_time"]) / 2))
+            frames_list = frame_distribution_prints( Data["network_time"], scale_factor, frame_num )
+        else:
+            frames_list = [int(round(x)) for x in np.linspace(0,time_steps_max, num=frame_num + 1)]
+             
+        print("frames prints:",frames_list)
 
         ###PLOTS
         plot_beta_distributions(FILENAME,alpha_attract,beta_attract,alpha_threshold,beta_threshold,bin_num,num_counts,dpi_save,)
@@ -282,7 +303,11 @@ if __name__ == "__main__":
         #plot_carbon_price_timeseries(FILENAME,Data,dpi_save)
         #plot_total_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
         #plot_av_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
+<<<<<<< HEAD
         #plot_weighting_matrix_convergence_timeseries(FILENAME, Data, dpi_save)
+=======
+        plot_weighting_matrix_convergence_timeseries(FILENAME, Data, dpi_save)
+>>>>>>> variable_weighting
         #plot_cultural_range_timeseries(FILENAME, Data, dpi_save)
         #plot_average_culture_timeseries(FILENAME,Data,dpi_save)
 

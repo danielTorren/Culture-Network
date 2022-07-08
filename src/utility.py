@@ -54,12 +54,23 @@ def createFolderSA(fileName: str):
     if str(os.path.exists("Results")) == "False":
         os.mkdir("Results")
 
+
     # check for runName folder
     if str(os.path.exists(fileName)) == "False":
         os.mkdir(fileName)
 
     # make plots folder:
     plotsName = fileName + "/Plots"
+    if str(os.path.exists(plotsName)) == "False":
+        os.mkdir(plotsName)
+
+    # make animation folder:
+    plotsName = fileName + "/Animations"
+    if str(os.path.exists(plotsName)) == "False":
+        os.mkdir(plotsName)
+
+    # make prints folder:
+    plotsName = fileName + "/Prints"
     if str(os.path.exists(plotsName)) == "False":
         os.mkdir(plotsName)
 
@@ -285,6 +296,6 @@ def frame_distribution_prints(time_list: list, scale_factor: int, frame_num: int
     frames_list_int = [int(x) for x in frames_list]
     # print(frames_list_int)
     frames_list_int.insert(0, 0)
-    print("frames prints:",sorted(frames_list_int))
+
 
     return sorted(frames_list_int)

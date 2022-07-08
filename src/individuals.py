@@ -22,7 +22,6 @@ class Individual:
         self.carbon_intensive_list = individual_params["carbon_emissions"]
         self.culture_momentum = individual_params["culture_momentum"]
         self.discount_list = individual_params["discount_list"]
-
         self.carbon_price_state = individual_params["carbon_price_state"]
         self.information_provision_state = individual_params["information_provision_state"]
 
@@ -34,6 +33,9 @@ class Individual:
             self.nu = individual_params["nu"]
             self.eta = individual_params["eta"]
             self.t_IP_list = individual_params["t_IP_list"]
+
+        self.time_list_beahviours = [self.delta_t*x for x in range(self.culture_momentum)]
+        #print("time_list_beahviours", self.time_list_beahviours)
 
         #print(self.attracts,self.thresholds, type(self.thresholds))
         self.values = self.attracts - self.thresholds
@@ -71,6 +73,7 @@ class Individual:
 
     def calc_culture(self) -> float:
         weighted_sum_behaviours = 0
+
         for i in range(len(self.av_behaviour_list)):
             weighted_sum_behaviours += self.discount_list[i]*self.av_behaviour_list[i]
         normalized_culture = weighted_sum_behaviours/len(self.av_behaviour_list)
@@ -78,7 +81,6 @@ class Individual:
         return normalized_culture
 
     def update_values(self):
-        
         self.values = self.attracts - self.thresholds
 
     def update_attracts(self,social_component_behaviours):

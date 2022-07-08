@@ -17,6 +17,8 @@ save_data = True
 opinion_dynamics =  "DEGROOT" #  "DEGROOT"  "SELECT"
 carbon_price_state = False
 information_provision_state = False
+linear_alpha_diff_state = True
+homophily_state = True
 
 #Social emissions model
 K = 5  # k nearest neighbours INTEGER
@@ -37,7 +39,12 @@ set_seed = 1  ##reproducibility INTEGER
 phi_list_lower,phi_list_upper = 0.1,1
 learning_error_scale = 0.05  # 1 standard distribution is 2% error
 carbon_emissions = [1]*M
+
 discount_factor = 0.8
+present_discount_factor = 0.8
+confirmation_bias = 2
+
+
 
 #Infromation provision parameters
 if information_provision_state:
@@ -59,6 +66,8 @@ params = {
     "time_steps_max": time_steps_max, 
     "carbon_price_state" : carbon_price_state,
     "information_provision_state" : information_provision_state,
+    "linear_alpha_diff_state": linear_alpha_diff_state,
+    "homophily_state": homophily_state,
     "delta_t": delta_t,
     "phi_list_lower": phi_list_lower,
     "phi_list_upper": phi_list_upper,
@@ -76,6 +85,9 @@ params = {
     "carbon_emissions" : carbon_emissions,
     "alpha_change" : 1,
     "discount_factor": discount_factor,
+    "present_discount_factor": present_discount_factor,
+    "confirmation_bias": confirmation_bias,
+    #"orderliness": orderliness
 }
 
 if carbon_price_state:

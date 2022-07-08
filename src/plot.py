@@ -1099,37 +1099,37 @@ def multi_animation_four(
     writervideo = animation.FFMpegWriter(fps=fps)
     ani.save(f, writer=writervideo)
 
-def plot_carbon_emissions_total_prob_rewire(fileName: str, Data_list: list[Network], dpi_save:int, culture_momentum: float):
+def plot_carbon_emissions_total_orderliness(fileName: str, Data_list: list[Network], dpi_save:int ):
     y_title = "Total Emissions"
 
     fig, ax = plt.subplots()
     ax.set_ylabel(r"%s" % y_title)
     for i in range(len(Data_list)):
-        ax.plot(np.asarray(Data_list[i].history_time), np.asarray(Data_list[i].history_total_carbon_emissions), label = Data_list[i].prob_rewire)
+        ax.plot(np.asarray(Data_list[i].history_time), np.asarray(Data_list[i].history_total_carbon_emissions), label = Data_list[i].orderliness)
         ax.set_xlabel(r"Time")
-    ax.axvline(culture_momentum, color='r',linestyle = "--")
+    #ax.axvline(culture_momentum, color='r',linestyle = "--")
     ax.legend()
 
     plotName = fileName + "/Plots"
-    f = plotName + "/comparing_total_emissions_prob_rewire.png"
+    f = plotName + "/comparing_total_emissions_orderliness.png"
     fig.savefig(f, dpi=dpi_save)
 
-def plot_weighting_convergence_prob_rewire(fileName: str, Data_list: list[Network], dpi_save:int, culture_momentum: float):
+def plot_weighting_convergence_orderliness(fileName: str, Data_list: list[Network], dpi_save:int):
     y_title = "Weighting matrix convergence"
 
     fig, ax = plt.subplots()
     ax.set_ylabel(r"%s" % y_title)
     for i in range(len(Data_list)):
-        ax.plot(np.asarray(Data_list[i].history_time), np.asarray(Data_list[i].history_weighting_matrix_convergence), label = Data_list[i].prob_rewire)
+        ax.plot(np.asarray(Data_list[i].history_time), np.asarray(Data_list[i].history_weighting_matrix_convergence), label = Data_list[i].orderliness)
         ax.set_xlabel(r"Time")
-    ax.axvline(culture_momentum, color='r',linestyle = "--")
+    #ax.axvline(culture_momentum, color='r',linestyle = "--")
     ax.legend()
 
     plotName = fileName + "/Plots"
-    f = plotName + "/comparing_weighting_matrix_convergence_prob_rewire.png"
+    f = plotName + "/comparing_weighting_matrix_convergence_orderliness.png"
     fig.savefig(f, dpi=dpi_save)
 
-def print_culture_time_series_prob_rewire(fileName: str, Data_list: list[Network], dpi_save:int,nrows: int, ncols:int, culture_momentum: float):
+def print_culture_time_series_orderliness(fileName: str, Data_list: list[Network], dpi_save:int,nrows: int, ncols:int):
     
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
     y_title = "Culture"
@@ -1140,18 +1140,18 @@ def print_culture_time_series_prob_rewire(fileName: str, Data_list: list[Network
 
         ax.set_xlabel(r"Time")
         ax.set_ylabel(r"%s" % y_title)
-        ax.set_title("Prob rewire = {}".format(Data_list[i].prob_rewire))
-        ax.axvline(culture_momentum, color='r',linestyle = "--")
+        ax.set_title("Orderliness = {}".format(Data_list[i].orderliness))
+        #ax.axvline(culture_momentum, color='r',linestyle = "--")
 
     plt.tight_layout()
 
     plotName = fileName + "/Plots"
-    f = plotName + "/print_culture_time_series_prob_rewire.png"
+    f = plotName + "/print_culture_time_series_orderliness.png"
     fig.savefig(f, dpi=dpi_save)
 
 
 
-def print_intial_culture_networks_prob_rewire(fileName: str, Data_list: list[Network], dpi_save:int,nrows: int, ncols:int , layout: str, norm_neg_pos, cmap, node_size):
+def print_intial_culture_networks_orderliness(fileName: str, Data_list: list[Network], dpi_save:int,nrows: int, ncols:int , layout: str, norm_neg_pos, cmap, node_size):
     
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
 
@@ -1160,7 +1160,7 @@ def print_intial_culture_networks_prob_rewire(fileName: str, Data_list: list[Net
         G = nx.from_numpy_matrix(Data_list[i].history_weighting_matrix[0])
         pos_culture_network = prod_pos(layout, G)
         # print(i,ax)
-        ax.set_title("Prob rewire = {}".format(Data_list[i].prob_rewire))
+        ax.set_title("Orderliness = {}".format(Data_list[i].orderliness))
 
         indiv_culutre_list = [v.history_culture[0] for v in Data_list[i].agent_list]
         #print(indiv_culutre_list)
@@ -1177,10 +1177,10 @@ def print_intial_culture_networks_prob_rewire(fileName: str, Data_list: list[Net
         )
 
     plotName = fileName + "/Plots"
-    f = plotName + "/print_culture_time_series_prob_rewire.png"
+    f = plotName + "/print_intial_culture_networks_orderliness.png"
     fig.savefig(f, dpi=dpi_save)
 
-def prints_init_weighting_matrix_prob_rewire(
+def prints_init_weighting_matrix_orderliness(
     fileName: str, Data_list: list[Network], dpi_save:int,nrows: int, ncols:int, cmap, 
 ):
 
@@ -1194,7 +1194,7 @@ def prints_init_weighting_matrix_prob_rewire(
             cmap=cmap,
             aspect="auto",
         )
-        ax.set_title("Prob rewire = {}".format(Data_list[i].prob_rewire))
+        ax.set_title("orderliness = {}".format(Data_list[i].orderliness))
         ax.set_xlabel("Agent Link Strength")
         ax.set_ylabel("Agent Link Strength")
     plt.tight_layout()
@@ -1209,7 +1209,7 @@ def prints_init_weighting_matrix_prob_rewire(
     cbar.set_label("Weighting matrix")
 
     plotName = fileName + "/Plots"
-    f = plotName + "/prints_init_weighting_matrix_prob_rewire.png"
+    f = plotName + "/prints_init_weighting_matrix_orderliness.png"
     fig.savefig(f, dpi=dpi_save)
 
 
