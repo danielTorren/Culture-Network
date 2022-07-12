@@ -12,6 +12,7 @@ from plot import (
     print_culture_time_series_confirmation_bias,
     print_intial_culture_networks_confirmation_bias,
     prints_init_weighting_matrix_confirmation_bias,
+    prints_final_weighting_matrix_confirmation_bias,
     multi_animation_weighting,
 )
 
@@ -23,10 +24,10 @@ linear_alpha_diff_state = False#if true use the exponential form instead like th
 homophily_state = True
 
 #Social emissions model
-K = 5  # k nearest neighbours INTEGER
+K = 10  # k nearest neighbours INTEGER
 M = 3  # number of behaviours
-N = 20  # number of agents
-total_time = 1.2
+N = 100  # number of agents
+total_time = 10
 
 delta_t = 0.01  # time step size
 culture_momentum_real = 1# real time over which culture is calculated for INTEGER, NEEDS TO BE MROE THAN DELTA t
@@ -50,7 +51,9 @@ carbon_emissions = [1]*M
 discount_factor = 1#0.6
 present_discount_factor = 1#0.8
 #confirmation_bias = 0.90
+
 inverse_homophily = 0.1
+homophilly_rate = 1
 
 #Infromation provision parameters
 if information_provision_state:
@@ -92,6 +95,7 @@ params = {
     "alpha_change" : 1,
     "discount_factor": discount_factor,
     "inverse_homophily": inverse_homophily,#1 is total mixing, 0 is no mixing
+    "homophilly_rate": homophilly_rate,
     "present_discount_factor": present_discount_factor,
     #"confirmation_bias": confirmation_bias,
 }
@@ -112,7 +116,7 @@ round_dec = 2
 
 if __name__ == "__main__":
         
-        confirmation_bias_max = 10
+        confirmation_bias_max = 100
         reps = 9
 
         fileName = "results/confrimation_bias_variation_%s_%s_%s_%s_%s" % (str(params["N"]),str(params["time_steps_max"]),str(params["K"]), str(confirmation_bias_max), str(reps))
@@ -122,6 +126,7 @@ if __name__ == "__main__":
         ncols = 3
 
         confirmation_bias_list = np.linspace(0,confirmation_bias_max, reps)
+        print("confirmation_bias_list: ", confirmation_bias_list)
         data = []
         for i in confirmation_bias_list:
             params["confirmation_bias"] = i
@@ -135,12 +140,13 @@ if __name__ == "__main__":
         #plot_carbon_emissions_total_confirmation_bias(fileName, data, dpi_save)
         #plot_weighting_convergence_confirmation_bias(fileName, data, dpi_save)
         #print_culture_time_series_confirmation_bias(fileName, data, dpi_save, nrows, ncols)
-        print_intial_culture_networks_confirmation_bias(fileName, data, dpi_save, nrows, ncols , layout, norm_neg_pos, cmap, node_size)
+        #print_intial_culture_networks_confirmation_bias(fileName, data, dpi_save, nrows, ncols , layout, norm_neg_pos, cmap, node_size)
         prints_init_weighting_matrix_confirmation_bias(fileName, data, dpi_save,nrows, ncols, cmap_weighting)
+        prints_final_weighting_matrix_confirmation_bias(fileName, data, dpi_save,nrows, ncols, cmap_weighting)
 
         #multi_animation_weighting(fileName,data, cmap_weighting,  interval, fps, round_dec, nrows, ncols, time_steps_max)
 
-        #plt.show()
+        plt.show()
 
 
 

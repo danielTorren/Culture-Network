@@ -25,11 +25,15 @@ from plot import (
     animate_network_social_component_matrix,
     animate_network_information_provision,
     print_network_information_provision,
-    multi_animation_four
+    multi_animation_four,
+    print_culture_histogram,
+    animate_culture_network_and_weighting,
+    weighting_link_timeseries_plot,
 )
 from utility import loadData, get_run_properties, frame_distribution_prints
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap, SymLogNorm, Normalize
+from matplotlib.cm import get_cmap
 import time
 import numpy as np
 
@@ -43,20 +47,21 @@ homophily_state = True
 alpha_change = True
 
 #Social emissions model
-K = 8  # k nearest neighbours INTEGER
+K = 10  # k nearest neighbours INTEGER
 M = 3  # number of behaviours
-N = 50  # number of agents
+N = 100  # number of agents
+
 total_time = 10
 
-delta_t = 0.01  # time step size
+delta_t = 0.05  # time step size
 culture_momentum_real = 1# real time over which culture is calculated for INTEGER, NEEDS TO BE MROE THAN DELTA t
 
-prob_rewire = 0.2  # re-wiring probability?
+prob_rewire = 0.1  # re-wiring probability?
 
-alpha_attract = 0.1#2  ##inital distribution parameters - doing the inverse inverts it!
-beta_attract = 0.1#3
-alpha_threshold = 0.1#3
-beta_threshold = 0.1#2
+alpha_attract = 1#2  ##inital distribution parameters - doing the inverse inverts it!
+beta_attract = 1#3
+alpha_threshold = 1#3
+beta_threshold = 1#2
 
 time_steps_max = int(
     total_time / delta_t
@@ -67,13 +72,13 @@ phi_list_lower,phi_list_upper = 0.1,1
 learning_error_scale = 0.05  # 1 standard distribution is 2% error
 carbon_emissions = [1]*M
 
-inverse_homophily = 0.01#0.2
-homophilly_rate = 1.5
+inverse_homophily = 0.2#0.2
+homophilly_rate = 1
 
 discount_factor = 0.6
 present_discount_factor = 0.8
 
-confirmation_bias = 1.5
+confirmation_bias = 10
 
 #Infromation provision parameters
 if information_provision_state:
@@ -233,8 +238,9 @@ cmap = LinearSegmentedColormap.from_list("BrownGreen", ["sienna", "white", "oliv
 norm_neg_pos = Normalize(vmin=-1, vmax=1)
 #log_norm = SymLogNorm(linthresh=0.15, linscale=1, vmin=-1.0, vmax=1.0, base=10)  # this works at least its correct
 cmap_weighting = "Reds"
+cmap_edge = get_cmap("Greys")
 fps = 5
-interval = 300
+interval = 50
 layout = "circular"
 round_dec = 2
 
@@ -245,15 +251,16 @@ ncols = 3
 frame_num = ncols * nrows - 1
 scale_factor = time_steps_max*2
 
+min_val = 1e-3
 
 bin_num = 1000
 num_counts = 100000
-
+bin_num_agents = int(round(N/10))
 dpi_save = 2000
 
 RUN = True
 PLOT = True
-SHOW_PLOT = False
+SHOW_PLOT = True
 frames_list_exponetial = False
 
 if __name__ == "__main__":
@@ -293,38 +300,42 @@ if __name__ == "__main__":
         print("frames prints:",frames_list)
 
         ###PLOTS
-        plot_beta_distributions(FILENAME,alpha_attract,beta_attract,alpha_threshold,beta_threshold,bin_num,num_counts,dpi_save,)
-        plot_culture_timeseries(FILENAME, Data, dpi_save)
+        #plot_beta_distributions(FILENAME,alpha_attract,beta_attract,alpha_threshold,beta_threshold,bin_num,num_counts,dpi_save,)
+        #plot_culture_timeseries(FILENAME, Data, dpi_save)
         #plot_value_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save)
         #plot_threshold_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save)
-        plot_attract_timeseries(FILENAME, Data, nrows_behave, ncols_behave, dpi_save)
+        #plot_attract_timeseries(FILENAME, Data, nrows_behave, ncols_behave, dpi_save)
         #plot_total_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
         #plot_av_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
-        plot_weighting_matrix_convergence_timeseries(FILENAME, Data, dpi_save)
+        #plot_weighting_matrix_convergence_timeseries(FILENAME, Data, dpi_save)
         #plot_cultural_range_timeseries(FILENAME, Data, dpi_save)
         #plot_average_culture_timeseries(FILENAME,Data,dpi_save)
+        weighting_link_timeseries_plot(FILENAME, Data, "Link strength", dpi_save,min_val)
+        
         if carbon_price_state:
             plot_carbon_price_timeseries(FILENAME,Data,dpi_save)
 
         ###PRINTS
         
-        prints_weighting_matrix(FILENAME,Data,cmap_weighting,nrows,ncols,frames_list,round_dec,dpi_save)
+        #prints_weighting_matrix(FILENAME,Data,cmap_weighting,nrows,ncols,frames_list,round_dec,dpi_save)
         #prints_behavioural_matrix(FILENAME,Data,cmap,nrows,ncols,frames_list,round_dec,dpi_save)
-        prints_culture_network(FILENAME,Data,layout,cmap,node_size,nrows,ncols,norm_neg_pos,frames_list,round_dec,dpi_save)
+        #prints_culture_network(FILENAME,Data,layout,cmap,node_size,nrows,ncols,norm_neg_pos,frames_list,round_dec,dpi_save)
         #print_network_social_component_matrix(FILENAME,Data,cmap,nrows,ncols,frames_list,round_dec,dpi_save)
+        #print_culture_histogram(FILENAME, Data, "individual_culture", nrows, ncols, frames_list,round_dec,dpi_save, bin_num_agents)
         if information_provision_state:
             print_network_information_provision(FILENAME,Data,cmap,nrows,ncols,frames_list,round_dec,dpi_save)
 
         ###ANIMATIONS
-        #animate_network_information_provision(FILENAME,Data,interval,fps,round_dec,cmap_weighting)
-        #animate_network_social_component_matrix(FILENAME,Data,interval,fps,round_dec,cmap)
-        # animate_weighting_matrix(FILENAME,Data,interval,fps,round_dec,cmap_weighting)
-        # animate_behavioural_matrix(FILENAME,Data,interval,fps,cmap,round_dec)
-        #animate_culture_network(FILENAME,Data,layout,cmap,node_size,interval,fps,norm_neg_pos,round_dec)
-        #multi_animation(FILENAME,Data,cmap,cmap,layout,node_size,interval,fps,norm_neg_pos)
-        #multi_animation_four(FILENAME,Data,cmap,cmap,layout,node_size,interval,fps,norm_neg_pos)
-        # multi_animation_alt(FILENAME,Data,cmap,cmap,layout,node_size,interval,fps,norm_neg_pos)
-        # multi_animation_scaled(FILENAME,Data,cmap,cmap,layout,node_size,interval,fps,scale_factor,frames_proportion,norm_neg_pos)
+        #ani_a = animate_network_information_provision(FILENAME,Data,interval,fps,round_dec,cmap_weighting)
+        #ani_b = animate_network_social_component_matrix(FILENAME,Data,interval,fps,round_dec,cmap)
+        #ani_c = animate_weighting_matrix(FILENAME,Data,interval,fps,round_dec,cmap_weighting)
+        #ani_d = animate_behavioural_matrix(FILENAME,Data,interval,fps,cmap,round_dec)
+        #ani_e = animate_culture_network(FILENAME,Data,layout,cmap,node_size,interval,fps,norm_neg_pos,round_dec)
+        ani_f =  animate_culture_network_and_weighting(FILENAME,Data,layout,cmap,node_size,interval,fps,norm_neg_pos,round_dec,cmap_edge)
+        #ani_h = multi_animation(FILENAME,Data,cmap,cmap,layout,node_size,interval,fps,norm_neg_pos)
+        #ani_i = multi_animation_four(FILENAME,Data,cmap,cmap,layout,node_size,interval,fps,norm_neg_pos)
+        #ani_j = multi_animation_alt(FILENAME,Data,cmap,cmap,layout,node_size,interval,fps,norm_neg_pos)
+        #ani_k = multi_animation_scaled(FILENAME,Data,cmap,cmap,layout,node_size,interval,fps,scale_factor,frames_proportion,norm_neg_pos)
 
         print(
             "PLOT time taken: %s minutes" % ((time.time() - start_time) / 60),

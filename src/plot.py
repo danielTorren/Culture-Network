@@ -1,7 +1,7 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-from matplotlib.colors import Normalize
+from matplotlib.colors import Normalize 
 import numpy as np
 from utility import frame_distribution, frame_distribution_prints
 from pandas import DataFrame
@@ -210,6 +210,8 @@ def animate_network_social_component_matrix(FILENAME: str, Data: DataFrame, inte
     writervideo = animation.FFMpegWriter(fps=fps)
     ani.save(f, writer=writervideo)
 
+    return ani
+
 def animate_network_information_provision(FILENAME: str, Data: DataFrame, interval:int, fps:int, round_dec:int, cmap: Union[LinearSegmentedColormap,str]):
 
     def update(i):
@@ -248,6 +250,7 @@ def animate_network_information_provision(FILENAME: str, Data: DataFrame, interv
     f = animateName + "/" + "behaviour_information_provision_animation.mp4"
     writervideo = animation.FFMpegWriter(fps=fps)
     ani.save(f, writer=writervideo)
+    return ani
 
 # make matrix animation
 def animate_weighting_matrix(FILENAME: str, Data: DataFrame, interval:int, fps:int, round_dec:int, cmap_weighting: Union[LinearSegmentedColormap,str]):
@@ -256,6 +259,7 @@ def animate_weighting_matrix(FILENAME: str, Data: DataFrame, interval:int, fps:i
         # print("next frame!",M)        
         matrice.set_array(M)
         # Set the title
+        
         ax.set_title(
             "Time= {}".format(round(Data["network_time"][i], round_dec))
             )
@@ -280,7 +284,7 @@ def animate_weighting_matrix(FILENAME: str, Data: DataFrame, interval:int, fps:i
     f = animateName + "/" + "weighting_matrix_animation.mp4"
     writervideo = animation.FFMpegWriter(fps=fps)
     ani.save(f, writer=writervideo)
-
+    return ani
 
 # make behaviour evolution plot
 def animate_behavioural_matrix(
@@ -323,7 +327,7 @@ def animate_behavioural_matrix(
     f = animateName + "/" + "behavioural_matrix_animation.mp4"
     writervideo = animation.FFMpegWriter(fps=fps)
     ani.save(f, writer=writervideo)
-
+    return ani
 
 def prod_pos(layout_type:str, network:Graph) -> Graph:
 
@@ -391,7 +395,7 @@ def animate_culture_network(
     f = animateName + "/" + "cultural_animation.mp4"
     writervideo = animation.FFMpegWriter(fps=fps)
     ani.save(f, writer=writervideo)
-
+    return ani
 
 def prints_weighting_matrix(
     FILENAME: str, Data: DataFrame, cmap_behaviour: Union[LinearSegmentedColormap,str], nrows:int, ncols:int, frames_list:list[int], round_dec:int, dpi_save:int
@@ -405,6 +409,7 @@ def prints_weighting_matrix(
         ax.matshow(
             Data["network_weighting_matrix"][frames_list[i]],
             cmap=cmap_behaviour,
+            norm=Normalize(vmin=0, vmax=1),
             aspect="auto",
         )
         # Set the title
@@ -651,7 +656,7 @@ def multi_animation(
     f = animateName + "/" + "multi_animation.mp4"
     writervideo = animation.FFMpegWriter(fps=fps)
     ani.save(f, writer=writervideo)
-
+    return ani
 
 def multi_animation_alt(
     FILENAME: str, Data: DataFrame, cmap_behaviour: Union[LinearSegmentedColormap,str], cmap_culture: Union[LinearSegmentedColormap,str], layout: str, node_size:int,  interval:int,
@@ -752,7 +757,7 @@ def multi_animation_alt(
     f = animateName + "/" + "multi_animation_alt.mp4"
     writervideo = animation.FFMpegWriter(fps=fps)
     ani.save(f, writer=writervideo)
-
+    return ani
 
 def multi_animation_scaled(
     FILENAME: str, Data: DataFrame, cmap_behaviour: Union[LinearSegmentedColormap,str], cmap_culture: Union[LinearSegmentedColormap,str], layout: str, node_size:int,  interval:int,
@@ -841,7 +846,7 @@ def multi_animation_scaled(
     f = animateName + "/" + "multi_animation_scaled.mp4"
     writervideo = animation.FFMpegWriter(fps=fps)
     ani.save(f, writer=writervideo)
-
+    return ani
 
 
 
@@ -981,7 +986,7 @@ def multi_animation_four(
     f = animateName + "/" + "multi_animation_four.mp4"
     writervideo = animation.FFMpegWriter(fps=fps)
     ani.save(f, writer=writervideo)
-
+    return ani
 
 
 def print_intial_culture_networks_homophily_fischer(fileName: str, Data_list: list[Network], dpi_save:int,nrows: int, ncols:int , layout: str, norm_neg_pos, cmap, node_size):
@@ -1121,6 +1126,7 @@ def prints_init_weighting_matrix_confirmation_bias(
         mat = ax.matshow(
             Data_list[i].history_weighting_matrix[0],
             cmap=cmap,
+            norm=Normalize(vmin=0, vmax=1),
             aspect="auto",
         )
         ax.set_title("Confirmation bias = {}".format(Data_list[i].confirmation_bias))
@@ -1136,6 +1142,37 @@ def prints_init_weighting_matrix_confirmation_bias(
     plotName = fileName + "/Prints"
     f = plotName + "/prints_init_weighting_matrix_confirmation_bias.png"
     fig.savefig(f, dpi=dpi_save)
+
+def prints_final_weighting_matrix_confirmation_bias(
+    fileName: str, Data_list: list[Network], dpi_save:int,nrows: int, ncols:int, cmap, 
+):
+
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
+    # print(frames_list,Data["network_time"],Data["network_weighting_matrix"][20])
+    #print( len(Data["network_weighting_matrix"]),frames_list)
+    for i, ax in enumerate(axes.flat):
+        # print(i)
+        mat = ax.matshow(
+            Data_list[i].history_weighting_matrix[-1],
+            cmap=cmap,
+            norm=Normalize(vmin=0, vmax=1),
+            aspect="auto",
+        )
+        ax.set_title("Confirmation bias = {}".format(Data_list[i].confirmation_bias))
+        ax.set_xlabel("Agent Link Strength")
+        ax.set_ylabel("Agent Link Strength")
+
+    plt.tight_layout()
+    # colour bar axes
+    cbar = fig.colorbar(mat,ax=ax)  # This does a mapabble on the fly i think, not sure
+    
+    cbar.set_label("Weighting matrix")
+    
+
+    plotName = fileName + "/Prints"
+    f = plotName + "/prints_final_weighting_matrix_confirmation_bias.png"
+    fig.savefig(f, dpi=dpi_save)
+
 
     
 def plot_carbon_emissions_total_confirmation_bias(fileName: str, Data_list: list[Network], dpi_save:int):
@@ -1237,7 +1274,7 @@ def multi_animation_weighting(FILENAME: str, data_list: list, cmap: Union[Linear
     f = animateName + "/" + "multi_weighting_matrix_animation.mp4"
     writervideo = animation.FFMpegWriter(fps=fps)
     ani.save(f, writer=writervideo)
-
+    return ani
 """WEIGHTING"""
 
 def plot_average_culture_no_range_comparison(fileName: str, Data_list: list[Network], dpi_save:int, property_list:list):
@@ -1356,3 +1393,140 @@ def prints_SA_matrix(FILENAME, Data,title_list,cmap,nrows, ncols, dpi_save , lab
     plotName = FILENAME + "/Prints"
     f = plotName + "/" + "prints_SA_matrix.png"
     fig.savefig(f, dpi=dpi_save)
+
+"""OTHER"""
+
+def print_culture_histgram(fileName: str, Data_list: list[Network] , title_list:str, nrows:int, ncols:int , dpi_save:int):
+    y_title = "indivdiual culture"
+
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
+
+    for i, ax in enumerate(axes.flat):
+
+        ax.set_title(title_list[i])
+        ax.set_ylabel(r"%s" % y_title)
+
+        ax.hist(x, density=True, bins=30)  # density=False would make counts
+        for v in Data_list[i].agent_list:
+            ax.plot(np.asarray( Data_list[i].history_time ), np.asarray(v.history_culture))
+        ax.set_xlabel(r"Time")
+    
+    plotName = fileName + "/Prints"
+    f = plotName + "/print_culture_timeseries.png"
+    fig.savefig(f, dpi=dpi_save)
+
+
+
+def print_culture_histogram(
+    FILENAME: str, Data: DataFrame, property:str, nrows:int, ncols:int, frames_list, round_dec, dpi_save,bin_num
+):
+    y_title = "Probability"
+    #print(Data[property], Data[property].shape)
+
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
+    # print("property = ", property)
+
+    for i, ax in enumerate(axes.flat):
+        #print(Data[property][frames_list[i]])
+        ax.hist(Data[property][frames_list[i]], density=True, bins = bin_num)  # density=False would make counts
+        ax.set_xlabel(r"Culture")
+        ax.set_ylabel(r"%s" % y_title)
+        ax.set_title("Time= {}".format(round(Data["network_time"][frames_list[i]], round_dec)))  # avoid 0 in the title
+    plt.tight_layout()
+
+    plotName = FILENAME + "/Plots"
+    f = plotName + "/print_culture_histogram.png"
+    fig.savefig(f, dpi=dpi_save)
+
+
+# animation of changing culture
+def animate_culture_network_and_weighting(
+    FILENAME: str, Data: DataFrame, layout:str, cmap_culture: Union[LinearSegmentedColormap,str], node_size:int, interval:int, fps:int, norm_neg_pos: SymLogNorm, round_dec:int, cmap_edge
+):
+
+    def update(i, G, pos, ax, cmap_culture):
+
+        ax.clear()
+        # print(Data["individual_culture"][i],Data["individual_culture"][i].shape)
+        
+        colour_adjust = norm_neg_pos(Data["individual_culture"][i])
+        ani_step_colours = cmap_culture(colour_adjust)
+
+        G = nx.from_numpy_matrix( Data["network_weighting_matrix"][i])
+
+        weights = [G[u][v]['weight'] for u,v in G.edges()]
+        norm = Normalize(vmin=0, vmax=1)
+        colour_adjust_edge = norm(weights)
+        colors_weights = cmap_edge(colour_adjust_edge)
+
+        nx.draw(
+            G,
+            node_color=ani_step_colours,
+            edge_color=colors_weights,
+            ax=ax,
+            pos=pos,
+            node_size=node_size,
+            edgecolors="black",
+        )
+
+        # Set the title
+        ax.set_title("Time= {}".format(round(Data["network_time"][i], round_dec)))
+
+    # Build plot
+    fig, ax = plt.subplots()
+    # cbar = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap_culture), ax=ax)#This does a mapabble on the fly i think, not sure
+    cbar_culture = fig.colorbar(
+        plt.cm.ScalarMappable(cmap=cmap_culture), ax=ax
+    )  # This does a mapabble on the fly i think, not sure
+    cbar_culture.set_label("Culture")
+
+    cbar_weight = fig.colorbar(
+        plt.cm.ScalarMappable(cmap=cmap_edge), ax=ax, location='left',
+    )  # This does a mapabble on the fly i think, not sure
+    cbar_weight.set_label("Link Strength")
+
+    # need to generate the network from the matrix
+    G = nx.from_numpy_matrix(Data["network_weighting_matrix"][0])
+
+    # get pos
+    pos_culture_network = prod_pos(layout, G)
+
+    ani = animation.FuncAnimation(
+        fig,
+        update,
+        frames=int(Data["time_steps_max"]),
+        fargs=(G, pos_culture_network, ax, cmap_culture),
+        repeat_delay=500,
+        interval=interval,
+    )
+
+    # save the video
+    animateName = FILENAME + "/Animations"
+    f = animateName + "/" + "cultural_animation.mp4"
+    writervideo = animation.FFMpegWriter(fps=fps)
+    ani.save(f, writer=writervideo)
+
+    return ani
+
+
+def weighting_link_timeseries_plot(FILENAME: str, Data: DataFrame, y_title:str, dpi_save:int, min_val):
+
+    fig, ax = plt.subplots()
+
+    for i in range(int(Data["N"])):
+        for v in range(int(Data["N"])):
+            if Data["network_weighting_matrix"][0][i][v] > 0.0:
+                link_data = [Data["network_weighting_matrix"][x][i][v] for x in range(len(Data["network_time"]))]
+                if any(j > min_val for j in link_data):
+                    ax.plot(Data["network_time"], link_data)
+
+    ax.axvline(Data["culture_momentum_real"], color='r',linestyle = "--")
+    ax.set_xlabel(r"Time")
+    ax.set_ylabel(r"%s" % y_title)
+
+    plotName = FILENAME + "/Plots"
+    f = plotName + "/weighting_link_timeseries_plot.png"
+    fig.savefig(f, dpi=dpi_save)
+
+
+

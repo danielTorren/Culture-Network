@@ -1,12 +1,13 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from typing import Union
+import pickle
 
 ##inital distribution parameters - doing the inverse inverts it!
-alpha_attract = 8
+alpha_attract = 3
 beta_attract = 2
 
-alpha_threshold = 8
+alpha_threshold = 3
 beta_threshold = 2
 
 bin_num = 1000
@@ -52,3 +53,14 @@ plot_beta(
     alpha_attract, beta_attract, alpha_threshold, beta_threshold, bin_num, num_counts
 )
 plt.show()
+
+"""
+fileName = "Results/_DEGROOT_5900_3_100_0.01_10_0.2_1_0.05_0.1_0.1_0.1_0.1_1/"
+
+file = open(fileName + "Data.pickle",'rb')
+object_file = pickle.load(file)
+file.close()
+
+
+print(object_file.agent_list)
+"""

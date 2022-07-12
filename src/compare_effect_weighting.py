@@ -21,12 +21,12 @@ homophily_state = True
 #alpha_change = True
 
 #Social emissions model
-K = 8  # k nearest neighbours INTEGER
+K = 10  # k nearest neighbours INTEGER
 M = 3  # number of behaviours
-N = 50  # number of agents
-total_time = 10
+N = 100  # number of agents
+total_time = 10000
 
-delta_t = 0.01  # time step size
+delta_t = 0.05  # time step size
 culture_momentum_real = 1# real time over which culture is calculated for INTEGER, NEEDS TO BE MROE THAN DELTA t
 
 prob_rewire = 0.2  # re-wiring probability?
@@ -46,12 +46,12 @@ learning_error_scale = 0.05  # 1 standard distribution is 2% error
 carbon_emissions = [1]*M
 
 inverse_homophily = 0.01#0.2
-homophilly_rate = 1.5
+homophilly_rate = 1
 
 discount_factor = 0.6
 present_discount_factor = 0.8
 
-confirmation_bias = 1.5
+confirmation_bias = 1000
 
 #Infromation provision parameters
 if information_provision_state:

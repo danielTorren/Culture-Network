@@ -28,7 +28,7 @@ alpha_change = True
 K = 10  # k nearest neighbours INTEGER
 M = 3  # number of behaviours
 N = 100  # number of agents
-total_time = 10.2
+total_time = 10
 
 delta_t = 0.01  # time step size
 culture_momentum_real = 1# real time over which culture is calculated for INTEGER, NEEDS TO BE MROE THAN DELTA t
@@ -45,12 +45,12 @@ time_steps_max = int(
 )  # number of time steps max, will stop if culture converges
 
 set_seed = 1  ##reproducibility INTEGER
-phi_list_lower,phi_list_upper = 0.1,1
+phi_list_lower,phi_list_upper = 0,1
 learning_error_scale = 0.05  # 1 standard distribution is 2% error
 carbon_emissions = [1]*M
 
 #inverse_homophily = 0.1#0.2
-homophilly_rate = 1.5
+homophilly_rate = 1
 
 discount_factor = 0.6
 present_discount_factor = 0.8
@@ -149,4 +149,4 @@ if __name__ == "__main__":
         print_culture_time_series_homophily_fischer(fileName, data, dpi_save, nrows, ncols)
         print_intial_culture_networks_homophily_fischer(fileName, data, dpi_save, nrows, ncols , layout, norm_neg_pos, cmap, node_size)
         #prints_culture_network_homophily_fischer(fileName, data[0],layout, cmap ,node_size,  nrows, ncols ,  norm_neg_pos,frames_list, round_dec, dpi_save)
-        #plt.show()
+        plt.show()

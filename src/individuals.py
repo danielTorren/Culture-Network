@@ -69,7 +69,7 @@ class Individual:
 
     def update_av_behaviour_list_alt(self):
         self.av_behaviour_list.pop(0)
-        self.av_behaviour_list.append(self.av_behaviour)
+        self.av_behaviour_list.append(self.av_behaviour)#what if its attraction instead?
 
     def calc_culture(self) -> float:
         weighted_sum_behaviours = 0
@@ -102,7 +102,7 @@ class Individual:
         
         for i in range(self.M):
 
-            total_behaviour += self.values[i]  # calc_behaviour_av
+            total_behaviour += self.values[i] #attracts WHAT IF ATTRACTION INSTEAD!!!! # calc_behaviour_av
 
             if (self.values[i] <= 0):  # calc_carbon_emissions if less than or equal to 0 then it is a less environmetally friendly behaviour(brown)
                 total_emissions += self.carbon_intensive_list[i]  # calc_carbon_emissions
