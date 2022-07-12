@@ -6,11 +6,15 @@ import numpy as np
 from network import Network
 from utility import createFolderSA
 import networkx as nx
+from matplotlib.cm import get_cmap
 from plot import ( 
     plot_average_culture_comparison,
     plot_carbon_emissions_total_comparison,
     plot_weighting_matrix_convergence_comparison,
     plot_average_culture_no_range_comparison,
+    live_compare_animate_culture_network_and_weighting,
+    live_compare_animate_weighting_matrix,
+    live_compare_animate_behaviour_matrix,
     )
 from matplotlib.colors import LinearSegmentedColormap,  Normalize
 
@@ -33,7 +37,7 @@ M = 3  # number of behaviours
 N = 100  # number of agents
 total_time = 10
 
-delta_t = 0.01  # time step size
+delta_t = 0.05  # time step size
 culture_momentum_real = 1# real time over which culture is calculated for INTEGER, NEEDS TO BE MROE THAN DELTA t
 
 prob_rewire = 0.2  # re-wiring probability?
@@ -53,12 +57,12 @@ learning_error_scale = 0.05  # 1 standard distribution is 2% error
 carbon_emissions = [1]*M
 
 inverse_homophily = 0.1#0.2
-homophilly_rate = 1.5
+homophilly_rate = 1
 
 discount_factor = 0.6
 present_discount_factor = 0.8
 
-confirmation_bias = 1.5
+confirmation_bias = 100
 
 #Infromation provision parameters
 if information_provision_state:
@@ -121,6 +125,7 @@ cmap = LinearSegmentedColormap.from_list("BrownGreen", ["sienna", "white", "oliv
 cmap_weighting = "Reds"
 #norm_neg_pos = plt.cm.ScalarMappable(cmap=cmap, norm=Normalize(vmin=-1, vmax=1))
 norm_neg_pos = Normalize(vmin=-1, vmax=1)
+norm_zero_one = Normalize(vmin=0, vmax=1)
 node_size = 50
 
 layout = "circular"
@@ -130,6 +135,12 @@ bin_num = 1000
 
 num_counts = 100000
 frames_list = [int(round(x)) for x in np.linspace(0,time_steps_max, num=frame_num + 1)]
+
+fps = 5
+interval = 50
+round_dec = 2
+cmap_edge = get_cmap("Greys")
+
 print("frames_list: ", frames_list)
 
 if __name__ == "__main__":
@@ -150,8 +161,12 @@ if __name__ == "__main__":
 
         createFolderSA(fileName)
 
-        plot_average_culture_comparison(fileName, data, dpi_save,set_seed_list)
-        plot_carbon_emissions_total_comparison(fileName, data, dpi_save,set_seed_list)
-        plot_weighting_matrix_convergence_comparison(fileName, data, dpi_save,set_seed_list)
-        plot_average_culture_no_range_comparison(fileName, data, dpi_save,set_seed_list)
+        #plot_average_culture_comparison(fileName, data, dpi_save,set_seed_list)
+        #plot_carbon_emissions_total_comparison(fileName, data, dpi_save,set_seed_list)
+        #plot_weighting_matrix_convergence_comparison(fileName, data, dpi_save,set_seed_list)
+        #plot_average_culture_no_range_comparison(fileName, data, dpi_save,set_seed_list)
+
+        #ani_b = live_compare_animate_culture_network_and_weighting(fileName,data,layout,cmap,node_size,interval,fps,norm_zero_one,round_dec,cmap_edge, ncols, nrows,"Seed",set_seed_list)
+        #ani_c = live_compare_animate_weighting_matrix(fileName, data,  cmap_weighting, interval, fps, round_dec, cmap_edge, nrows, ncols,"Seed",set_seed_list)
+        ani_d = live_compare_animate_behaviour_matrix(fileName, data,  cmap, interval, fps, round_dec, nrows, ncols,"Seed",set_seed_list)
     

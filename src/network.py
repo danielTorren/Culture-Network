@@ -98,14 +98,14 @@ class Network:
             self.t_IP_list = np.empty(self.M)
 
         # create indviduals#Do a homophilly
-        """
-        if self.homophily_state: 
+        
+        #if self.homophily_state: 
             #self.attract_matrix_init, self.threshold_matrix_init = self.generate_init_data_behaviours_homo_alt()#self.generate_init_data_behaviours_homo()
-            self.attract_matrix_init, self.threshold_matrix_init = self.generate_init_data_behaviours_homo_shuffle()#self.generate_init_data_behaviours_homo()
-        else:
-            self.attract_matrix_init, self.threshold_matrix_init = self.generate_init_data_behaviours()#self.generate_init_data_behaviours_homo()
-        """
-        self.attract_matrix_init, self.threshold_matrix_init = self.generate_init_data_behaviours_homo_harsh()
+        self.attract_matrix_init, self.threshold_matrix_init = self.generate_init_data_behaviours()#self.generate_init_data_behaviours_homo()
+        #else:
+            #self.attract_matrix_init, self.threshold_matrix_init = self.generate_init_data_behaviours()#self.generate_init_data_behaviours_homo()
+        
+        #self.attract_matrix_init, self.threshold_matrix_init = self.generate_init_data_behaviours_homo_harsh()
 
         self.agent_list = self.create_agent_list()
 
@@ -198,17 +198,7 @@ class Network:
             neighbours_list,
         )  # num_neighbours,
 
-    def generate_init_data_behaviours(self) -> tuple:
-        ###init_attract, init_threshold,carbon_emissions
-        attract_matrix = np.asarray([np.random.beta(self.alpha_attract, self.beta_attract, size=self.M) for n in self.list_people])
-        threshold_matrix = np.asarray(
-            [
-                np.random.beta(self.alpha_threshold, self.beta_threshold, size=self.M)
-                for n in self.list_people
-            ]
-        )
-        return np.asarray(attract_matrix),np.asarray(threshold_matrix)
-
+    """
     def generate_init_data_behaviours_homo_harsh(self) -> tuple:
         ###init_attract, init_threshold,carbon_emissions
         attract_matrix_green = [np.random.beta(8, 2, size=self.M) for n in range(int(self.N/5))]
@@ -223,63 +213,33 @@ class Network:
         attract_list = attract_matrix_green + attract_matrix_indifferent + attract_matrix_brown 
         threshold_list = threshold_matrix_green + threshold_matrix_indifferent + threshold_matrix_brown 
 
-        #print(attract_list, len(attract_list))
-
         attract_matrix = np.asarray(attract_list)
         threshold_matrix = np.asarray(threshold_list)
 
         culture_list = self.quick_calc_culture(attract_matrix,threshold_matrix)
-        #print("init culture_list: ",culture_list)
-        #print("shuffle_reps", self.shuffle_reps)
+
         #shuffle the indexes!
         attract_list_sorted = [x for _,x in sorted(zip(culture_list,attract_list))]
         threshold_list_sorted = [x for _,x in sorted(zip(culture_list,threshold_list))]
-        #print( "culture list sorted",self.quick_calc_culture(np.asarray(attract_list_sorted),np.asarray(threshold_list_sorted)))
-        #print("attract_list_sorted", attract_list_sorted)
+
         attract_array_circular = self.produce_circular_list(attract_list_sorted)
         threshold_array_circular = self.produce_circular_list(threshold_list_sorted)
-        #print( "culture list _array_circular",self.quick_calc_culture(np.asarray(attract_array_circular),np.asarray(threshold_array_circular)))
-
-        #print("attract_array_circular ",attract_array_circular )
 
         attract_array_circular_indexes = list(range(len(attract_array_circular)))
-        #print("culture_list_indexes",culture_list_indexes)
         attract_array_circular_indexes_shuffled = self.partial_shuffle(attract_array_circular_indexes, self.shuffle_reps)
-        #print("attract_array_circular_indexes_shuffled",attract_array_circular_indexes_shuffled)
-        #print("culture_list_indexes_shuffled", culture_list_indexes_shuffled)
 
         attract_list_sorted_shuffle = [x for _,x in sorted(zip(attract_array_circular_indexes_shuffled,attract_array_circular))]
-        #print("attract_list_sorted_shuffle",attract_list_sorted_shuffle)
         threshold_list_sorted_shuffle = [x for _,x in sorted(zip(attract_array_circular_indexes_shuffled,threshold_array_circular))]
         
-        #print( "init culture list",self.quick_calc_culture(np.asarray(attract_list_sorted_shuffle),np.asarray(threshold_list_sorted_shuffle)))
 
-        #quit()
         return np.asarray(attract_list_sorted_shuffle),np.asarray(threshold_list_sorted_shuffle)
+    """
 
     def produce_circular_list(self,list):
         first_half = list[::2]
         second_half =  (list[1::2])[::-1]
         circular = first_half + second_half
         return circular
-
-    def generate_init_data_behaviours_homo(self) -> tuple:
-        ###init_attract, init_threshold,carbon_emissions
-        attract_list = [np.random.beta(self.alpha_attract, self.beta_attract, size=self.M) for n in self.list_people]
-        threshold_list = [np.random.beta(self.alpha_threshold, self.beta_threshold, size=self.M) for n in self.list_people]
-        attract_matrix = np.asarray(attract_list)
-        threshold_matrix = np.asarray(threshold_list)
-
-        behave_value_matrix = attract_matrix - threshold_matrix
-        culture_list = behave_value_matrix.sum(axis=1)/behave_value_matrix.shape[1]
-
-        attract_list_sorted = [x for _,x in sorted(zip(culture_list,attract_list))]
-        threshold_list_sorted = [x for _,x in sorted(zip(culture_list,threshold_list))]
-
-        attract_array_circular = np.asarray(self.produce_circular_list(attract_list_sorted))
-        threshold_array_circular = np.asarray(self.produce_circular_list(threshold_list_sorted))
-
-        return attract_array_circular,threshold_array_circular
 
     def partial_shuffle(self, l, swap_reps=5):
         n = len(l)
@@ -293,7 +253,7 @@ class Network:
         culture_list = behave_value_matrix.sum(axis=1)/behave_value_matrix.shape[1]
         return culture_list
 
-    def generate_init_data_behaviours_homo_shuffle(self) -> tuple:
+    def generate_init_data_behaviours(self) -> tuple:
         ###init_attract, init_threshold,carbon_emissions
         attract_list = [np.random.beta(self.alpha_attract, self.beta_attract, size=self.M) for n in self.list_people]
         threshold_list = [np.random.beta(self.alpha_threshold, self.beta_threshold, size=self.M) for n in self.list_people]
@@ -301,32 +261,20 @@ class Network:
         threshold_matrix = np.asarray(threshold_list)
 
         culture_list = self.quick_calc_culture(attract_matrix,threshold_matrix)
-        #print("init culture_list: ",culture_list)
-        #print("shuffle_reps", self.shuffle_reps)
+
         #shuffle the indexes!
         attract_list_sorted = [x for _,x in sorted(zip(culture_list,attract_list))]
         threshold_list_sorted = [x for _,x in sorted(zip(culture_list,threshold_list))]
-        #print( "culture list sorted",self.quick_calc_culture(np.asarray(attract_list_sorted),np.asarray(threshold_list_sorted)))
-        #print("attract_list_sorted", attract_list_sorted)
+
         attract_array_circular = self.produce_circular_list(attract_list_sorted)
         threshold_array_circular = self.produce_circular_list(threshold_list_sorted)
-        #print( "culture list _array_circular",self.quick_calc_culture(np.asarray(attract_array_circular),np.asarray(threshold_array_circular)))
-
-        #print("attract_array_circular ",attract_array_circular )
 
         attract_array_circular_indexes = list(range(len(attract_array_circular)))
-        #print("culture_list_indexes",culture_list_indexes)
         attract_array_circular_indexes_shuffled = self.partial_shuffle(attract_array_circular_indexes, self.shuffle_reps)
-        #print("attract_array_circular_indexes_shuffled",attract_array_circular_indexes_shuffled)
-        #print("culture_list_indexes_shuffled", culture_list_indexes_shuffled)
 
         attract_list_sorted_shuffle = [x for _,x in sorted(zip(attract_array_circular_indexes_shuffled,attract_array_circular))]
-        #print("attract_list_sorted_shuffle",attract_list_sorted_shuffle)
         threshold_list_sorted_shuffle = [x for _,x in sorted(zip(attract_array_circular_indexes_shuffled,threshold_array_circular))]
         
-        #print( "init culture list",self.quick_calc_culture(np.asarray(attract_list_sorted_shuffle),np.asarray(threshold_list_sorted_shuffle)))
-
-        #quit()
         return np.asarray(attract_list_sorted_shuffle),np.asarray(threshold_list_sorted_shuffle)
 
     def create_agent_list(self) -> list:

@@ -524,7 +524,7 @@ def print_network_information_provision(
 
 
 def prints_culture_network(
-    FILENAME: str, Data: DataFrame,layout:str, cmap_culture: LinearSegmentedColormap,node_size:int, nrows:int, ncols:int, norm_neg_pos: SymLogNorm, frames_list:list[int], round_dec:int, dpi_save:int
+    FILENAME: str, Data: DataFrame,layout:str, cmap_culture: LinearSegmentedColormap,node_size:int, nrows:int, ncols:int, norm_neg_pos: SymLogNorm, frames_list:list[int], round_dec:int, dpi_save:int,norm_zero_one
 ):
 
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
@@ -562,7 +562,7 @@ def prints_culture_network(
     # print("cmap_culture", cmap_culture)
 
     # colour bar axes
-    cbar = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap_culture, norm=Normalize(vmin=-1, vmax=1)),ax=axes.ravel().tolist())
+    cbar = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap_culture, norm=norm_zero_one),ax=axes.ravel().tolist())
     cbar.set_label("Culture")
 
     f = FILENAME + "/Prints/prints_culture_network.png"
@@ -571,7 +571,7 @@ def prints_culture_network(
 
 def multi_animation(
     FILENAME: str, Data: DataFrame, cmap_behaviour: Union[LinearSegmentedColormap,str], cmap_culture: Union[LinearSegmentedColormap,str], layout: str, node_size:int,  interval:int,
-    fps:int, norm_neg_pos: SymLogNorm,
+    fps:int, norm_neg_pos: SymLogNorm, norm_zero_one,
 ):
 
     ####ACUTAL
@@ -629,7 +629,7 @@ def multi_animation(
 
     # cbar = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap_culture), ax=ax)#This does a mapabble on the fly i think, not sure
     cbar_culture = fig.colorbar(
-        plt.cm.ScalarMappable(cmap=cmap_culture, norm=norm_neg_pos), ax=ax2
+        plt.cm.ScalarMappable(cmap=cmap_culture, norm=norm_zero_one), ax=ax2
     )  # This does a mapabble on the fly i think, not sure
     cbar_culture.set_label("Culture")
 
@@ -761,7 +761,7 @@ def multi_animation_alt(
 
 def multi_animation_scaled(
     FILENAME: str, Data: DataFrame, cmap_behaviour: Union[LinearSegmentedColormap,str], cmap_culture: Union[LinearSegmentedColormap,str], layout: str, node_size:int,  interval:int,
-    fps:int, scale_factor: int, frames_proportion: int, norm_neg_pos: SymLogNorm
+    fps:int, scale_factor: int, frames_proportion: int, norm_zero_one: SymLogNorm
 ):
 
     ####ACUTAL
@@ -796,7 +796,7 @@ def multi_animation_scaled(
     def update(i):
         ax2.clear()
 
-        colour_adjust = norm_neg_pos(Data["individual_culture"][frames_list[i]])
+        colour_adjust = norm_zero_one(Data["individual_culture"][frames_list[i]])
         ani_step_colours = cmap_culture(colour_adjust)
         nx.draw(
             G,
@@ -823,7 +823,7 @@ def multi_animation_scaled(
 
     # cbar = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap_culture), ax=ax)#This does a mapabble on the fly i think, not sure
     cbar_culture = fig.colorbar(
-        plt.cm.ScalarMappable(cmap=cmap_culture, norm=norm_neg_pos), ax=ax2
+        plt.cm.ScalarMappable(cmap=cmap_culture, norm=norm_zero_one), ax=ax2
     )  # This does a mapabble on the fly i think, not sure
     cbar_culture.set_label("Culture")
 
@@ -989,7 +989,7 @@ def multi_animation_four(
     return ani
 
 
-def print_intial_culture_networks_homophily_fischer(fileName: str, Data_list: list[Network], dpi_save:int,nrows: int, ncols:int , layout: str, norm_neg_pos, cmap, node_size):
+def print_intial_culture_networks_homophily_fischer(fileName: str, Data_list: list[Network], dpi_save:int,nrows: int, ncols:int , layout: str, norm_zero_one, cmap, node_size):
     
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
 
@@ -1002,7 +1002,7 @@ def print_intial_culture_networks_homophily_fischer(fileName: str, Data_list: li
 
         indiv_culutre_list = [v.history_culture[0] for v in Data_list[i].agent_list]
         #print(indiv_culutre_list)
-        colour_adjust = norm_neg_pos(indiv_culutre_list)
+        colour_adjust = norm_zero_one(indiv_culutre_list)
         ani_step_colours = cmap(colour_adjust)
 
         nx.draw(
@@ -1015,7 +1015,7 @@ def print_intial_culture_networks_homophily_fischer(fileName: str, Data_list: li
         )
     
     # colour bar axes
-    cbar = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap, norm=Normalize(vmin=-1, vmax=1)),ax=axes.ravel().tolist())
+    cbar = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap, norm=norm_zero_one),ax=axes.ravel().tolist())
     cbar.set_label("Culture")
 
     plotName = fileName + "/Prints"
@@ -1043,7 +1043,7 @@ def print_culture_time_series_homophily_fischer(fileName: str, Data_list: list[N
     fig.savefig(f, dpi=dpi_save)
 
 def prints_culture_network_homophily_fischer(
-    FILENAME: str, Data: DataFrame,layout:str, cmap_culture: LinearSegmentedColormap,node_size:int, nrows:int, ncols:int, norm_neg_pos: SymLogNorm, frames_list:list[int], round_dec:int, dpi_save:int
+    FILENAME: str, Data: DataFrame,layout:str, cmap_culture: LinearSegmentedColormap,node_size:int, nrows:int, ncols:int, norm_zero_one: SymLogNorm, frames_list:list[int], round_dec:int, dpi_save:int
 ):
 
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
@@ -1062,7 +1062,7 @@ def prints_culture_network_homophily_fischer(
 
         culture_list = [x.history_culture[frames_list[i]] for x in Data.agent_list]
         #print(culture_list)
-        colour_adjust = norm_neg_pos(np.asarray(culture_list))
+        colour_adjust = norm_zero_one(np.asarray(culture_list))
         #colour_adjust = (Data["individual_culture"][frames_list[i]] + 1)/2
         #colour_adjust = Data["individual_culture"][frames_list[i]]
         ani_step_colours = cmap_culture(colour_adjust)
@@ -1503,6 +1503,193 @@ def animate_culture_network_and_weighting(
     # save the video
     animateName = FILENAME + "/Animations"
     f = animateName + "/" + "cultural_animation.mp4"
+    writervideo = animation.FFMpegWriter(fps=fps)
+    ani.save(f, writer=writervideo)
+
+    return ani
+
+# animation of changing culture
+def live_compare_animate_culture_network_and_weighting(
+    FILENAME: str, Data_list: list, layout:str, cmap_culture: Union[LinearSegmentedColormap,str], node_size:int, interval:int, fps:int, norm_zero_one: SymLogNorm, round_dec:int, cmap_edge, nrows, ncols,property_name, property_list
+):
+
+    def update(i, Data_list, axes, cmap_culture, layout,title ):
+
+        for j, ax in enumerate(axes.flat):
+
+            ax.clear()
+            # print(Data["individual_culture"][i],Data["individual_culture"][i].shape)
+            individual_culture_list = [x.culture for x in Data_list[j].agent_list]
+            colour_adjust = norm_zero_one(individual_culture_list)
+            ani_step_colours = cmap_culture(colour_adjust)
+
+            G = nx.from_numpy_matrix(Data_list[j].history_weighting_matrix[i])
+
+             # get pos
+            pos = prod_pos(layout, G)
+
+            weights = [G[u][v]['weight'] for u,v in G.edges()]
+            norm = Normalize(vmin=0, vmax=1)
+            colour_adjust_edge = norm(weights)
+            colors_weights = cmap_edge(colour_adjust_edge)
+
+            nx.draw(
+                G,
+                node_color=ani_step_colours,
+                edge_color=colors_weights,
+                ax=ax,
+                pos=pos,
+                node_size=node_size,
+                edgecolors="black",
+            )
+
+            ax.set_title( r"%s = %s" % (property_name, round(property_list[j], round_dec)))
+
+        title.set_text("Time= {}".format(round(Data_list[0].history_time[i], round_dec)))
+
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
+
+    title = plt.suptitle(t='', fontsize = 20)
+
+    cbar_culture = fig.colorbar(
+        plt.cm.ScalarMappable(cmap=cmap_culture), ax=axes.ravel().tolist(), location='right'
+    )  # This does a mapabble on the fly i think, not sure
+    cbar_culture.set_label("Culture")
+
+    cbar_weight = fig.colorbar(
+        plt.cm.ScalarMappable(cmap=cmap_edge), ax=axes.ravel().tolist(), location='left',
+    )  # This does a mapabble on the fly i think, not sure
+    cbar_weight.set_label("Link Strength")
+
+    # need to generate the network from the matrix
+    #G = nx.from_numpy_matrix(Data_list[0].history_weighting_matrix[0])
+
+
+
+    ani = animation.FuncAnimation(
+        fig,
+        update,
+        frames=int(len(Data_list[0].history_time)),
+        fargs=(Data_list, axes, cmap_culture, layout,title),
+        repeat_delay=500,
+        interval=interval,
+    )
+
+
+    # save the video
+    animateName = FILENAME + "/Animations"
+    f = animateName + "/live_multi_animate_culture_network_and_weighting_%s.mp4" % property_name
+    #print("f", f)
+    writervideo = animation.FFMpegWriter(fps=fps)
+    ani.save(f, writer=writervideo)
+
+    return ani
+
+# animation of changing culture
+def live_compare_animate_weighting_matrix(
+    FILENAME: str, Data_list: list,  cmap_weighting: Union[LinearSegmentedColormap,str], interval:int, fps:int, round_dec:int, cmap_edge, nrows, ncols,property_name, property_list
+):
+
+    def update(i, Data_list, axes, title ):
+
+        for j, ax in enumerate(axes.flat):
+
+            ax.clear()
+
+            ax.matshow(Data_list[j].history_weighting_matrix[i], cmap=cmap_weighting, norm=Normalize(vmin=0, vmax=1),aspect="auto" )
+            
+            ax.set_title( r"%s = %s" % (property_name, round(property_list[j], round_dec)))
+            ax.set_xlabel("Agent")
+            ax.set_ylabel("Agent")
+
+        title.set_text("Time= {}".format(round(Data_list[0].history_time[i], round_dec)))
+
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7), constrained_layout=True)
+
+    #plt.tight_layout()
+
+    title = plt.suptitle(t='', fontsize = 20)
+
+    cbar_weight = fig.colorbar(
+        plt.cm.ScalarMappable(cmap=cmap_weighting), ax=axes.ravel().tolist(), location='right',
+    )  # This does a mapabble on the fly i think, not sure
+    cbar_weight.set_label("Link Strength")
+
+    # need to generate the network from the matrix
+    #G = nx.from_numpy_matrix(Data_list[0].history_weighting_matrix[0])
+    
+
+    ani = animation.FuncAnimation(
+        fig,
+        update,
+        frames=int(len(Data_list[0].history_time)),
+        fargs=(Data_list, axes, title),
+        repeat_delay=500,
+        interval=interval,
+    )
+
+
+    # save the video
+    animateName = FILENAME + "/Animations"
+    f = animateName + "/live_compare_animate_weighting_matrix_%s.mp4" % property_name
+    writervideo = animation.FFMpegWriter(fps=fps)
+    ani.save(f, writer=writervideo)
+
+    return ani
+
+# animation of changing culture
+def live_compare_animate_behaviour_matrix(
+    FILENAME: str, Data_list: list,  cmap_behaviour: Union[LinearSegmentedColormap,str], interval:int, fps:int, round_dec:int, nrows, ncols,property_name, property_list
+):
+
+    def update(i, Data_list, axes, title ):
+
+        for j, ax in enumerate(axes.flat):
+
+            ax.clear()
+
+            for q in Data_list[j].agent_list:
+                q.history_behaviour_values
+
+            M = [n.history_behaviour_values[i] for n in Data_list[j].agent_list]
+
+            ax.matshow(M, cmap=cmap_behaviour, norm=Normalize(vmin=-1, vmax=1),aspect="auto",)
+            
+            ax.set_title( r"%s = %s" % (property_name, round(property_list[j], round_dec)))
+            ax.set_xlabel("Agent")
+            ax.set_ylabel("Agent")
+
+        title.set_text("Time= {}".format(round(Data_list[0].history_time[i], round_dec)))
+
+        
+
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7), constrained_layout=True)
+
+    #fig.tight_layout(h_pad=2)
+    #plt.tight_layout()
+
+    title = plt.suptitle(t='', fontsize = 20)
+
+    cbar_weight = fig.colorbar(
+        plt.cm.ScalarMappable(cmap=cmap_behaviour), ax=axes.ravel().tolist(), location='right',
+    )  # This does a mapabble on the fly i think, not sure
+    cbar_weight.set_label("Behavioural Value")
+
+    # need to generate the network from the matrix
+    #G = nx.from_numpy_matrix(Data_list[0].history_weighting_matrix[0])
+
+    ani = animation.FuncAnimation(
+        fig,
+        update,
+        frames=int(len(Data_list[0].history_time)),
+        fargs=(Data_list, axes, title),
+        repeat_delay=500,
+        interval=interval,
+    )
+
+    # save the video
+    animateName = FILENAME + "/Animations"
+    f = animateName + "/live_compare_animate_behaviour_matrix_%s.mp4" % property_name
     writervideo = animation.FFMpegWriter(fps=fps)
     ani.save(f, writer=writervideo)
 

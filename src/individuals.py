@@ -102,7 +102,7 @@ class Individual:
         
         for i in range(self.M):
 
-            total_behaviour += self.values[i] #attracts WHAT IF ATTRACTION INSTEAD!!!! # calc_behaviour_av
+            total_behaviour += self.attracts[i] #attracts! # calc_behaviour_av
 
             if (self.values[i] <= 0):  # calc_carbon_emissions if less than or equal to 0 then it is a less environmetally friendly behaviour(brown)
                 total_emissions += self.carbon_intensive_list[i]  # calc_carbon_emissions

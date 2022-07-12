@@ -51,9 +51,9 @@ K = 10  # k nearest neighbours INTEGER
 M = 3  # number of behaviours
 N = 100  # number of agents
 
-total_time = 10
+total_time = 100
 
-delta_t = 0.05  # time step size
+delta_t = 0.01  # time step size
 culture_momentum_real = 1# real time over which culture is calculated for INTEGER, NEEDS TO BE MROE THAN DELTA t
 
 prob_rewire = 0.1  # re-wiring probability?
@@ -78,7 +78,7 @@ homophilly_rate = 1
 discount_factor = 0.6
 present_discount_factor = 0.8
 
-confirmation_bias = 10
+confirmation_bias = 100
 
 #Infromation provision parameters
 if information_provision_state:
@@ -236,6 +236,7 @@ node_size = 50
 cmap = LinearSegmentedColormap.from_list("BrownGreen", ["sienna", "white", "olivedrab"])
 #norm_neg_pos = plt.cm.ScalarMappable(cmap=cmap, norm=Normalize(vmin=-1, vmax=1))
 norm_neg_pos = Normalize(vmin=-1, vmax=1)
+norm_zero_one  = Normalize(vmin=0, vmax=1)
 #log_norm = SymLogNorm(linthresh=0.15, linscale=1, vmin=-1.0, vmax=1.0, base=10)  # this works at least its correct
 cmap_weighting = "Reds"
 cmap_edge = get_cmap("Greys")
@@ -301,16 +302,16 @@ if __name__ == "__main__":
 
         ###PLOTS
         #plot_beta_distributions(FILENAME,alpha_attract,beta_attract,alpha_threshold,beta_threshold,bin_num,num_counts,dpi_save,)
-        #plot_culture_timeseries(FILENAME, Data, dpi_save)
+        plot_culture_timeseries(FILENAME, Data, dpi_save)
         #plot_value_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save)
         #plot_threshold_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save)
-        #plot_attract_timeseries(FILENAME, Data, nrows_behave, ncols_behave, dpi_save)
+        plot_attract_timeseries(FILENAME, Data, nrows_behave, ncols_behave, dpi_save)
         #plot_total_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
         #plot_av_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
         #plot_weighting_matrix_convergence_timeseries(FILENAME, Data, dpi_save)
         #plot_cultural_range_timeseries(FILENAME, Data, dpi_save)
         #plot_average_culture_timeseries(FILENAME,Data,dpi_save)
-        weighting_link_timeseries_plot(FILENAME, Data, "Link strength", dpi_save,min_val)
+        #weighting_link_timeseries_plot(FILENAME, Data, "Link strength", dpi_save,min_val)
         
         if carbon_price_state:
             plot_carbon_price_timeseries(FILENAME,Data,dpi_save)
@@ -319,7 +320,7 @@ if __name__ == "__main__":
         
         #prints_weighting_matrix(FILENAME,Data,cmap_weighting,nrows,ncols,frames_list,round_dec,dpi_save)
         #prints_behavioural_matrix(FILENAME,Data,cmap,nrows,ncols,frames_list,round_dec,dpi_save)
-        #prints_culture_network(FILENAME,Data,layout,cmap,node_size,nrows,ncols,norm_neg_pos,frames_list,round_dec,dpi_save)
+        prints_culture_network(FILENAME,Data,layout,cmap,node_size,nrows,ncols,norm_neg_pos,frames_list,round_dec,dpi_save,norm_zero_one)
         #print_network_social_component_matrix(FILENAME,Data,cmap,nrows,ncols,frames_list,round_dec,dpi_save)
         #print_culture_histogram(FILENAME, Data, "individual_culture", nrows, ncols, frames_list,round_dec,dpi_save, bin_num_agents)
         if information_provision_state:
@@ -331,8 +332,8 @@ if __name__ == "__main__":
         #ani_c = animate_weighting_matrix(FILENAME,Data,interval,fps,round_dec,cmap_weighting)
         #ani_d = animate_behavioural_matrix(FILENAME,Data,interval,fps,cmap,round_dec)
         #ani_e = animate_culture_network(FILENAME,Data,layout,cmap,node_size,interval,fps,norm_neg_pos,round_dec)
-        ani_f =  animate_culture_network_and_weighting(FILENAME,Data,layout,cmap,node_size,interval,fps,norm_neg_pos,round_dec,cmap_edge)
-        #ani_h = multi_animation(FILENAME,Data,cmap,cmap,layout,node_size,interval,fps,norm_neg_pos)
+        #ani_f =  animate_culture_network_and_weighting(FILENAME,Data,layout,cmap,node_size,interval,fps,norm_neg_pos,round_dec,cmap_edge)
+        #ani_h = multi_animation(FILENAME,Data,cmap,cmap,layout,node_size,interval,fps,norm_neg_pos,norm_zero_one)
         #ani_i = multi_animation_four(FILENAME,Data,cmap,cmap,layout,node_size,interval,fps,norm_neg_pos)
         #ani_j = multi_animation_alt(FILENAME,Data,cmap,cmap,layout,node_size,interval,fps,norm_neg_pos)
         #ani_k = multi_animation_scaled(FILENAME,Data,cmap,cmap,layout,node_size,interval,fps,scale_factor,frames_proportion,norm_neg_pos)

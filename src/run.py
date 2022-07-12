@@ -9,7 +9,7 @@ def generate_data(parameters: dict) -> Network:
     #rint(parameters)
     #if parameters["save_data"]:
 
-    print_simu = False
+    print_simu = True
     
     if print_simu:
         start_time = time.time()

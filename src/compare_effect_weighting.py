@@ -4,13 +4,20 @@ from run import generate_data
 import matplotlib.pyplot as plt
 import numpy as np
 from network import Network
+from matplotlib.cm import get_cmap
 from utility import createFolderSA
 from plot import (
     plot_average_culture_comparison,
     plot_carbon_emissions_total_comparison,
     plot_weighting_matrix_convergence_comparison,
     print_culture_timeseries,
+    live_compare_animate_culture_network_and_weighting,
+    live_compare_animate_weighting_matrix,
+    live_compare_animate_behaviour_matrix,
 )
+
+from matplotlib.colors import LinearSegmentedColormap,  Normalize
+
 # Params
 save_data = True
 opinion_dynamics =  "DEGROOT" #  "DEGROOT"  "SELECT"
@@ -109,7 +116,19 @@ if information_provision_state:
     params["attract_information_provision_list"] = attract_information_provision_list
     params["t_IP_matrix"] =  t_IP_matrix
 
+fps = 5
+interval = 50
+round_dec = 2
+cmap_edge = get_cmap("Greys")
 
+layout = "circular"
+cmap = LinearSegmentedColormap.from_list("BrownGreen", ["sienna", "white", "olivedrab"])
+cmap_weighting = "Reds"
+#norm_neg_pos = plt.cm.ScalarMappable(cmap=cmap, norm=Normalize(vmin=-1, vmax=1))
+norm_neg_pos = Normalize(vmin=-1, vmax=1)
+norm_zero_one  = Normalize(vmin=0, vmax=1)
+node_size = 50
+bin_num = 1000
 dpi_save = 1200
 
 if __name__ == "__main__":
@@ -134,10 +153,14 @@ if __name__ == "__main__":
         nrows = 1
         ncols = 3
 
-        plot_average_culture_comparison(fileName, data, dpi_save,title_list )
-        plot_carbon_emissions_total_comparison(fileName, data, dpi_save, title_list)
-        plot_weighting_matrix_convergence_comparison(fileName, data, dpi_save, title_list)
-        print_culture_timeseries(fileName, data , title_list, nrows, ncols ,dpi_save)
+        #plot_average_culture_comparison(fileName, data, dpi_save,title_list )
+        #plot_carbon_emissions_total_comparison(fileName, data, dpi_save, title_list)
+        #plot_weighting_matrix_convergence_comparison(fileName, data, dpi_save, title_list)
+        #print_culture_timeseries(fileName, data , title_list, nrows, ncols ,dpi_save)
+
+        #ani_b = live_compare_animate_culture_network_and_weighting(fileName,data,layout,cmap,node_size,interval,fps,norm_zero_one,round_dec,cmap_edge, ncols, nrows,"Weighting state",title_list)
+        #ani_c = live_compare_animate_weighting_matrix(fileName, data,  cmap_weighting, interval, fps, round_dec, cmap_edge, nrows, ncols,"Weighting state",title_list)
+        ani_d = live_compare_animate_behaviour_matrix(fileName, data,  cmap, interval, fps, round_dec, nrows, ncols,"Weighting state",title_list)
 
         plt.show()
 
