@@ -21,7 +21,7 @@ from plot import (
 )
 
 save_data = True
-opinion_dynamics =  "DEGROOT" #  "DEGROOT"  "SELECT"
+opinion_dynamics =  "SELECT" #  "DEGROOT"  "SELECT"
 carbon_price_state = False
 information_provision_state = False
 linear_alpha_diff_state = False#if true use the exponential form instead like theo
@@ -31,10 +31,10 @@ homophily_state = True
 K = 10  # k nearest neighbours INTEGER
 M = 3  # number of behaviours
 N = 100  # number of agents
-total_time = 10
+total_time = 1001
 
-delta_t = 0.01  # time step size
-culture_momentum_real = 1# real time over which culture is calculated for INTEGER, NEEDS TO BE MROE THAN DELTA t
+delta_t = 1  # time step size
+culture_momentum_real = 5# real time over which culture is calculated for INTEGER, NEEDS TO BE MROE THAN DELTA t
 
 prob_rewire = 0.1  # re-wiring probability?
 
@@ -49,7 +49,7 @@ time_steps_max = int(
 
 set_seed = 1  ##reproducibility INTEGER
 phi_list_lower,phi_list_upper = 0.1,1
-learning_error_scale = 0.05  # 1 standard distribution is 2% error
+learning_error_scale = 0.0  # 1 standard distribution is 2% error
 carbon_emissions = [1]*M
 
 inverse_homophily = 0.2#0.2
@@ -123,7 +123,7 @@ cmap_edge = get_cmap("Greys")
 
 if __name__ == "__main__":
         
-        confirmation_bias_max = 3
+        confirmation_bias_max = 10
         reps = 4
 
         fileName = "results/confrimation_bias_variation_%s_%s_%s_%s_%s" % (str(params["N"]),str(params["time_steps_max"]),str(params["K"]), str(confirmation_bias_max), str(reps))
@@ -132,7 +132,7 @@ if __name__ == "__main__":
         nrows = 2
         ncols = 2
 
-        confirmation_bias_list = np.logspace(-1,confirmation_bias_max, reps)
+        confirmation_bias_list = np.linspace(0,confirmation_bias_max, reps)
         print("confirmation_bias_list: ", confirmation_bias_list)
         data = []
         for i in confirmation_bias_list:
@@ -144,19 +144,19 @@ if __name__ == "__main__":
 
         createFolderSA(fileName)
 
-        #plot_carbon_emissions_total_confirmation_bias(fileName, data, dpi_save)
-        #plot_weighting_convergence_confirmation_bias(fileName, data, dpi_save)
-        #print_culture_time_series_confirmation_bias(fileName, data, dpi_save, nrows, ncols)
-        #print_intial_culture_networks_confirmation_bias(fileName, data, dpi_save, nrows, ncols , layout, norm_zero_one, cmap, node_size)
-        #prints_init_weighting_matrix_confirmation_bias(fileName, data, dpi_save,nrows, ncols, cmap_weighting)
-        #prints_final_weighting_matrix_confirmation_bias(fileName, data, dpi_save,nrows, ncols, cmap_weighting)
+        plot_carbon_emissions_total_confirmation_bias(fileName, data, dpi_save)
+        plot_weighting_convergence_confirmation_bias(fileName, data, dpi_save)
+        print_culture_time_series_confirmation_bias(fileName, data, dpi_save, nrows, ncols)
+        print_intial_culture_networks_confirmation_bias(fileName, data, dpi_save, nrows, ncols , layout, norm_zero_one, cmap, node_size)
+        prints_init_weighting_matrix_confirmation_bias(fileName, data, dpi_save,nrows, ncols, cmap_weighting)
+        prints_final_weighting_matrix_confirmation_bias(fileName, data, dpi_save,nrows, ncols, cmap_weighting)
 
         #multi_animation_weighting(fileName,data, cmap_weighting,  interval, fps, round_dec, nrows, ncols, time_steps_max)
         #ani_b = live_compare_animate_culture_network_and_weighting(fileName,data,layout,cmap,node_size,interval,fps,norm_zero_one,round_dec,cmap_edge, ncols, nrows,"Confirmation bias",confirmation_bias_list)
-        ani_c = live_compare_animate_weighting_matrix(fileName, data,  cmap_weighting, interval, fps, round_dec, cmap_edge, nrows, ncols,"Confirmation bias",confirmation_bias_list)
+        #ani_c = live_compare_animate_weighting_matrix(fileName, data,  cmap_weighting, interval, fps, round_dec, cmap_edge, nrows, ncols,"Confirmation bias",confirmation_bias_list)
         #ani_d = live_compare_animate_behaviour_matrix(fileName, data,  cmap, interval, fps, round_dec, nrows, ncols,"Confirmation bias",confirmation_bias_list)
         
-        #plt.show()
+        plt.show()
 
 
 

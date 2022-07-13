@@ -25,10 +25,14 @@ class Network:
         self.save_data = parameters["save_data"]
         self.linear_alpha_diff_state = parameters["linear_alpha_diff_state"]
         self.homophily_state = parameters["homophily_state"]
+        self.nur_attitude = parameters["nur_attitude"]
 
         #time
         self.t = 0
-        self.delta_t = parameters["delta_t"]
+        if self.nur_attitude:
+            self.delta_t = 1
+        else:
+            self.delta_t = parameters["delta_t"]
 
         #culture
         self.culture_momentum_real = parameters["culture_momentum_real"]
@@ -110,6 +114,7 @@ class Network:
         self.agent_list = self.create_agent_list()
 
         self.behavioural_attract_matrix = self.calc_behavioural_attract_matrix()#need to leave outside as its a thing being saved, why is it being saved???
+        self.init_behavioural_attract_matrix = self.calc_behavioural_attract_matrix()
 
         # create network
         (
@@ -126,6 +131,8 @@ class Network:
             ego_influence = self.calc_ego_influence_degroot()
         else:
             raise Exception("Invalid opinion dynamics model")
+
+        
 
         self.social_component_matrix = self.calc_social_component_matrix(ego_influence)
 
@@ -148,6 +155,8 @@ class Network:
                 np.nan
             )  # there is no convergence in the first step, to deal with time issues when plotting
 
+            self.green_adoption = self.calc_green_adoption()
+
             self.history_weighting_matrix = [self.weighting_matrix]
             self.history_social_component_matrix = [self.social_component_matrix]
             self.history_cultural_var = [self.cultural_var]
@@ -157,6 +166,7 @@ class Network:
             self.history_average_culture = [self.average_culture]
             self.history_min_culture = [self.min_culture]
             self.history_max_culture = [self.max_culture]
+            self.history_green_adoption = [self.green_adoption]
 
             if self.carbon_price_state:
                 self.history_carbon_price = [self.carbon_price]
@@ -289,6 +299,8 @@ class Network:
                 "discount_list" : self.discount_list,
                 "carbon_price_state" : self.carbon_price_state,
                 "information_provision_state" : self.information_provision_state,
+                "phi_array": self.phi_array,
+                "nur_attitude": self.nur_attitude
         }
 
         if self.carbon_price_state:
@@ -317,7 +329,7 @@ class Network:
         return np.array([self.agent_list[k].attracts for k in k_list])#make a new NxM where each row is what agent n is going to learn from their selected agent k
 
     def calc_social_component_matrix(self,ego_influence: npt.NDArray) ->  npt.NDArray:
-        return self.phi_array*(ego_influence + np.random.normal(loc=0, scale=self.learning_error_scale, size=(self.N, self.M)) - self.behavioural_attract_matrix)
+        return self.phi_array*(ego_influence + np.random.normal(loc=0, scale=self.learning_error_scale, size=(self.N, self.M)) )
 
     def calc_total_weighting_matrix_difference(self, matrix_before: npt.NDArray, matrix_after: npt.NDArray)-> float:
         difference_matrix = np.subtract(matrix_before, matrix_after)
@@ -380,6 +392,15 @@ class Network:
             min(culture_list),
         )
 
+    def calc_green_adoption(self):
+        adoption = 0
+        for n in self.agent_list:
+            for m in range(self.M):
+                if n.values[m] > 0:
+                    adoption += 1
+        adoption_ratio = adoption/(self.N*self.M)
+        return adoption_ratio
+
     def update_individuals(self):
         for i in self.list_people:
             if self.carbon_price_state:
@@ -398,12 +419,12 @@ class Network:
         self.history_cultural_var.append(self.cultural_var)
         self.history_min_culture.append(self.min_culture)
         self.history_max_culture.append(self.max_culture)
+        self.history_green_adoption.append(self.green_adoption)
 
         if self.carbon_price_state:
             self.history_carbon_price.append(self.carbon_price)
 
     def next_step(self):
-        #print("HEYE")
         # advance a time step
         self.t += self.delta_t
 
@@ -445,4 +466,6 @@ class Network:
                 self.min_culture,
                 self.max_culture,
             ) = self.calc_network_culture()
+            self.green_adoption = self.calc_green_adoption()
             self.save_data_network()
+            

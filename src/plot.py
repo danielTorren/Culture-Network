@@ -131,6 +131,12 @@ def plot_total_carbon_emissions_timeseries(FILENAME: str, Data: DataFrame, dpi_s
     property = "network_total_carbon_emissions"
     plot_network_timeseries(FILENAME, Data, y_title, property, dpi_save)
 
+def plot_green_adoption_timeseries(FILENAME: str, Data: DataFrame, dpi_save:int):
+    y_title = "green_adoption_"
+    property = "network_green_adoption"
+
+    plot_network_timeseries(FILENAME, Data, y_title, property, dpi_save)
+
 
 def plot_average_culture_timeseries(FILENAME: str, Data: DataFrame, dpi_save:int):
     y_title = "Average Culture"

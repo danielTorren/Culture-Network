@@ -10,8 +10,10 @@ class Individual:
     def __init__(
         self, individual_params, init_data_attracts, init_data_thresholds
     ):
-
+        
+        self.init_attracts = init_data_attracts
         self.init_thresholds = init_data_thresholds
+
         self.attracts = init_data_attracts
         self.thresholds = init_data_thresholds
 
@@ -24,6 +26,9 @@ class Individual:
         self.discount_list = individual_params["discount_list"]
         self.carbon_price_state = individual_params["carbon_price_state"]
         self.information_provision_state = individual_params["information_provision_state"]
+        self.nur_attitude = individual_params["nur_attitude"]
+
+        self.phi_array = individual_params["phi_array"]
 
         if self.carbon_price_state:
             self.carbon_price = individual_params["carbon_price"]
@@ -34,7 +39,7 @@ class Individual:
             self.eta = individual_params["eta"]
             self.t_IP_list = individual_params["t_IP_list"]
 
-        self.time_list_beahviours = [self.delta_t*x for x in range(self.culture_momentum)]
+        #self.time_list_beahviours = [self.delta_t*x for x in range(self.culture_momentum)]
         #print("time_list_beahviours", self.time_list_beahviours)
 
         #print(self.attracts,self.thresholds, type(self.thresholds))
@@ -83,11 +88,17 @@ class Individual:
     def update_values(self):
         self.values = self.attracts - self.thresholds
 
-    def update_attracts(self,social_component_behaviours):
-        if self.information_provision_state:
-            self.attracts += self.delta_t*(social_component_behaviours + self.information_provision)  
+    def update_attracts(self,social_component_with_phi):
+        if self.nur_attitude:
+            if self.information_provision_state:
+                self.attracts = self.init_attracts*(1 - self.phi_array) + social_component_with_phi + self.information_provision
+            else:
+                self.attracts = self.init_attracts*(1 - self.phi_array) + social_component_with_phi
         else:
-            self.attracts += self.delta_t*(social_component_behaviours)  
+            if self.information_provision_state:
+                self.attracts = self.attracts*(1 - self.delta_t*self.phi_array) + self.delta_t*(social_component_with_phi + self.information_provision)  
+            else:
+                self.attracts = self.attracts*(1 - self.delta_t*self.phi_array) + self.delta_t*(social_component_with_phi)  
 
     def update_thresholds(self):
         for m in range(self.M):
@@ -149,14 +160,14 @@ class Individual:
         if self.information_provision_state:
             self.history_information_provision.append(self.information_provision)
 
-    def next_step(self, t:float, social_component_behaviours: npt.NDArray):
+    def next_step(self, t:float, social_component_with_phi: npt.NDArray):
         self.t = t
         if self.information_provision_state:
             self.update_information_provision()
 
         self.update_values()
         #print("before", self.attracts)
-        self.update_attracts(social_component_behaviours)
+        self.update_attracts(social_component_with_phi)
 
         if self.carbon_price_state:
             self.update_thresholds()
