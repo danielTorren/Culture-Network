@@ -30,10 +30,10 @@ homophily_state = True
 #Social emissions model
 K = 10  # k nearest neighbours INTEGER
 M = 3  # number of behaviours
-N = 20  # number of agents
-total_time = 2
+N = 100  # number of agents
+total_time = 10
 
-delta_t = 0.05  # time step size
+delta_t = 0.01  # time step size
 culture_momentum_real = 1# real time over which culture is calculated for INTEGER, NEEDS TO BE MROE THAN DELTA t
 
 prob_rewire = 0.1  # re-wiring probability?
@@ -123,7 +123,7 @@ cmap_edge = get_cmap("Greys")
 
 if __name__ == "__main__":
         
-        confirmation_bias_max = 100
+        confirmation_bias_max = 3
         reps = 4
 
         fileName = "results/confrimation_bias_variation_%s_%s_%s_%s_%s" % (str(params["N"]),str(params["time_steps_max"]),str(params["K"]), str(confirmation_bias_max), str(reps))
@@ -132,7 +132,7 @@ if __name__ == "__main__":
         nrows = 2
         ncols = 2
 
-        confirmation_bias_list = np.linspace(0,confirmation_bias_max, reps)
+        confirmation_bias_list = np.logspace(-1,confirmation_bias_max, reps)
         print("confirmation_bias_list: ", confirmation_bias_list)
         data = []
         for i in confirmation_bias_list:
@@ -152,9 +152,9 @@ if __name__ == "__main__":
         #prints_final_weighting_matrix_confirmation_bias(fileName, data, dpi_save,nrows, ncols, cmap_weighting)
 
         #multi_animation_weighting(fileName,data, cmap_weighting,  interval, fps, round_dec, nrows, ncols, time_steps_max)
-        ani_b = live_compare_animate_culture_network_and_weighting(fileName,data,layout,cmap,node_size,interval,fps,norm_zero_one,round_dec,cmap_edge, ncols, nrows,"Confirmation bias",confirmation_bias_list)
+        #ani_b = live_compare_animate_culture_network_and_weighting(fileName,data,layout,cmap,node_size,interval,fps,norm_zero_one,round_dec,cmap_edge, ncols, nrows,"Confirmation bias",confirmation_bias_list)
         ani_c = live_compare_animate_weighting_matrix(fileName, data,  cmap_weighting, interval, fps, round_dec, cmap_edge, nrows, ncols,"Confirmation bias",confirmation_bias_list)
-        ani_d = live_compare_animate_behaviour_matrix(fileName, data,  cmap, interval, fps, round_dec, nrows, ncols,"Confirmation bias",confirmation_bias_list)
+        #ani_d = live_compare_animate_behaviour_matrix(fileName, data,  cmap, interval, fps, round_dec, nrows, ncols,"Confirmation bias",confirmation_bias_list)
         
         #plt.show()
 

@@ -51,7 +51,7 @@ K = 10  # k nearest neighbours INTEGER
 M = 3  # number of behaviours
 N = 100  # number of agents
 
-total_time = 100
+total_time = 10
 
 delta_t = 0.01  # time step size
 culture_momentum_real = 1# real time over which culture is calculated for INTEGER, NEEDS TO BE MROE THAN DELTA t
@@ -261,7 +261,7 @@ dpi_save = 2000
 
 RUN = True
 PLOT = True
-SHOW_PLOT = True
+SHOW_PLOT = False
 frames_list_exponetial = False
 
 if __name__ == "__main__":
@@ -301,28 +301,28 @@ if __name__ == "__main__":
         print("frames prints:",frames_list)
 
         ###PLOTS
-        #plot_beta_distributions(FILENAME,alpha_attract,beta_attract,alpha_threshold,beta_threshold,bin_num,num_counts,dpi_save,)
+        plot_beta_distributions(FILENAME,alpha_attract,beta_attract,alpha_threshold,beta_threshold,bin_num,num_counts,dpi_save,)
         plot_culture_timeseries(FILENAME, Data, dpi_save)
-        #plot_value_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save)
+        plot_value_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save)
         #plot_threshold_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save)
         plot_attract_timeseries(FILENAME, Data, nrows_behave, ncols_behave, dpi_save)
-        #plot_total_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
-        #plot_av_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
-        #plot_weighting_matrix_convergence_timeseries(FILENAME, Data, dpi_save)
-        #plot_cultural_range_timeseries(FILENAME, Data, dpi_save)
-        #plot_average_culture_timeseries(FILENAME,Data,dpi_save)
-        #weighting_link_timeseries_plot(FILENAME, Data, "Link strength", dpi_save,min_val)
+        plot_total_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
+        plot_av_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
+        plot_weighting_matrix_convergence_timeseries(FILENAME, Data, dpi_save)
+        plot_cultural_range_timeseries(FILENAME, Data, dpi_save)
+        plot_average_culture_timeseries(FILENAME,Data,dpi_save)
+        weighting_link_timeseries_plot(FILENAME, Data, "Link strength", dpi_save,min_val)
         
         if carbon_price_state:
             plot_carbon_price_timeseries(FILENAME,Data,dpi_save)
 
         ###PRINTS
         
-        #prints_weighting_matrix(FILENAME,Data,cmap_weighting,nrows,ncols,frames_list,round_dec,dpi_save)
-        #prints_behavioural_matrix(FILENAME,Data,cmap,nrows,ncols,frames_list,round_dec,dpi_save)
-        prints_culture_network(FILENAME,Data,layout,cmap,node_size,nrows,ncols,norm_neg_pos,frames_list,round_dec,dpi_save,norm_zero_one)
-        #print_network_social_component_matrix(FILENAME,Data,cmap,nrows,ncols,frames_list,round_dec,dpi_save)
-        #print_culture_histogram(FILENAME, Data, "individual_culture", nrows, ncols, frames_list,round_dec,dpi_save, bin_num_agents)
+        prints_weighting_matrix(FILENAME,Data,cmap_weighting,nrows,ncols,frames_list,round_dec,dpi_save)
+        prints_behavioural_matrix(FILENAME,Data,cmap,nrows,ncols,frames_list,round_dec,dpi_save)
+        prints_culture_network(FILENAME,Data,layout,cmap,node_size,nrows,ncols,norm_zero_one,frames_list,round_dec,dpi_save)
+        print_network_social_component_matrix(FILENAME,Data,cmap,nrows,ncols,frames_list,round_dec,dpi_save)
+        print_culture_histogram(FILENAME, Data, "individual_culture", nrows, ncols, frames_list,round_dec,dpi_save, bin_num_agents)
         if information_provision_state:
             print_network_information_provision(FILENAME,Data,cmap,nrows,ncols,frames_list,round_dec,dpi_save)
 
@@ -332,7 +332,7 @@ if __name__ == "__main__":
         #ani_c = animate_weighting_matrix(FILENAME,Data,interval,fps,round_dec,cmap_weighting)
         #ani_d = animate_behavioural_matrix(FILENAME,Data,interval,fps,cmap,round_dec)
         #ani_e = animate_culture_network(FILENAME,Data,layout,cmap,node_size,interval,fps,norm_neg_pos,round_dec)
-        #ani_f =  animate_culture_network_and_weighting(FILENAME,Data,layout,cmap,node_size,interval,fps,norm_neg_pos,round_dec,cmap_edge)
+        ani_f = animate_culture_network_and_weighting(FILENAME,Data,layout,cmap,node_size,interval,fps,norm_neg_pos,round_dec,cmap_edge)
         #ani_h = multi_animation(FILENAME,Data,cmap,cmap,layout,node_size,interval,fps,norm_neg_pos,norm_zero_one)
         #ani_i = multi_animation_four(FILENAME,Data,cmap,cmap,layout,node_size,interval,fps,norm_neg_pos)
         #ani_j = multi_animation_alt(FILENAME,Data,cmap,cmap,layout,node_size,interval,fps,norm_neg_pos)

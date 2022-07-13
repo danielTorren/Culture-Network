@@ -524,7 +524,7 @@ def print_network_information_provision(
 
 
 def prints_culture_network(
-    FILENAME: str, Data: DataFrame,layout:str, cmap_culture: LinearSegmentedColormap,node_size:int, nrows:int, ncols:int, norm_neg_pos: SymLogNorm, frames_list:list[int], round_dec:int, dpi_save:int,norm_zero_one
+    FILENAME: str, Data: DataFrame,layout:str, cmap_culture: LinearSegmentedColormap,node_size:int, nrows:int, ncols:int, norm_zero_one: SymLogNorm, frames_list:list[int], round_dec:int, dpi_save:int
 ):
 
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
@@ -541,7 +541,7 @@ def prints_culture_network(
             "Time= {}".format(round(Data["network_time"][frames_list[i]], round_dec))
         )
 
-        colour_adjust = norm_neg_pos(Data["individual_culture"][frames_list[i]])
+        colour_adjust = norm_zero_one(Data["individual_culture"][frames_list[i]])
         #colour_adjust = (Data["individual_culture"][frames_list[i]] + 1)/2
         #colour_adjust = Data["individual_culture"][frames_list[i]]
         #print("colour_adjust", colour_adjust)
