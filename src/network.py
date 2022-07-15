@@ -26,6 +26,8 @@ class Network:
         self.linear_alpha_diff_state = parameters["linear_alpha_diff_state"]
         self.homophily_state = parameters["homophily_state"]
         self.nur_attitude = parameters["nur_attitude"]
+        self.value_culture_def  = parameters["value_culture_def"]
+        self.harsh_data = parameters["harsh_data"]
 
         #time
         self.t = 0
@@ -54,12 +56,6 @@ class Network:
         self.K = int(
             round(parameters["K"])
         )  # round due to the sampling method producing floats, lets hope this works
-        (
-            self.alpha_attract,
-            self.beta_attract,
-            self.alpha_threshold,
-            self.beta_threshold,
-        ) = (parameters["alpha_attract"], parameters["beta_attract"], parameters["alpha_threshold"], parameters["beta_threshold"])
         self.prob_rewire = parameters["prob_rewire"]
         
         
@@ -76,14 +72,28 @@ class Network:
         self.inverse_homophily = parameters["inverse_homophily"]#0-1
         self.homophilly_rate = parameters["homophilly_rate"]
         self.shuffle_reps = int(round((self.N**self.homophilly_rate)*self.inverse_homophily))#int(round((self.N)*self.inverse_homophily))#im going to square it
-        (
-            self.alpha_attract,
-            self.beta_attract,
-            self.alpha_threshold,
-            self.beta_threshold,
-        ) = (parameters["alpha_attract"], parameters["beta_attract"], parameters["alpha_threshold"], parameters["beta_threshold"])
+        
+        if self.harsh_data:
+            (
+                self.green_extreme_max,
+                self.green_extreme_min,
+                self.green_extreme_prop,
+                self.indifferent_max, 
+                self.indifferent_min, 
+                self.indifferent_prop,
+                self.brown_extreme_min, 
+                self.brown_extreme_max,
+                self.brown_extreme_prop,
+            ) = (parameters["green_extreme_max"], parameters["green_extreme_min"], parameters["green_extreme_prop"], parameters["indifferent_max"], parameters["indifferent_min"], parameters["indifferent_prop"], parameters["brown_extreme_min"], parameters["brown_extreme_max"], parameters["brown_extreme_prop"])
+        else:
+            (
+                self.alpha_attract,
+                self.beta_attract,
+                self.alpha_threshold,
+                self.beta_threshold,
+            ) = (parameters["alpha_attract"], parameters["beta_attract"], parameters["alpha_threshold"], parameters["beta_threshold"])
 
-
+            
         #carbon price
         self.carbon_price_state = parameters["carbon_price_state"]
         if self.carbon_price_state:
@@ -105,7 +115,7 @@ class Network:
         
         #if self.homophily_state: 
             #self.attract_matrix_init, self.threshold_matrix_init = self.generate_init_data_behaviours_homo_alt()#self.generate_init_data_behaviours_homo()
-        self.attract_matrix_init, self.threshold_matrix_init = self.generate_init_data_behaviours()#self.generate_init_data_behaviours_homo()
+        self.attract_matrix_init, self.threshold_matrix_init = self.generate_init_data_behaviours()#self.generate_init_data_behaviours()#self.generate_init_data_behaviours_homo()
         #else:
             #self.attract_matrix_init, self.threshold_matrix_init = self.generate_init_data_behaviours()#self.generate_init_data_behaviours_homo()
         
@@ -208,42 +218,20 @@ class Network:
             neighbours_list,
         )  # num_neighbours,
 
-    """
-    def generate_init_data_behaviours_homo_harsh(self) -> tuple:
-        ###init_attract, init_threshold,carbon_emissions
-        attract_matrix_green = [np.random.beta(8, 2, size=self.M) for n in range(int(self.N/5))]
-        threshold_matrix_green = [np.random.beta(2, 8, size=self.M)for n in range(int(self.N/5))]
+    def generate_harsh_data(self):
+        attract_matrix_green = [np.random.beta(self.green_extreme_max, self.green_extreme_min, size=self.M) for n in range(int(self.N*self.green_extreme_prop))]
+        threshold_matrix_green = [np.random.beta(self.green_extreme_min, self.green_extreme_max, size=self.M)for n in range(int(self.N*self.green_extreme_prop))]
 
-        attract_matrix_indifferent = [np.random.beta(2, 2, size=self.M) for n in range(int(self.N*3/5))]
-        threshold_matrix_indifferent = [np.random.beta(2, 2, size=self.M)for n in range(int(self.N*3/5))]
+        attract_matrix_indifferent = [np.random.beta(self.indifferent_max, self.indifferent_min, size=self.M) for n in range(int(self.N*self.indifferent_prop))]
+        threshold_matrix_indifferent = [np.random.beta(self.indifferent_min, self.indifferent_max, size=self.M)for n in range(int(self.N*self.indifferent_prop))]
 
-        attract_matrix_brown = [np.random.beta(2, 8, size=self.M) for n in range(int(self.N/5))]
-        threshold_matrix_brown = [np.random.beta(8, 2, size=self.M)for n in range(int(self.N/5))]
+        attract_matrix_brown = [np.random.beta(self.brown_extreme_min, self.brown_extreme_max, size=self.M) for n in range(int(self.N*self.brown_extreme_prop))]
+        threshold_matrix_brown = [np.random.beta(self.brown_extreme_max, self.brown_extreme_min, size=self.M) for n in range(int(self.N*self.brown_extreme_prop))]
 
         attract_list = attract_matrix_green + attract_matrix_indifferent + attract_matrix_brown 
         threshold_list = threshold_matrix_green + threshold_matrix_indifferent + threshold_matrix_brown 
-
-        attract_matrix = np.asarray(attract_list)
-        threshold_matrix = np.asarray(threshold_list)
-
-        culture_list = self.quick_calc_culture(attract_matrix,threshold_matrix)
-
-        #shuffle the indexes!
-        attract_list_sorted = [x for _,x in sorted(zip(culture_list,attract_list))]
-        threshold_list_sorted = [x for _,x in sorted(zip(culture_list,threshold_list))]
-
-        attract_array_circular = self.produce_circular_list(attract_list_sorted)
-        threshold_array_circular = self.produce_circular_list(threshold_list_sorted)
-
-        attract_array_circular_indexes = list(range(len(attract_array_circular)))
-        attract_array_circular_indexes_shuffled = self.partial_shuffle(attract_array_circular_indexes, self.shuffle_reps)
-
-        attract_list_sorted_shuffle = [x for _,x in sorted(zip(attract_array_circular_indexes_shuffled,attract_array_circular))]
-        threshold_list_sorted_shuffle = [x for _,x in sorted(zip(attract_array_circular_indexes_shuffled,threshold_array_circular))]
-        
-
-        return np.asarray(attract_list_sorted_shuffle),np.asarray(threshold_list_sorted_shuffle)
-    """
+        return attract_list, threshold_list
+    
 
     def produce_circular_list(self,list):
         first_half = list[::2]
@@ -265,8 +253,13 @@ class Network:
 
     def generate_init_data_behaviours(self) -> tuple:
         ###init_attract, init_threshold,carbon_emissions
-        attract_list = [np.random.beta(self.alpha_attract, self.beta_attract, size=self.M) for n in self.list_people]
-        threshold_list = [np.random.beta(self.alpha_threshold, self.beta_threshold, size=self.M) for n in self.list_people]
+
+        if self.harsh_data:
+            attract_list, threshold_list = self.generate_harsh_data()
+        else:
+            attract_list = [np.random.beta(self.alpha_attract, self.beta_attract, size=self.M) for n in self.list_people]
+            threshold_list = [np.random.beta(self.alpha_threshold, self.beta_threshold, size=self.M) for n in self.list_people]
+
         attract_matrix = np.asarray(attract_list)
         threshold_matrix = np.asarray(threshold_list)
 
@@ -300,7 +293,8 @@ class Network:
                 "carbon_price_state" : self.carbon_price_state,
                 "information_provision_state" : self.information_provision_state,
                 "phi_array": self.phi_array,
-                "nur_attitude": self.nur_attitude
+                "nur_attitude": self.nur_attitude,
+                "value_culture_def": self.value_culture_def
         }
 
         if self.carbon_price_state:

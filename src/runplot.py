@@ -30,6 +30,7 @@ from plot import (
     animate_culture_network_and_weighting,
     weighting_link_timeseries_plot,
     plot_green_adoption_timeseries,
+    prints_behaviour_timeseries_plot_colour_culture,
 )
 from utility import loadData, get_run_properties, frame_distribution_prints
 import matplotlib.pyplot as plt
@@ -46,30 +47,30 @@ information_provision_state = False
 linear_alpha_diff_state = False#if true use the exponential form instead like theo
 homophily_state = True
 alpha_change = True
-nur_attitude = True
+nur_attitude = False
+value_culture_def = True
+harsh_data = True
 
 #Social emissions model
-K = 10  # k nearest neighbours INTEGER
+K = 10 # k nearest neighbours INTEGER
 M = 3  # number of behaviours
-N = 50  # number of agents
+N = 100  # number of agents
 
-total_time = 1000
-culture_momentum_real = 5# real time over which culture is calculated for INTEGER, NEEDS TO BE MROE THAN DELTA t
-delta_t = 1  # time step size
+total_time = 100
+
+culture_momentum_real = 10# real time over which culture is calculated for INTEGER, NEEDS TO BE MROE THAN DELTA t
+delta_t = 0.1  # time step size
 
 prob_rewire = 0.1  # re-wiring probability?
-
-alpha_attract = 1#2  ##inital distribution parameters - doing the inverse inverts it!
-beta_attract = 1#3
-alpha_threshold = 1#3
-beta_threshold = 1#2
 
 time_steps_max = int(
     total_time / delta_t
 )  # number of time steps max, will stop if culture converges
 
 set_seed = 1  ##reproducibility INTEGER
-phi_list_lower,phi_list_upper = 0.1,1
+phi_list_lower,phi_list_upper = 1,1
+phi_list = np.linspace(0.5,1, M)
+#print(phi_list)
 learning_error_scale = 0.0  # 1 standard distribution is 2% error
 carbon_emissions = [1]*M
 
@@ -79,7 +80,27 @@ homophilly_rate = 1
 discount_factor = 0.6
 present_discount_factor = 0.8
 
-confirmation_bias = 1
+confirmation_bias = 2
+
+#harsh data parameters
+if harsh_data:
+    green_extreme_max = 8
+    green_extreme_min = 2
+    green_extreme_prop = 2/5
+    indifferent_max = 2
+    indifferent_min = 2
+    indifferent_prop = 1/5
+    brown_extreme_min = 2
+    brown_extreme_max = 8
+    brown_extreme_prop = 2/5
+    if green_extreme_prop + indifferent_prop + brown_extreme_prop != 1:
+        print(green_extreme_prop + indifferent_prop + brown_extreme_prop)
+        raise Exception("Invalid proportions")
+else:
+    alpha_attract = 1#2  ##inital distribution parameters - doing the inverse inverts it!
+    beta_attract = 1#3
+    alpha_threshold = 1#3
+    beta_threshold = 1#2
 
 #Infromation provision parameters
 if information_provision_state:
@@ -114,18 +135,34 @@ params = {
     "set_seed": set_seed,
     "culture_momentum_real": culture_momentum_real,
     "learning_error_scale": learning_error_scale,
-    "alpha_attract": alpha_attract,
-    "beta_attract": beta_attract,
-    "alpha_threshold": alpha_threshold,
-    "beta_threshold": beta_threshold,
     "carbon_emissions" : carbon_emissions,
     "discount_factor": discount_factor,
     "inverse_homophily": inverse_homophily,#1 is total mixing, 0 is no mixing
     "homophilly_rate" : homophilly_rate,
     "present_discount_factor": present_discount_factor,
     "confirmation_bias": confirmation_bias,
-    "nur_attitude": nur_attitude
+    "nur_attitude": nur_attitude,
+    "value_culture_def": value_culture_def, 
+    "harsh_data": harsh_data,
+    
 }
+#behaviours!
+if harsh_data:#trying to create a polarised society!
+    params["green_extreme_max"]= green_extreme_max
+    params["green_extreme_min"]= green_extreme_min
+    params["green_extreme_prop"]= green_extreme_prop
+    params["indifferent_max"]= indifferent_max
+    params["indifferent_min"]= indifferent_min
+    params["indifferent_prop"]= indifferent_prop
+    params["brown_extreme_min"]= brown_extreme_min 
+    params["brown_extreme_max"]= brown_extreme_max
+    params["brown_extreme_prop"]= brown_extreme_prop
+else:
+    params["alpha_attract"] = alpha_attract
+    params["beta_attract"] = beta_attract
+    params["alpha_threshold"] = alpha_threshold
+    params["beta_threshold"] = beta_threshold
+
 
 if carbon_price_state:
     params["carbon_price_init"] = carbon_price_init
@@ -149,11 +186,7 @@ params_name = [#THOSE USEd to create the save list?
     prob_rewire,
     set_seed,
     learning_error_scale,
-    alpha_attract,
-    beta_attract,
-    alpha_threshold,
-    beta_threshold,
-    culture_momentum_real
+    culture_momentum_real,
 ]
 
 # SAVING DATA
@@ -200,10 +233,6 @@ paramList = [
     "prob_rewire",
     "set_seed",
     "learning_error_scale",
-    "alpha_attract",
-    "beta_attract",
-    "alpha_threshold",
-    "beta_threshold",
     "culture_momentum_real",
 ]
 
@@ -240,7 +269,12 @@ node_size = 50
 cmap = LinearSegmentedColormap.from_list("BrownGreen", ["sienna", "white", "olivedrab"])
 #norm_neg_pos = plt.cm.ScalarMappable(cmap=cmap, norm=Normalize(vmin=-1, vmax=1))
 norm_neg_pos = Normalize(vmin=-1, vmax=1)
-norm_zero_one  = Normalize(vmin=0, vmax=1)
+
+if value_culture_def:
+    norm_zero_one  = Normalize(vmin=-1, vmax=1)
+else:
+    norm_zero_one  = Normalize(vmin=0, vmax=1)
+
 #log_norm = SymLogNorm(linthresh=0.15, linscale=1, vmin=-1.0, vmax=1.0, base=10)  # this works at least its correct
 cmap_weighting = "Reds"
 cmap_edge = get_cmap("Greys")
@@ -307,16 +341,17 @@ if __name__ == "__main__":
         ###PLOTS
         #plot_beta_distributions(FILENAME,alpha_attract,beta_attract,alpha_threshold,beta_threshold,bin_num,num_counts,dpi_save,)
         plot_culture_timeseries(FILENAME, Data, dpi_save)
-        plot_green_adoption_timeseries(FILENAME, Data, dpi_save)
-        #plot_value_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save)
-        #plot_threshold_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save)
-        plot_attract_timeseries(FILENAME, Data, nrows_behave, ncols_behave, dpi_save)
+        #plot_green_adoption_timeseries(FILENAME, Data, dpi_save)
+        #plot_value_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save, phi_list)
+        plot_threshold_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save, phi_list)
+        plot_attract_timeseries(FILENAME, Data, nrows_behave, ncols_behave, dpi_save, phi_list)
         #plot_total_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
         ##plot_av_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
-        plot_weighting_matrix_convergence_timeseries(FILENAME, Data, dpi_save)
+        #plot_weighting_matrix_convergence_timeseries(FILENAME, Data, dpi_save)
         #plot_cultural_range_timeseries(FILENAME, Data, dpi_save)
         #plot_average_culture_timeseries(FILENAME,Data,dpi_save)
         #weighting_link_timeseries_plot(FILENAME, Data, "Link strength", dpi_save,min_val)
+        prints_behaviour_timeseries_plot_colour_culture(FILENAME, Data, "behaviour_attract", "Attractiveness", nrows_behave, ncols_behave, dpi_save, phi_list,cmap,norm_zero_one)
         
         if carbon_price_state:
             plot_carbon_price_timeseries(FILENAME,Data,dpi_save)
@@ -325,7 +360,7 @@ if __name__ == "__main__":
         
         #prints_weighting_matrix(FILENAME,Data,cmap_weighting,nrows,ncols,frames_list,round_dec,dpi_save)
         #prints_behavioural_matrix(FILENAME,Data,cmap,nrows,ncols,frames_list,round_dec,dpi_save)
-        prints_culture_network(FILENAME,Data,layout,cmap,node_size,nrows,ncols,norm_zero_one,frames_list,round_dec,dpi_save)
+        #prints_culture_network(FILENAME,Data,layout,cmap,node_size,nrows,ncols,norm_zero_one,frames_list,round_dec,dpi_save)
         #print_network_social_component_matrix(FILENAME,Data,cmap,nrows,ncols,frames_list,round_dec,dpi_save)
         #print_culture_histogram(FILENAME, Data, "individual_culture", nrows, ncols, frames_list,round_dec,dpi_save, bin_num_agents)
         if information_provision_state:

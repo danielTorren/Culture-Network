@@ -1,11 +1,12 @@
 import networkx as nx
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-from matplotlib.colors import Normalize 
+
 import numpy as np
 from utility import frame_distribution, frame_distribution_prints
 from pandas import DataFrame
-from matplotlib.colors import LinearSegmentedColormap,SymLogNorm
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+from matplotlib.colors import Normalize,LinearSegmentedColormap,SymLogNorm
+from matplotlib.collections import LineCollection
 from typing import Union
 from networkx import Graph
 from network import Network
@@ -13,7 +14,7 @@ from network import Network
 
 
 def prints_behaviour_timeseries_plot(
-    FILENAME: str, Data: DataFrame, property:str, y_title:str, nrows:int, ncols:int, dpi_save:int
+    FILENAME: str, Data: DataFrame, property:str, y_title:str, nrows:int, ncols:int, dpi_save:int, phi_list
 ):
     PropertyData = Data[property].transpose()
 
@@ -25,12 +26,44 @@ def prints_behaviour_timeseries_plot(
             ax.plot(Data["network_time"], PropertyData[i][j])
         ax.set_xlabel(r"Time")
         ax.set_ylabel(r"%s" % y_title)
-        ax.set_title(r"Trait %s" % (i + 1))  # avoid 0 in the title
+        ax.set_title(r'$\phi$ = ' + str(phi_list[i]))  # avoid 0 in the title
         ax.axvline(Data["culture_momentum_real"], color='r',linestyle = "--")
+        
     plt.tight_layout()
-
+    
     plotName = FILENAME + "/Plots"
     f = plotName + "/" + property + "_prints_timeseries.png"
+    fig.savefig(f, dpi=dpi_save)
+
+def prints_behaviour_timeseries_plot_colour_culture(
+    FILENAME: str, Data: DataFrame, property:str, y_title:str, nrows:int, ncols:int, dpi_save:int, phi_list, culture_cmap, norm_zero_one
+):
+    PropertyData = Data[property].transpose()
+    #print(PropertyData.shape)
+
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7), constrained_layout=True)
+
+    for i, ax in enumerate(axes.flat):
+        for j in range(int(Data["N"])):
+            points = np.array([Data["network_time"],PropertyData[i][j]]).T.reshape(-1, 1, 2)# NO iDEA WHAT THESE ARE DOING!
+            segments = np.concatenate([points[:-1], points[1:]], axis=1)# NO iDEA WHAT THESE ARE DOING!
+            # Create a continuous norm to map from data points to colors
+            lc = LineCollection(segments, cmap = culture_cmap, norm=norm_zero_one)
+            # Set the values used for colormapping
+            lc.set_array(Data["individual_culture"][j])
+            ax.add_collection(lc)
+        ax.set_xlabel(r"Time")
+        ax.set_ylabel(r"%s" % y_title)
+        ax.set_title(r'$\phi$ = ' + str(phi_list[i]))  # avoid 0 in the title
+        #ax.axvline(Data["culture_momentum_real"], color='r',linestyle = "--")
+
+    cbar_culture = fig.colorbar(
+        plt.cm.ScalarMappable(cmap=culture_cmap), ax=axes.ravel().tolist(), location='right',
+    )  # This does a mapabble on the fly i think, not sure
+    cbar_culture.set_label(r"Culture")
+
+    plotName = FILENAME + "/Plots"
+    f = plotName + "/" + property + "_prints_behaviour_timeseries_plot_colour_culture.png"
     fig.savefig(f, dpi=dpi_save)
 
 
@@ -50,25 +83,25 @@ def standard_behaviour_timeseries_plot(FILENAME: str, Data: DataFrame, property:
     fig.savefig(f, dpi=dpi_save)
 
 
-def plot_value_timeseries(FILENAME: str, Data: DataFrame, nrows:int, ncols:int, dpi_save:int):
+def plot_value_timeseries(FILENAME: str, Data: DataFrame, nrows:int, ncols:int, dpi_save:int, phi_list):
     prints_behaviour_timeseries_plot(
-        FILENAME, Data, "behaviour_value", "Trait Value", nrows, ncols, dpi_save
+        FILENAME, Data, "behaviour_value", "Trait Value", nrows, ncols, dpi_save, phi_list
     )
 
 
-def plot_threshold_timeseries(FILENAME: str, Data: DataFrame, nrows:int, ncols:int, dpi_save:int):
+def plot_threshold_timeseries(FILENAME: str, Data: DataFrame, nrows:int, ncols:int, dpi_save:int, phi_list):
     prints_behaviour_timeseries_plot(
-        FILENAME, Data, "behaviour_threshold", "Threshold", nrows, ncols, dpi_save
+        FILENAME, Data, "behaviour_threshold", "Threshold", nrows, ncols, dpi_save, phi_list
     )
 
 
-def plot_attract_timeseries(FILENAME: str, Data: DataFrame, nrows:int, ncols:int, dpi_save:int):
+def plot_attract_timeseries(FILENAME: str, Data: DataFrame, nrows:int, ncols:int, dpi_save:int, phi_list):
     
     #print(Data["behaviour_attract"],np.shape(Data["behaviour_attract"]))
 
 
     prints_behaviour_timeseries_plot(
-        FILENAME, Data, "behaviour_attract", "Attractiveness", nrows, ncols, dpi_save
+        FILENAME, Data, "behaviour_attract", "Attractiveness", nrows, ncols, dpi_save, phi_list
     )
 
 
@@ -132,7 +165,7 @@ def plot_total_carbon_emissions_timeseries(FILENAME: str, Data: DataFrame, dpi_s
     plot_network_timeseries(FILENAME, Data, y_title, property, dpi_save)
 
 def plot_green_adoption_timeseries(FILENAME: str, Data: DataFrame, dpi_save:int):
-    y_title = "green_adoption_"
+    y_title = "Green adoption %"
     property = "network_green_adoption"
 
     plot_network_timeseries(FILENAME, Data, y_title, property, dpi_save)

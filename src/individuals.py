@@ -27,6 +27,7 @@ class Individual:
         self.carbon_price_state = individual_params["carbon_price_state"]
         self.information_provision_state = individual_params["information_provision_state"]
         self.nur_attitude = individual_params["nur_attitude"]
+        self.value_culture_def = individual_params["value_culture_def"]
 
         self.phi_array = individual_params["phi_array"]
 
@@ -112,8 +113,10 @@ class Individual:
         total_behaviour = 0  # calc_behaviour_av
         
         for i in range(self.M):
-
-            total_behaviour += self.attracts[i] #attracts! # calc_behaviour_av
+            if self.value_culture_def:
+                total_behaviour += self.values[i] #attracts! # calc_behaviour_av
+            else:
+                total_behaviour += self.attracts[i]
 
             if (self.values[i] <= 0):  # calc_carbon_emissions if less than or equal to 0 then it is a less environmetally friendly behaviour(brown)
                 total_emissions += self.carbon_intensive_list[i]  # calc_carbon_emissions
