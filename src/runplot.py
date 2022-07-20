@@ -28,9 +28,10 @@ from plot import (
     multi_animation_four,
     print_culture_histogram,
     animate_culture_network_and_weighting,
-    weighting_link_timeseries_plot,
+    plot_weighting_link_timeseries,
     plot_green_adoption_timeseries,
     prints_behaviour_timeseries_plot_colour_culture,
+    live_plot_heterogenous_culture_momentum,
 )
 from utility import loadData, get_run_properties, frame_distribution_prints
 import matplotlib.pyplot as plt
@@ -44,12 +45,13 @@ save_data = True
 opinion_dynamics =  "DEGROOT" #  "DEGROOT"  "SELECT"
 carbon_price_state = False
 information_provision_state = False
-linear_alpha_diff_state = False#if true use the exponential form instead like theo
+linear_alpha_diff_state = False #if true use the exponential form instead like theo
 homophily_state = True
 alpha_change = True
 nur_attitude = False
-value_culture_def = True
-harsh_data = True
+value_culture_def = False
+harsh_data = False
+heterogenous_cultural_momentum = True
 
 #Social emissions model
 K = 10 # k nearest neighbours INTEGER
@@ -57,8 +59,7 @@ M = 3  # number of behaviours
 N = 100  # number of agents
 
 total_time = 100
-
-culture_momentum_real = 10# real time over which culture is calculated for INTEGER, NEEDS TO BE MROE THAN DELTA t
+culture_momentum_real = 10
 delta_t = 0.1  # time step size
 
 prob_rewire = 0.1  # re-wiring probability?
@@ -68,19 +69,28 @@ time_steps_max = int(
 )  # number of time steps max, will stop if culture converges
 
 set_seed = 1  ##reproducibility INTEGER
-phi_list_lower,phi_list_upper = 1,1
-phi_list = np.linspace(0.5,1, M)
+phi_list_lower,phi_list_upper = 0.5,1
+phi_list = np.linspace(phi_list_lower, phi_list_upper, num=M)
 #print(phi_list)
-learning_error_scale = 0.0  # 1 standard distribution is 2% error
+learning_error_scale = 0.01  # 1 standard distribution is 2% error
+
 carbon_emissions = [1]*M
 
 inverse_homophily = 0.3#0.2
 homophilly_rate = 1
 
-discount_factor = 0.6
-present_discount_factor = 0.8
+discount_factor = 0.6#0.6
+present_discount_factor = 0.8#0.8
 
-confirmation_bias = 2
+confirmation_bias = 30
+
+
+if heterogenous_cultural_momentum:
+    quick_changers_prop = 0.2
+    lagards_prop = 0.2
+    culture_momentum_quick_real = int(round(culture_momentum_real/10))
+    culture_momentum_lagard_real = int(round(5*culture_momentum_real))
+
 
 #harsh data parameters
 if harsh_data:
@@ -125,6 +135,7 @@ params = {
     "linear_alpha_diff_state": linear_alpha_diff_state,
     "homophily_state": homophily_state,
     "alpha_change" : alpha_change,
+    "heterogenous_cultural_momentum" : heterogenous_cultural_momentum,
     "delta_t": delta_t,
     "phi_list_lower": phi_list_lower,
     "phi_list_upper": phi_list_upper,
@@ -144,8 +155,18 @@ params = {
     "nur_attitude": nur_attitude,
     "value_culture_def": value_culture_def, 
     "harsh_data": harsh_data,
-    
 }
+
+if heterogenous_cultural_momentum:
+    params["quick_changers_prop"] = quick_changers_prop
+    params["lagards_prop"] = lagards_prop
+    params["culture_momentum_quick_real"] = culture_momentum_quick_real
+    params["culture_momentum_lagard_real"] = culture_momentum_lagard_real
+
+    #params["alpha_quick_changers_cultural_momentum"]= alpha_quick_changers_cultural_momentum
+    #params["beta_quick_changers_cultural_momentum"]= beta_quick_changers_cultural_momentum
+    #params["alpha_lagards_cultural_momentum"]= alpha_lagards_cultural_momentum
+    #params["beta_lagards_cultural_momentum"]= beta_lagards_cultural_momentum
 #behaviours!
 if harsh_data:#trying to create a polarised society!
     params["green_extreme_max"]= green_extreme_max
@@ -266,7 +287,8 @@ if carbon_price_state:
 nrows_behave = 1
 ncols_behave = M
 node_size = 50
-cmap = LinearSegmentedColormap.from_list("BrownGreen", ["sienna", "white", "olivedrab"])
+cmap = LinearSegmentedColormap.from_list("BrownGreen", ["sienna", "whitesmoke", "olivedrab"], gamma=1)
+
 #norm_neg_pos = plt.cm.ScalarMappable(cmap=cmap, norm=Normalize(vmin=-1, vmax=1))
 norm_neg_pos = Normalize(vmin=-1, vmax=1)
 
@@ -311,7 +333,7 @@ if __name__ == "__main__":
         # print("start_time =", time.ctime(time.time()))
         ###RUN MODEL
         #print("start_time =", time.ctime(time.time()))
-        FILENAME = run(params, to_save_list, params_name)
+        FILENAME, social_network = run(params, to_save_list, params_name)
         # print ("RUN time taken: %s minutes" % ((time.time()-start_time)/60), "or %s s"%((time.time()-start_time)))
 
     if PLOT:
@@ -340,19 +362,22 @@ if __name__ == "__main__":
 
         ###PLOTS
         #plot_beta_distributions(FILENAME,alpha_attract,beta_attract,alpha_threshold,beta_threshold,bin_num,num_counts,dpi_save,)
-        plot_culture_timeseries(FILENAME, Data, dpi_save)
+        #plot_culture_timeseries(FILENAME, Data, dpi_save)
         #plot_green_adoption_timeseries(FILENAME, Data, dpi_save)
         #plot_value_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save, phi_list)
-        plot_threshold_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save, phi_list)
-        plot_attract_timeseries(FILENAME, Data, nrows_behave, ncols_behave, dpi_save, phi_list)
+        #plot_threshold_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save, phi_list)
+        #plot_attract_timeseries(FILENAME, Data, nrows_behave, ncols_behave, dpi_save, phi_list)
         #plot_total_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
         ##plot_av_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
         #plot_weighting_matrix_convergence_timeseries(FILENAME, Data, dpi_save)
         #plot_cultural_range_timeseries(FILENAME, Data, dpi_save)
         #plot_average_culture_timeseries(FILENAME,Data,dpi_save)
-        #weighting_link_timeseries_plot(FILENAME, Data, "Link strength", dpi_save,min_val)
-        prints_behaviour_timeseries_plot_colour_culture(FILENAME, Data, "behaviour_attract", "Attractiveness", nrows_behave, ncols_behave, dpi_save, phi_list,cmap,norm_zero_one)
-        
+        #plot_weighting_link_timeseries(FILENAME, Data, "Link strength", dpi_save,min_val)
+
+        if RUN:
+            print("RUN")
+            live_plot_heterogenous_culture_momentum(FILENAME, social_network, dpi_save)
+
         if carbon_price_state:
             plot_carbon_price_timeseries(FILENAME,Data,dpi_save)
 
@@ -363,6 +388,7 @@ if __name__ == "__main__":
         #prints_culture_network(FILENAME,Data,layout,cmap,node_size,nrows,ncols,norm_zero_one,frames_list,round_dec,dpi_save)
         #print_network_social_component_matrix(FILENAME,Data,cmap,nrows,ncols,frames_list,round_dec,dpi_save)
         #print_culture_histogram(FILENAME, Data, "individual_culture", nrows, ncols, frames_list,round_dec,dpi_save, bin_num_agents)
+        prints_behaviour_timeseries_plot_colour_culture(FILENAME, Data, "behaviour_attract", "Attractiveness", nrows_behave, ncols_behave, dpi_save, phi_list,cmap,norm_zero_one)
         if information_provision_state:
             print_network_information_provision(FILENAME,Data,cmap,nrows,ncols,frames_list,round_dec,dpi_save)
 

@@ -2,7 +2,7 @@ import numpy as np
 import networkx as nx
 from individuals import Individual
 import numpy.typing as npt
-from random import randrange,seed
+from random import randrange,seed, shuffle
 
 class Network:
 
@@ -28,6 +28,7 @@ class Network:
         self.nur_attitude = parameters["nur_attitude"]
         self.value_culture_def  = parameters["value_culture_def"]
         self.harsh_data = parameters["harsh_data"]
+        self.heterogenous_cultural_momentum = parameters["heterogenous_cultural_momentum"]
 
         #time
         self.t = 0
@@ -35,19 +36,6 @@ class Network:
             self.delta_t = 1
         else:
             self.delta_t = parameters["delta_t"]
-
-        #culture
-        self.culture_momentum_real = parameters["culture_momentum_real"]
-        self.culture_momentum = int(
-            round(self.culture_momentum_real/ self.delta_t)
-        )  # round due to the sampling method producing floats, lets hope this works
-
-        #time discounting 
-        self.discount_factor = parameters["discount_factor"]
-        self.present_discount_factor = parameters["present_discount_factor"]
-        time_list_beahviours =  np.asarray([self.delta_t*x for x in range(self.culture_momentum)])
-        self.discount_list = self.present_discount_factor*(self.discount_factor)**(time_list_beahviours)
-        self.discount_list[0] = 1
 
         #network
         self.M = int(round(parameters["M"]))
@@ -57,7 +45,34 @@ class Network:
             round(parameters["K"])
         )  # round due to the sampling method producing floats, lets hope this works
         self.prob_rewire = parameters["prob_rewire"]
+
+        #culture
+        self.culture_momentum_real = parameters["culture_momentum_real"]
+        self.culture_momentum = int(
+            round(self.culture_momentum_real/ self.delta_t)
+        )  # round due to the sampling method producing floats, lets hope this works
         
+        if self.heterogenous_cultural_momentum:
+            self.quick_changers_prop = parameters["quick_changers_prop"]
+            self.lagards_prop  = parameters["lagards_prop"]
+            self.culture_momentum_quick = int(round(parameters["culture_momentum_quick_real"]/ self.delta_t)) 
+            self.culture_momentum_lagard= int(round(parameters["culture_momentum_lagard_real"]/ self.delta_t)) 
+            self.culture_momentum_list = self.generate_heterogenous_cultural_momentum()
+            #self.alpha_quick_changers_cultural_momentum = parameters["alpha_quick_changers_cultural_momentum"]
+            #self.beta_quick_changers_cultural_momentum = parameters["beta_quick_changers_cultural_momentum"]
+            #self.alpha_lagards_cultural_momentum = parameters["alpha_lagards_cultural_momentum"]
+            #self.beta_lagards_cultural_momentum = parameters["beta_lagards_cultural_momentum"]
+        else: 
+            self.culture_momentum_list = [self.culture_momentum]*self.N
+        #print("self.culture_momentum_list",self.culture_momentum_list, type(self.culture_momentum_list))
+
+        #time discounting 
+        self.discount_factor = parameters["discount_factor"]
+        self.present_discount_factor = parameters["present_discount_factor"]
+        self.normalized_discount_array = self.calc_normalized_discount_array()
+        
+        #self.discount_array = [self.present_discount_factor*(self.discount_factor)**(time_list_beahviours)]
+        #print("self.discount_array", self.discount_array)
         
         #social learning and bias
         self.confirmation_bias = parameters["confirmation_bias"]
@@ -142,8 +157,6 @@ class Network:
         else:
             raise Exception("Invalid opinion dynamics model")
 
-        
-
         self.social_component_matrix = self.calc_social_component_matrix(ego_influence)
 
         if self.alpha_change == 1 or 0.5:
@@ -188,6 +201,22 @@ class Network:
         norm_matrix = matrix/row_sums[:, np.newaxis]
 
         return norm_matrix
+    
+    def calc_normalized_discount_array(self):
+        normalized_discount_array = []
+        for i in self.culture_momentum_list:
+            discount_row = []
+            for v in range(i):
+                 discount_row.append( self.present_discount_factor*(self.discount_factor)**(self.delta_t*v))
+            discount_row[0] = 1.0
+
+            #print(" BERFORE discount_row", discount_row)
+            normalized_discount_row = (np.asarray(discount_row)/sum(discount_row)).tolist()
+            #print(" AFTER discount_row", discount_row)
+
+            normalized_discount_array.append(normalized_discount_row)
+        
+        return normalized_discount_array
 
     def calc_network_density(self):
         actual_connections = self.weighting_matrix.sum()
@@ -218,6 +247,26 @@ class Network:
             neighbours_list,
         )  # num_neighbours,
 
+    def generate_heterogenous_cultural_momentum(self):
+        #quick_changers_cultural_momentum_array = np.random.beta( self.alpha_quick_changers_cultural_momentum , self.beta_quick_changers_cultural_momentum, size=int(round(self.N*self.quick_changers_prop)))
+        #lagards_cultural_momentum_array = np.random.beta(self.alpha_lagards_cultural_momentum, self.beta_lagards_cultural_momentum, size=int(round(self.N*(1-self.quick_changers_prop))))
+
+        #print("quick_changers_cultural_momentum_list",quick_changers_cultural_momentum_array)
+
+        quick_changers_cultural_momentum_list  = [self.culture_momentum_quick]*int(round(self.N*self.quick_changers_prop))
+        lagards_cultural_momentum_list = [self.culture_momentum_lagard]*int(round(self.N*self.lagards_prop))
+        normal_cultural_momentum_list = [self.culture_momentum]*(self.N - (len(quick_changers_cultural_momentum_list) + len(lagards_cultural_momentum_list)))
+
+        total_cultural_momentum_list = quick_changers_cultural_momentum_list+ lagards_cultural_momentum_list + normal_cultural_momentum_list
+        
+        np.random.shuffle(total_cultural_momentum_list)
+
+        #print("self.culture_momentum list",self.culture_momentum * total_cultural_momentum_array) 
+        #quit()
+
+        return total_cultural_momentum_list
+
+    
     def generate_harsh_data(self):
         attract_matrix_green = [np.random.beta(self.green_extreme_max, self.green_extreme_min, size=self.M) for n in range(int(self.N*self.green_extreme_prop))]
         threshold_matrix_green = [np.random.beta(self.green_extreme_min, self.green_extreme_max, size=self.M)for n in range(int(self.N*self.green_extreme_prop))]
@@ -284,12 +333,11 @@ class Network:
 
         individual_params = {
                 "delta_t" : self.delta_t,
-                "culture_momentum" : self.culture_momentum,
                 "t" : self.t,
                 "M": self.M,
                 "save_data" : self.save_data,
                 "carbon_emissions" : self.carbon_emissions,
-                "discount_list" : self.discount_list,
+                #"discount_list" : self.discount_list,
                 "carbon_price_state" : self.carbon_price_state,
                 "information_provision_state" : self.information_provision_state,
                 "phi_array": self.phi_array,
@@ -307,7 +355,7 @@ class Network:
             individual_params["t_IP_list"] = self.t_IP_list
 
 
-        agent_list = [Individual(individual_params,self.attract_matrix_init[n],self.threshold_matrix_init[n]) for n in self.list_people]
+        agent_list = [Individual(individual_params,self.attract_matrix_init[n],self.threshold_matrix_init[n], self.normalized_discount_array[n], self.culture_momentum_list[n]) for n in self.list_people]
 
         return agent_list
 
@@ -419,6 +467,7 @@ class Network:
             self.history_carbon_price.append(self.carbon_price)
 
     def next_step(self):
+        #print("step")
         # advance a time step
         self.t += self.delta_t
 

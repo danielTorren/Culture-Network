@@ -64,6 +64,6 @@ def run(parameters: dict, to_save_list: list, params_name: list) -> str:
             "or %s s" % ((time.time() - start_time)),
         )
 
-        return fileName
+        return fileName, social_network
     else:
-        return 0
+        return 0, social_network

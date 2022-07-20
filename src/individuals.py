@@ -8,7 +8,7 @@ class Individual:
     """
 
     def __init__(
-        self, individual_params, init_data_attracts, init_data_thresholds
+        self, individual_params, init_data_attracts, init_data_thresholds, normalized_discount_list , culture_momentum
     ):
         
         self.init_attracts = init_data_attracts
@@ -16,14 +16,14 @@ class Individual:
 
         self.attracts = init_data_attracts
         self.thresholds = init_data_thresholds
+        self.normalized_discount_list = normalized_discount_list
+        self.culture_momentum = culture_momentum
 
         self.M = individual_params["M"]
         self.t = individual_params["t"]
         self.delta_t = individual_params["delta_t"]
         self.save_data = individual_params["save_data"]
         self.carbon_intensive_list = individual_params["carbon_emissions"]
-        self.culture_momentum = individual_params["culture_momentum"]
-        self.discount_list = individual_params["discount_list"]
         self.carbon_price_state = individual_params["carbon_price_state"]
         self.information_provision_state = individual_params["information_provision_state"]
         self.nur_attitude = individual_params["nur_attitude"]
@@ -40,14 +40,8 @@ class Individual:
             self.eta = individual_params["eta"]
             self.t_IP_list = individual_params["t_IP_list"]
 
-        #self.time_list_beahviours = [self.delta_t*x for x in range(self.culture_momentum)]
-        #print("time_list_beahviours", self.time_list_beahviours)
-
-        #print(self.attracts,self.thresholds, type(self.thresholds))
         self.values = self.attracts - self.thresholds
-        #print(self.values)
 
-        #print("intia values",self.values, type(self.attracts ),self.attracts )
         if self.information_provision_state:
             self.information_provision = self.calc_information_provision()
         
@@ -68,23 +62,14 @@ class Individual:
 
     def update_av_behaviour_list(self):
         if len(self.av_behaviour_list) < self.culture_momentum:
-            self.av_behaviour_list.append(self.av_behaviour)
+            self.av_behaviour_list.insert(0,self.av_behaviour)
         else:
-            self.av_behaviour_list.pop(0)
-            self.av_behaviour_list.append(self.av_behaviour)
-
-    def update_av_behaviour_list_alt(self):
-        self.av_behaviour_list.pop(0)
-        self.av_behaviour_list.append(self.av_behaviour)#what if its attraction instead?
+            self.av_behaviour_list.pop()
+            self.av_behaviour_list.insert(0,self.av_behaviour)
+        #print("self.av_behaviour_list", self.av_behaviour_list)
 
     def calc_culture(self) -> float:
-        weighted_sum_behaviours = 0
-
-        for i in range(len(self.av_behaviour_list)):
-            weighted_sum_behaviours += self.discount_list[i]*self.av_behaviour_list[i]
-        normalized_culture = weighted_sum_behaviours/len(self.av_behaviour_list)
-        #print(len(self.av_behaviour_list))
-        return normalized_culture
+        return np.matmul(self.normalized_discount_list, self.av_behaviour_list)#here discount list is normalized
 
     def update_values(self):
         self.values = self.attracts - self.thresholds
@@ -176,7 +161,7 @@ class Individual:
             self.update_thresholds()
 
         self.total_carbon_emissions, self.av_behaviour = self.update_total_emissions_av_behaviour()
-        self.update_av_behaviour_list_alt()
+        self.update_av_behaviour_list()
         self.culture = self.calc_culture()
         #print("inv culture", self.culture)
         if self.save_data:

@@ -1,5 +1,4 @@
 import networkx as nx
-
 import numpy as np
 from utility import frame_distribution, frame_distribution_prints
 from pandas import DataFrame
@@ -42,6 +41,7 @@ def prints_behaviour_timeseries_plot_colour_culture(
     #print(PropertyData.shape)
 
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7), constrained_layout=True)
+    culture_n_T = Data["individual_culture"].T
 
     for i, ax in enumerate(axes.flat):
         for j in range(int(Data["N"])):
@@ -50,7 +50,8 @@ def prints_behaviour_timeseries_plot_colour_culture(
             # Create a continuous norm to map from data points to colors
             lc = LineCollection(segments, cmap = culture_cmap, norm=norm_zero_one)
             # Set the values used for colormapping
-            lc.set_array(Data["individual_culture"][j])
+            #print(Data["individual_culture"][j])
+            lc.set_array(culture_n_T[j])
             ax.add_collection(lc)
         ax.set_xlabel(r"Time")
         ax.set_ylabel(r"%s" % y_title)
@@ -1735,7 +1736,7 @@ def live_compare_animate_behaviour_matrix(
     return ani
 
 
-def weighting_link_timeseries_plot(FILENAME: str, Data: DataFrame, y_title:str, dpi_save:int, min_val):
+def plot_weighting_link_timeseries(FILENAME: str, Data: DataFrame, y_title:str, dpi_save:int, min_val):
 
     fig, ax = plt.subplots()
 
@@ -1751,8 +1752,30 @@ def weighting_link_timeseries_plot(FILENAME: str, Data: DataFrame, y_title:str, 
     ax.set_ylabel(r"%s" % y_title)
 
     plotName = FILENAME + "/Plots"
-    f = plotName + "/weighting_link_timeseries_plot.png"
+    f = plotName + "/plot_weighting_link_timeseries.png"
     fig.savefig(f, dpi=dpi_save)
 
+def live_plot_heterogenous_culture_momentum(fileName: str, Data: Network, dpi_save:int):
+    ##plot cultural evolution of agents
+    fig, ax = plt.subplots()
+    ax.set_xlabel("Time")
+    ax.set_ylabel("Culture")
+
+    for v in Data.agent_list:
+        if v.culture_momentum == Data.culture_momentum_quick:
+            ax.plot(np.asarray(Data.history_time), np.asarray(v.history_culture),color='red', alpha = 1 , label = "Quick Changers")
+        elif v.culture_momentum == Data.culture_momentum_lagard:
+            ax.plot(np.asarray(Data.history_time), np.asarray(v.history_culture), color='blue', alpha = 1, label = "Lagards")
+        else:
+            ax.plot(np.asarray(Data.history_time), np.asarray(v.history_culture), color='grey', alpha = 0.5, label = "Normal")
+    ax.set_xlabel(r"Time")
+
+    handles, labels = ax.get_legend_handles_labels()
+    by_label = dict(zip(labels, handles))
+    ax.legend(by_label.values(), by_label.keys())
+    
+    plotName = fileName + "/Plots"
+    f = plotName + "/live_plot_heterogenous_culture_momentum.png"
+    fig.savefig(f, dpi=dpi_save)
 
 
