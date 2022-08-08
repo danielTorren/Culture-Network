@@ -30,8 +30,8 @@ homophily_state = True
 #Social emissions model
 K = 10  # k nearest neighbours INTEGER
 M = 3  # number of behaviours
-N = 100  # number of agents
-total_time = 10000
+N = 50  # number of agents
+total_time = 100
 
 delta_t = 0.05  # time step size
 culture_momentum_real = 1# real time over which culture is calculated for INTEGER, NEEDS TO BE MROE THAN DELTA t
@@ -58,7 +58,7 @@ homophilly_rate = 1
 discount_factor = 0.6
 present_discount_factor = 0.8
 
-confirmation_bias = 1000
+confirmation_bias = 10
 
 #Infromation provision parameters
 if information_provision_state:
@@ -138,29 +138,29 @@ if __name__ == "__main__":
         #no change in attention
         params["alpha_change"] = 0
         social_network_case_zero = generate_data(params)
-        #change in attention
-        params["alpha_change"] = 1
-        social_network_case_one = generate_data(params)
         #change in attention only once
         params["alpha_change"] = 0.5
         social_network_case_zero_point_five = generate_data(params)
+        #change in attention
+        params["alpha_change"] = 1
+        social_network_case_one = generate_data(params)
 
         createFolderSA(fileName)
 
-        data = [social_network_case_zero,social_network_case_one,social_network_case_zero_point_five]
+        data = [social_network_case_zero,social_network_case_zero_point_five,social_network_case_one]
 
         title_list = ["Equal Weighting", "Static Cultural Weighting", "Dynamic Cultural Weighting"]
         nrows = 1
         ncols = 3
 
-        #plot_average_culture_comparison(fileName, data, dpi_save,title_list )
+        plot_average_culture_comparison(fileName, data, dpi_save,title_list )
         #plot_carbon_emissions_total_comparison(fileName, data, dpi_save, title_list)
-        #plot_weighting_matrix_convergence_comparison(fileName, data, dpi_save, title_list)
-        #print_culture_timeseries(fileName, data , title_list, nrows, ncols ,dpi_save)
+        plot_weighting_matrix_convergence_comparison(fileName, data, dpi_save, title_list)
+        print_culture_timeseries(fileName, data , title_list, nrows, ncols ,dpi_save)
 
         #ani_b = live_compare_animate_culture_network_and_weighting(fileName,data,layout,cmap,node_size,interval,fps,norm_zero_one,round_dec,cmap_edge, ncols, nrows,"Weighting state",title_list)
         #ani_c = live_compare_animate_weighting_matrix(fileName, data,  cmap_weighting, interval, fps, round_dec, cmap_edge, nrows, ncols,"Weighting state",title_list)
-        ani_d = live_compare_animate_behaviour_matrix(fileName, data,  cmap, interval, fps, round_dec, nrows, ncols,"Weighting state",title_list)
+        #ani_d = live_compare_animate_behaviour_matrix(fileName, data,  cmap, interval, fps, round_dec, nrows, ncols,"Weighting state",title_list)
 
         plt.show()
 

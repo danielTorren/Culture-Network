@@ -48,13 +48,13 @@ def plot_beta(
     ax.set_ylabel(r"PDF")
     ax.legend()
 
-
+"""
 plot_beta(
     alpha_attract, beta_attract, alpha_threshold, beta_threshold, bin_num, num_counts
 )
 plt.show()
-
 """
+
 fileName = "Results/_DEGROOT_5900_3_100_0.01_10_0.2_1_0.05_0.1_0.1_0.1_0.1_1/"
 
 file = open(fileName + "Data.pickle",'rb')
@@ -63,4 +63,4 @@ file.close()
 
 
 print(object_file.agent_list)
-"""
+
