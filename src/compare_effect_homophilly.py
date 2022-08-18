@@ -8,6 +8,10 @@ from utility import createFolderSA
 import networkx as nx
 from matplotlib.cm import get_cmap
 from plot import ( 
+    live_link_change_homophily_fischer,
+    live_cum_link_change_homophily_fischer,
+    live_link_change_homophily_fischer_per_agent,
+    live_cum_link_change_homophily_fischer_per_agent,
     print_intial_culture_networks_homophily_fischer,
     print_culture_time_series_homophily_fischer,
     prints_culture_network_homophily_fischer,
@@ -18,7 +22,7 @@ from plot import (
 from matplotlib.colors import LinearSegmentedColormap,  Normalize
 
 # Params
-reps = 9
+reps = 4
 
 save_data = True
 opinion_dynamics =  "DEGROOT" #  "DEGROOT"  "SELECT"
@@ -29,10 +33,10 @@ homophily_state = True
 alpha_change = True
 
 #Social emissions model
-K = 10  # k nearest neighbours INTEGER
+K = 5 # k nearest neighbours INTEGER
 M = 3  # number of behaviours
-N = 50  # number of agents
-total_time = 50
+N = 20  # number of agents
+total_time = 10
 
 delta_t = 0.05  # time step size
 culture_momentum_real = 1# real time over which culture is calculated for INTEGER, NEEDS TO BE MROE THAN DELTA t
@@ -50,7 +54,7 @@ time_steps_max = int(
 
 set_seed = 1  ##reproducibility INTEGER
 phi_list_lower,phi_list_upper = 0,1
-learning_error_scale = 0.05  # 1 standard distribution is 2% error
+learning_error_scale = 0.02#5  # 1 standard distribution is 2% error
 carbon_emissions = [1]*M
 
 #inverse_homophily = 0.1#0.2
@@ -124,8 +128,8 @@ cmap_weighting = "Reds"
 norm_neg_pos = Normalize(vmin=-1, vmax=1)
 norm_zero_one = Normalize(vmin=0,vmax=1)
 node_size = 50
-nrows = 3
-ncols = 3
+nrows = 2
+ncols = 2
 layout = "circular"
 round_dec = 2
 frame_num = ncols * nrows - 1
@@ -157,9 +161,14 @@ if __name__ == "__main__":
 
         createFolderSA(fileName)
 
-        print_culture_time_series_homophily_fischer(fileName, data, dpi_save, nrows, ncols)
-        print_intial_culture_networks_homophily_fischer(fileName, data, dpi_save, nrows, ncols , layout, norm_neg_pos, cmap, node_size)
-        prints_culture_network_homophily_fischer(fileName, data[0],layout, cmap ,node_size,  nrows, ncols ,  norm_zero_one,frames_list, round_dec, dpi_save)
+        #live_link_change_homophily_fischer(fileName, data, dpi_save,round_dec)
+        #live_cum_link_change_homophily_fischer(fileName, data, dpi_save,round_dec)
+        live_link_change_homophily_fischer_per_agent(fileName, data, dpi_save,round_dec)
+        live_cum_link_change_homophily_fischer_per_agent(fileName, data, dpi_save,round_dec)
+
+        #print_culture_time_series_homophily_fischer(fileName, data, dpi_save, nrows, ncols)
+        print_intial_culture_networks_homophily_fischer(fileName, data, dpi_save, nrows, ncols , layout, norm_zero_one, cmap, node_size,round_dec)
+        #prints_culture_network_homophily_fischer(fileName, data[0],layout, cmap ,node_size,  nrows, ncols ,  norm_zero_one,frames_list, round_dec, dpi_save)
 
         #ani_b = live_compare_animate_culture_network_and_weighting(fileName,data,layout,cmap,node_size,interval,fps,norm_zero_one,round_dec,cmap_edge, ncols, nrows,"Inverse homophily",inverse_homophily_list)
         #ani_c = live_compare_animate_weighting_matrix(fileName, data,  cmap_weighting, interval, fps, round_dec, cmap_edge, nrows, ncols,"Inverse homophily",inverse_homophily_list)

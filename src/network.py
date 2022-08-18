@@ -72,6 +72,7 @@ class Network:
         self.inverse_homophily = parameters["inverse_homophily"]#0-1
         self.homophilly_rate = parameters["homophilly_rate"]
         self.shuffle_reps = int(round((self.N**self.homophilly_rate)*self.inverse_homophily))#int(round((self.N)*self.inverse_homophily))#im going to square it
+        #print("self.inverse_homophily= ", self.inverse_homophily,"self.shuffle_reps = ",self.shuffle_reps)
         (
             self.alpha_attract,
             self.beta_attract,
@@ -144,9 +145,7 @@ class Network:
                 self.min_culture,
                 self.max_culture,
             ) = self.calc_network_culture()
-            self.weighting_matrix_convergence = (
-                np.nan
-            )  # there is no convergence in the first step, to deal with time issues when plotting
+            self.weighting_matrix_convergence = 0 # there is no convergence in the first step, to deal with time issues when plotting
 
             self.history_weighting_matrix = [self.weighting_matrix]
             self.history_social_component_matrix = [self.social_component_matrix]
@@ -249,9 +248,19 @@ class Network:
         return l
 
     def quick_calc_culture(self,attract_matrix,threshold_matrix):
-        behave_value_matrix = attract_matrix - threshold_matrix
+        behave_value_matrix = attract_matrix #- threshold_matrix
         culture_list = behave_value_matrix.sum(axis=1)/behave_value_matrix.shape[1]
         return culture_list
+
+    def calc_culture(self) -> float:
+        weighted_sum_behaviours = 0
+
+        for i in range(len(av_behaviour_list)):
+            weighted_sum_behaviours += discount_list[i]*av_behaviour_list[i]
+        normalized_culture = weighted_sum_behaviours/len(av_behaviour_list)
+        #print(len(self.av_behaviour_list))
+        return normalized_culture
+
 
     def generate_init_data_behaviours(self) -> tuple:
         ###init_attract, init_threshold,carbon_emissions
@@ -261,7 +270,7 @@ class Network:
         threshold_matrix = np.asarray(threshold_list)
 
         culture_list = self.quick_calc_culture(attract_matrix,threshold_matrix)
-
+        
         #shuffle the indexes!
         attract_list_sorted = [x for _,x in sorted(zip(culture_list,attract_list))]
         threshold_list_sorted = [x for _,x in sorted(zip(culture_list,threshold_list))]
@@ -275,7 +284,9 @@ class Network:
         attract_list_sorted_shuffle = [x for _,x in sorted(zip(attract_array_circular_indexes_shuffled,attract_array_circular))]
         threshold_list_sorted_shuffle = [x for _,x in sorted(zip(attract_array_circular_indexes_shuffled,threshold_array_circular))]
         
+        print("culture_list WUICK",self.quick_calc_culture(np.asarray(attract_list_sorted_shuffle),np.asarray(threshold_list_sorted_shuffle)))
         return np.asarray(attract_list_sorted_shuffle),np.asarray(threshold_list_sorted_shuffle)
+        
 
     def create_agent_list(self) -> list:
 
@@ -373,6 +384,10 @@ class Network:
 
     def calc_network_culture(self) ->  tuple[float, float, float, float]:
         culture_list = [x.culture for x in self.agent_list]
+        
+        if self.t == 0:
+            print("inti culture_list",culture_list)
+
         return (
             np.mean(culture_list),
             max(culture_list) - min(culture_list),

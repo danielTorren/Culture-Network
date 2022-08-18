@@ -989,7 +989,7 @@ def multi_animation_four(
     return ani
 
 
-def print_intial_culture_networks_homophily_fischer(fileName: str, Data_list: list[Network], dpi_save:int,nrows: int, ncols:int , layout: str, norm_zero_one, cmap, node_size):
+def print_intial_culture_networks_homophily_fischer(fileName: str, Data_list: list[Network], dpi_save:int,nrows: int, ncols:int , layout: str, norm_zero_one, cmap, node_size,round_dec):
     
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
 
@@ -998,7 +998,7 @@ def print_intial_culture_networks_homophily_fischer(fileName: str, Data_list: li
         G = nx.from_numpy_matrix(Data_list[i].history_weighting_matrix[0])
         pos_culture_network = prod_pos(layout, G)
         # print(i,ax)
-        ax.set_title("inverse_homophily = {}".format(Data_list[i].inverse_homophily))
+        ax.set_title("inverse_homophily = {}".format(round(Data_list[i].inverse_homophily, round_dec)))
 
         indiv_culutre_list = [v.history_culture[0] for v in Data_list[i].agent_list]
         #print(indiv_culutre_list)
@@ -1022,7 +1022,7 @@ def print_intial_culture_networks_homophily_fischer(fileName: str, Data_list: li
     f = plotName + "/print_intial_culture_networks_homophily_fischer.png"
     fig.savefig(f, dpi=dpi_save)
 
-def print_culture_time_series_homophily_fischer(fileName: str, Data_list: list[Network], dpi_save:int,nrows: int, ncols:int):
+def print_culture_time_series_homophily_fischer(fileName: str, Data_list: list[Network], dpi_save:int,nrows: int, ncols:int, round_dec):
     
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
     y_title = "Culture"
@@ -1033,13 +1033,83 @@ def print_culture_time_series_homophily_fischer(fileName: str, Data_list: list[N
 
         ax.set_xlabel(r"Time")
         ax.set_ylabel(r"%s" % y_title)
-        ax.set_title("inverse homophily = {}".format(Data_list[i].inverse_homophily))
+        ax.set_title("Inverse homophily = {}".format(round(Data_list[i].inverse_homophily, round_dec)))
         #ax.axvline(culture_momentum, color='r',linestyle = "--")
 
     plt.tight_layout()
 
     plotName = fileName + "/Prints"
     f = plotName + "/print_culture_time_series_homophily_fischer.png"
+    fig.savefig(f, dpi=dpi_save)
+
+def live_link_change_homophily_fischer(fileName: str, Data_list: list[Network], dpi_save:int, round_dec):
+    
+    fig, ax = plt.subplots()
+    y_title = "Total link strength change"
+
+    for i in range(len(Data_list)):
+        ax.plot(np.asarray(Data_list[i].history_time), np.asarray(Data_list[i].history_weighting_matrix_convergence), label = "Inverse homophily = {}".format(round(Data_list[i].inverse_homophily, round_dec)))
+        ax.set_xlabel(r"Time")
+        ax.set_ylabel(r"%s" % y_title)
+    ax.legend()
+    plt.tight_layout()
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/live_link_change_homophily_fischer.png"
+    fig.savefig(f, dpi=dpi_save)
+
+def live_cum_link_change_homophily_fischer(fileName: str, Data_list: list[Network], dpi_save:int, round_dec):
+    
+    fig, ax = plt.subplots()
+    y_title = "Cumulative total link strength change"
+
+    for i in range(len(Data_list)):
+        cumulative_link_change = np.cumsum(np.asarray(Data_list[i].history_weighting_matrix_convergence))
+        print("norm",np.asarray(Data_list[i].history_weighting_matrix_convergence))
+        print("cum:", cumulative_link_change)
+        ax.plot(np.asarray(Data_list[i].history_time), cumulative_link_change, label = "Inverse homophily = {}".format(round(Data_list[i].inverse_homophily, round_dec)))
+        ax.set_xlabel(r"Time")
+        ax.set_ylabel(r"%s" % y_title)
+    ax.legend()
+    plt.tight_layout()
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/live_cum_link_change_homophily_fischer.png"
+    fig.savefig(f, dpi=dpi_save)
+
+def live_link_change_homophily_fischer_per_agent(fileName: str, Data_list: list[Network], dpi_save:int, round_dec):
+    
+    fig, ax = plt.subplots()
+    y_title = "Total link strength change per agent"
+
+    for i in range(len(Data_list)):
+        ax.plot(np.asarray(Data_list[i].history_time), np.asarray(Data_list[i].history_weighting_matrix_convergence)/Data_list[i].N, label = "Inverse homophily = {}".format(round(Data_list[i].inverse_homophily, round_dec)))
+        ax.set_xlabel(r"Time")
+        ax.set_ylabel(r"%s" % y_title)
+    ax.legend()
+    plt.tight_layout()
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/live_link_change_homophily_fischer_per_agent.png"
+    fig.savefig(f, dpi=dpi_save)
+
+def live_cum_link_change_homophily_fischer_per_agent(fileName: str, Data_list: list[Network], dpi_save:int,round_dec):
+    
+    fig, ax = plt.subplots()
+    y_title = "Cumulative total link strength change per agent"
+
+    for i in range(len(Data_list)):
+        cumulative_link_change = np.cumsum(np.asarray(Data_list[i].history_weighting_matrix_convergence)/Data_list[i].N)
+        #print("norm",np.asarray(Data_list[i].history_weighting_matrix_convergence))
+        #print("cum:", cumulative_link_change)
+        ax.plot(np.asarray(Data_list[i].history_time), cumulative_link_change, label = "Inverse homophily = {}".format(round(Data_list[i].inverse_homophily, round_dec)))
+        ax.set_xlabel(r"Time")
+        ax.set_ylabel(r"%s" % y_title)
+    ax.legend()
+    plt.tight_layout()
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/live_cum_link_change_homophily_fischer_per_agent.png"
     fig.savefig(f, dpi=dpi_save)
 
 def prints_culture_network_homophily_fischer(
@@ -1085,7 +1155,7 @@ def prints_culture_network_homophily_fischer(
     f = FILENAME + "/Prints/prints_culture_network_homophily_fischer.png"
     fig.savefig(f, dpi=dpi_save)
 
-def print_intial_culture_networks_confirmation_bias(fileName: str, Data_list: list[Network], dpi_save:int,nrows: int, ncols:int , layout: str, norm_neg_pos, cmap, node_size):
+def print_intial_culture_networks_confirmation_bias(fileName: str, Data_list: list[Network], dpi_save:int,nrows: int, ncols:int , layout: str, norm_neg_pos, cmap, node_size, round_dec):
     
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
 
@@ -1094,7 +1164,7 @@ def print_intial_culture_networks_confirmation_bias(fileName: str, Data_list: li
         G = nx.from_numpy_matrix(Data_list[i].history_weighting_matrix[0])
         pos_culture_network = prod_pos(layout, G)
         # print(i,ax)
-        ax.set_title("Confirmation bias = {}".format(Data_list[i].confirmation_bias))
+        ax.set_title("Confirmation bias = {}".format(round(Data_list[i].confirmation_bias, round_dec)))
 
         indiv_culutre_list = [v.history_culture[0] for v in Data_list[i].agent_list]
         #print(indiv_culutre_list)
