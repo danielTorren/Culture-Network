@@ -247,19 +247,31 @@ class Network:
             l[b], l[a] = l[a], l[b]
         return l
 
-    def quick_calc_culture(self,attract_matrix,threshold_matrix):
-        behave_value_matrix = attract_matrix #- threshold_matrix
-        culture_list = behave_value_matrix.sum(axis=1)/behave_value_matrix.shape[1]
-        return culture_list
-
-    def calc_culture(self) -> float:
+    def quick_indiv_calc_culture(self,attracts) -> float:
+        """
+        Calc the individual culture of the attraction matrix for homophilly
+        """
         weighted_sum_behaviours = 0
 
+        av_behaviour = attracts.sum()/attracts.shape
+
+        av_behaviour_list = [av_behaviour]*self.culture_momentum
+
         for i in range(len(av_behaviour_list)):
-            weighted_sum_behaviours += discount_list[i]*av_behaviour_list[i]
+            weighted_sum_behaviours += self.discount_list[i]*av_behaviour_list[i]
         normalized_culture = weighted_sum_behaviours/len(av_behaviour_list)
-        #print(len(self.av_behaviour_list))
-        return normalized_culture
+        #print(normalized_culture)
+        return normalized_culture[0]
+
+    def quick_calc_culture(self,attract_matrix):
+        """
+        Create culture list from the attraction matrix for homophilly
+        """
+        cul_list = []
+        for i in range(len(attract_matrix)):
+            cul_list.append(self.quick_indiv_calc_culture(attract_matrix[i]))
+        #print("non circ cul_list: ",cul_list)
+        return cul_list
 
 
     def generate_init_data_behaviours(self) -> tuple:
@@ -269,24 +281,24 @@ class Network:
         attract_matrix = np.asarray(attract_list)
         threshold_matrix = np.asarray(threshold_list)
 
-        culture_list = self.quick_calc_culture(attract_matrix,threshold_matrix)
+        culture_list = self.quick_calc_culture(attract_matrix)#,threshold_matrix
         
         #shuffle the indexes!
         attract_list_sorted = [x for _,x in sorted(zip(culture_list,attract_list))]
-        threshold_list_sorted = [x for _,x in sorted(zip(culture_list,threshold_list))]
+        #threshold_list_sorted = [x for _,x in sorted(zip(culture_list,threshold_list))]
 
         attract_array_circular = self.produce_circular_list(attract_list_sorted)
-        threshold_array_circular = self.produce_circular_list(threshold_list_sorted)
+        #threshold_array_circular = self.produce_circular_list(threshold_list_sorted)
 
         attract_array_circular_indexes = list(range(len(attract_array_circular)))
         attract_array_circular_indexes_shuffled = self.partial_shuffle(attract_array_circular_indexes, self.shuffle_reps)
 
         attract_list_sorted_shuffle = [x for _,x in sorted(zip(attract_array_circular_indexes_shuffled,attract_array_circular))]
-        threshold_list_sorted_shuffle = [x for _,x in sorted(zip(attract_array_circular_indexes_shuffled,threshold_array_circular))]
+        #threshold_list_sorted_shuffle = [x for _,x in sorted(zip(attract_array_circular_indexes_shuffled,threshold_array_circular))]
         
-        print("culture_list WUICK",self.quick_calc_culture(np.asarray(attract_list_sorted_shuffle),np.asarray(threshold_list_sorted_shuffle)))
-        return np.asarray(attract_list_sorted_shuffle),np.asarray(threshold_list_sorted_shuffle)
-        
+        #print("culture_list WUICK",self.quick_calc_culture(np.asarray(attract_list_sorted_shuffle)))
+        #print("culture attract shuffel ",np.asarray(attract_list_sorted_shuffle))
+        return np.asarray(attract_list_sorted_shuffle), threshold_matrix
 
     def create_agent_list(self) -> list:
 
@@ -384,10 +396,6 @@ class Network:
 
     def calc_network_culture(self) ->  tuple[float, float, float, float]:
         culture_list = [x.culture for x in self.agent_list]
-        
-        if self.t == 0:
-            print("inti culture_list",culture_list)
-
         return (
             np.mean(culture_list),
             max(culture_list) - min(culture_list),
