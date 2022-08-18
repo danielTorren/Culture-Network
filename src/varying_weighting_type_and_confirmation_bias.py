@@ -19,6 +19,7 @@ from plot import (
     live_compare_animate_culture_network_and_weighting,
     live_compare_animate_weighting_matrix,
     live_compare_animate_behaviour_matrix,
+    print_culture_timeseries_vary_conformity_bias,
 )
 
 save_data = True
@@ -31,9 +32,9 @@ homophily_state = True
 compression_factor = 5
 
 #Social emissions model
-K = 10  # k nearest neighbours INTEGER
+K = 3 # k nearest neighbours INTEGER
 M = 3  # number of behaviours
-N = 100  # number of agents
+N = 10  # number of agents
 total_time = 20
 
 delta_t = 0.05  # time step size
@@ -101,7 +102,7 @@ params = {
     "alpha_threshold": alpha_threshold,
     "beta_threshold": beta_threshold,
     "carbon_emissions" : carbon_emissions,
-    "alpha_change" : 1,
+    #"alpha_change" : 1,
     "discount_factor": discount_factor,
     "inverse_homophily": inverse_homophily,#1 is total mixing, 0 is no mixing
     "homophilly_rate": homophilly_rate,
@@ -128,30 +129,46 @@ cmap_edge = get_cmap("Greys")
 if __name__ == "__main__":
         
         confirmation_bias_max = 100
-        reps = 4
+        reps = 3
 
-        fileName = "results/confrimation_bias_variation_%s_%s_%s_%s_%s" % (str(params["N"]),str(params["time_steps_max"]),str(params["K"]), str(confirmation_bias_max), str(reps))
+        fileName = "results/varying_weighting_and_confrimation_bias_variation_%s_%s_%s_%s_%s" % (str(params["N"]),str(params["time_steps_max"]),str(params["K"]), str(confirmation_bias_max), str(reps))
         print("fileName: ", fileName)
 
-        nrows = 2
-        ncols = 2
+        nrows = 3
+        ncols = 3
 
         confirmation_bias_list = np.linspace(1,confirmation_bias_max, reps)
-        print("confirmation_bias_list: ", confirmation_bias_list)
+
+        #print("confirmation_bias_list: ", confirmation_bias_list)
+
+        alpha_case = [0,0.5,1]
+
+        title_list_alpha = ["Equal Weighting", "Static Cultural Weighting", "Dynamic Cultural Weighting"]
+        title_list = []
+        for i in confirmation_bias_list:
+            title_list.append("Confirmation Bias = %s, Equal Weighting" % i)
+            title_list.append("Confirmation Bias = %s, Static Cultural Weighting" % i)
+            title_list.append("Confirmation Bias = %s, Dynamic Cultural Weighting" % i)
+
+        print(title_list)
+
+
         data = []
         for i in confirmation_bias_list:
             params["confirmation_bias"] = i
-            res = generate_data(params)
-            data.append(res)
-            #print("RES:", res.history_weighting_matrix[0])
-            #print("RES LATER",res.history_weighting_matrix[-1])
+            for i in alpha_case:
+                #no change in attention
+                params["alpha_change"] = i
+                data.append(generate_data(params))
 
         createFolderSA(fileName)
 
+        print_culture_timeseries_vary_conformity_bias(fileName, data , title_list, nrows, ncols , dpi_save)
+
         #plot_carbon_emissions_total_confirmation_bias(fileName, data, dpi_save)
 
-        plot_weighting_convergence_confirmation_bias(fileName, data, dpi_save)
-        plot_cum_weighting_convergence_confirmation_bias(fileName, data, dpi_save)
+        #plot_weighting_convergence_confirmation_bias(fileName, data, dpi_save)
+        #plot_cum_weighting_convergence_confirmation_bias(fileName, data, dpi_save)
         #print_culture_time_series_confirmation_bias(fileName, data, dpi_save, nrows, ncols)
         #print_intial_culture_networks_confirmation_bias(fileName, data, dpi_save, nrows, ncols , layout, norm_zero_one, cmap, node_size)
         #prints_init_weighting_matrix_confirmation_bias(fileName, data, dpi_save,nrows, ncols, cmap_weighting)
@@ -163,6 +180,8 @@ if __name__ == "__main__":
         #ani_d = live_compare_animate_behaviour_matrix(fileName, data,  cmap, interval, fps, round_dec, nrows, ncols,"Confirmation bias",confirmation_bias_list)
         
         plt.show()
+
+
 
 
 

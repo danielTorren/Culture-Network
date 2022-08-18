@@ -10,6 +10,7 @@ from plot import (
     plot_average_culture_comparison,
     plot_carbon_emissions_total_comparison,
     plot_weighting_matrix_convergence_comparison,
+    plot_cum_weighting_matrix_convergence_comparison,
     print_culture_timeseries,
     live_compare_animate_culture_network_and_weighting,
     live_compare_animate_weighting_matrix,
@@ -27,21 +28,23 @@ linear_alpha_diff_state = False#if true use the exponential form instead like th
 homophily_state = True
 #alpha_change = True
 
+compression_factor = 5
+
 #Social emissions model
 K = 10  # k nearest neighbours INTEGER
 M = 3  # number of behaviours
-N = 50  # number of agents
-total_time = 100
+N = 100  # number of agents
+total_time = 20
 
 delta_t = 0.05  # time step size
 culture_momentum_real = 1# real time over which culture is calculated for INTEGER, NEEDS TO BE MROE THAN DELTA t
 
 prob_rewire = 0.2  # re-wiring probability?
 
-alpha_attract = 0.1#2  ##inital distribution parameters - doing the inverse inverts it!
-beta_attract = 0.1#3
-alpha_threshold = 0.1#3
-beta_threshold = 0.1#2
+alpha_attract = 1#2  ##inital distribution parameters - doing the inverse inverts it!
+beta_attract = 1#3
+alpha_threshold = 1#3
+beta_threshold = 1#2
 
 time_steps_max = int(
     total_time / delta_t
@@ -49,10 +52,10 @@ time_steps_max = int(
 
 set_seed = 1  ##reproducibility INTEGER
 phi_list_lower,phi_list_upper = 0.1,1
-learning_error_scale = 0.05  # 1 standard distribution is 2% error
+learning_error_scale = 0.02 # 1 standard distribution is 2% error
 carbon_emissions = [1]*M
 
-inverse_homophily = 0.01#0.2
+inverse_homophily = 0.2#0.2
 homophilly_rate = 1
 
 discount_factor = 0.6
@@ -77,6 +80,7 @@ if carbon_price_state:
 params = {
     "opinion_dynamics": opinion_dynamics,
     "save_data": save_data, 
+    "compression_factor": compression_factor,
     "time_steps_max": time_steps_max, 
     "carbon_price_state" : carbon_price_state,
     "information_provision_state" : information_provision_state,
@@ -156,6 +160,8 @@ if __name__ == "__main__":
         plot_average_culture_comparison(fileName, data, dpi_save,title_list )
         #plot_carbon_emissions_total_comparison(fileName, data, dpi_save, title_list)
         plot_weighting_matrix_convergence_comparison(fileName, data, dpi_save, title_list)
+        plot_cum_weighting_matrix_convergence_comparison(fileName, data, dpi_save, title_list)
+
         print_culture_timeseries(fileName, data , title_list, nrows, ncols ,dpi_save)
 
         #ani_b = live_compare_animate_culture_network_and_weighting(fileName,data,layout,cmap,node_size,interval,fps,norm_zero_one,round_dec,cmap_edge, ncols, nrows,"Weighting state",title_list)

@@ -132,6 +132,7 @@ def plot_total_carbon_emissions_timeseries(FILENAME: str, Data: DataFrame, dpi_s
     plot_network_timeseries(FILENAME, Data, y_title, property, dpi_save)
 
 
+
 def plot_average_culture_timeseries(FILENAME: str, Data: DataFrame, dpi_save:int):
     y_title = "Average Culture"
     property = "network_average_culture"
@@ -1275,6 +1276,22 @@ def plot_weighting_convergence_confirmation_bias(fileName: str, Data_list: list[
     f = plotName + "/comparing_weighting_matrix_convergence_confirmation_bias.png"
     fig.savefig(f, dpi=dpi_save)
 
+def plot_cum_weighting_convergence_confirmation_bias(fileName: str, Data_list: list[Network], dpi_save:int):
+    y_title = "Weighting matrix convergence"
+
+    fig, ax = plt.subplots()
+    ax.set_ylabel(r"%s" % y_title)
+    for i in range(len(Data_list)):
+        cumulative_link_change = np.cumsum(np.asarray(Data_list[i].history_weighting_matrix_convergence))
+        ax.plot(np.asarray(Data_list[i].history_time),cumulative_link_change , label = Data_list[i].confirmation_bias)
+        ax.set_xlabel(r"Time")
+    #ax.axvline(culture_momentum, color='r',linestyle = "--")
+    ax.legend()
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/comparing_cum_weighting_matrix_convergence_confirmation_bias.png"
+    fig.savefig(f, dpi=dpi_save)
+
 def print_culture_time_series_confirmation_bias(fileName: str, Data_list: list[Network], dpi_save:int,nrows: int, ncols:int):
     
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
@@ -1419,6 +1436,21 @@ def plot_weighting_matrix_convergence_comparison(fileName: str, Data_list: list[
     f = plotName + "/comparing_weighting_matrix_convergence.png"
     fig.savefig(f, dpi=dpi_save)
 
+def plot_cum_weighting_matrix_convergence_comparison(fileName: str, Data_list: list[Network], dpi_save:int, property_list:list):
+    y_title = "weighting_matrix_convergence"
+
+    fig, ax = plt.subplots()
+    ax.set_ylabel(r"%s" % y_title)
+    for i in range(len(Data_list)):
+        cumulative_link_change = np.cumsum(np.asarray(Data_list[i].history_weighting_matrix_convergence))
+        ax.plot(np.asarray(Data_list[i].history_time), cumulative_link_change, label = property_list[i])
+        ax.set_xlabel(r"Time")
+    ax.legend()
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/comparing_cum_weighting_matrix_convergence.png"
+    fig.savefig(f, dpi=dpi_save)
+
 def print_culture_timeseries(fileName: str, Data_list: list[Network] , title_list:str, nrows:int, ncols:int , dpi_save:int):
     y_title = "indivdiual culture"
 
@@ -1434,6 +1466,27 @@ def print_culture_timeseries(fileName: str, Data_list: list[Network] , title_lis
     plotName = fileName + "/Prints"
     f = plotName + "/print_culture_timeseries.png"
     fig.savefig(f, dpi=dpi_save)
+
+def print_culture_timeseries_vary_conformity_bias(fileName: str, Data_list: list[Network] , title_list:str, nrows:int, ncols:int , dpi_save:int):
+    y_title = "Indivdiual culture"
+
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
+
+    for i, ax in enumerate(axes.flat):
+
+        ax.set_title(title_list[i])
+
+        ax.set_ylabel(r"%s" % y_title)
+
+        for v in Data_list[i].agent_list:
+            ax.plot(np.asarray( Data_list[i].history_time ), np.asarray(v.history_culture))
+
+        ax.set_xlabel(r"Time")
+    
+    plotName = fileName + "/Prints"
+    f = plotName + "/print_culture_timeseries_vary_conformity_bias.png"
+    fig.savefig(f, dpi=dpi_save)
+
 
     """SA"""
 
