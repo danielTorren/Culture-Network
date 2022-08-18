@@ -23,11 +23,13 @@ class Network:
         self.alpha_change = parameters["alpha_change"]
         self.opinion_dyanmics = parameters["opinion_dynamics"]
         self.save_data = parameters["save_data"]
+        self.compression_factor = parameters["compression_factor"]
         self.linear_alpha_diff_state = parameters["linear_alpha_diff_state"]
         self.homophily_state = parameters["homophily_state"]
 
         #time
         self.t = 0
+        self.steps = 0
         self.delta_t = parameters["delta_t"]
 
         #culture
@@ -312,6 +314,7 @@ class Network:
                 "discount_list" : self.discount_list,
                 "carbon_price_state" : self.carbon_price_state,
                 "information_provision_state" : self.information_provision_state,
+                "compression_factor": self.compression_factor,
         }
 
         if self.carbon_price_state:
@@ -407,7 +410,7 @@ class Network:
         for i in self.list_people:
             if self.carbon_price_state:
                 self.agent_list[i].carbon_price = self.carbon_price
-            self.agent_list[i].next_step(self.t,self.social_component_matrix[i])
+            self.agent_list[i].next_step(self.t,self.steps,self.social_component_matrix[i])
 
     def save_data_network(self):
         self.history_time.append(self.t)
@@ -429,6 +432,7 @@ class Network:
         #print("HEYE")
         # advance a time step
         self.t += self.delta_t
+        self.steps += 1
 
         #unsure where this step should go SORT THIS OUT
         
@@ -468,4 +472,5 @@ class Network:
                 self.min_culture,
                 self.max_culture,
             ) = self.calc_network_culture()
-            self.save_data_network()
+            if self.steps%self.compression_factor == 0:
+                self.save_data_network()

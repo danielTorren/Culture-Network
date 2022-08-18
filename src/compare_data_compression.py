@@ -8,16 +8,7 @@ from utility import createFolderSA
 import networkx as nx
 from matplotlib.cm import get_cmap
 from plot import ( 
-    live_link_change_homophily_fischer,
-    live_cum_link_change_homophily_fischer,
-    live_link_change_homophily_fischer_per_agent,
-    live_cum_link_change_homophily_fischer_per_agent,
-    print_intial_culture_networks_homophily_fischer,
-    print_culture_time_series_homophily_fischer,
-    prints_culture_network_homophily_fischer,
-    live_compare_animate_culture_network_and_weighting,
-    live_compare_animate_weighting_matrix,
-    live_compare_animate_behaviour_matrix,
+    print_culture_time_series_data_compression
     )
 from matplotlib.colors import LinearSegmentedColormap,  Normalize
 
@@ -31,6 +22,8 @@ information_provision_state = False
 linear_alpha_diff_state = False#if true use the exponential form instead like theo
 homophily_state = True
 alpha_change = True
+
+#compression_factor = 10
 
 #Social emissions model
 K = 10 # k nearest neighbours INTEGER
@@ -57,7 +50,7 @@ phi_list_lower,phi_list_upper = 0,1
 learning_error_scale = 0.02#5  # 1 standard distribution is 2% error
 carbon_emissions = [1]*M
 
-#inverse_homophily = 0.1#0.2
+inverse_homophily = 0.1#0.2
 homophilly_rate = 1
 
 discount_factor = 0.6
@@ -83,6 +76,7 @@ params = {
     "opinion_dynamics": opinion_dynamics,
     "save_data": save_data, 
     "time_steps_max": time_steps_max, 
+    #"compression_factor": compression_factor,
     "carbon_price_state" : carbon_price_state,
     "information_provision_state" : information_provision_state,
     "linear_alpha_diff_state": linear_alpha_diff_state,
@@ -104,7 +98,7 @@ params = {
     "beta_threshold": beta_threshold,
     "carbon_emissions" : carbon_emissions,
     "discount_factor": discount_factor,
-    #"inverse_homophily": inverse_homophily,#1 is total mixing, 0 is no mixing
+    "inverse_homophily": inverse_homophily,#1 is total mixing, 0 is no mixing
     "homophilly_rate": homophilly_rate,
     "present_discount_factor": present_discount_factor,
     "confirmation_bias": confirmation_bias,
@@ -147,31 +141,20 @@ print("frames_list: ", frames_list)
 
 if __name__ == "__main__":
 
-        fileName = "results/fischer_homophilly_variation_%s_%s_%s_%s" % (str(params["N"]),str(params["time_steps_max"]),str(params["K"]), str(reps))
+        fileName = "results/data_compression_variation_%s_%s_%s_%s" % (str(params["N"]),str(params["time_steps_max"]),str(params["K"]), str(reps))
         data = []
         
-        inverse_homophily_list = np.linspace(0,1,reps)
+        compression_factor_list = [1,2,5,10]
 
         #print(list(prob_rewire_list))
-        for i in inverse_homophily_list:
+        for i in compression_factor_list:
             #print(i)
-            params["inverse_homophily"] = i
+            params["compression_factor"] = i
             social_network = generate_data(params)
             data.append(social_network)
 
         createFolderSA(fileName)
 
-        #live_link_change_homophily_fischer(fileName, data, dpi_save,round_dec)
-        #live_cum_link_change_homophily_fischer(fileName, data, dpi_save,round_dec)
-        live_link_change_homophily_fischer_per_agent(fileName, data, dpi_save,round_dec)
-        live_cum_link_change_homophily_fischer_per_agent(fileName, data, dpi_save,round_dec)
-
-        #print_culture_time_series_homophily_fischer(fileName, data, dpi_save, nrows, ncols,round_dec)
-        #print_intial_culture_networks_homophily_fischer(fileName, data, dpi_save, nrows, ncols , layout, norm_zero_one, cmap, node_size,round_dec)
-        #prints_culture_network_homophily_fischer(fileName, data[0],layout, cmap ,node_size,  nrows, ncols ,  norm_zero_one,frames_list, round_dec, dpi_save)
-
-        ani_b = live_compare_animate_culture_network_and_weighting(fileName,data,layout,cmap,node_size,interval,fps,norm_zero_one,round_dec,cmap_edge, ncols, nrows,"Inverse homophily",inverse_homophily_list)
-        #ani_c = live_compare_animate_weighting_matrix(fileName, data,  cmap_weighting, interval, fps, round_dec, cmap_edge, nrows, ncols,"Inverse homophily",inverse_homophily_list)
-        #ani_d = live_compare_animate_behaviour_matrix(fileName, data,  cmap, interval, fps, round_dec, nrows, ncols,"Inverse homophily",inverse_homophily_list)
+        print_culture_time_series_data_compression(fileName, data, dpi_save, nrows, ncols,round_dec)
 
         plt.show()

@@ -46,6 +46,8 @@ linear_alpha_diff_state = False#if true use the exponential form instead like th
 homophily_state = True
 alpha_change = True
 
+compression_factor = 10
+
 #Social emissions model
 K = 10  # k nearest neighbours INTEGER
 M = 3  # number of behaviours
@@ -66,10 +68,10 @@ beta_threshold = 1#2
 time_steps_max = int(
     total_time / delta_t
 )  # number of time steps max, will stop if culture converges
-
+print("time steps max" , time_steps_max)
 set_seed = 1  ##reproducibility INTEGER
 phi_list_lower,phi_list_upper = 0.1,1
-learning_error_scale = 0.05  # 1 standard distribution is 2% error
+learning_error_scale = 0.02  # 1 standard distribution is 2% error
 carbon_emissions = [1]*M
 
 inverse_homophily = 0.2#0.2
@@ -97,6 +99,7 @@ if carbon_price_state:
 params = {
     "opinion_dynamics": opinion_dynamics,
     "save_data": save_data, 
+    "compression_factor": compression_factor,
     "time_steps_max": time_steps_max, 
     "carbon_price_state" : carbon_price_state,
     "information_provision_state" : information_provision_state,
@@ -296,13 +299,15 @@ if __name__ == "__main__":
             frames_proportion = int(round(len(Data["network_time"]) / 2))
             frames_list = frame_distribution_prints( Data["network_time"], scale_factor, frame_num )
         else:
-            frames_list = [int(round(x)) for x in np.linspace(0,time_steps_max, num=frame_num + 1)]
+            #print(len(Data["network_weighting_matrix"]))
+            #print(Data["network_time"], len(Data["network_time"]))
+            frames_list = [int(round(x)) for x in np.linspace(0, len(Data["network_time"])-1 , num=frame_num + 1)]# -1 is so its within range as linspace is inclusive
              
         print("frames prints:",frames_list)
 
         ###PLOTS
         #plot_beta_distributions(FILENAME,alpha_attract,beta_attract,alpha_threshold,beta_threshold,bin_num,num_counts,dpi_save,)
-        plot_culture_timeseries(FILENAME, Data, dpi_save)
+        #plot_culture_timeseries(FILENAME, Data, dpi_save)
         #plot_value_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save)
         #plot_threshold_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save)
         #plot_attract_timeseries(FILENAME, Data, nrows_behave, ncols_behave, dpi_save)
@@ -318,7 +323,7 @@ if __name__ == "__main__":
 
         ###PRINTS
         
-        #prints_weighting_matrix(FILENAME,Data,cmap_weighting,nrows,ncols,frames_list,round_dec,dpi_save)
+        prints_weighting_matrix(FILENAME,Data,cmap_weighting,nrows,ncols,frames_list,round_dec,dpi_save)
         #prints_behavioural_matrix(FILENAME,Data,cmap,nrows,ncols,frames_list,round_dec,dpi_save)
         #prints_culture_network(FILENAME,Data,layout,cmap,node_size,nrows,ncols,norm_neg_pos,frames_list,round_dec,dpi_save,norm_zero_one)
         #print_network_social_component_matrix(FILENAME,Data,cmap,nrows,ncols,frames_list,round_dec,dpi_save)

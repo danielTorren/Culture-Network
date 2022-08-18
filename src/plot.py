@@ -1785,5 +1785,25 @@ def weighting_link_timeseries_plot(FILENAME: str, Data: DataFrame, y_title:str, 
     f = plotName + "/weighting_link_timeseries_plot.png"
     fig.savefig(f, dpi=dpi_save)
 
+def print_culture_time_series_data_compression(fileName: str, Data_list: list[Network], dpi_save:int,nrows: int, ncols:int, round_dec):
+    
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
+    y_title = "Culture"
+
+    for i, ax in enumerate(axes.flat):
+        for v in Data_list[i].agent_list:
+            ax.plot(np.asarray(Data_list[i].history_time), np.asarray(v.history_culture))
+
+        ax.set_xlabel(r"Time")
+        ax.set_ylabel(r"%s" % y_title)
+        ax.set_title("Data compression = {}".format(round(Data_list[i].compression_factor, round_dec)))
+        #ax.axvline(culture_momentum, color='r',linestyle = "--")
+
+    plt.tight_layout()
+
+    plotName = fileName + "/Prints"
+    f = plotName + "/print_culture_time_series_data_compression.png"
+    fig.savefig(f, dpi=dpi_save)
+
 
 

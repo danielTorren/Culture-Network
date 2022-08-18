@@ -10,7 +10,7 @@ class Individual:
     def __init__(
         self, individual_params, init_data_attracts, init_data_thresholds
     ):
-
+        
         self.init_thresholds = init_data_thresholds
         self.attracts = init_data_attracts
         self.thresholds = init_data_thresholds
@@ -24,6 +24,7 @@ class Individual:
         self.discount_list = individual_params["discount_list"]
         self.carbon_price_state = individual_params["carbon_price_state"]
         self.information_provision_state = individual_params["information_provision_state"]
+        self.compression_factor = individual_params["compression_factor"]
 
         if self.carbon_price_state:
             self.carbon_price = individual_params["carbon_price"]
@@ -149,8 +150,10 @@ class Individual:
         if self.information_provision_state:
             self.history_information_provision.append(self.information_provision)
 
-    def next_step(self, t:float, social_component_behaviours: npt.NDArray):
+    def next_step(self, t:float,steps: int,  social_component_behaviours: npt.NDArray):
         self.t = t
+        self.steps = steps
+
         if self.information_provision_state:
             self.update_information_provision()
 
@@ -166,7 +169,8 @@ class Individual:
         self.culture = self.calc_culture()
         #print("inv culture", self.culture)
         if self.save_data:
-            self.save_data_individual()
+            if self.steps%self.compression_factor == 0:
+                self.save_data_individual()
         
 
 
