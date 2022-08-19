@@ -9,6 +9,7 @@ from matplotlib.colors import LinearSegmentedColormap,SymLogNorm
 from typing import Union
 from networkx import Graph
 from network import Network
+from tslearn.clustering import TimeSeriesKMeans
 ###DEFINE PLOTS
 
 
@@ -1894,5 +1895,94 @@ def print_culture_time_series_data_compression(fileName: str, Data_list: list[Ne
     f = plotName + "/print_culture_time_series_data_compression.png"
     fig.savefig(f, dpi=dpi_save)
 
+def Euclidean_cluster_plot(fileName: str, Data,k_clusters: int, alpha: float, min_culture_distance: float, dpi_save:int):
+    nrows = 1
+    ncols = 1
 
+    X_train = np.asarray(Data["individual_culture"])
+
+    km = TimeSeriesKMeans(n_clusters=k_clusters, verbose=False)
+    y_pred = km.fit_predict(X_train)#YOU HAVE TO FIT PREDICT TO THEN GET THE CLUSTER CENTERS LATER
+
+    if k_clusters == 2 and abs(km.cluster_centers_[0][0][-1] - km.cluster_centers_[1][0][-1]) <  min_culture_distance:
+        print("A Single Cluster Present", abs(km.cluster_centers_[0][0][-1] - km.cluster_centers_[1][0][-1]),min_culture_distance)
+    else:
+        fig, ax = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
+
+        for i in range(int(int(Data["N"]))):
+            # print(Data["individual_culture"][i])
+            ax.plot(Data["network_time"], X_train[i],"k-", alpha=alpha)
+        ax.axvline(Data["culture_momentum_real"], color='r',linestyle = "--")
+
+        for i in range(k_clusters):
+            #print("HELLO",len(km.cluster_centers_[i].ravel()))
+            ax.plot(Data["network_time"],km.cluster_centers_[i].ravel(), "r-")
+            #ax.set_xlim(0, sz)
+        ax.set_title("Euclidean $k$-means")
+
+        plotName = fileName + "/Plots"
+        f = plotName + "/Euclid_cluster_plot.png"
+        fig.savefig(f, dpi=dpi_save)
+
+        """
+        # Euclidean k-means
+        print("Euclidean k-means")
+        km = TimeSeriesKMeans(n_clusters=k_clusters, verbose=True)
+        y_pred = km.fit_predict(X_train)
+
+        fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
+        for i, ax in enumerate(axes.flat):
+            for xx in X_train[y_pred == i]:
+                ax.plot(xx.ravel(), "k-", alpha=.2)
+            ax.plot(km.cluster_centers_[i].ravel(), "r-")
+            ax.xlim(0, sz)
+            ax.ylim(-4, 4)
+            ax.text(0.55, 0.85,'Cluster %d' % (i + 1),
+                    transform=plt.gca().transAxes)
+            if i == 1:
+                ax.title("Euclidean $k$-means")
+
+        plotName = fileName + "/Plots"
+        f = plotName + "/DTW_cluster_plot.png"
+        fig.savefig(f, dpi=dpi_save)
+        """
+
+
+        """
+        fig = plt.figure()
+        # Soft-DTW-k-means
+        print("Soft-DTW k-means")
+        sdtw_km = TimeSeriesKMeans(n_clusters=k_clusters,
+                                metric="softdtw",
+                                metric_params={"gamma": .01},
+                                verbose=True,
+        )
+
+        y_pred = sdtw_km.fit_predict(X_train)
+
+        for yi in range(k_clusters):
+            plt.subplot(1, k_clusters,7 + yi)# 
+            for xx in X_train[y_pred == yi]:
+                plt.plot(xx.ravel(), "k-", alpha=.2)
+            plt.plot(sdtw_km.cluster_centers_[yi].ravel(), "r-")
+            plt.xlim(0, sz)
+            plt.ylim(-4, 4)
+            plt.text(0.55, 0.85,'Cluster %d' % (yi + 1),
+                    transform=plt.gca().transAxes)
+            if yi == 1:
+                plt.title("Soft-DTW $k$-means")
+        """
+
+def plot_k_cluster_scores(fileName,scores,dpi_save):
+    x = scores.keys()
+    y = scores.values()
+
+    fig, ax = plt.subplots()
+    ax.scatter(x,y)
+    ax.set_xlabel(r"K clusters")
+    ax.set_ylabel(r"Silhouette score")
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/plot_k_cluster_scores.png"
+    fig.savefig(f, dpi=dpi_save)
 

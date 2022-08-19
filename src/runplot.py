@@ -1,3 +1,4 @@
+from logging import raiseExceptions
 from run import run
 from plot import (
     plot_culture_timeseries,
@@ -29,13 +30,16 @@ from plot import (
     print_culture_histogram,
     animate_culture_network_and_weighting,
     weighting_link_timeseries_plot,
+    Euclidean_cluster_plot,
+    plot_k_cluster_scores,
 )
-from utility import loadData, get_run_properties, frame_distribution_prints
+from utility import loadData, get_run_properties, frame_distribution_prints,k_means_calc
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap, SymLogNorm, Normalize
 from matplotlib.cm import get_cmap
 import time
 import numpy as np
+
 
 # Params
 save_data = True
@@ -46,16 +50,16 @@ linear_alpha_diff_state = False#if true use the exponential form instead like th
 homophily_state = True
 alpha_change = True
 
-compression_factor = 10
+compression_factor = 5# CANT USE THIS WITH THE K MEANS STUFF??????
 
 #Social emissions model
-K = 10  # k nearest neighbours INTEGER
+K = 20  # k nearest neighbours INTEGER
 M = 3  # number of behaviours
-N = 50  # number of agents
+N = 100  # number of agents
 
-total_time = 10
+total_time = 100
 
-delta_t = 0.01  # time step size
+delta_t = 0.1  # time step size
 culture_momentum_real = 1# real time over which culture is calculated for INTEGER, NEEDS TO BE MROE THAN DELTA t
 
 prob_rewire = 0.1  # re-wiring probability?
@@ -68,7 +72,7 @@ beta_threshold = 1#2
 time_steps_max = int(
     total_time / delta_t
 )  # number of time steps max, will stop if culture converges
-print("time steps max" , time_steps_max)
+#print("time steps max" , time_steps_max)
 set_seed = 1  ##reproducibility INTEGER
 phi_list_lower,phi_list_upper = 0.1,1
 learning_error_scale = 0.02  # 1 standard distribution is 2% error
@@ -262,15 +266,22 @@ num_counts = 100000
 bin_num_agents = int(round(N/10))
 dpi_save = 2000
 
+min_k,max_k = 2,N - 1# Cover all the possible bases with the max k though it does slow it down
+alpha_val = 0.25
+size_points = 5
+min_culture_distance = 0.5
+
 RUN = True
 PLOT = True
+cluster_plots = False
 SHOW_PLOT = True
+
 frames_list_exponetial = False
 
 if __name__ == "__main__":
 
     if RUN == False:
-        FILENAME = "results/_DEGROOT_1000_3_100_0.01_30_0.2_10_0.05_0.2_0.3_0.3_0.2_0.1"
+        FILENAME = "results/_DEGROOT_1000_3_100_0.1_20_0.1_1_0.02_1_1_1_1_1"
     else:
         # start_time = time.time()
         # print("start_time =", time.ctime(time.time()))
@@ -307,7 +318,7 @@ if __name__ == "__main__":
 
         ###PLOTS
         #plot_beta_distributions(FILENAME,alpha_attract,beta_attract,alpha_threshold,beta_threshold,bin_num,num_counts,dpi_save,)
-        #plot_culture_timeseries(FILENAME, Data, dpi_save)
+        plot_culture_timeseries(FILENAME, Data, dpi_save)
         #plot_value_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save)
         #plot_threshold_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save)
         #plot_attract_timeseries(FILENAME, Data, nrows_behave, ncols_behave, dpi_save)
@@ -321,9 +332,14 @@ if __name__ == "__main__":
         if carbon_price_state:
             plot_carbon_price_timeseries(FILENAME,Data,dpi_save)
 
+        if cluster_plots:
+            k_clusters,win_score, scores = k_means_calc(Data,min_k,max_k,size_points)#CALCULATE THE OPTIMAL NUMBER OF CLUSTERS USING SILOUTTE SCORE, DOENST WORK FOR 1
+            #k_clusters = 2 # UNCOMMENT TO SET K MANUALLY
+            Euclidean_cluster_plot(FILENAME, Data, k_clusters,alpha_val,min_culture_distance, dpi_save)
+
         ###PRINTS
         
-        prints_weighting_matrix(FILENAME,Data,cmap_weighting,nrows,ncols,frames_list,round_dec,dpi_save)
+        #prints_weighting_matrix(FILENAME,Data,cmap_weighting,nrows,ncols,frames_list,round_dec,dpi_save)
         #prints_behavioural_matrix(FILENAME,Data,cmap,nrows,ncols,frames_list,round_dec,dpi_save)
         #prints_culture_network(FILENAME,Data,layout,cmap,node_size,nrows,ncols,norm_neg_pos,frames_list,round_dec,dpi_save,norm_zero_one)
         #print_network_social_component_matrix(FILENAME,Data,cmap,nrows,ncols,frames_list,round_dec,dpi_save)
@@ -343,12 +359,13 @@ if __name__ == "__main__":
         #ani_j = multi_animation_alt(FILENAME,Data,cmap,cmap,layout,node_size,interval,fps,norm_neg_pos)
         #ani_k = multi_animation_scaled(FILENAME,Data,cmap,cmap,layout,node_size,interval,fps,scale_factor,frames_proportion,norm_neg_pos)
 
+
         print(
             "PLOT time taken: %s minutes" % ((time.time() - start_time) / 60),
             "or %s s" % ((time.time() - start_time)),
         )
 
-    
 
-        if SHOW_PLOT:
-            plt.show()
+
+    if SHOW_PLOT:
+        plt.show()

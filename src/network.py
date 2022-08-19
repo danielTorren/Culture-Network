@@ -272,6 +272,8 @@ class Network:
         cul_list = []
         for i in range(len(attract_matrix)):
             cul_list.append(self.quick_indiv_calc_culture(attract_matrix[i]))
+
+        #print(np.mean(cul_list))
         #print("non circ cul_list: ",cul_list)
         return cul_list
 
@@ -280,6 +282,7 @@ class Network:
         ###init_attract, init_threshold,carbon_emissions
         attract_list = [np.random.beta(self.alpha_attract, self.beta_attract, size=self.M) for n in self.list_people]
         threshold_list = [np.random.beta(self.alpha_threshold, self.beta_threshold, size=self.M) for n in self.list_people]
+        
         attract_matrix = np.asarray(attract_list)
         threshold_matrix = np.asarray(threshold_list)
 
@@ -399,6 +402,7 @@ class Network:
 
     def calc_network_culture(self) ->  tuple[float, float, float, float]:
         culture_list = [x.culture for x in self.agent_list]
+        #print(np.mean(culture_list))
         return (
             np.mean(culture_list),
             max(culture_list) - min(culture_list),
