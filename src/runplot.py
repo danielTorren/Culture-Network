@@ -50,7 +50,7 @@ linear_alpha_diff_state = False#if true use the exponential form instead like th
 homophily_state = True
 alpha_change = True
 
-compression_factor = 5# CANT USE THIS WITH THE K MEANS STUFF??????
+compression_factor = 5
 
 #Social emissions model
 K = 20  # k nearest neighbours INTEGER

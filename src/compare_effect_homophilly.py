@@ -32,13 +32,15 @@ linear_alpha_diff_state = False#if true use the exponential form instead like th
 homophily_state = True
 alpha_change = True
 
+compression_factor = 5
+
 #Social emissions model
 K = 10 # k nearest neighbours INTEGER
 M = 3  # number of behaviours
 N = 50  # number of agents
-total_time = 10
+total_time = 50
 
-delta_t = 0.05  # time step size
+delta_t = 0.01  # time step size
 culture_momentum_real = 1# real time over which culture is calculated for INTEGER, NEEDS TO BE MROE THAN DELTA t
 
 prob_rewire = 0.2  # re-wiring probability?
@@ -83,6 +85,7 @@ params = {
     "opinion_dynamics": opinion_dynamics,
     "save_data": save_data, 
     "time_steps_max": time_steps_max, 
+    "compression_factor": compression_factor,
     "carbon_price_state" : carbon_price_state,
     "information_provision_state" : information_provision_state,
     "linear_alpha_diff_state": linear_alpha_diff_state,
@@ -163,14 +166,14 @@ if __name__ == "__main__":
 
         #live_link_change_homophily_fischer(fileName, data, dpi_save,round_dec)
         #live_cum_link_change_homophily_fischer(fileName, data, dpi_save,round_dec)
-        live_link_change_homophily_fischer_per_agent(fileName, data, dpi_save,round_dec)
+        #live_link_change_homophily_fischer_per_agent(fileName, data, dpi_save,round_dec)
         live_cum_link_change_homophily_fischer_per_agent(fileName, data, dpi_save,round_dec)
 
-        #print_culture_time_series_homophily_fischer(fileName, data, dpi_save, nrows, ncols,round_dec)
-        #print_intial_culture_networks_homophily_fischer(fileName, data, dpi_save, nrows, ncols , layout, norm_zero_one, cmap, node_size,round_dec)
+        print_culture_time_series_homophily_fischer(fileName, data, dpi_save, nrows, ncols,round_dec)
+        print_intial_culture_networks_homophily_fischer(fileName, data, dpi_save, nrows, ncols , layout, norm_zero_one, cmap, node_size,round_dec)
         #prints_culture_network_homophily_fischer(fileName, data[0],layout, cmap ,node_size,  nrows, ncols ,  norm_zero_one,frames_list, round_dec, dpi_save)
 
-        ani_b = live_compare_animate_culture_network_and_weighting(fileName,data,layout,cmap,node_size,interval,fps,norm_zero_one,round_dec,cmap_edge, ncols, nrows,"Inverse homophily",inverse_homophily_list)
+        #ani_b = live_compare_animate_culture_network_and_weighting(fileName,data,layout,cmap,node_size,interval,fps,norm_zero_one,round_dec,cmap_edge, ncols, nrows,"Inverse homophily",inverse_homophily_list)
         #ani_c = live_compare_animate_weighting_matrix(fileName, data,  cmap_weighting, interval, fps, round_dec, cmap_edge, nrows, ncols,"Inverse homophily",inverse_homophily_list)
         #ani_d = live_compare_animate_behaviour_matrix(fileName, data,  cmap, interval, fps, round_dec, nrows, ncols,"Inverse homophily",inverse_homophily_list)
 

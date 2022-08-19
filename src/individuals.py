@@ -22,6 +22,7 @@ class Individual:
         self.carbon_intensive_list = individual_params["carbon_emissions"]
         self.culture_momentum = individual_params["culture_momentum"]
         self.discount_list = individual_params["discount_list"]
+        self.sum_discount_list = sum(self.discount_list)
         self.carbon_price_state = individual_params["carbon_price_state"]
         self.information_provision_state = individual_params["information_provision_state"]
         self.compression_factor = individual_params["compression_factor"]
@@ -73,13 +74,8 @@ class Individual:
         self.av_behaviour_list.append(self.av_behaviour)#what if its attraction instead?
 
     def calc_culture(self) -> float:
-        weighted_sum_behaviours = 0
-
-        for i in range(len(self.av_behaviour_list)):
-            weighted_sum_behaviours += self.discount_list[i]*self.av_behaviour_list[i]
-        normalized_culture = weighted_sum_behaviours/len(self.av_behaviour_list)
-        #print(len(self.av_behaviour_list))
-        return normalized_culture
+        indiv_cul = np.matmul(self.discount_list, self.av_behaviour_list)/self.sum_discount_list
+        return indiv_cul
 
     def update_values(self):
         self.values = self.attracts - self.thresholds

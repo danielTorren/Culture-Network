@@ -253,28 +253,22 @@ class Network:
         """
         Calc the individual culture of the attraction matrix for homophilly
         """
-        weighted_sum_behaviours = 0
-
         av_behaviour = attracts.sum()/attracts.shape
-
         av_behaviour_list = [av_behaviour]*self.culture_momentum
-
-        for i in range(len(av_behaviour_list)):
-            weighted_sum_behaviours += self.discount_list[i]*av_behaviour_list[i]
-        normalized_culture = weighted_sum_behaviours/len(av_behaviour_list)
-        #print(normalized_culture)
-        return normalized_culture[0]
+        #### HERE I HAVE THE CORRECT LIST OF AV BEAHVIOUR
+        indiv_cul = np.matmul(self.discount_list, av_behaviour_list)/sum(self.discount_list)
+        return indiv_cul
 
     def quick_calc_culture(self,attract_matrix):
         """
         Create culture list from the attraction matrix for homophilly
         """
+
         cul_list = []
         for i in range(len(attract_matrix)):
             cul_list.append(self.quick_indiv_calc_culture(attract_matrix[i]))
 
-        #print(np.mean(cul_list))
-        #print("non circ cul_list: ",cul_list)
+        #print("cul_list = ", np.mean(cul_list))
         return cul_list
 
 
