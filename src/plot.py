@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from matplotlib.colors import Normalize 
 import numpy as np
-from utility import frame_distribution, frame_distribution_prints
+from utility import frame_distribution, frame_distribution_prints,live_k_means_calc
 from pandas import DataFrame
 from matplotlib.colors import LinearSegmentedColormap,SymLogNorm
 from typing import Union
@@ -12,6 +12,35 @@ from network import Network
 from tslearn.clustering import TimeSeriesKMeans
 ###DEFINE PLOTS
 
+def print_culture_time_series_clusters(FILENAME: str, Data_list: list, property_varied_values: list, property_varied:str, min_k,max_k,size_points, alpha: float, min_culture_distance: float, nrows:int, ncols:int, dpi_save:int, round_dec):
+    
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7),constrained_layout=True)
+
+    for i, ax in enumerate(axes.flat):
+        X_train = np.asarray([v.history_culture for v in Data_list[i].agent_list])
+        time_list = np.asarray(Data_list[i].history_time)
+
+        k_clusters,win_score, scores = live_k_means_calc(X_train,Data_list[i].history_time,min_k,max_k,size_points)
+
+        km = TimeSeriesKMeans(n_clusters=k_clusters, verbose=False)
+        y_pred = km.fit_predict(X_train)#YOU HAVE TO FIT PREDICT TO THEN GET THE CLUSTER CENTERS LATER
+
+        for v in range(int(int(Data_list[i].N))):
+            ax.plot(time_list, X_train[v],"k-", alpha=alpha)
+        ax.axvline(Data_list[i].culture_momentum_real, color='r',linestyle = "--")
+
+        if (k_clusters > 2) or (k_clusters == 2 and abs(km.cluster_centers_[0][0][-1] - km.cluster_centers_[1][0][-1]) >  min_culture_distance):
+            print("cluster")
+            for k in range(k_clusters):
+                ax.plot(time_list,km.cluster_centers_[k].ravel(), "r-")
+
+        ax.set_xlabel(r"Time")
+        ax.set_ylabel(r"Culture")
+        ax.set_title("{} = {}".format(property_varied,round(property_varied_values[i], round_dec)))
+
+    plotName = FILENAME + "/Prints"
+    f = plotName + "/print_culture_time_series_{}_clusters.png".format(property_varied)
+    fig.savefig(f, dpi=dpi_save)
 
 def prints_behaviour_timeseries_plot(
     FILENAME: str, Data: DataFrame, property:str, y_title:str, nrows:int, ncols:int, dpi_save:int

@@ -305,7 +305,6 @@ def frame_distribution_prints(time_list: list, scale_factor: int, frame_num: int
 
 def k_means_calc(Data,min_k,max_k,size_points):
     #Z=pd.DataFrame(x) #converting into data frame for ease
-
     if size_points == 1:
         last_columns = np.asarray(Data["individual_culture"].iloc[: , -size_points]).reshape(-1,1)#THE RESHAPE MAKES IT AN ARRAY OF ARRAY WHERE EACH ENTRY HAS ITS own ENTRY INSTEAD OF A SINGLE LIST OF DATA
     elif size_points > Data["individual_culture"].shape[1]:
@@ -314,14 +313,35 @@ def k_means_calc(Data,min_k,max_k,size_points):
         last_columns = np.asarray(Data["individual_culture"].iloc[: , -size_points:])
         print("Steps used: ",size_points,"/",len(Data["network_time"]), ", or last time taken",Data["network_time"][-size_points], "of ", Data["network_time"][-1])
 
-    x = last_columns
+    scores = {}
+    for k in range(min_k,max_k + 1):#+1 so it actually does the max number 
+        KMean= KMeans(n_clusters=k)
+        KMean.fit(last_columns)
+        label=KMean.predict(last_columns)
+        scores[k] = silhouette_score(last_columns, label)
+    
+    fin_max = max(scores, key=scores.get)
+
+    print("k cluster, highest score = ",fin_max, scores[fin_max])
+
+    return fin_max, scores[fin_max], scores
+
+def live_k_means_calc(Data_culture, time_list,min_k,max_k,size_points):
+    if size_points == 1:
+        last_columns = Data_culture[:,-size_points:].reshape(-1,1)#THE RESHAPE MAKES IT AN ARRAY OF ARRAY WHERE EACH ENTRY HAS ITS own ENTRY INSTEAD OF A SINGLE LIST OF DATA
+    elif size_points > Data_culture.shape[1]:
+        print("Points difference = ",size_points,Data_culture.shape[1])
+        raiseExceptions("Size points larger than number of available data points, lower")
+    else:
+        last_columns = Data_culture[:,-size_points:]
+        print("Steps used: ",size_points,"/",len(time_list), ", or last time taken",time_list[-size_points], "of ", time_list[-1])
 
     scores = {}
-    for i in range(min_k,max_k + 1):#+1 so it actually does the max number 
-        KMean= KMeans(n_clusters=i)
-        KMean.fit(x)
-        label=KMean.predict(x)
-        scores[i] = silhouette_score(x, label)
+    for k in range(min_k,max_k + 1):#+1 so it actually does the max number 
+        KMean= KMeans(n_clusters=k)
+        KMean.fit(last_columns)
+        label=KMean.predict(last_columns)
+        scores[k] = silhouette_score(last_columns, label)
     
     fin_max = max(scores, key=scores.get)
 

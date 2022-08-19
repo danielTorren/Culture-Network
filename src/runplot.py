@@ -271,9 +271,9 @@ alpha_val = 0.25
 size_points = 5
 min_culture_distance = 0.5
 
-RUN = True
+RUN = False
 PLOT = True
-cluster_plots = False
+cluster_plots = True
 SHOW_PLOT = True
 
 frames_list_exponetial = False
@@ -291,7 +291,6 @@ if __name__ == "__main__":
         # print ("RUN time taken: %s minutes" % ((time.time()-start_time)/60), "or %s s"%((time.time()-start_time)))
 
     if PLOT:
-
         start_time = time.time()
         print("start_time =", time.ctime(time.time()))
 

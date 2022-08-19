@@ -19,6 +19,7 @@ from plot import (
     live_compare_animate_culture_network_and_weighting,
     live_compare_animate_weighting_matrix,
     live_compare_animate_behaviour_matrix,
+    print_culture_time_series_clusters,
 )
 
 save_data = True
@@ -31,10 +32,10 @@ homophily_state = True
 compression_factor = 5
 
 #Social emissions model
-K = 10  # k nearest neighbours INTEGER
+K = 10 # k nearest neighbours INTEGER
 M = 3  # number of behaviours
 N = 100  # number of agents
-total_time = 20
+total_time = 100
 
 delta_t = 0.05  # time step size
 culture_momentum_real = 1# real time over which culture is calculated for INTEGER, NEEDS TO BE MROE THAN DELTA t
@@ -124,6 +125,11 @@ interval = 50
 round_dec = 2
 cmap_edge = get_cmap("Greys")
 
+min_k,max_k = 2,N - 1# Cover all the possible bases with the max k though it does slow it down
+alpha_val = 0.25
+size_points = 5
+min_culture_distance = 0.5
+
 
 if __name__ == "__main__":
         
@@ -150,12 +156,13 @@ if __name__ == "__main__":
 
         #plot_carbon_emissions_total_confirmation_bias(fileName, data, dpi_save)
 
-        plot_weighting_convergence_confirmation_bias(fileName, data, dpi_save)
-        plot_cum_weighting_convergence_confirmation_bias(fileName, data, dpi_save)
-        #print_culture_time_series_confirmation_bias(fileName, data, dpi_save, nrows, ncols)
-        #print_intial_culture_networks_confirmation_bias(fileName, data, dpi_save, nrows, ncols , layout, norm_zero_one, cmap, node_size)
+        #plot_weighting_convergence_confirmation_bias(fileName, data, dpi_save)
+        #plot_cum_weighting_convergence_confirmation_bias(fileName, data, dpi_save)
+        print_culture_time_series_confirmation_bias(fileName, data, dpi_save, nrows, ncols)
+        print_intial_culture_networks_confirmation_bias(fileName, data, dpi_save, nrows, ncols , layout, norm_zero_one, cmap, node_size,round_dec)
         #prints_init_weighting_matrix_confirmation_bias(fileName, data, dpi_save,nrows, ncols, cmap_weighting)
         #prints_final_weighting_matrix_confirmation_bias(fileName, data, dpi_save,nrows, ncols, cmap_weighting)
+        print_culture_time_series_clusters(fileName, data, confirmation_bias_list, "Confirmation bias", min_k,max_k,size_points, alpha_val, min_culture_distance, nrows, ncols, dpi_save, round_dec)
 
         #multi_animation_weighting(fileName,data, cmap_weighting,  interval, fps, round_dec, nrows, ncols, time_steps_max)
         #ani_b = live_compare_animate_culture_network_and_weighting(fileName,data,layout,cmap,node_size,interval,fps,norm_zero_one,round_dec,cmap_edge, ncols, nrows,"Confirmation bias",confirmation_bias_list)
