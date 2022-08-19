@@ -1467,7 +1467,8 @@ def print_culture_timeseries(fileName: str, Data_list: list[Network] , title_lis
     f = plotName + "/print_culture_timeseries.png"
     fig.savefig(f, dpi=dpi_save)
 
-def print_culture_timeseries_vary_conformity_bias(fileName: str, Data_list: list[Network] , title_list:str, nrows:int, ncols:int , dpi_save:int):
+def print_culture_timeseries_vary_conformity_bias(fileName: str, Data_list: list[Network] , conformity_title_list:str, alpha_title_list:str, nrows:int, ncols:int , dpi_save:int):
+    """
     y_title = "Indivdiual culture"
 
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
@@ -1486,6 +1487,41 @@ def print_culture_timeseries_vary_conformity_bias(fileName: str, Data_list: list
     plotName = fileName + "/Prints"
     f = plotName + "/print_culture_timeseries_vary_conformity_bias.png"
     fig.savefig(f, dpi=dpi_save)
+    """
+
+
+    #####
+    y_title = "Indivdiual culture"
+
+    fig = plt.figure(constrained_layout=True)
+    #fig.suptitle('Culture timeseries with varying conformity bias and alpha dynamics')
+
+    # create 3x1 subfigs
+    subfigs = fig.subfigures(nrows=nrows, ncols=1)
+    for row, subfig in enumerate(subfigs):
+        subfig.suptitle(f'Conformity bias = {conformity_title_list[row]}')
+
+        # create 1x3 subplots per subfig
+        axs = subfig.subplots(nrows=1, ncols=ncols)
+        for col, ax in enumerate(axs):
+            for v in Data_list[row][col].agent_list:
+                ax.plot(np.asarray(Data_list[row][col].history_time ), np.asarray(v.history_culture))
+            ax.set_title(r'%s' % alpha_title_list[col])
+            #ax.set_ylabel(r"%s" % y_title)
+            #ax.set_xlabel(r"Time")
+    fig.supxlabel(r"Time")
+    fig.supylabel(r"%s" % y_title)
+    
+    plotName = fileName + "/Prints"
+    f = plotName + "/print_culture_timeseries_vary_conformity_bias.png"
+    fig.savefig(f, dpi=dpi_save)
+
+
+
+
+
+
+
 
 
     """SA"""

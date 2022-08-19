@@ -32,10 +32,10 @@ homophily_state = True
 compression_factor = 5
 
 #Social emissions model
-K = 3 # k nearest neighbours INTEGER
+K = 10 # k nearest neighbours INTEGER
 M = 3  # number of behaviours
-N = 10  # number of agents
-total_time = 20
+N = 200  # number of agents
+total_time = 100
 
 delta_t = 0.05  # time step size
 culture_momentum_real = 1# real time over which culture is calculated for INTEGER, NEEDS TO BE MROE THAN DELTA t
@@ -150,20 +150,24 @@ if __name__ == "__main__":
             title_list.append("Confirmation Bias = %s, Static Cultural Weighting" % i)
             title_list.append("Confirmation Bias = %s, Dynamic Cultural Weighting" % i)
 
-        print(title_list)
+        #print(title_list)
 
 
         data = []
         for i in confirmation_bias_list:
             params["confirmation_bias"] = i
+            data_alpha = []
             for i in alpha_case:
                 #no change in attention
                 params["alpha_change"] = i
-                data.append(generate_data(params))
+                data_alpha.append(generate_data(params))
+            data.append(data_alpha)
 
         createFolderSA(fileName)
 
-        print_culture_timeseries_vary_conformity_bias(fileName, data , title_list, nrows, ncols , dpi_save)
+        #print_culture_timeseries_vary_conformity_bias(fileName, data , title_list, nrows, ncols , dpi_save)
+        print_culture_timeseries_vary_conformity_bias(fileName, data , confirmation_bias_list, title_list_alpha, nrows, ncols , dpi_save)
+        
 
         #plot_carbon_emissions_total_confirmation_bias(fileName, data, dpi_save)
 
