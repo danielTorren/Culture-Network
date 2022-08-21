@@ -18,6 +18,7 @@ from plot import (
     live_compare_animate_culture_network_and_weighting,
     live_compare_animate_weighting_matrix,
     live_compare_animate_behaviour_matrix,
+    print_culture_time_series_clusters,
     )
 from matplotlib.colors import LinearSegmentedColormap,  Normalize
 
@@ -146,6 +147,11 @@ interval = 50
 round_dec = 2
 cmap_edge = get_cmap("Greys")
 
+min_k,max_k = 2,N - 1# Cover all the possible bases with the max k though it does slow it down
+alpha_val = 0.25
+size_points = 5
+min_culture_distance = 0.5
+
 print("frames_list: ", frames_list)
 
 if __name__ == "__main__":
@@ -172,6 +178,7 @@ if __name__ == "__main__":
         print_culture_time_series_homophily_fischer(fileName, data, dpi_save, nrows, ncols,round_dec)
         print_intial_culture_networks_homophily_fischer(fileName, data, dpi_save, nrows, ncols , layout, norm_zero_one, cmap, node_size,round_dec)
         #prints_culture_network_homophily_fischer(fileName, data[0],layout, cmap ,node_size,  nrows, ncols ,  norm_zero_one,frames_list, round_dec, dpi_save)
+        print_culture_time_series_clusters(fileName, data, inverse_homophily_list, "Inverse homophilly", min_k,max_k,size_points, alpha_val, min_culture_distance, nrows, ncols, dpi_save, round_dec)
 
         #ani_b = live_compare_animate_culture_network_and_weighting(fileName,data,layout,cmap,node_size,interval,fps,norm_zero_one,round_dec,cmap_edge, ncols, nrows,"Inverse homophily",inverse_homophily_list)
         #ani_c = live_compare_animate_weighting_matrix(fileName, data,  cmap_weighting, interval, fps, round_dec, cmap_edge, nrows, ncols,"Inverse homophily",inverse_homophily_list)

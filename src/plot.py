@@ -1,15 +1,16 @@
+from logging import raiseExceptions
 import networkx as nx
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from matplotlib.colors import Normalize 
 import numpy as np
-from utility import frame_distribution, frame_distribution_prints,live_k_means_calc
 from pandas import DataFrame
+from utility import frame_distribution, frame_distribution_prints,live_k_means_calc,get_km_euclid,get_km_sDTW,get_km_DTW
 from matplotlib.colors import LinearSegmentedColormap,SymLogNorm
 from typing import Union
 from networkx import Graph
 from network import Network
-from tslearn.clustering import TimeSeriesKMeans
+
 ###DEFINE PLOTS
 
 def print_culture_time_series_clusters(FILENAME: str, Data_list: list, property_varied_values: list, property_varied:str, min_k,max_k,size_points, alpha: float, min_culture_distance: float, nrows:int, ncols:int, dpi_save:int, round_dec):
@@ -22,8 +23,7 @@ def print_culture_time_series_clusters(FILENAME: str, Data_list: list, property_
 
         k_clusters,win_score, scores = live_k_means_calc(X_train,Data_list[i].history_time,min_k,max_k,size_points)
 
-        km = TimeSeriesKMeans(n_clusters=k_clusters, verbose=False)
-        y_pred = km.fit_predict(X_train)#YOU HAVE TO FIT PREDICT TO THEN GET THE CLUSTER CENTERS LATER
+        km = get_km_euclid(k_clusters,X_train)
 
         for v in range(int(int(Data_list[i].N))):
             ax.plot(time_list, X_train[v],"k-", alpha=alpha)
@@ -39,12 +39,64 @@ def print_culture_time_series_clusters(FILENAME: str, Data_list: list, property_
         ax.set_title("{} = {}".format(property_varied,round(property_varied_values[i], round_dec)))
 
     plotName = FILENAME + "/Prints"
-    f = plotName + "/print_culture_time_series_{}_clusters.png".format(property_varied)
+    f = plotName + "/print_culture_time_series_{}__clusters.png".format(property_varied)
     fig.savefig(f, dpi=dpi_save)
 
-def prints_behaviour_timeseries_plot(
-    FILENAME: str, Data: DataFrame, property:str, y_title:str, nrows:int, ncols:int, dpi_save:int
-):
+def print_culture_time_series_clusters_two_properties(FILENAME: str, Data_list: list, property_varied_values_row: list, property_varied_values_column: list, property_varied_row:str, property_varied_column:str, min_k,max_k,size_points, alpha: float, min_culture_distance: float,distance_measure: str, nrows:int, ncols:int, dpi_save:int, round_dec, gamma = 0.01):
+
+    y_title = "Indivdiual culture"
+
+    fig = plt.figure(constrained_layout=True)
+    plt.suptitle(distance_measure)
+
+    # create 3x1 subfigs
+    subfigs = fig.subfigures(nrows=nrows, ncols=1)
+    for row, subfig in enumerate(subfigs):
+        
+        subfig.suptitle(f'{property_varied_row} = {property_varied_values_row[row]}')
+
+        # create 1x3 subplots per subfig
+        axs = subfig.subplots(nrows=1, ncols=ncols)
+        for col, ax in enumerate(axs):
+            ###CALC THE STUFF
+
+            X_train = np.asarray([v.history_culture for v in Data_list[row][col].agent_list])
+            time_list = np.asarray(Data_list[row][col].history_time)
+
+            k_clusters,win_score, scores = live_k_means_calc(X_train,time_list,min_k,max_k,size_points)
+
+            if distance_measure == "SDTW":
+                km = get_km_sDTW(k_clusters,X_train,gamma)
+            elif distance_measure == "Euclid":
+                km = get_km_euclid(k_clusters,X_train)
+            elif distance_measure == "DTW":
+                km = get_km_DTW(k_clusters,X_train,gamma)
+            else:
+                raiseExceptions("Invalid type of distance measure, try Euclid or SDTW")
+
+            for v in range(int(int(Data_list[row][col].N))):
+                ax.plot(time_list, X_train[v],"k-", alpha=alpha)
+            ax.axvline(Data_list[row][col].culture_momentum_real, color='r',linestyle = "--")
+
+            if (k_clusters > 2) or (k_clusters == 2 and abs(km.cluster_centers_[0][0][-1] - km.cluster_centers_[1][0][-1]) >  min_culture_distance):
+                for k in range(k_clusters):
+                    ax.plot(time_list,km.cluster_centers_[k].ravel(), "r--")
+
+            #ax.set_xlabel(r"Time")
+            #ax.set_ylabel(r"Culture")
+            ax.set_title(r"{} = {}".format(property_varied_column,round(property_varied_values_column[col], round_dec)))
+
+    fig.supxlabel(r"Time")
+    fig.supylabel(r"%s" % y_title)
+    
+    plotName = FILENAME + "/Prints"
+    f = plotName + "/print_culture_time_series_clusters_two_properties_{}_{}_{}.png".format(property_varied_row, property_varied_column, distance_measure)
+    fig.savefig(f, dpi=dpi_save)
+
+
+
+
+def prints_behaviour_timeseries_plot(FILENAME: str, Data: DataFrame, property:str, y_title:str, nrows:int, ncols:int, dpi_save:int):
     PropertyData = Data[property].transpose()
 
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
@@ -1498,29 +1550,7 @@ def print_culture_timeseries(fileName: str, Data_list: list[Network] , title_lis
     fig.savefig(f, dpi=dpi_save)
 
 def print_culture_timeseries_vary_conformity_bias(fileName: str, Data_list: list[Network] , conformity_title_list:str, alpha_title_list:str, nrows:int, ncols:int , dpi_save:int):
-    """
-    y_title = "Indivdiual culture"
 
-    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
-
-    for i, ax in enumerate(axes.flat):
-
-        ax.set_title(title_list[i])
-
-        ax.set_ylabel(r"%s" % y_title)
-
-        for v in Data_list[i].agent_list:
-            ax.plot(np.asarray( Data_list[i].history_time ), np.asarray(v.history_culture))
-
-        ax.set_xlabel(r"Time")
-    
-    plotName = fileName + "/Prints"
-    f = plotName + "/print_culture_timeseries_vary_conformity_bias.png"
-    fig.savefig(f, dpi=dpi_save)
-    """
-
-
-    #####
     y_title = "Indivdiual culture"
 
     fig = plt.figure(constrained_layout=True)
@@ -1930,8 +1960,7 @@ def Euclidean_cluster_plot(fileName: str, Data,k_clusters: int, alpha: float, mi
 
     X_train = np.asarray(Data["individual_culture"])
 
-    km = TimeSeriesKMeans(n_clusters=k_clusters, verbose=False)
-    y_pred = km.fit_predict(X_train)#YOU HAVE TO FIT PREDICT TO THEN GET THE CLUSTER CENTERS LATER
+    km = get_km_euclid(k_clusters,X_train)
 
     if k_clusters == 2 and abs(km.cluster_centers_[0][0][-1] - km.cluster_centers_[1][0][-1]) <  min_culture_distance:
         print("A Single Cluster Present", abs(km.cluster_centers_[0][0][-1] - km.cluster_centers_[1][0][-1]),min_culture_distance)
@@ -1952,55 +1981,6 @@ def Euclidean_cluster_plot(fileName: str, Data,k_clusters: int, alpha: float, mi
         plotName = fileName + "/Plots"
         f = plotName + "/Euclid_cluster_plot.png"
         fig.savefig(f, dpi=dpi_save)
-
-        """
-        # Euclidean k-means
-        print("Euclidean k-means")
-        km = TimeSeriesKMeans(n_clusters=k_clusters, verbose=True)
-        y_pred = km.fit_predict(X_train)
-
-        fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
-        for i, ax in enumerate(axes.flat):
-            for xx in X_train[y_pred == i]:
-                ax.plot(xx.ravel(), "k-", alpha=.2)
-            ax.plot(km.cluster_centers_[i].ravel(), "r-")
-            ax.xlim(0, sz)
-            ax.ylim(-4, 4)
-            ax.text(0.55, 0.85,'Cluster %d' % (i + 1),
-                    transform=plt.gca().transAxes)
-            if i == 1:
-                ax.title("Euclidean $k$-means")
-
-        plotName = fileName + "/Plots"
-        f = plotName + "/DTW_cluster_plot.png"
-        fig.savefig(f, dpi=dpi_save)
-        """
-
-
-        """
-        fig = plt.figure()
-        # Soft-DTW-k-means
-        print("Soft-DTW k-means")
-        sdtw_km = TimeSeriesKMeans(n_clusters=k_clusters,
-                                metric="softdtw",
-                                metric_params={"gamma": .01},
-                                verbose=True,
-        )
-
-        y_pred = sdtw_km.fit_predict(X_train)
-
-        for yi in range(k_clusters):
-            plt.subplot(1, k_clusters,7 + yi)# 
-            for xx in X_train[y_pred == yi]:
-                plt.plot(xx.ravel(), "k-", alpha=.2)
-            plt.plot(sdtw_km.cluster_centers_[yi].ravel(), "r-")
-            plt.xlim(0, sz)
-            plt.ylim(-4, 4)
-            plt.text(0.55, 0.85,'Cluster %d' % (yi + 1),
-                    transform=plt.gca().transAxes)
-            if yi == 1:
-                plt.title("Soft-DTW $k$-means")
-        """
 
 def plot_k_cluster_scores(fileName,scores,dpi_save):
     x = scores.keys()

@@ -7,6 +7,7 @@ from network import Network
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
 from logging import raiseExceptions
+from tslearn.clustering import TimeSeriesKMeans
 
 def produceName_alt(parameters: list) -> str:
     fileName = "results/"
@@ -348,5 +349,32 @@ def live_k_means_calc(Data_culture, time_list,min_k,max_k,size_points):
     print("k cluster, highest score = ",fin_max, scores[fin_max])
 
     return fin_max, scores[fin_max], scores
+
+def get_km_euclid(k_clusters,X_train):
+
+    km = TimeSeriesKMeans(n_clusters=k_clusters, verbose=False)
+    y_pred = km.fit_predict(X_train)#YOU HAVE TO FIT PREDICT TO THEN GET THE CLUSTER CENTERS LATER
+    return km
+
+
+def get_km_sDTW(k_clusters,X_train,gamma):
+    sdtw_km = TimeSeriesKMeans(n_clusters=k_clusters,
+                            metric="softdtw",
+                            metric_params={"gamma": .01},
+                            verbose=True,
+    )
+
+    y_pred = sdtw_km.fit_predict(X_train)
+    return sdtw_km
+
+def get_km_DTW(k_clusters,X_train,gamma):
+    sdtw_km = TimeSeriesKMeans(n_clusters=k_clusters,
+                            metric="dtw",
+                            #metric_params={"gamma": .01},
+                            verbose=True,
+    )
+
+    y_pred = sdtw_km.fit_predict(X_train)
+    return sdtw_km
 
 

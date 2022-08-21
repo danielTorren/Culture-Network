@@ -15,6 +15,7 @@ from plot import (
     live_compare_animate_culture_network_and_weighting,
     live_compare_animate_weighting_matrix,
     live_compare_animate_behaviour_matrix,
+    print_culture_time_series_clusters,
 )
 
 from matplotlib.colors import LinearSegmentedColormap,  Normalize
@@ -135,6 +136,11 @@ node_size = 50
 bin_num = 1000
 dpi_save = 1200
 
+min_k,max_k = 2,N - 1# Cover all the possible bases with the max k though it does slow it down
+alpha_val = 0.25
+size_points = 5
+min_culture_distance = 0.5
+
 if __name__ == "__main__":
 
         fileName = "results/alpha_variation_%s_%s_%s" % (str(params["N"]),str(params["time_steps_max"]),str(params["K"]))
@@ -157,12 +163,13 @@ if __name__ == "__main__":
         nrows = 1
         ncols = 3
 
-        plot_average_culture_comparison(fileName, data, dpi_save,title_list )
+        #plot_average_culture_comparison(fileName, data, dpi_save,title_list )
         #plot_carbon_emissions_total_comparison(fileName, data, dpi_save, title_list)
         plot_weighting_matrix_convergence_comparison(fileName, data, dpi_save, title_list)
         plot_cum_weighting_matrix_convergence_comparison(fileName, data, dpi_save, title_list)
 
-        print_culture_timeseries(fileName, data , title_list, nrows, ncols ,dpi_save)
+        #print_culture_timeseries(fileName, data , title_list, nrows, ncols ,dpi_save)
+        print_culture_time_series_clusters(fileName, data, title_list, "Link", min_k,max_k,size_points, alpha_val, min_culture_distance, nrows, ncols, dpi_save, round_dec)
 
         #ani_b = live_compare_animate_culture_network_and_weighting(fileName,data,layout,cmap,node_size,interval,fps,norm_zero_one,round_dec,cmap_edge, ncols, nrows,"Weighting state",title_list)
         #ani_c = live_compare_animate_weighting_matrix(fileName, data,  cmap_weighting, interval, fps, round_dec, cmap_edge, nrows, ncols,"Weighting state",title_list)

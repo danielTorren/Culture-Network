@@ -15,6 +15,7 @@ from plot import (
     live_compare_animate_culture_network_and_weighting,
     live_compare_animate_weighting_matrix,
     live_compare_animate_behaviour_matrix,
+    print_culture_time_series_clusters,
     )
 from matplotlib.colors import LinearSegmentedColormap,  Normalize
 
@@ -30,6 +31,8 @@ information_provision_state = False
 linear_alpha_diff_state = False#if true use the exponential form instead like theo
 homophily_state = True
 alpha_change = True
+
+compression_factor = 5
 
 #Social emissions model
 K = 10  # k nearest neighbours INTEGER
@@ -81,6 +84,7 @@ if carbon_price_state:
 params = {
     "opinion_dynamics": opinion_dynamics,
     "save_data": save_data, 
+    "compression_factor": compression_factor,
     "time_steps_max": time_steps_max, 
     "carbon_price_state" : carbon_price_state,
     "information_provision_state" : information_provision_state,
@@ -141,6 +145,11 @@ interval = 50
 round_dec = 2
 cmap_edge = get_cmap("Greys")
 
+min_k,max_k = 2,N - 1# Cover all the possible bases with the max k though it does slow it down
+alpha_val = 0.25
+size_points = 5
+min_culture_distance = 0.5
+
 print("frames_list: ", frames_list)
 
 if __name__ == "__main__":
@@ -165,6 +174,8 @@ if __name__ == "__main__":
         #plot_carbon_emissions_total_comparison(fileName, data, dpi_save,set_seed_list)
         #plot_weighting_matrix_convergence_comparison(fileName, data, dpi_save,set_seed_list)
         #plot_average_culture_no_range_comparison(fileName, data, dpi_save,set_seed_list)
+
+        print_culture_time_series_clusters(fileName, data, set_seed_list, "Seed", min_k,max_k,size_points, alpha_val, min_culture_distance, nrows, ncols, dpi_save, round_dec)
 
         #ani_b = live_compare_animate_culture_network_and_weighting(fileName,data,layout,cmap,node_size,interval,fps,norm_zero_one,round_dec,cmap_edge, ncols, nrows,"Seed",set_seed_list)
         #ani_c = live_compare_animate_weighting_matrix(fileName, data,  cmap_weighting, interval, fps, round_dec, cmap_edge, nrows, ncols,"Seed",set_seed_list)

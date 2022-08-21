@@ -35,7 +35,7 @@ compression_factor = 10
 #Social emissions model
 K = 10 # k nearest neighbours INTEGER
 M = 3  # number of behaviours
-N = 100  # number of agents
+N = 50  # number of agents
 total_time = 100
 
 delta_t = 0.05  # time step size
@@ -54,7 +54,7 @@ time_steps_max = int(
 
 set_seed = 1  ##reproducibility INTEGER
 phi_list_lower,phi_list_upper = 0.1,1
-learning_error_scale = 0.02  # 1 standard distribution is 2% error
+#learning_error_scale = 0.02  # 1 standard distribution is 2% error
 carbon_emissions = [1]*M
 
 inverse_homophily = 0.2#0.2
@@ -97,13 +97,13 @@ params = {
     "prob_rewire": prob_rewire,
     "set_seed": set_seed,
     "culture_momentum_real": culture_momentum_real,
-    "learning_error_scale": learning_error_scale,
+    #"learning_error_scale": learning_error_scale,
     "alpha_attract": alpha_attract,
     "beta_attract": beta_attract,
     "alpha_threshold": alpha_threshold,
     "beta_threshold": beta_threshold,
     "carbon_emissions" : carbon_emissions,
-    #"alpha_change" : 1,
+    "alpha_change" : 1,
     "discount_factor": discount_factor,
     "inverse_homophily": inverse_homophily,#1 is total mixing, 0 is no mixing
     "homophilly_rate": homophilly_rate,
@@ -128,7 +128,7 @@ cmap_edge = get_cmap("Greys")
 
 min_k,max_k = 2,N - 1# Cover all the possible bases with the max k though it does slow it down
 alpha_val = 0.15
-size_points = 1
+size_points = 10
 min_culture_distance = 0.5
 
 
@@ -137,59 +137,38 @@ if __name__ == "__main__":
         confirmation_bias_max = 100
         reps = 3
 
-        fileName = "results/varying_weighting_and_confrimation_bias_variation_%s_%s_%s_%s_%s" % (str(params["N"]),str(params["time_steps_max"]),str(params["K"]), str(confirmation_bias_max), str(reps))
+        fileName = "results/learning_error_scale_and_confrimation_bias_variation_%s_%s_%s_%s_%s" % (str(params["N"]),str(params["time_steps_max"]),str(params["K"]), str(confirmation_bias_max), str(reps))
         print("fileName: ", fileName)
 
         nrows = reps
         ncols = 3
 
         #confirmation_bias_list = np.linspace(confirmation_bias_min,confirmation_bias_max, reps)
-        confirmation_bias_list = [0.5,1,10]
-
-        print("confirmation_bias_list: ", confirmation_bias_list)
-
-        alpha_case = [0,0.5,1]
-
-        title_list_alpha = ["Equal Weighting", "Static Cultural Weighting", "Dynamic Cultural Weighting"]
+        confirmation_bias_list = [-1,10,100]
+        learning_error_scale_list = [0.0,0.05,0.1]
+        
         title_list = []
-        for i in confirmation_bias_list:
-            title_list.append("Confirmation Bias = %s, Equal Weighting" % i)
-            title_list.append("Confirmation Bias = %s, Static Cultural Weighting" % i)
-            title_list.append("Confirmation Bias = %s, Dynamic Cultural Weighting" % i)
+        for i in range(len(confirmation_bias_list)):
+            for v in range(len(learning_error_scale_list)):
+                title_list.append(("Confirmation Bias = %s, Social learning error = %s") % (str(confirmation_bias_list[i]), str(learning_error_scale_list[v])))
 
-        print(title_list_alpha,title_list)
-
+        print(title_list)
 
         data = []
         for i in confirmation_bias_list:
             params["confirmation_bias"] = i
-            data_alpha = []
-            for i in alpha_case:
+            data_learning_error_scale = []
+            for i in learning_error_scale_list:
                 #no change in attention
-                params["alpha_change"] = i
-                data_alpha.append(generate_data(params))
-            data.append(data_alpha)
+                params["learning_error_scale"] = i
+                data_learning_error_scale.append(generate_data(params))
+            data.append(data_learning_error_scale)
 
         createFolderSA(fileName)
 
-        #print_culture_timeseries_vary_conformity_bias(fileName, data , title_list, nrows, ncols , dpi_save)
-        print_culture_timeseries_vary_conformity_bias(fileName, data , confirmation_bias_list, title_list_alpha, nrows, ncols , dpi_save)
-        print_culture_time_series_clusters_two_properties(fileName, data, confirmation_bias_list, alpha_case,"Confirmation bias", "Alpha dynamic", min_k,max_k,size_points, alpha_val, min_culture_distance,"DTW", nrows, ncols, dpi_save, round_dec)
-        #print_culture_time_series_clusters_two_properties(fileName, data, confirmation_bias_list, alpha_case,"Confirmation bias", "Alpha dynamic", min_k,max_k,size_points, alpha_val, min_culture_distance,"Euclid", nrows, ncols, dpi_save, round_dec)
-        #plot_carbon_emissions_total_confirmation_bias(fileName, data, dpi_save)
+        print_culture_timeseries_vary_conformity_bias(fileName, data , confirmation_bias_list, learning_error_scale_list, nrows, ncols , dpi_save)
+        print_culture_time_series_clusters_two_properties(fileName, data, confirmation_bias_list, learning_error_scale_list,"Confirmation bias", "Social learning error", min_k,max_k,size_points, alpha_val, min_culture_distance,"DTW", nrows, ncols, dpi_save, round_dec)
 
-        #plot_weighting_convergence_confirmation_bias(fileName, data, dpi_save)
-        #plot_cum_weighting_convergence_confirmation_bias(fileName, data, dpi_save)
-        #print_culture_time_series_confirmation_bias(fileName, data, dpi_save, nrows, ncols)
-        #print_intial_culture_networks_confirmation_bias(fileName, data, dpi_save, nrows, ncols , layout, norm_zero_one, cmap, node_size)
-        #prints_init_weighting_matrix_confirmation_bias(fileName, data, dpi_save,nrows, ncols, cmap_weighting)
-        #prints_final_weighting_matrix_confirmation_bias(fileName, data, dpi_save,nrows, ncols, cmap_weighting)
-
-        #multi_animation_weighting(fileName,data, cmap_weighting,  interval, fps, round_dec, nrows, ncols, time_steps_max)
-        #ani_b = live_compare_animate_culture_network_and_weighting(fileName,data,layout,cmap,node_size,interval,fps,norm_zero_one,round_dec,cmap_edge, ncols, nrows,"Confirmation bias",confirmation_bias_list)
-        #ani_c = live_compare_animate_weighting_matrix(fileName, data,  cmap_weighting, interval, fps, round_dec, cmap_edge, nrows, ncols,"Confirmation bias",confirmation_bias_list)
-        #ani_d = live_compare_animate_behaviour_matrix(fileName, data,  cmap, interval, fps, round_dec, nrows, ncols,"Confirmation bias",confirmation_bias_list)
-        
         plt.show()
 
 
