@@ -93,6 +93,36 @@ def print_culture_time_series_clusters_two_properties(FILENAME: str, Data_list: 
     f = plotName + "/print_culture_time_series_clusters_two_properties_{}_{}_{}.png".format(property_varied_row, property_varied_column, distance_measure)
     fig.savefig(f, dpi=dpi_save)
 
+def print_culture_time_series_two_properties(FILENAME: str, Data_list: list, property_varied_values_row: list, property_varied_values_column: list, property_varied_row:str, property_varied_column:str, nrows:int, ncols:int, dpi_save:int, round_dec):
+
+    y_title = "Indivdiual culture"
+
+    fig = plt.figure(constrained_layout=True)
+
+    subfigs = fig.subfigures(nrows=nrows, ncols=1)
+    for row, subfig in enumerate(subfigs):
+        
+        subfig.suptitle(f'{property_varied_row} = {property_varied_values_row[row]}')
+
+        axs = subfig.subplots(nrows=1, ncols=ncols)
+        for col, ax in enumerate(axs):
+
+            X_train = np.asarray([v.history_culture for v in Data_list[row][col].agent_list])
+            time_list = np.asarray(Data_list[row][col].history_time)
+
+            for v in range(int(int(Data_list[row][col].N))):
+                ax.plot(time_list, X_train[v])
+            ax.axvline(Data_list[row][col].culture_momentum_real, color='r',linestyle = "--")
+
+            ax.set_title(r"{} = {}".format(property_varied_column,round(property_varied_values_column[col], round_dec)))
+
+    fig.supxlabel(r"Time")
+    fig.supylabel(r"%s" % y_title)
+    
+    plotName = FILENAME + "/Prints"
+    f = plotName + "/print_culture_time_series_two_properties_{}_{}.png".format(property_varied_row, property_varied_column)
+    fig.savefig(f, dpi=dpi_save)
+
 
 
 
