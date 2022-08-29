@@ -1,7 +1,6 @@
 from network import Network
-from utility import produceName_alt, createFolder, saveObjects, saveData
+from utility import produceName_alt, createFolder, saveObjects, saveData,createFolderSA
 import time
-
 
 def generate_data(parameters: dict) -> Network:
     ### CREATE NETWORK
@@ -67,3 +66,39 @@ def run(parameters: dict, to_save_list: list, params_name: list) -> str:
         return fileName
     else:
         return 0
+
+def two_parameter_run(
+    params,
+    fileName,
+    property_col,
+    param_col,
+    col_list,
+    property_row,
+    param_row,
+    row_list,
+):
+    
+    data_array = []
+    data_list = []
+
+    for i in row_list:
+        data_col = []
+        for i in col_list:
+            params[param_row] = i
+            params[param_col] = i
+            
+            #no change in attention
+            data_col.append(generate_data(params))
+        data_list = data_list + data_col
+        data_array.append(data_col)
+    
+    title_list = []
+    for i in range(len(col_list)):
+        for v in range(len(row_list)):
+            title_list.append(("%s = %s, %s = %s") % (property_col,str(col_list[i]), property_row,str(row_list[v])))
+
+    print(title_list)
+
+    createFolderSA(fileName)
+    
+    return data_array, data_list, title_list

@@ -3,6 +3,9 @@ import networkx as nx
 from individuals import Individual
 import numpy.typing as npt
 from random import randrange,seed
+from scipy.stats import gmean
+from logging import raiseExceptions
+
 
 class Network:
 
@@ -26,6 +29,7 @@ class Network:
         self.compression_factor = parameters["compression_factor"]
         self.linear_alpha_diff_state = parameters["linear_alpha_diff_state"]
         self.homophily_state = parameters["homophily_state"]
+        self.averaging_method = parameters["averaging_method"]
 
         #time
         self.t = 0
@@ -248,25 +252,40 @@ class Network:
             a, b = randrange(n), randrange(n)
             l[b], l[a] = l[a], l[b]
         return l
+    
+    def quick_av_behaviour(self ,attracts, threshold_weighting_array):
 
-    def quick_indiv_calc_culture(self,attracts) -> float:
+        if self.averaging_method == "Arithmetic":
+            return np.mean(attracts)
+        elif self.averaging_method == "Geometric":
+            return gmean(attracts)
+        elif self.averaging_method == "Quadratic":
+            return np.sqrt(np.mean(attracts**2))
+        elif self.averaging_method == "Threshold weighted arithmetic":
+            return np.matmul(threshold_weighting_array, attracts)#/(self.M)
+        else:
+            raiseExceptions("Invalid averaging method choosen try: Arithmetic or Geometric")
+
+    def quick_indiv_calc_culture(self,attracts, threshold_weighting_array) -> float:
         """
         Calc the individual culture of the attraction matrix for homophilly
         """
-        av_behaviour = attracts.sum()/attracts.shape
+        av_behaviour = self.quick_av_behaviour(attracts,threshold_weighting_array)
+        #av_behaviour = attracts.sum()/attracts.shape
         av_behaviour_list = [av_behaviour]*self.culture_momentum
         #### HERE I HAVE THE CORRECT LIST OF AV BEAHVIOUR
         indiv_cul = np.matmul(self.discount_list, av_behaviour_list)/sum(self.discount_list)
         return indiv_cul
 
-    def quick_calc_culture(self,attract_matrix):
+    def quick_calc_culture(self,attract_matrix,threshold_matrix):
         """
         Create culture list from the attraction matrix for homophilly
         """
 
         cul_list = []
         for i in range(len(attract_matrix)):
-            cul_list.append(self.quick_indiv_calc_culture(attract_matrix[i]))
+            threshold_weighting_array = threshold_matrix[i]/sum(threshold_matrix[i])
+            cul_list.append(self.quick_indiv_calc_culture(attract_matrix[i],threshold_weighting_array))
 
         #print("cul_list = ", np.mean(cul_list))
         return cul_list
@@ -279,8 +298,8 @@ class Network:
         
         attract_matrix = np.asarray(attract_list)
         threshold_matrix = np.asarray(threshold_list)
-
-        culture_list = self.quick_calc_culture(attract_matrix)#,threshold_matrix
+        
+        culture_list = self.quick_calc_culture(attract_matrix,threshold_matrix)#,threshold_matrix
         
         #shuffle the indexes!
         attract_list_sorted = [x for _,x in sorted(zip(culture_list,attract_list))]
@@ -311,6 +330,7 @@ class Network:
                 "discount_list" : self.discount_list,
                 "carbon_price_state" : self.carbon_price_state,
                 "information_provision_state" : self.information_provision_state,
+                "averaging_method": self.averaging_method,
                 "compression_factor": self.compression_factor,
         }
 

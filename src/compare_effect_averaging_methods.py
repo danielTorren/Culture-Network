@@ -8,18 +8,8 @@ from utility import createFolderSA
 from matplotlib.colors import LinearSegmentedColormap,  Normalize
 from matplotlib.cm import get_cmap
 from plot import (
-    plot_carbon_emissions_total_confirmation_bias,
-    plot_weighting_convergence_confirmation_bias,
-    plot_cum_weighting_convergence_confirmation_bias,
-    print_culture_time_series_confirmation_bias,
-    print_intial_culture_networks_confirmation_bias,
-    prints_init_weighting_matrix_confirmation_bias,
-    prints_final_weighting_matrix_confirmation_bias,
-    multi_animation_weighting,
-    live_compare_animate_culture_network_and_weighting,
-    live_compare_animate_weighting_matrix,
-    live_compare_animate_behaviour_matrix,
-    print_culture_time_series_clusters,
+    live_print_culture_timeseries,
+    live_compare_plot_animate_behaviour_scatter,
 )
 
 save_data = True
@@ -28,7 +18,7 @@ carbon_price_state = False
 information_provision_state = False
 linear_alpha_diff_state = False#if true use the exponential form instead like theo
 homophily_state = True
-averaging_method = "Arithmetic"
+#averaging_method =
 
 compression_factor = 5
 
@@ -43,8 +33,8 @@ culture_momentum_real = 1# real time over which culture is calculated for INTEGE
 
 prob_rewire = 0.1  # re-wiring probability?
 
-alpha_attract = 1#2  ##inital distribution parameters - doing the inverse inverts it!
-beta_attract = 1#3
+alpha_attract = 5#2  ##inital distribution parameters - doing the inverse inverts it!
+beta_attract = 5#3
 alpha_threshold = 1#3
 beta_threshold = 1#2
 
@@ -63,7 +53,7 @@ homophilly_rate = 1
 discount_factor = 0.6
 present_discount_factor = 0.8
 
-#confirmation_bias = 10
+confirmation_bias = 30
 
 #Infromation provision parameters
 if information_provision_state:
@@ -88,7 +78,7 @@ params = {
     "information_provision_state" : information_provision_state,
     "linear_alpha_diff_state": linear_alpha_diff_state,
     "homophily_state": homophily_state,
-    "averaging_method": averaging_method,
+    #"averaging_method": averaging_method,
     "delta_t": delta_t,
     "phi_list_lower": phi_list_lower,
     "phi_list_upper": phi_list_upper,
@@ -109,7 +99,7 @@ params = {
     "inverse_homophily": inverse_homophily,#1 is total mixing, 0 is no mixing
     "homophilly_rate": homophilly_rate,
     "present_discount_factor": present_discount_factor,
-    #"confirmation_bias": confirmation_bias,
+    "confirmation_bias": confirmation_bias,
 }
 
 dpi_save = 1200
@@ -122,7 +112,7 @@ norm_zero_one = Normalize(vmin=0,vmax=1)
 node_size = 50
 bin_num = 1000
 num_counts = 100000
-fps = 5
+fps = 10
 interval = 50
 round_dec = 2
 cmap_edge = get_cmap("Greys")
@@ -134,44 +124,25 @@ min_culture_distance = 0.5
 
 
 if __name__ == "__main__":
-        
-        confirmation_bias_max = 100
-        reps = 4
+    nrows = 1
+    ncols = 4
 
-        fileName = "results/confrimation_bias_variation_%s_%s_%s_%s_%s" % (str(params["N"]),str(params["time_steps_max"]),str(params["K"]), str(confirmation_bias_max), str(reps))
-        print("fileName: ", fileName)
+    fileName = "results/Averaging_methods"
+    print("fileName: ", fileName)
+    createFolderSA(fileName)
+    
+    title_list = ["Threshold weighted arithmetic", "Arithmetic","Geometric", "Quadratic"]
 
-        nrows = 2
-        ncols = 2
+    Data = []
+    for i in title_list:
+        #no change in attention
+        params["averaging_method"] = i
+        Data.append(generate_data(params))
 
-        confirmation_bias_list = np.linspace(1,confirmation_bias_max, reps)
-        print("confirmation_bias_list: ", confirmation_bias_list)
-        data = []
-        for i in confirmation_bias_list:
-            params["confirmation_bias"] = i
-            res = generate_data(params)
-            data.append(res)
-            #print("RES:", res.history_weighting_matrix[0])
-            #print("RES LATER",res.history_weighting_matrix[-1])
+    live_print_culture_timeseries(fileName, Data, "averaging_method",title_list,nrows, ncols,  dpi_save)
+    #ani_a = live_compare_plot_animate_behaviour_scatter(fileName,Data,norm_zero_one, cmap, nrows, ncols,"Averaging method", title_list,interval, fps,round_dec)
 
-        createFolderSA(fileName)
-
-        #plot_carbon_emissions_total_confirmation_bias(fileName, data, dpi_save)
-
-        #plot_weighting_convergence_confirmation_bias(fileName, data, dpi_save)
-        #plot_cum_weighting_convergence_confirmation_bias(fileName, data, dpi_save)
-        #print_culture_time_series_confirmation_bias(fileName, data, dpi_save, nrows, ncols)
-        #print_intial_culture_networks_confirmation_bias(fileName, data, dpi_save, nrows, ncols , layout, norm_zero_one, cmap, node_size,round_dec)
-        #prints_init_weighting_matrix_confirmation_bias(fileName, data, dpi_save,nrows, ncols, cmap_weighting)
-        #prints_final_weighting_matrix_confirmation_bias(fileName, data, dpi_save,nrows, ncols, cmap_weighting)
-        print_culture_time_series_clusters(fileName, data, confirmation_bias_list, "Confirmation bias", min_k,max_k,size_points, alpha_val, min_culture_distance, nrows, ncols, dpi_save, round_dec)
-
-        #multi_animation_weighting(fileName,data, cmap_weighting,  interval, fps, round_dec, nrows, ncols, time_steps_max)
-        #ani_b = live_compare_animate_culture_network_and_weighting(fileName,data,layout,cmap,node_size,interval,fps,norm_zero_one,round_dec,cmap_edge, ncols, nrows,"Confirmation bias",confirmation_bias_list)
-        #ani_c = live_compare_animate_weighting_matrix(fileName, data,  cmap_weighting, interval, fps, round_dec, cmap_edge, nrows, ncols,"Confirmation bias",confirmation_bias_list)
-        #ani_d = live_compare_animate_behaviour_matrix(fileName, data,  cmap, interval, fps, round_dec, nrows, ncols,"Confirmation bias",confirmation_bias_list)
-        
-        plt.show()
+    plt.show()
 
 
 

@@ -1,5 +1,7 @@
+from logging import raiseExceptions
 import numpy.typing as npt
 import numpy as np
+from scipy.stats import gmean
 
 class Individual:
 
@@ -12,6 +14,8 @@ class Individual:
     ):
         
         self.init_thresholds = init_data_thresholds
+        self.threshold_sum = sum(self.init_thresholds)
+        self.threshold_weighting_array = self.init_thresholds/self.threshold_sum
         self.attracts = init_data_attracts
         self.thresholds = init_data_thresholds
 
@@ -25,6 +29,7 @@ class Individual:
         self.sum_discount_list = sum(self.discount_list)
         self.carbon_price_state = individual_params["carbon_price_state"]
         self.information_provision_state = individual_params["information_provision_state"]
+        self.averaging_method = individual_params["averaging_method"]
         self.compression_factor = individual_params["compression_factor"]
 
         if self.carbon_price_state:
@@ -47,7 +52,9 @@ class Individual:
         if self.information_provision_state:
             self.information_provision = self.calc_information_provision()
         
-        self.total_carbon_emissions, self.av_behaviour  = self.update_total_emissions_av_behaviour()
+        self.total_carbon_emissions = self.update_total_emissions()
+        self.av_behaviour = self.update_av_behaviour()
+        #self.total_carbon_emissions, self.av_behaviour  = self.update_total_emissions_av_behaviour()
 
         self.av_behaviour_list = [self.av_behaviour]*self.culture_momentum
         self.culture = self.calc_culture()
@@ -93,18 +100,33 @@ class Individual:
             else:
                 self.thresholds[m] = self.init_thresholds[m] - self.carbon_price*self.carbon_intensive_list[m]
 
-    def update_total_emissions_av_behaviour(self):
+    def update_total_emissions(self):
         total_emissions = 0  # calc_carbon_emission
-        total_behaviour = 0  # calc_behaviour_av
-        
         for i in range(self.M):
-
-            total_behaviour += self.attracts[i] #attracts! # calc_behaviour_av
-
             if (self.values[i] <= 0):  # calc_carbon_emissions if less than or equal to 0 then it is a less environmetally friendly behaviour(brown)
                 total_emissions += self.carbon_intensive_list[i]  # calc_carbon_emissions
-        average_behaviour = total_behaviour/self.M
-        return total_emissions, average_behaviour  # calc_carbon_emissions #calc_behaviour_a
+        return total_emissions
+    
+    def update_total_emissions_alt(self):
+        total_emissions = sum(self.carbon_intensive_list[i] for i in range(self.M) if self.values[i] <= 0)
+        return total_emissions
+
+    def update_av_behaviour(self):
+
+        if self.averaging_method == "Arithmetic":
+            return np.mean(self.attracts)
+        elif self.averaging_method == "Geometric":
+            return gmean(self.attracts)
+        elif self.averaging_method == "Quadratic":
+            return np.sqrt(np.mean(self.attracts**2))
+        elif self.averaging_method == "Threshold weighted arithmetic":
+            #print("self.threshold_weighting_array",self.threshold_weighting_array)
+            #print("self.attracts", self.attracts)
+            #print( "np.matmul",np.matmul(self.threshold_weighting_array, self.attracts))
+            #print("everything", np.matmul(self.threshold_weighting_array, self.attracts)/(self.M))
+            return np.matmul(self.threshold_weighting_array, self.attracts)#/(self.M)
+        else:
+            raiseExceptions("Invalid averaging method choosen try: Arithmetic or Geometric")
 
     def calc_information_provision_boost(self,i):
         return self.attract_information_provision_list[i]*(1 - np.exp(-self.nu*(self.attract_information_provision_list[i] - self.attracts[i])))
@@ -160,7 +182,8 @@ class Individual:
         if self.carbon_price_state:
             self.update_thresholds()
 
-        self.total_carbon_emissions, self.av_behaviour = self.update_total_emissions_av_behaviour()
+        self.total_carbon_emissions = self.update_total_emissions()
+        self.av_behaviour = self.update_av_behaviour()
         self.update_av_behaviour_list_alt()
         self.culture = self.calc_culture()
         #print("inv culture", self.culture)

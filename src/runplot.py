@@ -32,6 +32,8 @@ from plot import (
     weighting_link_timeseries_plot,
     Euclidean_cluster_plot,
     plot_k_cluster_scores,
+    plot_behaviour_scatter,
+    animate_behaviour_scatter,
 )
 from utility import loadData, get_run_properties, frame_distribution_prints,k_means_calc
 import matplotlib.pyplot as plt
@@ -49,18 +51,19 @@ information_provision_state = False
 linear_alpha_diff_state = False#if true use the exponential form instead like theo
 homophily_state = True
 alpha_change = True
+averaging_method = "Arithmetic"#"Threshold weighted arithmetic"
 
-compression_factor = 5
+compression_factor = 10
 
 #Social emissions model
-K = 20  # k nearest neighbours INTEGER
-M = 3  # number of behaviours
-N = 100  # number of agents
+K = 10  # k nearest neighbours INTEGER
+M = 3 # number of behaviours
+N = 100 # number of agents
 
-total_time = 100
+total_time = 500
 
-delta_t = 0.1  # time step size
-culture_momentum_real = 1# real time over which culture is calculated for INTEGER, NEEDS TO BE MROE THAN DELTA t
+delta_t = 0.05  # time step size
+culture_momentum_real = 10# real time over which culture is calculated for INTEGER, NEEDS TO BE MROE THAN DELTA t
 
 prob_rewire = 0.1  # re-wiring probability?
 
@@ -84,7 +87,7 @@ homophilly_rate = 1
 discount_factor = 0.6
 present_discount_factor = 0.8
 
-confirmation_bias = 10
+confirmation_bias = 50
 
 #Infromation provision parameters
 if information_provision_state:
@@ -110,6 +113,7 @@ params = {
     "linear_alpha_diff_state": linear_alpha_diff_state,
     "homophily_state": homophily_state,
     "alpha_change" : alpha_change,
+    "averaging_method": averaging_method,
     "delta_t": delta_t,
     "phi_list_lower": phi_list_lower,
     "phi_list_upper": phi_list_upper,
@@ -271,9 +275,9 @@ alpha_val = 0.25
 size_points = 5
 min_culture_distance = 0.5
 
-RUN = False
+RUN = True
 PLOT = True
-cluster_plots = True
+cluster_plots = False
 SHOW_PLOT = True
 
 frames_list_exponetial = False
@@ -281,7 +285,7 @@ frames_list_exponetial = False
 if __name__ == "__main__":
 
     if RUN == False:
-        FILENAME = "results/_DEGROOT_1000_3_100_0.1_20_0.1_1_0.02_1_1_1_1_1"
+        FILENAME = "results/_DEGROOT_200_3_50_0.1_10_0.1_1_0.02_1_1_1_1_1"
     else:
         # start_time = time.time()
         # print("start_time =", time.ctime(time.time()))
@@ -320,13 +324,14 @@ if __name__ == "__main__":
         plot_culture_timeseries(FILENAME, Data, dpi_save)
         #plot_value_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save)
         #plot_threshold_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save)
-        #plot_attract_timeseries(FILENAME, Data, nrows_behave, ncols_behave, dpi_save)
+        plot_attract_timeseries(FILENAME, Data, nrows_behave, ncols_behave, dpi_save)
         #plot_total_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
         #plot_av_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
         #plot_weighting_matrix_convergence_timeseries(FILENAME, Data, dpi_save)
         #plot_cultural_range_timeseries(FILENAME, Data, dpi_save)
         #plot_average_culture_timeseries(FILENAME,Data,dpi_save)
         #weighting_link_timeseries_plot(FILENAME, Data, "Link strength", dpi_save,min_val)
+        #plot_behaviour_scatter(FILENAME,Data,"behaviour_attract",dpi_save)
         
         if carbon_price_state:
             plot_carbon_price_timeseries(FILENAME,Data,dpi_save)
@@ -357,8 +362,7 @@ if __name__ == "__main__":
         #ani_i = multi_animation_four(FILENAME,Data,cmap,cmap,layout,node_size,interval,fps,norm_neg_pos)
         #ani_j = multi_animation_alt(FILENAME,Data,cmap,cmap,layout,node_size,interval,fps,norm_neg_pos)
         #ani_k = multi_animation_scaled(FILENAME,Data,cmap,cmap,layout,node_size,interval,fps,scale_factor,frames_proportion,norm_neg_pos)
-
-
+        #ani_l = animate_behaviour_scatter(FILENAME,Data,"behaviour_attract",norm_zero_one, cmap,interval,fps,round_dec)
         print(
             "PLOT time taken: %s minutes" % ((time.time() - start_time) / 60),
             "or %s s" % ((time.time() - start_time)),

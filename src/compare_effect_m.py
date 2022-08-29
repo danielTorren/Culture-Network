@@ -20,6 +20,7 @@ from plot import (
     live_compare_animate_weighting_matrix,
     live_compare_animate_behaviour_matrix,
     print_culture_time_series_clusters,
+    print_culture_time_series_generic,
 )
 
 save_data = True
@@ -28,14 +29,14 @@ carbon_price_state = False
 information_provision_state = False
 linear_alpha_diff_state = False#if true use the exponential form instead like theo
 homophily_state = True
-averaging_method = "Arithmetic"
+averaging_method = "Geometric"
 
 compression_factor = 5
 
 #Social emissions model
 K = 10 # k nearest neighbours INTEGER
-M = 3  # number of behaviours
-N = 50  # number of agents
+#M = 3  # number of behaviours
+N = 100  # number of agents
 total_time = 100
 
 delta_t = 0.05  # time step size
@@ -55,7 +56,7 @@ time_steps_max = int(
 set_seed = 1  ##reproducibility INTEGER
 phi_list_lower,phi_list_upper = 0.1,1
 learning_error_scale = 0.02  # 1 standard distribution is 2% error
-carbon_emissions = [1]*M
+#carbon_emissions = [1]*M
 
 inverse_homophily = 0.2#0.2
 homophilly_rate = 1
@@ -63,7 +64,7 @@ homophilly_rate = 1
 discount_factor = 0.6
 present_discount_factor = 0.8
 
-#confirmation_bias = 10
+confirmation_bias = 10
 
 #Infromation provision parameters
 if information_provision_state:
@@ -93,7 +94,7 @@ params = {
     "phi_list_lower": phi_list_lower,
     "phi_list_upper": phi_list_upper,
     "N": N,
-    "M": M,
+    #"M": M,
     "K": K,
     "prob_rewire": prob_rewire,
     "set_seed": set_seed,
@@ -103,13 +104,13 @@ params = {
     "beta_attract": beta_attract,
     "alpha_threshold": alpha_threshold,
     "beta_threshold": beta_threshold,
-    "carbon_emissions" : carbon_emissions,
+    #"carbon_emissions" : carbon_emissions,
     "alpha_change" : 1,
     "discount_factor": discount_factor,
     "inverse_homophily": inverse_homophily,#1 is total mixing, 0 is no mixing
     "homophilly_rate": homophilly_rate,
     "present_discount_factor": present_discount_factor,
-    #"confirmation_bias": confirmation_bias,
+    "confirmation_bias": confirmation_bias,
 }
 
 dpi_save = 1200
@@ -135,20 +136,22 @@ min_culture_distance = 0.5
 
 if __name__ == "__main__":
         
-        confirmation_bias_max = 100
+        #confirmation_bias_max = 100
         reps = 4
 
-        fileName = "results/confrimation_bias_variation_%s_%s_%s_%s_%s" % (str(params["N"]),str(params["time_steps_max"]),str(params["K"]), str(confirmation_bias_max), str(reps))
+        fileName = "results/m_variation_%s_%s_%s_%s" % (str(params["N"]),str(params["time_steps_max"]),str(params["K"]), str(reps))
         print("fileName: ", fileName)
 
         nrows = 2
         ncols = 2
 
-        confirmation_bias_list = np.linspace(1,confirmation_bias_max, reps)
-        print("confirmation_bias_list: ", confirmation_bias_list)
+        m_list = [3,5,10,20]
+        m_list_title = [str(i) for i in m_list]
+        #print("confirmation_bias_list: ", confirmation_bias_list)
         data = []
-        for i in confirmation_bias_list:
-            params["confirmation_bias"] = i
+        for i in m_list:
+            params["M"] = i
+            params["carbon_emissions"] = [1]*i
             res = generate_data(params)
             data.append(res)
             #print("RES:", res.history_weighting_matrix[0])
@@ -160,11 +163,13 @@ if __name__ == "__main__":
 
         #plot_weighting_convergence_confirmation_bias(fileName, data, dpi_save)
         #plot_cum_weighting_convergence_confirmation_bias(fileName, data, dpi_save)
-        #print_culture_time_series_confirmation_bias(fileName, data, dpi_save, nrows, ncols)
+
+        print_culture_time_series_generic(fileName, data, m_list_title, "M", dpi_save,nrows, ncols)
+        
         #print_intial_culture_networks_confirmation_bias(fileName, data, dpi_save, nrows, ncols , layout, norm_zero_one, cmap, node_size,round_dec)
         #prints_init_weighting_matrix_confirmation_bias(fileName, data, dpi_save,nrows, ncols, cmap_weighting)
         #prints_final_weighting_matrix_confirmation_bias(fileName, data, dpi_save,nrows, ncols, cmap_weighting)
-        print_culture_time_series_clusters(fileName, data, confirmation_bias_list, "Confirmation bias", min_k,max_k,size_points, alpha_val, min_culture_distance, nrows, ncols, dpi_save, round_dec)
+        #print_culture_time_series_clusters(fileName, data, m_list, "M", min_k,max_k,size_points, alpha_val, min_culture_distance, nrows, ncols, dpi_save, round_dec)
 
         #multi_animation_weighting(fileName,data, cmap_weighting,  interval, fps, round_dec, nrows, ncols, time_steps_max)
         #ani_b = live_compare_animate_culture_network_and_weighting(fileName,data,layout,cmap,node_size,interval,fps,norm_zero_one,round_dec,cmap_edge, ncols, nrows,"Confirmation bias",confirmation_bias_list)

@@ -5,9 +5,10 @@ import pandas as pd
 import numpy as np
 from network import Network
 from sklearn.cluster import KMeans
-from sklearn.metrics import silhouette_score
+from sklearn.metrics import silhouette_score as silhouette_score
 from logging import raiseExceptions
 from tslearn.clustering import TimeSeriesKMeans
+from tslearn.clustering import silhouette_score as tslearn_silhouette_score
 
 def produceName_alt(parameters: list) -> str:
     fileName = "results/"
@@ -305,6 +306,7 @@ def frame_distribution_prints(time_list: list, scale_factor: int, frame_num: int
     return sorted(frames_list_int)
 
 def k_means_calc(Data,min_k,max_k,size_points):
+    """
     #Z=pd.DataFrame(x) #converting into data frame for ease
     if size_points == 1:
         last_columns = np.asarray(Data["individual_culture"].iloc[: , -size_points]).reshape(-1,1)#THE RESHAPE MAKES IT AN ARRAY OF ARRAY WHERE EACH ENTRY HAS ITS own ENTRY INSTEAD OF A SINGLE LIST OF DATA
@@ -313,13 +315,25 @@ def k_means_calc(Data,min_k,max_k,size_points):
     else:
         last_columns = np.asarray(Data["individual_culture"].iloc[: , -size_points:])
         print("Steps used: ",size_points,"/",len(Data["network_time"]), ", or last time taken",Data["network_time"][-size_points], "of ", Data["network_time"][-1])
+    """
+
+    last_columns = np.asarray(Data["individual_culture"])
+    #print("Steps used: ",size_points,"/",len(time_list), ", or last time taken",time_list[-size_points], "of ", time_list[-1])
 
     scores = {}
     for k in range(min_k,max_k + 1):#+1 so it actually does the max number 
-        KMean= KMeans(n_clusters=k)
-        KMean.fit(last_columns)
-        label=KMean.predict(last_columns)
-        scores[k] = silhouette_score(last_columns, label)
+        tsKMean = TimeSeriesKMeans(n_clusters=k,
+                            metric="dtw",
+                            #metric_params={"gamma": .01},
+                            verbose=False,
+        )
+        tsKMean.fit(last_columns)
+        label=tsKMean.predict(last_columns)
+        #print("last_columns",last_columns)
+        #print("label",label)        
+        #print("ts vs sk?", tslearn_silhouette_score(last_columns, label, metric="dtw"), silhouette_score(last_columns, label))
+        #scores[k] = silhouette_score(last_columns, label)
+        scores[k] = tslearn_silhouette_score(last_columns, label, metric="dtw")
     
     fin_max = max(scores, key=scores.get)
 
@@ -335,14 +349,22 @@ def live_k_means_calc(Data_culture, time_list,min_k,max_k,size_points):
         raiseExceptions("Size points larger than number of available data points, lower")
     else:
         last_columns = Data_culture[:,-size_points:]
-        print("Steps used: ",size_points,"/",len(time_list), ", or last time taken",time_list[-size_points], "of ", time_list[-1])
-
+    #size_points = int(round(len(Data_culture[0])/2))
+    #last_columns = Data_culture[:,-size_points:]
+    print("Steps used: ",size_points,"/",len(time_list), ", or last time taken",time_list[-size_points], "of ", time_list[-1])
+    #print(last_columns,last_columns.T)
     scores = {}
     for k in range(min_k,max_k + 1):#+1 so it actually does the max number 
-        KMean= KMeans(n_clusters=k)
-        KMean.fit(last_columns)
-        label=KMean.predict(last_columns)
-        scores[k] = silhouette_score(last_columns, label)
+        tsKMean_norm = TimeSeriesKMeans(n_clusters=k,
+                            metric="dtw",
+                            #metric_params={"gamma": .01},
+                            verbose=False,
+        )
+        tsKMean_norm.fit(last_columns)
+        label_norm=tsKMean_norm.predict(last_columns)
+        scores[k] = tslearn_silhouette_score(last_columns, label_norm, metric="dtw")
+
+        print(k,scores[k])
     
     fin_max = max(scores, key=scores.get)
 
