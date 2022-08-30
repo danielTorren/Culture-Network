@@ -1498,13 +1498,13 @@ def plot_carbon_emissions_total_confirmation_bias(fileName: str, Data_list: list
     f = plotName + "/comparing_total_emissions_confirmation_bias.png"
     fig.savefig(f, dpi=dpi_save)
 
-def plot_weighting_convergence_confirmation_bias(fileName: str, Data_list: list[Network], dpi_save:int):
+def plot_weighting_convergence_confirmation_bias(fileName: str, Data_list: list[Network], dpi_save:int,round_dec):
     y_title = "Weighting matrix convergence"
 
     fig, ax = plt.subplots()
     ax.set_ylabel(r"%s" % y_title)
     for i in range(len(Data_list)):
-        ax.plot(np.asarray(Data_list[i].history_time), np.asarray(Data_list[i].history_weighting_matrix_convergence), label = Data_list[i].confirmation_bias)
+        ax.plot(np.asarray(Data_list[i].history_time), np.asarray(Data_list[i].history_weighting_matrix_convergence), label = round(Data_list[i].confirmation_bias,round_dec))
         ax.set_xlabel(r"Time")
     #ax.axvline(culture_momentum, color='r',linestyle = "--")
     ax.legend()
@@ -1513,14 +1513,14 @@ def plot_weighting_convergence_confirmation_bias(fileName: str, Data_list: list[
     f = plotName + "/comparing_weighting_matrix_convergence_confirmation_bias.png"
     fig.savefig(f, dpi=dpi_save)
 
-def plot_cum_weighting_convergence_confirmation_bias(fileName: str, Data_list: list[Network], dpi_save:int):
+def plot_cum_weighting_convergence_confirmation_bias(fileName: str, Data_list: list[Network], dpi_save:int,round_dec):
     y_title = "Weighting matrix convergence"
 
     fig, ax = plt.subplots()
     ax.set_ylabel(r"%s" % y_title)
     for i in range(len(Data_list)):
         cumulative_link_change = np.cumsum(np.asarray(Data_list[i].history_weighting_matrix_convergence))
-        ax.plot(np.asarray(Data_list[i].history_time),cumulative_link_change , label = Data_list[i].confirmation_bias)
+        ax.plot(np.asarray(Data_list[i].history_time),cumulative_link_change , label = round(Data_list[i].confirmation_bias,round_dec))
         ax.set_xlabel(r"Time")
     #ax.axvline(culture_momentum, color='r',linestyle = "--")
     ax.legend()
@@ -1529,7 +1529,7 @@ def plot_cum_weighting_convergence_confirmation_bias(fileName: str, Data_list: l
     f = plotName + "/comparing_cum_weighting_matrix_convergence_confirmation_bias.png"
     fig.savefig(f, dpi=dpi_save)
 
-def print_culture_time_series_confirmation_bias(fileName: str, Data_list: list[Network], dpi_save:int,nrows: int, ncols:int):
+def print_culture_time_series_confirmation_bias(fileName: str, Data_list: list[Network], dpi_save:int,nrows: int, ncols:int,round_dec):
     
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
     y_title = "Culture"
@@ -1540,7 +1540,7 @@ def print_culture_time_series_confirmation_bias(fileName: str, Data_list: list[N
 
         ax.set_xlabel(r"Time")
         ax.set_ylabel(r"%s" % y_title)
-        ax.set_title("Confirmation bias = {}".format(Data_list[i].confirmation_bias))
+        ax.set_title("Confirmation bias = {}".format(round(Data_list[i].confirmation_bias,round_dec)))
         #ax.axvline(culture_momentum, color='r',linestyle = "--")
 
     plt.tight_layout()
@@ -1550,42 +1550,40 @@ def print_culture_time_series_confirmation_bias(fileName: str, Data_list: list[N
     fig.savefig(f, dpi=dpi_save)
 
 
-def multi_animation_weighting(FILENAME: str, data_list: list, cmap: Union[LinearSegmentedColormap,str],  interval:int, fps:int, round_dec:int ,nrows: int, ncols:int, time_steps_max:int):
+def multi_animation_weighting(FILENAME: str, data_list: list, cmap: Union[LinearSegmentedColormap,str],  interval:int, fps:int, round_dec:int ,nrows: int, ncols:int):
     ####ACUTAL
-    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7),constrained_layout=True)
 
-    def update(i, data_list, axes):
-        matrices_list = []
-        for v, ax in enumerate(axes.flat):
-            M = data_list[v].history_weighting_matrix[i]
-            # print("next frame!",M)        
-            matrice.set_array(M)
-            # Set the title
-            matrices_list.append(matrice)
-        #time_ax.text(0, 0, "Time= {}".format(round(data_list[0].history_time[i])), ha="center", va="center")
-        #time_ax.annotate("Time= {}".format(round(data_list[0].history_time[i], round_dec)),xy=(0, 0), ha="center")
-        #time_ax.set_title("Time= {}".format(round(data_list[0].history_time[i], round_dec)))
-        
-        #plt.suptitle("Time= {}".format(round(data_list[0].history_time[i], round_dec)),fontsize=20)
+    def update(i,matrices_list, data_list):
+        for v in range(len(data_list)):
+            M = data_list[v].history_weighting_matrix[i]     
+            matrices_list[v].set_array(M)
 
-        return matrices_list
+        title.set_text("Time= {}".format(round(data_list[0].history_time[i], round_dec)))
+
+    matrices_list = []
 
     for v, ax in enumerate(axes.flat):
         ax.set_xlabel("Agent")
         ax.set_ylabel("Agent")
-        matrice = ax.matshow(data_list[v].history_weighting_matrix[0], cmap=cmap)
+        ax.set_title("Confirmation bias = {}".format(round(data_list[v].confirmation_bias,round_dec)))
+        matrice = ax.matshow(data_list[v].history_weighting_matrix[0], cmap=cmap,norm=Normalize(vmin=0, vmax=1),aspect="auto",)
+        matrices_list.append(matrice)
+
 
     # colour bar axes
+    #cbar = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap_behaviour, norm=Normalize(vmin=0, vmax=1)),ax=axes.ravel().tolist())  # This does a mapabble on the fly i think, not sure
     cbar = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap, norm=Normalize(vmin=0, vmax=1)),ax=axes.ravel().tolist())
     cbar.set_label("Agent Link Strength")
 
-    plt.suptitle("Time= {}".format(round(data_list[0].history_time[0], round_dec)),fontsize=20)
+    title = plt.suptitle(t='', fontsize = 20)
+    #plt.suptitle("Time= {}".format(round(data_list[0].history_time[0], round_dec)),fontsize=20)
 
     ani = animation.FuncAnimation(
         fig,
         update,
-        fargs=(data_list,axes),
-        frames=int(time_steps_max),
+        fargs=(matrices_list,data_list),
+        frames=int(len(data_list[0].history_time)),
         repeat_delay=500,
         interval=interval,
     )
@@ -1599,6 +1597,7 @@ def multi_animation_weighting(FILENAME: str, data_list: list, cmap: Union[Linear
     writervideo = animation.FFMpegWriter(fps=fps)
     ani.save(f, writer=writervideo)
     return ani
+
 """WEIGHTING"""
 
 def plot_average_culture_no_range_comparison(fileName: str, Data_list: list[Network], dpi_save:int, property_list:list):
@@ -2276,6 +2275,30 @@ def live_compare_plot_animate_behaviour_scatter(fileName,Data_list,norm_zero_one
     f = animateName + "/" + "live_compare_plot_animate_behaviour_scatter.mp4"
     writervideo = animation.FFMpegWriter(fps=fps)
     ani.save(f, writer=writervideo)
+
+def plot_alpha_variation(FILENAME,num_counts,phi_list,dpi_save):
+    
+    def alpha_calc(phi,x):
+        return  np.exp(-phi*np.abs(x))
+    def alpha_diff_calc(phi,x):
+        return  -phi*np.exp(-phi*np.abs(x))
+
+    fig, ax = plt.subplots()
+    
+    x = np.linspace(0,1,num_counts)
+
+    for i in phi_list:
+        y = [alpha_calc(i,x) for x in x]
+        ax.plot(x,y, "-", label = "Phi = %s" % i)
+        dydx = [alpha_diff_calc(i,x) for x in x]
+        ax.plot(x,dydx,"--", label = "Phi = %s" % i)
+
+    ax.set_xlabel(r"$|I_n -I_k|$")
+    ax.set_ylabel(r"$\alpha$")
+    ax.legend()
+    plotName = FILENAME + "/Plots"
+    f = plotName + "/plot_alpha_variation.png"
+    fig.savefig(f, dpi=dpi_save)
 
 
 

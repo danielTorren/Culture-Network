@@ -35,7 +35,7 @@ from plot import (
     plot_behaviour_scatter,
     animate_behaviour_scatter,
 )
-from utility import loadData, get_run_properties, frame_distribution_prints,k_means_calc
+from utility import loadData, get_run_properties, frame_distribution_prints,k_means_calc,loadObjects
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap, SymLogNorm, Normalize
 from matplotlib.cm import get_cmap
@@ -276,6 +276,8 @@ size_points = 5
 min_culture_distance = 0.5
 
 RUN = True
+LIVE_DATA = True
+LOAD_DATA = True
 PLOT = True
 cluster_plots = False
 SHOW_PLOT = True
@@ -299,8 +301,15 @@ if __name__ == "__main__":
         print("start_time =", time.ctime(time.time()))
 
         dataName = FILENAME + "/Data"
-        Data = loadData(dataName, loadBooleanCSV, loadBooleanArray)
-        Data = get_run_properties(Data, FILENAME, paramList)
+
+        if LIVE_DATA:
+            "LOAD LIVE OBJECT"
+            live_network = loadObjects(dataName)
+
+        if LOAD_DATA:
+            "LOAD DATA"
+            Data = loadData(dataName, loadBooleanCSV, loadBooleanArray)
+            Data = get_run_properties(Data, FILENAME, paramList)
 
 
         #####BODGES!!

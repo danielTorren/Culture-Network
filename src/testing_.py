@@ -2,6 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from typing import Union
 import pickle
+from plot import plot_alpha_variation
+from utility import createFolderSA
 
 ##inital distribution parameters - doing the inverse inverts it!
 alpha_attract = 3
@@ -11,7 +13,7 @@ alpha_threshold = 3
 beta_threshold = 2
 
 bin_num = 1000
-num_counts = 100000
+num_counts = 1000
 
 
 def plot_beta(
@@ -48,19 +50,30 @@ def plot_beta(
     ax.set_ylabel(r"PDF")
     ax.legend()
 
-"""
-plot_beta(
-    alpha_attract, beta_attract, alpha_threshold, beta_threshold, bin_num, num_counts
-)
-plt.show()
-"""
-
-fileName = "Results/_DEGROOT_5900_3_100_0.01_10_0.2_1_0.05_0.1_0.1_0.1_0.1_1/"
-
-file = open(fileName + "Data.pickle",'rb')
-object_file = pickle.load(file)
-file.close()
 
 
-print(object_file.agent_list)
+if __name__ == '__main__':
+
+    "Plotting inital distributions"
+    #plot_beta(
+    #    alpha_attract, beta_attract, alpha_threshold, beta_threshold, bin_num, num_counts
+    #)
+    
+
+    "Test loading data"
+    fileName = "results/_DEGROOT_10000_3_100_0.05_10_0.1_1_0.02_1_1_1_1_10"
+
+    #file = open(fileName + "/Data.pkl",'rb')
+    #object_file = pickle.load(file)
+    #file.close()
+    #print(object_file.agent_list)
+    #print(object_file.history_average_culture)
+
+    "Running matrix based simulation"
+
+    "alpha variation"
+    phi_list = [-1,0,1]
+    dpi_save = 1200
+    plot_alpha_variation(fileName,num_counts,phi_list,dpi_save)
+    plt.show()
 
