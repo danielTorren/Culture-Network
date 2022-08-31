@@ -57,7 +57,7 @@ compression_factor = 10
 
 #Social emissions model
 K = 10  # k nearest neighbours INTEGER
-M = 3 # number of behaviours
+M = 2 # number of behaviours
 N = 100 # number of agents
 
 total_time = 500
@@ -79,7 +79,6 @@ time_steps_max = int(
 set_seed = 1  ##reproducibility INTEGER
 phi_list_lower,phi_list_upper = 0.1,1
 learning_error_scale = 0.02  # 1 standard distribution is 2% error
-carbon_emissions = [1]*M
 
 inverse_homophily = 0.2#0.2
 homophilly_rate = 1
@@ -128,7 +127,6 @@ params = {
     "beta_attract": beta_attract,
     "alpha_threshold": alpha_threshold,
     "beta_threshold": beta_threshold,
-    "carbon_emissions" : carbon_emissions,
     "discount_factor": discount_factor,
     "inverse_homophily": inverse_homophily,#1 is total mixing, 0 is no mixing
     "homophilly_rate" : homophilly_rate,
@@ -330,10 +328,10 @@ if __name__ == "__main__":
 
         ###PLOTS
         #plot_beta_distributions(FILENAME,alpha_attract,beta_attract,alpha_threshold,beta_threshold,bin_num,num_counts,dpi_save,)
-        plot_culture_timeseries(FILENAME, Data, dpi_save)
+        #plot_culture_timeseries(FILENAME, Data, dpi_save)
         #plot_value_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save)
         #plot_threshold_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save)
-        plot_attract_timeseries(FILENAME, Data, nrows_behave, ncols_behave, dpi_save)
+        #plot_attract_timeseries(FILENAME, Data, nrows_behave, ncols_behave, dpi_save)
         #plot_total_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
         #plot_av_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
         #plot_weighting_matrix_convergence_timeseries(FILENAME, Data, dpi_save)
@@ -371,7 +369,7 @@ if __name__ == "__main__":
         #ani_i = multi_animation_four(FILENAME,Data,cmap,cmap,layout,node_size,interval,fps,norm_neg_pos)
         #ani_j = multi_animation_alt(FILENAME,Data,cmap,cmap,layout,node_size,interval,fps,norm_neg_pos)
         #ani_k = multi_animation_scaled(FILENAME,Data,cmap,cmap,layout,node_size,interval,fps,scale_factor,frames_proportion,norm_neg_pos)
-        #ani_l = animate_behaviour_scatter(FILENAME,Data,"behaviour_attract",norm_zero_one, cmap,interval,fps,round_dec)
+        ani_l = animate_behaviour_scatter(FILENAME,Data,"behaviour_attract",norm_zero_one, cmap,interval,fps,round_dec)
         print(
             "PLOT time taken: %s minutes" % ((time.time() - start_time) / 60),
             "or %s s" % ((time.time() - start_time)),

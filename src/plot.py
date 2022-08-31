@@ -12,7 +12,7 @@ from networkx import Graph
 from network import Network
 
 ###DEFINE PLOTS
-def print_culture_time_series_generic(fileName: str, Data_list: list[Network], property_varied_values: list, property_varied:str, dpi_save:int,nrows: int, ncols:int):
+def print_culture_time_series_generic(fileName: str, Data_list: list[Network], property_varied_values: list, property_varied:str, dpi_save:int,nrows: int, ncols:int,round_dec):
     
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
     y_title = "Culture"
@@ -23,7 +23,7 @@ def print_culture_time_series_generic(fileName: str, Data_list: list[Network], p
 
         ax.set_xlabel(r"Time")
         ax.set_ylabel(r"%s" % y_title)
-        ax.set_title("{} = {}".format( property_varied,property_varied_values[i]))
+        ax.set_title("{} = {}".format( property_varied,round(property_varied_values[i],round_dec)))
         #ax.axvline(culture_momentum, color='r',linestyle = "--")
 
     plt.tight_layout()
@@ -1227,327 +1227,9 @@ def multi_animation_four(
     return ani
 
 
-def print_intial_culture_networks_homophily_fischer(fileName: str, Data_list: list[Network], dpi_save:int,nrows: int, ncols:int , layout: str, norm_zero_one, cmap, node_size,round_dec):
-    
-    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
-
-    for i, ax in enumerate(axes.flat):
-
-        G = nx.from_numpy_matrix(Data_list[i].history_weighting_matrix[0])
-        pos_culture_network = prod_pos(layout, G)
-        # print(i,ax)
-        ax.set_title("inverse_homophily = {}".format(round(Data_list[i].inverse_homophily, round_dec)))
-
-        indiv_culutre_list = [v.history_culture[0] for v in Data_list[i].agent_list]
-        #print(indiv_culutre_list)
-        colour_adjust = norm_zero_one(indiv_culutre_list)
-        ani_step_colours = cmap(colour_adjust)
-
-        nx.draw(
-            G,
-            node_color=ani_step_colours,
-            ax=ax,
-            pos=pos_culture_network,
-            node_size=node_size,
-            edgecolors="black",
-        )
-    
-    # colour bar axes
-    cbar = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap, norm=norm_zero_one),ax=axes.ravel().tolist())
-    cbar.set_label("Culture")
-
-    plotName = fileName + "/Prints"
-    f = plotName + "/print_intial_culture_networks_homophily_fischer.png"
-    fig.savefig(f, dpi=dpi_save)
-
-def print_culture_time_series_homophily_fischer(fileName: str, Data_list: list[Network], dpi_save:int,nrows: int, ncols:int, round_dec):
-    
-    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
-    y_title = "Culture"
-
-    for i, ax in enumerate(axes.flat):
-        for v in Data_list[i].agent_list:
-            ax.plot(np.asarray(Data_list[i].history_time), np.asarray(v.history_culture))
-
-        ax.set_xlabel(r"Time")
-        ax.set_ylabel(r"%s" % y_title)
-        ax.set_title("Inverse homophily = {}".format(round(Data_list[i].inverse_homophily, round_dec)))
-        #ax.axvline(culture_momentum, color='r',linestyle = "--")
-
-    plt.tight_layout()
-
-    plotName = fileName + "/Prints"
-    f = plotName + "/print_culture_time_series_homophily_fischer.png"
-    fig.savefig(f, dpi=dpi_save)
-
-def live_link_change_homophily_fischer(fileName: str, Data_list: list[Network], dpi_save:int, round_dec):
-    
-    fig, ax = plt.subplots()
-    y_title = "Total link strength change"
-
-    for i in range(len(Data_list)):
-        ax.plot(np.asarray(Data_list[i].history_time), np.asarray(Data_list[i].history_weighting_matrix_convergence), label = "Inverse homophily = {}".format(round(Data_list[i].inverse_homophily, round_dec)))
-        ax.set_xlabel(r"Time")
-        ax.set_ylabel(r"%s" % y_title)
-    ax.legend()
-    plt.tight_layout()
-
-    plotName = fileName + "/Plots"
-    f = plotName + "/live_link_change_homophily_fischer.png"
-    fig.savefig(f, dpi=dpi_save)
-
-def live_cum_link_change_homophily_fischer(fileName: str, Data_list: list[Network], dpi_save:int, round_dec):
-    
-    fig, ax = plt.subplots()
-    y_title = "Cumulative total link strength change"
-
-    for i in range(len(Data_list)):
-        cumulative_link_change = np.cumsum(np.asarray(Data_list[i].history_weighting_matrix_convergence))
-        print("norm",np.asarray(Data_list[i].history_weighting_matrix_convergence))
-        print("cum:", cumulative_link_change)
-        ax.plot(np.asarray(Data_list[i].history_time), cumulative_link_change, label = "Inverse homophily = {}".format(round(Data_list[i].inverse_homophily, round_dec)))
-        ax.set_xlabel(r"Time")
-        ax.set_ylabel(r"%s" % y_title)
-    ax.legend()
-    plt.tight_layout()
-
-    plotName = fileName + "/Plots"
-    f = plotName + "/live_cum_link_change_homophily_fischer.png"
-    fig.savefig(f, dpi=dpi_save)
-
-def live_link_change_homophily_fischer_per_agent(fileName: str, Data_list: list[Network], dpi_save:int, round_dec):
-    
-    fig, ax = plt.subplots()
-    y_title = "Total link strength change per agent"
-
-    for i in range(len(Data_list)):
-        ax.plot(np.asarray(Data_list[i].history_time), np.asarray(Data_list[i].history_weighting_matrix_convergence)/Data_list[i].N, label = "Inverse homophily = {}".format(round(Data_list[i].inverse_homophily, round_dec)))
-        ax.set_xlabel(r"Time")
-        ax.set_ylabel(r"%s" % y_title)
-    ax.legend()
-    plt.tight_layout()
-
-    plotName = fileName + "/Plots"
-    f = plotName + "/live_link_change_homophily_fischer_per_agent.png"
-    fig.savefig(f, dpi=dpi_save)
-
-def live_cum_link_change_homophily_fischer_per_agent(fileName: str, Data_list: list[Network], dpi_save:int,round_dec):
-    
-    fig, ax = plt.subplots()
-    y_title = "Cumulative total link strength change per agent"
-
-    for i in range(len(Data_list)):
-        cumulative_link_change = np.cumsum(np.asarray(Data_list[i].history_weighting_matrix_convergence)/Data_list[i].N)
-        #print("norm",np.asarray(Data_list[i].history_weighting_matrix_convergence))
-        #print("cum:", cumulative_link_change)
-        ax.plot(np.asarray(Data_list[i].history_time), cumulative_link_change, label = "Inverse homophily = {}".format(round(Data_list[i].inverse_homophily, round_dec)))
-        ax.set_xlabel(r"Time")
-        ax.set_ylabel(r"%s" % y_title)
-    ax.legend()
-    plt.tight_layout()
-
-    plotName = fileName + "/Plots"
-    f = plotName + "/live_cum_link_change_homophily_fischer_per_agent.png"
-    fig.savefig(f, dpi=dpi_save)
-
-def prints_culture_network_homophily_fischer(
-    FILENAME: str, Data: DataFrame,layout:str, cmap_culture: LinearSegmentedColormap,node_size:int, nrows:int, ncols:int, norm_zero_one: SymLogNorm, frames_list:list[int], round_dec:int, dpi_save:int
-):
-
-    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
-
-    # need to generate the network from the matrix
-    G = nx.from_numpy_matrix(Data.history_weighting_matrix[0])
-
-    # get pos
-    pos_culture_network = prod_pos(layout, G)
-
-    for i, ax in enumerate(axes.flat):
-        # print(i,ax)
-        ax.set_title(
-            "Time= {}".format(round(Data.history_time[frames_list[i]], round_dec))
-        )
-
-        culture_list = [x.history_culture[frames_list[i]] for x in Data.agent_list]
-        #print(culture_list)
-        colour_adjust = norm_zero_one(np.asarray(culture_list))
-        #colour_adjust = (Data["individual_culture"][frames_list[i]] + 1)/2
-        #colour_adjust = Data["individual_culture"][frames_list[i]]
-        ani_step_colours = cmap_culture(colour_adjust)
-
-        nx.draw(
-            G,
-            node_color=ani_step_colours,
-            ax=ax,
-            pos=pos_culture_network,
-            node_size=node_size,
-            edgecolors="black",
-        )
-
-    plt.tight_layout()
-
-    # colour bar axes
-    cbar = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap_culture, norm=Normalize(vmin=-1, vmax=1)),ax=axes.ravel().tolist())
-    cbar.set_label("Culture")
-
-    f = FILENAME + "/Prints/prints_culture_network_homophily_fischer.png"
-    fig.savefig(f, dpi=dpi_save)
-
-def print_intial_culture_networks_confirmation_bias(fileName: str, Data_list: list[Network], dpi_save:int,nrows: int, ncols:int , layout: str, norm_neg_pos, cmap, node_size, round_dec):
-    
-    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
-
-    for i, ax in enumerate(axes.flat):
-
-        G = nx.from_numpy_matrix(Data_list[i].history_weighting_matrix[0])
-        pos_culture_network = prod_pos(layout, G)
-        # print(i,ax)
-        ax.set_title("Confirmation bias = {}".format(round(Data_list[i].confirmation_bias, round_dec)))
-
-        indiv_culutre_list = [v.history_culture[0] for v in Data_list[i].agent_list]
-        #print(indiv_culutre_list)
-        colour_adjust = norm_neg_pos(indiv_culutre_list)
-        ani_step_colours = cmap(colour_adjust)
-
-        nx.draw(
-            G,
-            node_color=ani_step_colours,
-            ax=ax,
-            pos=pos_culture_network,
-            node_size=node_size,
-            edgecolors="black",
-        )
-
-    plotName = fileName + "/Prints"
-    f = plotName + "/print_intial_culture_networks_confirmation_bias.png"
-    fig.savefig(f, dpi=dpi_save)
-
-def prints_init_weighting_matrix_confirmation_bias(
-    fileName: str, Data_list: list[Network], dpi_save:int,nrows: int, ncols:int, cmap, 
-):
-
-    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
-    # print(frames_list,Data["network_time"],Data["network_weighting_matrix"][20])
-    #print( len(Data["network_weighting_matrix"]),frames_list)
-    for i, ax in enumerate(axes.flat):
-        # print(i)
-        mat = ax.matshow(
-            Data_list[i].history_weighting_matrix[0],
-            cmap=cmap,
-            norm=Normalize(vmin=0, vmax=1),
-            aspect="auto",
-        )
-        ax.set_title("Confirmation bias = {}".format(Data_list[i].confirmation_bias))
-        ax.set_xlabel("Agent Link Strength")
-        ax.set_ylabel("Agent Link Strength")
-    plt.tight_layout()
-
-    # colour bar axes
-    cbar = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap, norm=Normalize(vmin=0, vmax=1)),ax=axes.ravel().tolist())  # This does a mapabble on the fly i think, not sure
-    
-    cbar.set_label("Weighting matrix")
-
-    plotName = fileName + "/Prints"
-    f = plotName + "/prints_init_weighting_matrix_confirmation_bias.png"
-    fig.savefig(f, dpi=dpi_save)
-
-def prints_final_weighting_matrix_confirmation_bias(
-    fileName: str, Data_list: list[Network], dpi_save:int,nrows: int, ncols:int, cmap, 
-):
-
-    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
-    # print(frames_list,Data["network_time"],Data["network_weighting_matrix"][20])
-    #print( len(Data["network_weighting_matrix"]),frames_list)
-    for i, ax in enumerate(axes.flat):
-        # print(i)
-        mat = ax.matshow(
-            Data_list[i].history_weighting_matrix[-1],
-            cmap=cmap,
-            norm=Normalize(vmin=0, vmax=1),
-            aspect="auto",
-        )
-        ax.set_title("Confirmation bias = {}".format(Data_list[i].confirmation_bias))
-        ax.set_xlabel("Agent Link Strength")
-        ax.set_ylabel("Agent Link Strength")
-
-    plt.tight_layout()
-    # colour bar axes
-    cbar = fig.colorbar(mat,ax=ax)  # This does a mapabble on the fly i think, not sure
-    
-    cbar.set_label("Weighting matrix")
-    
-
-    plotName = fileName + "/Prints"
-    f = plotName + "/prints_final_weighting_matrix_confirmation_bias.png"
-    fig.savefig(f, dpi=dpi_save)
 
 
-    
-def plot_carbon_emissions_total_confirmation_bias(fileName: str, Data_list: list[Network], dpi_save:int):
-    y_title = "Total Emissions"
 
-    fig, ax = plt.subplots()
-    ax.set_ylabel(r"%s" % y_title)
-    for i in range(len(Data_list)):
-        ax.plot(np.asarray(Data_list[i].history_time), np.asarray(Data_list[i].history_total_carbon_emissions), label = Data_list[i].confirmation_bias)
-        ax.set_xlabel(r"Time")
-    #ax.axvline(culture_momentum, color='r',linestyle = "--")
-    ax.legend()
-
-    plotName = fileName + "/Plots"
-    f = plotName + "/comparing_total_emissions_confirmation_bias.png"
-    fig.savefig(f, dpi=dpi_save)
-
-def plot_weighting_convergence_confirmation_bias(fileName: str, Data_list: list[Network], dpi_save:int,round_dec):
-    y_title = "Weighting matrix convergence"
-
-    fig, ax = plt.subplots()
-    ax.set_ylabel(r"%s" % y_title)
-    for i in range(len(Data_list)):
-        ax.plot(np.asarray(Data_list[i].history_time), np.asarray(Data_list[i].history_weighting_matrix_convergence), label = round(Data_list[i].confirmation_bias,round_dec))
-        ax.set_xlabel(r"Time")
-    #ax.axvline(culture_momentum, color='r',linestyle = "--")
-    ax.legend()
-
-    plotName = fileName + "/Plots"
-    f = plotName + "/comparing_weighting_matrix_convergence_confirmation_bias.png"
-    fig.savefig(f, dpi=dpi_save)
-
-def plot_cum_weighting_convergence_confirmation_bias(fileName: str, Data_list: list[Network], dpi_save:int,round_dec):
-    y_title = "Weighting matrix convergence"
-
-    fig, ax = plt.subplots()
-    ax.set_ylabel(r"%s" % y_title)
-    for i in range(len(Data_list)):
-        cumulative_link_change = np.cumsum(np.asarray(Data_list[i].history_weighting_matrix_convergence))
-        ax.plot(np.asarray(Data_list[i].history_time),cumulative_link_change , label = round(Data_list[i].confirmation_bias,round_dec))
-        ax.set_xlabel(r"Time")
-    #ax.axvline(culture_momentum, color='r',linestyle = "--")
-    ax.legend()
-
-    plotName = fileName + "/Plots"
-    f = plotName + "/comparing_cum_weighting_matrix_convergence_confirmation_bias.png"
-    fig.savefig(f, dpi=dpi_save)
-
-def print_culture_time_series_confirmation_bias(fileName: str, Data_list: list[Network], dpi_save:int,nrows: int, ncols:int,round_dec):
-    
-    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
-    y_title = "Culture"
-
-    for i, ax in enumerate(axes.flat):
-        for v in Data_list[i].agent_list:
-            ax.plot(np.asarray(Data_list[i].history_time), np.asarray(v.history_culture))
-
-        ax.set_xlabel(r"Time")
-        ax.set_ylabel(r"%s" % y_title)
-        ax.set_title("Confirmation bias = {}".format(round(Data_list[i].confirmation_bias,round_dec)))
-        #ax.axvline(culture_momentum, color='r',linestyle = "--")
-
-    plt.tight_layout()
-
-    plotName = fileName + "/Plots"
-    f = plotName + "/print_culture_time_series_confirmation_bias.png"
-    fig.savefig(f, dpi=dpi_save)
 
 
 def multi_animation_weighting(FILENAME: str, data_list: list, cmap: Union[LinearSegmentedColormap,str],  interval:int, fps:int, round_dec:int ,nrows: int, ncols:int):
@@ -1598,26 +1280,28 @@ def multi_animation_weighting(FILENAME: str, data_list: list, cmap: Union[Linear
     ani.save(f, writer=writervideo)
     return ani
 
-"""WEIGHTING"""
 
-def plot_average_culture_no_range_comparison(fileName: str, Data_list: list[Network], dpi_save:int, property_list:list):
+
+"""GENERIC MULTI RUN PLOTS"""
+
+def plot_average_culture_no_range_comparison(fileName: str, Data_list: list[Network], dpi_save:int, property_list:list, property,round_dec):
     y_title = "Average Culture"
 
     fig, ax = plt.subplots()
     ax.set_ylabel(r"%s" % y_title)
     for i in range(len(Data_list)):
 
-        ax.plot(np.asarray(Data_list[i].history_time), np.asarray(Data_list[i].history_average_culture), label = property_list[i])
+        ax.plot(np.asarray(Data_list[i].history_time), np.asarray(Data_list[i].history_average_culture), label = "%s = %s" % (property,round(property_list[i],round_dec)))
         
     ax.set_xlabel(r"Time")
     
     ax.legend()
 
     plotName = fileName + "/Plots"
-    f = plotName + "/plot_average_culture_no_range_comparison.png"
+    f = plotName + "/%s_plot_average_culture_no_range_comparison.png" % (property)
     fig.savefig(f, dpi=dpi_save)
 
-def plot_average_culture_comparison(fileName: str, Data_list: list[Network], dpi_save:int, property_list:list):
+def plot_average_culture_comparison(fileName: str, Data_list: list[Network], dpi_save:int, property_list:list, property,round_dec):
     y_title = "Average Culture"
 
     fig, ax = plt.subplots()
@@ -1627,7 +1311,7 @@ def plot_average_culture_comparison(fileName: str, Data_list: list[Network], dpi
         culture_min = np.asarray(Data_list[i].history_min_culture)  # bodge
         culture_max = np.asarray(Data_list[i].history_max_culture)  # bodge
 
-        ax.plot(np.asarray(Data_list[i].history_time), np.asarray(Data_list[i].history_average_culture), label = property_list[i])
+        ax.plot(np.asarray(Data_list[i].history_time), np.asarray(Data_list[i].history_average_culture), label = "%s = %s" % (property,round(property_list[i],round_dec)))
         
         
         ax.fill_between(
@@ -1638,107 +1322,451 @@ def plot_average_culture_comparison(fileName: str, Data_list: list[Network], dpi
     ax.legend()
 
     plotName = fileName + "/Plots"
-    f = plotName + "/comparing_av_cultures.png"
+    
+    f = plotName + "/%s_comparing_av_cultures.png" % (property)
     fig.savefig(f, dpi=dpi_save)
 
-def plot_carbon_emissions_total_comparison(fileName: str, Data_list: list[Network], dpi_save:int, property_list:list):
+def plot_carbon_emissions_total_comparison(fileName: str, Data_list: list[Network], dpi_save:int, property_list:list, property,round_dec):
     y_title = "Total Emissions"
 
     fig, ax = plt.subplots()
     ax.set_ylabel(r"%s" % y_title)
     for i in range(len(Data_list)):
-        ax.plot(np.asarray(Data_list[i].history_time), np.asarray(Data_list[i].history_total_carbon_emissions), label = property_list[i])
+        ax.plot(np.asarray(Data_list[i].history_time), np.asarray(Data_list[i].history_total_carbon_emissions), label = "%s = %s" % (property,round(property_list[i],round_dec)))
         ax.set_xlabel(r"Time")
     
     ax.legend()
 
     plotName = fileName + "/Plots"
-    f = plotName + "/comparing_total_emissions.png"
+    f = plotName + "/%s_comparing_total_emissions.png" % (property)
     fig.savefig(f, dpi=dpi_save)
 
-def plot_weighting_matrix_convergence_comparison(fileName: str, Data_list: list[Network], dpi_save:int, property_list:list):
-    y_title = "weighting_matrix_convergence"
+def plot_weighting_matrix_convergence_comparison(fileName: str, Data_list: list[Network], dpi_save:int, property_list:list, property,round_dec):
+    y_title = "Weighting matrix convergence"
 
     fig, ax = plt.subplots()
     ax.set_ylabel(r"%s" % y_title)
     for i in range(len(Data_list)):
 
-        ax.plot(np.asarray(Data_list[i].history_time), np.asarray(Data_list[i].history_weighting_matrix_convergence), label = property_list[i])
+        ax.plot(np.asarray(Data_list[i].history_time), np.asarray(Data_list[i].history_weighting_matrix_convergence), label = "%s = %s" % (property,round(property_list[i],round_dec)))
         ax.set_xlabel(r"Time")
     
     ax.legend()
 
     plotName = fileName + "/Plots"
-    f = plotName + "/comparing_weighting_matrix_convergence.png"
+    f = plotName + "/%s_comparing_weighting_matrix_convergence.png" % (property)
     fig.savefig(f, dpi=dpi_save)
 
-def plot_cum_weighting_matrix_convergence_comparison(fileName: str, Data_list: list[Network], dpi_save:int, property_list:list):
-    y_title = "weighting_matrix_convergence"
+def plot_cum_weighting_matrix_convergence_comparison(fileName: str, Data_list: list[Network], dpi_save:int, property_list:list, property,round_dec):
+    y_title = "Cumulative weighting matrix convergence"
 
     fig, ax = plt.subplots()
     ax.set_ylabel(r"%s" % y_title)
     for i in range(len(Data_list)):
         cumulative_link_change = np.cumsum(np.asarray(Data_list[i].history_weighting_matrix_convergence))
-        ax.plot(np.asarray(Data_list[i].history_time), cumulative_link_change, label = property_list[i])
+        ax.plot(np.asarray(Data_list[i].history_time), cumulative_link_change, label = "%s = %s" % (property,round(property_list[i],round_dec)))
         ax.set_xlabel(r"Time")
     ax.legend()
 
     plotName = fileName + "/Plots"
-    f = plotName + "/comparing_cum_weighting_matrix_convergence.png"
+    f = plotName + "/%s_comparing_cum_weighting_matrix_convergence.png" % (property)
     fig.savefig(f, dpi=dpi_save)
 
-def print_culture_timeseries(fileName: str, Data_list: list[Network] , title_list:str, nrows:int, ncols:int , dpi_save:int):
-    y_title = "indivdiual culture"
+def plot_live_link_change_comparison(fileName: str, Data_list: list[Network], dpi_save:int, property_list:list, property, round_dec):
+    
+    fig, ax = plt.subplots()
+    y_title = "Total link strength change"
 
+    for i in range(len(Data_list)):
+        ax.plot(np.asarray(Data_list[i].history_time), np.asarray(Data_list[i].history_weighting_matrix_convergence), label = "{} = {}".format(property,round(property_list[i], round_dec)))
+        ax.set_xlabel(r"Time")
+        ax.set_ylabel(r"%s" % y_title)
+    ax.legend()
+    plt.tight_layout()
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/%s_live_link_change.png" % (property)
+    fig.savefig(f, dpi=dpi_save)
+
+def plot_live_cum_link_change_comparison(fileName: str, Data_list: list[Network], dpi_save:int, property_list:list, property,round_dec):
+    
+    fig, ax = plt.subplots()
+    y_title = "Cumulative total link strength change"
+
+    for i in range(len(Data_list)):
+        cumulative_link_change = np.cumsum(np.asarray(Data_list[i].history_weighting_matrix_convergence))
+
+        ax.plot(np.asarray(Data_list[i].history_time), cumulative_link_change,  label = "{} = {}".format(property,round(property_list[i], round_dec)))
+        ax.set_xlabel(r"Time")
+        ax.set_ylabel(r"%s" % y_title)
+    ax.legend()
+    plt.tight_layout()
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/%s_live_cum_link_change.png" % (property)
+    fig.savefig(f, dpi=dpi_save)
+
+def plot_live_link_change_per_agent_comparison(fileName: str, Data_list: list[Network], dpi_save:int, property_list:list, property,round_dec):
+    
+    fig, ax = plt.subplots()
+    y_title = "Total link strength change per agent"
+
+    for i in range(len(Data_list)):
+        ax.plot(np.asarray(Data_list[i].history_time), np.asarray(Data_list[i].history_weighting_matrix_convergence)/Data_list[i].N,  label = "{} = {}".format(property,round(property_list[i], round_dec)))
+        ax.set_xlabel(r"Time")
+        ax.set_ylabel(r"%s" % y_title)
+    ax.legend()
+    plt.tight_layout()
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/%s_live_link_change_per_agent.png" % (property)
+    fig.savefig(f, dpi=dpi_save)
+
+def plot_live_cum_link_change_per_agent_comparison(fileName: str, Data_list: list[Network], dpi_save:int, property_list:list, property,round_dec):
+    
+    fig, ax = plt.subplots()
+    y_title = "Cumulative total link strength change per agent"
+
+    for i in range(len(Data_list)):
+        cumulative_link_change = np.cumsum(np.asarray(Data_list[i].history_weighting_matrix_convergence)/Data_list[i].N)
+        #print("norm",np.asarray(Data_list[i].history_weighting_matrix_convergence))
+        #print("cum:", cumulative_link_change)
+        ax.plot(np.asarray(Data_list[i].history_time), cumulative_link_change,  label = "{} = {}".format(property,round(property_list[i], round_dec)))
+        ax.set_xlabel(r"Time")
+        ax.set_ylabel(r"%s" % y_title)
+    ax.legend()
+    plt.tight_layout()
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/%s_live_cum_link_change_per_agent.png" % (property)
+    fig.savefig(f, dpi=dpi_save)
+
+def print_live_intial_culture_networks(fileName: str, Data_list: list[Network], dpi_save:int, property_list:list, property,nrows: int, ncols:int , layout: str, norm_zero_one, cmap, node_size,round_dec):
+    
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
 
     for i, ax in enumerate(axes.flat):
-        ax.set_title(title_list[i])
-        ax.set_ylabel(r"%s" % y_title)
-        for v in Data_list[i].agent_list:
-            ax.plot(np.asarray( Data_list[i].history_time ), np.asarray(v.history_culture))
-        ax.set_xlabel(r"Time")
+        G = nx.from_numpy_matrix(Data_list[i].history_weighting_matrix[0])
+        pos_culture_network = prod_pos(layout, G)
+        # print(i,ax)
+        ax.set_title("{} = {}".format(property,round(property_list[i], round_dec)))
+
+        indiv_culutre_list = [v.history_culture[0] for v in Data_list[i].agent_list]
+        #print(indiv_culutre_list)
+        colour_adjust = norm_zero_one(indiv_culutre_list)
+        ani_step_colours = cmap(colour_adjust)
+
+        nx.draw(
+            G,
+            node_color=ani_step_colours,
+            ax=ax,
+            pos=pos_culture_network,
+            node_size=node_size,
+            edgecolors="black",
+        )
     
+    # colour bar axes
+    cbar = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap, norm=norm_zero_one),ax=axes.ravel().tolist())
+    cbar.set_label("Culture")
+
     plotName = fileName + "/Prints"
-    f = plotName + "/print_culture_timeseries.png"
+    f = plotName + "/%s_print_intial_culture_networks.png" % (property)
     fig.savefig(f, dpi=dpi_save)
 
-def print_culture_timeseries_vary_conformity_bias(fileName: str, Data_list: list[Network] , conformity_title_list:str, alpha_title_list:str, nrows:int, ncols:int , dpi_save:int):
+def prints_init_weighting_matrix(fileName: str, Data_list: list[Network], dpi_save:int,nrows: int, ncols:int, cmap,property_list:list, property,round_dec):
 
-    y_title = "Indivdiual culture"
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
+    # print(frames_list,Data["network_time"],Data["network_weighting_matrix"][20])
+    #print( len(Data["network_weighting_matrix"]),frames_list)
+    for i, ax in enumerate(axes.flat):
+        # print(i)
+        mat = ax.matshow(
+            Data_list[i].history_weighting_matrix[0],
+            cmap=cmap,
+            norm=Normalize(vmin=0, vmax=1),
+            aspect="auto",
+        )
+        ax.set_title("{} = {}".format(property,round(property_list[i], round_dec)))
+        ax.set_xlabel("Agent Link Strength")
+        ax.set_ylabel("Agent Link Strength")
+    plt.tight_layout()
 
-    fig = plt.figure(constrained_layout=True)
-    #fig.suptitle('Culture timeseries with varying conformity bias and alpha dynamics')
-
-    # create 3x1 subfigs
-    subfigs = fig.subfigures(nrows=nrows, ncols=1)
-    for row, subfig in enumerate(subfigs):
-        subfig.suptitle(f'Conformity bias = {conformity_title_list[row]}')
-
-        # create 1x3 subplots per subfig
-        axs = subfig.subplots(nrows=1, ncols=ncols)
-        for col, ax in enumerate(axs):
-            for v in Data_list[row][col].agent_list:
-                ax.plot(np.asarray(Data_list[row][col].history_time ), np.asarray(v.history_culture))
-            ax.set_title(r'%s' % alpha_title_list[col])
-            #ax.set_ylabel(r"%s" % y_title)
-            #ax.set_xlabel(r"Time")
-    fig.supxlabel(r"Time")
-    fig.supylabel(r"%s" % y_title)
+    # colour bar axes
+    cbar = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap, norm=Normalize(vmin=0, vmax=1)),ax=axes.ravel().tolist())  # This does a mapabble on the fly i think, not sure
     
+    cbar.set_label("Weighting matrix")
+
     plotName = fileName + "/Prints"
-    f = plotName + "/print_culture_timeseries_vary_conformity_bias.png"
+    f = plotName + "/%s_prints_init_weighting_matrix.png" % (property)
     fig.savefig(f, dpi=dpi_save)
 
+def prints_final_weighting_matrix(fileName: str, Data_list: list[Network], dpi_save:int,nrows: int, ncols:int, cmap,property_list:list, property,round_dec):
+
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
+    # print(frames_list,Data["network_time"],Data["network_weighting_matrix"][20])
+    #print( len(Data["network_weighting_matrix"]),frames_list)
+    for i, ax in enumerate(axes.flat):
+        # print(i)
+        mat = ax.matshow(
+            Data_list[i].history_weighting_matrix[-1],
+            cmap=cmap,
+            norm=Normalize(vmin=0, vmax=1),
+            aspect="auto",
+        )
+        ax.set_title("{} = {}".format(property,round(property_list[i], round_dec)))
+        ax.set_xlabel("Agent Link Strength")
+        ax.set_ylabel("Agent Link Strength")
+    plt.tight_layout()
+
+    # colour bar axes
+    cbar = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap, norm=Normalize(vmin=0, vmax=1)),ax=axes.ravel().tolist())  # This does a mapabble on the fly i think, not sure
+    
+    cbar.set_label("Weighting matrix")
+
+    plotName = fileName + "/Prints"
+    f = plotName + "/%s_prints_final_weighting_matrix.png" % (property)
+    fig.savefig(f, dpi=dpi_save)
+
+# animation of changing culture
+def live_compare_animate_culture_network_and_weighting(
+    FILENAME: str, Data_list: list, layout:str, cmap_culture: Union[LinearSegmentedColormap,str], node_size:int, interval:int, fps:int, norm_zero_one: SymLogNorm, round_dec:int, cmap_edge, nrows, ncols,property_name, property_list
+):
+
+    def update(i, Data_list, axes, cmap_culture, layout,title ):
+
+        for j, ax in enumerate(axes.flat):
+
+            ax.clear()
+            # print(Data["individual_culture"][i],Data["individual_culture"][i].shape)
+            individual_culture_list = [x.culture for x in Data_list[j].agent_list]
+            colour_adjust = norm_zero_one(individual_culture_list)
+            ani_step_colours = cmap_culture(colour_adjust)
+
+            G = nx.from_numpy_matrix(Data_list[j].history_weighting_matrix[i])
+
+             # get pos
+            pos = prod_pos(layout, G)
+
+            weights = [G[u][v]['weight'] for u,v in G.edges()]
+            norm = Normalize(vmin=0, vmax=1)
+            colour_adjust_edge = norm(weights)
+            colors_weights = cmap_edge(colour_adjust_edge)
+
+            nx.draw(
+                G,
+                node_color=ani_step_colours,
+                edge_color=colors_weights,
+                ax=ax,
+                pos=pos,
+                node_size=node_size,
+                edgecolors="black",
+            )
+
+            ax.set_title( r"%s = %s" % (property_name, round(property_list[j], round_dec)))
+
+        title.set_text("Time= {}".format(round(Data_list[0].history_time[i], round_dec)))
+
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
+
+    title = plt.suptitle(t='', fontsize = 20)
+
+    cbar_culture = fig.colorbar(
+        plt.cm.ScalarMappable(cmap=cmap_culture), ax=axes.ravel().tolist(), location='right'
+    )  # This does a mapabble on the fly i think, not sure
+    cbar_culture.set_label("Culture")
+
+    cbar_weight = fig.colorbar(
+        plt.cm.ScalarMappable(cmap=cmap_edge), ax=axes.ravel().tolist(), location='left',
+    )  # This does a mapabble on the fly i think, not sure
+    cbar_weight.set_label("Link Strength")
+
+    # need to generate the network from the matrix
+    #G = nx.from_numpy_matrix(Data_list[0].history_weighting_matrix[0])
 
 
 
+    ani = animation.FuncAnimation(
+        fig,
+        update,
+        frames=int(len(Data_list[0].history_time)),
+        fargs=(Data_list, axes, cmap_culture, layout,title),
+        repeat_delay=500,
+        interval=interval,
+    )
+
+    # save the video
+    animateName = FILENAME + "/Animations"
+    f = animateName + "/live_multi_animate_culture_network_and_weighting_%s.mp4" % property_name
+    #print("f", f)
+    writervideo = animation.FFMpegWriter(fps=fps)
+    ani.save(f, writer=writervideo)
+
+    return ani
+
+# animation of changing culture
+def live_compare_animate_weighting_matrix(
+    FILENAME: str, Data_list: list,  cmap_weighting: Union[LinearSegmentedColormap,str], interval:int, fps:int, round_dec:int, cmap_edge, nrows, ncols,property_name, property_list
+):
+
+    def update(i, Data_list, axes, title ):
+
+        for j, ax in enumerate(axes.flat):
+
+            ax.clear()
+
+            ax.matshow(Data_list[j].history_weighting_matrix[i], cmap=cmap_weighting, norm=Normalize(vmin=0, vmax=1),aspect="auto" )
+            
+            ax.set_title( r"%s = %s" % (property_name, round(property_list[j], round_dec)))
+            ax.set_xlabel("Agent")
+            ax.set_ylabel("Agent")
+
+        title.set_text("Time= {}".format(round(Data_list[0].history_time[i], round_dec)))
+
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7), constrained_layout=True)
+
+    #plt.tight_layout()
+
+    title = plt.suptitle(t='', fontsize = 20)
+
+    cbar_weight = fig.colorbar(
+        plt.cm.ScalarMappable(cmap=cmap_weighting), ax=axes.ravel().tolist(), location='right',
+    )  # This does a mapabble on the fly i think, not sure
+    cbar_weight.set_label("Link Strength")
+
+    # need to generate the network from the matrix
+    #G = nx.from_numpy_matrix(Data_list[0].history_weighting_matrix[0])
+    
+
+    ani = animation.FuncAnimation(
+        fig,
+        update,
+        frames=int(len(Data_list[0].history_time)),
+        fargs=(Data_list, axes, title),
+        repeat_delay=500,
+        interval=interval,
+    )
 
 
+    # save the video
+    animateName = FILENAME + "/Animations"
+    f = animateName + "/live_compare_animate_weighting_matrix_%s.mp4" % property_name
+    writervideo = animation.FFMpegWriter(fps=fps)
+    ani.save(f, writer=writervideo)
+
+    return ani
+
+# animation of changing culture
+def live_compare_animate_behaviour_matrix(
+    FILENAME: str, Data_list: list,  cmap_behaviour: Union[LinearSegmentedColormap,str], interval:int, fps:int, round_dec:int, nrows, ncols,property_name, property_list
+):
+
+    def update(i, Data_list, axes, title ):
+
+        for j, ax in enumerate(axes.flat):
+
+            ax.clear()
+
+            for q in Data_list[j].agent_list:
+                q.history_behaviour_values
+
+            M = [n.history_behaviour_values[i] for n in Data_list[j].agent_list]
+
+            ax.matshow(M, cmap=cmap_behaviour, norm=Normalize(vmin=-1, vmax=1),aspect="auto",)
+            
+            ax.set_title( r"%s = %s" % (property_name, round(property_list[j], round_dec)))
+            ax.set_xlabel("Agent")
+            ax.set_ylabel("Agent")
+
+        title.set_text("Time= {}".format(round(Data_list[0].history_time[i], round_dec)))
+
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7), constrained_layout=True)
+
+    #fig.tight_layout(h_pad=2)
+    #plt.tight_layout()
+
+    title = plt.suptitle(t='', fontsize = 20)
+
+    cbar_weight = fig.colorbar(
+        plt.cm.ScalarMappable(cmap=cmap_behaviour), ax=axes.ravel().tolist(), location='right',
+    )  # This does a mapabble on the fly i think, not sure
+    cbar_weight.set_label("Behavioural Value")
+
+    # need to generate the network from the matrix
+    #G = nx.from_numpy_matrix(Data_list[0].history_weighting_matrix[0])
+
+    ani = animation.FuncAnimation(
+        fig,
+        update,
+        frames=int(len(Data_list[0].history_time)),
+        fargs=(Data_list, axes, title),
+        repeat_delay=500,
+        interval=interval,
+    )
+
+    # save the video
+    animateName = FILENAME + "/Animations"
+    f = animateName + "/live_compare_animate_behaviour_matrix_%s.mp4" % property_name
+    writervideo = animation.FFMpegWriter(fps=fps)
+    ani.save(f, writer=writervideo)
+
+    return ani
 
 
+def live_compare_plot_animate_behaviour_scatter(fileName,Data_list,norm_zero_one, cmap_culture, nrows, ncols,property_name, property_list,interval, fps,round_dec):
+    
+    def update(i, Data_list, axes, title ):
 
-    """SA"""
+        for j, ax in enumerate(axes.flat):
+            ax.clear()
+
+            individual_culture_list = [x.history_culture[i] for x in Data_list[j].agent_list]#where is the time step here?
+
+            colour_adjust = norm_zero_one(individual_culture_list)
+            ani_step_colours = cmap_culture(colour_adjust)
+
+            x = [v.history_behaviour_attracts[i][0] for v in Data_list[j].agent_list] #Data_list[j][property][i].T[0]
+            y = [v.history_behaviour_attracts[i][1] for v in Data_list[j].agent_list] #Data_list[j][property][i].T[1]
+
+            #print(x,y)
+
+            ax.scatter(x ,y , s= 60, c = ani_step_colours,edgecolors='black', linewidths=1)
+
+            ax.set_xlabel(r"Attitude")
+            ax.set_ylabel(r"Attitude")
+            ax.set_xlim(0,1)
+            ax.set_ylim(0,1)
+            ax.set_title( r"%s = %s" % (property_name, property_list[j]))
+
+        title.set_text("Time= {}".format(round(Data_list[0].history_time[i], round_dec)))
+
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7), constrained_layout=True)
+
+    #plt.tight_layout()
+
+    title = plt.suptitle(t='', fontsize = 20)
+
+    cbar = fig.colorbar(
+        plt.cm.ScalarMappable(cmap=cmap_culture), ax=axes.ravel().tolist(), location='right',
+    )  # This does a mapabble on the fly i think, not sure
+    cbar.set_label("Culture")
+
+    ani = animation.FuncAnimation(
+        fig,
+        update,
+        frames=int(len(Data_list[0].history_time)),
+        fargs=(Data_list, axes, title),
+        repeat_delay=500,
+        interval=interval,
+    )
+
+    # save the video
+    animateName = fileName + "/Animations"
+    f = animateName + "/" + "live_compare_plot_animate_behaviour_scatter.mp4"
+    writervideo = animation.FFMpegWriter(fps=fps)
+    ani.save(f, writer=writervideo)
+
+
+"""SA"""
 
 def prints_SA_matrix(FILENAME, Data,title_list,cmap,nrows, ncols, dpi_save , labels):
 
@@ -1769,6 +1797,36 @@ def prints_SA_matrix(FILENAME, Data,title_list,cmap,nrows, ncols, dpi_save , lab
 
 """OTHER"""
 
+###### VARY TWO THINGS AT ONCE
+
+def print_culture_timeseries_vary_conformity_bias(fileName: str, Data_list: list[Network] , conformity_title_list:str, alpha_title_list:str, nrows:int, ncols:int , dpi_save:int):
+
+    y_title = "Indivdiual culture"
+
+    fig = plt.figure(constrained_layout=True)
+    #fig.suptitle('Culture timeseries with varying conformity bias and alpha dynamics')
+
+    # create 3x1 subfigs
+    subfigs = fig.subfigures(nrows=nrows, ncols=1)
+    for row, subfig in enumerate(subfigs):
+        subfig.suptitle(f'Conformity bias = {conformity_title_list[row]}')
+
+        # create 1x3 subplots per subfig
+        axs = subfig.subplots(nrows=1, ncols=ncols)
+        for col, ax in enumerate(axs):
+            for v in Data_list[row][col].agent_list:
+                ax.plot(np.asarray(Data_list[row][col].history_time ), np.asarray(v.history_culture))
+            ax.set_title(r'%s' % alpha_title_list[col])
+            #ax.set_ylabel(r"%s" % y_title)
+            #ax.set_xlabel(r"Time")
+    fig.supxlabel(r"Time")
+    fig.supylabel(r"%s" % y_title)
+    
+    plotName = fileName + "/Prints"
+    f = plotName + "/print_culture_timeseries_vary_conformity_bias.png"
+    fig.savefig(f, dpi=dpi_save)
+
+
 def print_culture_histgram(fileName: str, Data_list: list[Network] , title_list:str, nrows:int, ncols:int , dpi_save:int):
     y_title = "indivdiual culture"
 
@@ -1787,8 +1845,6 @@ def print_culture_histgram(fileName: str, Data_list: list[Network] , title_list:
     plotName = fileName + "/Prints"
     f = plotName + "/print_culture_timeseries.png"
     fig.savefig(f, dpi=dpi_save)
-
-
 
 def print_culture_histogram(
     FILENAME: str, Data: DataFrame, property:str, nrows:int, ncols:int, frames_list, round_dec, dpi_save,bin_num
@@ -1882,194 +1938,6 @@ def animate_culture_network_and_weighting(
     return ani
 
 
-# animation of changing culture
-def live_compare_animate_culture_network_and_weighting(
-    FILENAME: str, Data_list: list, layout:str, cmap_culture: Union[LinearSegmentedColormap,str], node_size:int, interval:int, fps:int, norm_zero_one: SymLogNorm, round_dec:int, cmap_edge, nrows, ncols,property_name, property_list
-):
-
-    def update(i, Data_list, axes, cmap_culture, layout,title ):
-
-        for j, ax in enumerate(axes.flat):
-
-            ax.clear()
-            # print(Data["individual_culture"][i],Data["individual_culture"][i].shape)
-            individual_culture_list = [x.culture for x in Data_list[j].agent_list]
-            colour_adjust = norm_zero_one(individual_culture_list)
-            ani_step_colours = cmap_culture(colour_adjust)
-
-            G = nx.from_numpy_matrix(Data_list[j].history_weighting_matrix[i])
-
-             # get pos
-            pos = prod_pos(layout, G)
-
-            weights = [G[u][v]['weight'] for u,v in G.edges()]
-            norm = Normalize(vmin=0, vmax=1)
-            colour_adjust_edge = norm(weights)
-            colors_weights = cmap_edge(colour_adjust_edge)
-
-            nx.draw(
-                G,
-                node_color=ani_step_colours,
-                edge_color=colors_weights,
-                ax=ax,
-                pos=pos,
-                node_size=node_size,
-                edgecolors="black",
-            )
-
-            ax.set_title( r"%s = %s" % (property_name, round(property_list[j], round_dec)))
-
-        title.set_text("Time= {}".format(round(Data_list[0].history_time[i], round_dec)))
-
-    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
-
-    title = plt.suptitle(t='', fontsize = 20)
-
-    cbar_culture = fig.colorbar(
-        plt.cm.ScalarMappable(cmap=cmap_culture), ax=axes.ravel().tolist(), location='right'
-    )  # This does a mapabble on the fly i think, not sure
-    cbar_culture.set_label("Culture")
-
-    cbar_weight = fig.colorbar(
-        plt.cm.ScalarMappable(cmap=cmap_edge), ax=axes.ravel().tolist(), location='left',
-    )  # This does a mapabble on the fly i think, not sure
-    cbar_weight.set_label("Link Strength")
-
-    # need to generate the network from the matrix
-    #G = nx.from_numpy_matrix(Data_list[0].history_weighting_matrix[0])
-
-
-
-    ani = animation.FuncAnimation(
-        fig,
-        update,
-        frames=int(len(Data_list[0].history_time)),
-        fargs=(Data_list, axes, cmap_culture, layout,title),
-        repeat_delay=500,
-        interval=interval,
-    )
-
-
-    # save the video
-    animateName = FILENAME + "/Animations"
-    f = animateName + "/live_multi_animate_culture_network_and_weighting_%s.mp4" % property_name
-    #print("f", f)
-    writervideo = animation.FFMpegWriter(fps=fps)
-    ani.save(f, writer=writervideo)
-
-    return ani
-
-# animation of changing culture
-def live_compare_animate_weighting_matrix(
-    FILENAME: str, Data_list: list,  cmap_weighting: Union[LinearSegmentedColormap,str], interval:int, fps:int, round_dec:int, cmap_edge, nrows, ncols,property_name, property_list
-):
-
-    def update(i, Data_list, axes, title ):
-
-        for j, ax in enumerate(axes.flat):
-
-            ax.clear()
-
-            ax.matshow(Data_list[j].history_weighting_matrix[i], cmap=cmap_weighting, norm=Normalize(vmin=0, vmax=1),aspect="auto" )
-            
-            ax.set_title( r"%s = %s" % (property_name, round(property_list[j], round_dec)))
-            ax.set_xlabel("Agent")
-            ax.set_ylabel("Agent")
-
-        title.set_text("Time= {}".format(round(Data_list[0].history_time[i], round_dec)))
-
-    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7), constrained_layout=True)
-
-    #plt.tight_layout()
-
-    title = plt.suptitle(t='', fontsize = 20)
-
-    cbar_weight = fig.colorbar(
-        plt.cm.ScalarMappable(cmap=cmap_weighting), ax=axes.ravel().tolist(), location='right',
-    )  # This does a mapabble on the fly i think, not sure
-    cbar_weight.set_label("Link Strength")
-
-    # need to generate the network from the matrix
-    #G = nx.from_numpy_matrix(Data_list[0].history_weighting_matrix[0])
-    
-
-    ani = animation.FuncAnimation(
-        fig,
-        update,
-        frames=int(len(Data_list[0].history_time)),
-        fargs=(Data_list, axes, title),
-        repeat_delay=500,
-        interval=interval,
-    )
-
-
-    # save the video
-    animateName = FILENAME + "/Animations"
-    f = animateName + "/live_compare_animate_weighting_matrix_%s.mp4" % property_name
-    writervideo = animation.FFMpegWriter(fps=fps)
-    ani.save(f, writer=writervideo)
-
-    return ani
-
-# animation of changing culture
-def live_compare_animate_behaviour_matrix(
-    FILENAME: str, Data_list: list,  cmap_behaviour: Union[LinearSegmentedColormap,str], interval:int, fps:int, round_dec:int, nrows, ncols,property_name, property_list
-):
-
-    def update(i, Data_list, axes, title ):
-
-        for j, ax in enumerate(axes.flat):
-
-            ax.clear()
-
-            for q in Data_list[j].agent_list:
-                q.history_behaviour_values
-
-            M = [n.history_behaviour_values[i] for n in Data_list[j].agent_list]
-
-            ax.matshow(M, cmap=cmap_behaviour, norm=Normalize(vmin=-1, vmax=1),aspect="auto",)
-            
-            ax.set_title( r"%s = %s" % (property_name, round(property_list[j], round_dec)))
-            ax.set_xlabel("Agent")
-            ax.set_ylabel("Agent")
-
-        title.set_text("Time= {}".format(round(Data_list[0].history_time[i], round_dec)))
-
-        
-
-    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7), constrained_layout=True)
-
-    #fig.tight_layout(h_pad=2)
-    #plt.tight_layout()
-
-    title = plt.suptitle(t='', fontsize = 20)
-
-    cbar_weight = fig.colorbar(
-        plt.cm.ScalarMappable(cmap=cmap_behaviour), ax=axes.ravel().tolist(), location='right',
-    )  # This does a mapabble on the fly i think, not sure
-    cbar_weight.set_label("Behavioural Value")
-
-    # need to generate the network from the matrix
-    #G = nx.from_numpy_matrix(Data_list[0].history_weighting_matrix[0])
-
-    ani = animation.FuncAnimation(
-        fig,
-        update,
-        frames=int(len(Data_list[0].history_time)),
-        fargs=(Data_list, axes, title),
-        repeat_delay=500,
-        interval=interval,
-    )
-
-    # save the video
-    animateName = FILENAME + "/Animations"
-    f = animateName + "/live_compare_animate_behaviour_matrix_%s.mp4" % property_name
-    writervideo = animation.FFMpegWriter(fps=fps)
-    ani.save(f, writer=writervideo)
-
-    return ani
-
-
 def weighting_link_timeseries_plot(FILENAME: str, Data: DataFrame, y_title:str, dpi_save:int, min_val):
 
     fig, ax = plt.subplots()
@@ -2089,25 +1957,7 @@ def weighting_link_timeseries_plot(FILENAME: str, Data: DataFrame, y_title:str, 
     f = plotName + "/weighting_link_timeseries_plot.png"
     fig.savefig(f, dpi=dpi_save)
 
-def print_culture_time_series_data_compression(fileName: str, Data_list: list[Network], dpi_save:int,nrows: int, ncols:int, round_dec):
-    
-    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
-    y_title = "Culture"
-
-    for i, ax in enumerate(axes.flat):
-        for v in Data_list[i].agent_list:
-            ax.plot(np.asarray(Data_list[i].history_time), np.asarray(v.history_culture))
-
-        ax.set_xlabel(r"Time")
-        ax.set_ylabel(r"%s" % y_title)
-        ax.set_title("Data compression = {}".format(round(Data_list[i].compression_factor, round_dec)))
-        #ax.axvline(culture_momentum, color='r',linestyle = "--")
-
-    plt.tight_layout()
-
-    plotName = fileName + "/Prints"
-    f = plotName + "/print_culture_time_series_data_compression.png"
-    fig.savefig(f, dpi=dpi_save)
+"""CLUSTER PLOTS"""
 
 def Euclidean_cluster_plot(fileName: str, Data,k_clusters: int, alpha: float, min_culture_distance: float, dpi_save:int):
     nrows = 1
@@ -2223,58 +2073,6 @@ def animate_behaviour_scatter(fileName,Data,property,norm_zero_one, cmap_culture
     writervideo = animation.FFMpegWriter(fps=fps)
     ani.save(f, writer=writervideo)
 
-def live_compare_plot_animate_behaviour_scatter(fileName,Data_list,norm_zero_one, cmap_culture, nrows, ncols,property_name, property_list,interval, fps,round_dec):
-    
-    def update(i, Data_list, axes, title ):
-
-        for j, ax in enumerate(axes.flat):
-            ax.clear()
-
-            individual_culture_list = [x.history_culture[i] for x in Data_list[j].agent_list]#where is the time step here?
-
-            colour_adjust = norm_zero_one(individual_culture_list)
-            ani_step_colours = cmap_culture(colour_adjust)
-
-            x = [v.history_behaviour_attracts[i][0] for v in Data_list[j].agent_list] #Data_list[j][property][i].T[0]
-            y = [v.history_behaviour_attracts[i][1] for v in Data_list[j].agent_list] #Data_list[j][property][i].T[1]
-
-            #print(x,y)
-
-            ax.scatter(x ,y , s= 60, c = ani_step_colours,edgecolors='black', linewidths=1)
-
-            ax.set_xlabel(r"Attitude")
-            ax.set_ylabel(r"Attitude")
-            ax.set_xlim(0,1)
-            ax.set_ylim(0,1)
-            ax.set_title( r"%s = %s" % (property_name, property_list[j]))
-
-        title.set_text("Time= {}".format(round(Data_list[0].history_time[i], round_dec)))
-
-    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7), constrained_layout=True)
-
-    #plt.tight_layout()
-
-    title = plt.suptitle(t='', fontsize = 20)
-
-    cbar = fig.colorbar(
-        plt.cm.ScalarMappable(cmap=cmap_culture), ax=axes.ravel().tolist(), location='right',
-    )  # This does a mapabble on the fly i think, not sure
-    cbar.set_label("Culture")
-
-    ani = animation.FuncAnimation(
-        fig,
-        update,
-        frames=int(len(Data_list[0].history_time)),
-        fargs=(Data_list, axes, title),
-        repeat_delay=500,
-        interval=interval,
-    )
-
-    # save the video
-    animateName = fileName + "/Animations"
-    f = animateName + "/" + "live_compare_plot_animate_behaviour_scatter.mp4"
-    writervideo = animation.FFMpegWriter(fps=fps)
-    ani.save(f, writer=writervideo)
 
 def plot_alpha_variation(FILENAME,num_counts,phi_list,dpi_save):
     

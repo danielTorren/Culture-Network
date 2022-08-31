@@ -1,18 +1,16 @@
+from logging import raiseExceptions
 from network import Network
 from utility import produceName_alt, createFolder, saveObjects, saveData,createFolderSA
 import time
+from joblib import Parallel, delayed
+import multiprocessing
 
 def generate_data(parameters: dict) -> Network:
-    ### CREATE NETWORK
-    ##params = [save_data,time_steps_max,M,N,phi_list,carbon_emissions,alpha_attract,beta_attract,alpha_threshold,beta_threshold,delta_t,K,prob_rewire,set_seed,culture_momentum,learning_error_scale]
-    #rint(parameters)
-    #if parameters["save_data"]:
-
-    print_simu = True
+    print_simu = False
     
     if print_simu:
         start_time = time.time()
-    # print("start_time =", time.ctime(time.time()))
+    
     social_network = Network(parameters)
     
     #### RUN TIME STEPS
@@ -20,7 +18,7 @@ def generate_data(parameters: dict) -> Network:
     while time_counter < parameters["time_steps_max"]:
         social_network.next_step()
         time_counter += 1
-    #if parameters["save_data"]:
+    
     if print_simu:
         print(
             "SIMULATION time taken: %s minutes" % ((time.time() - start_time) / 60),
@@ -102,3 +100,20 @@ def two_parameter_run(
     createFolderSA(fileName)
     
     return data_array, data_list, title_list
+
+def parallel_run(params_list):
+    num_cores = multiprocessing.cpu_count()
+    data_parallel = Parallel(n_jobs=num_cores,verbose=10)(delayed(generate_data)(i) for i in params_list)
+    return data_parallel
+
+def get_carbon_emissions_result(params):
+    data = generate_data(params)
+    return data.total_carbon_emissions/(data.N*data.M)
+
+def parallel_run_sa(params_list,results_property):
+    num_cores = multiprocessing.cpu_count()
+    if results_property == "Carbon Emissions/NM":
+        results_parallel_sa = Parallel(n_jobs=num_cores,verbose=10)(delayed(get_carbon_emissions_result)(i) for i in params_list)
+    else:
+        raiseExceptions("Invalid results property")
+    return results_parallel_sa

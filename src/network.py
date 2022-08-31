@@ -70,7 +70,7 @@ class Network:
         self.learning_error_scale = parameters["learning_error_scale"]
 
         #social influence of behaviours
-        self.phi_array = np.linspace(parameters["phi_list_lower"], parameters["phi_list_upper"], num=self.M)
+        self.phi_array = np.linspace(parameters["phi_list_lower"], parameters["phi_list_upper"], num=self.M)# CONSPICUOUS CONSUMPTION OF BEHAVIOURS - THE HIgher the more social prestige associated with this behaviour
         #emissions associated with each behaviour
         self.carbon_emissions = [1]*self.M #parameters["carbon_emissions"], removed for the sake of the SA
 
