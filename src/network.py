@@ -55,16 +55,27 @@ class Network:
         
         if self.heterogenous_cultural_momentum:
             self.quick_changers_prop = parameters["quick_changers_prop"]
-            self.lagards_prop  = parameters["lagards_prop"]
-            self.culture_momentum_quick = int(round(parameters["culture_momentum_quick_real"]/ self.delta_t)) 
-            self.culture_momentum_lagard= int(round(parameters["culture_momentum_lagard_real"]/ self.delta_t)) 
+            self.lagards_prop  = parameters["quick_changers_prop"]#parameters["lagards_prop"] CHANGE BACK JUST FOR GRAPH
+
+            self.culture_momentum_quick_changers_real = self.culture_momentum_real*parameters["ratio_quick_changers"]#setting what ratios are between the quick changers and the normal individuals
+            self.culture_momentum_lagards_real = self.culture_momentum_real*parameters["ratio_lagards"]#setting what ratios are between the lagards and the normal individuals
+
+            self.culture_momentum_quick = int(round(self.culture_momentum_quick_changers_real/ self.delta_t)) 
+            self.culture_momentum_lagard= int(round(self.culture_momentum_lagards_real/ self.delta_t)) 
             self.culture_momentum_list = self.generate_heterogenous_cultural_momentum()
+            #print("Ral",self.culture_momentum_quick_changers_real,self.culture_momentum_lagards_real, self.culture_momentum_real )
             #self.alpha_quick_changers_cultural_momentum = parameters["alpha_quick_changers_cultural_momentum"]
             #self.beta_quick_changers_cultural_momentum = parameters["beta_quick_changers_cultural_momentum"]
             #self.alpha_lagards_cultural_momentum = parameters["alpha_lagards_cultural_momentum"]
             #self.beta_lagards_cultural_momentum = parameters["beta_lagards_cultural_momentum"]
+            if self.culture_momentum_quick == 0.0:
+                raiseExceptions("Culture momentum of quick changers zero, increase to at least dt")
         else: 
             self.culture_momentum_list = [self.culture_momentum]*self.N
+            
+        np.random.shuffle(self.culture_momentum_list)
+
+        #print("culture_momentum_list ",self.culture_momentum_list )
 
         #time discounting 
         self.discount_factor = parameters["discount_factor"]
@@ -236,12 +247,9 @@ class Network:
     def generate_heterogenous_cultural_momentum(self):
         quick_changers_cultural_momentum_list  = [self.culture_momentum_quick]*int(round(self.N*self.quick_changers_prop))
         lagards_cultural_momentum_list = [self.culture_momentum_lagard]*int(round(self.N*self.lagards_prop))
-        normal_cultural_momentum_list = [self.culture_momentum]*(self.N - (len(quick_changers_cultural_momentum_list) + len(lagards_cultural_momentum_list)))
-
+        print("len",len(quick_changers_cultural_momentum_list),  len(lagards_cultural_momentum_list))
+        normal_cultural_momentum_list = [self.culture_momentum]*(self.N - (len(quick_changers_cultural_momentum_list) + len(lagards_cultural_momentum_list)))# whatever is left over
         total_cultural_momentum_list = quick_changers_cultural_momentum_list+ lagards_cultural_momentum_list + normal_cultural_momentum_list
-        
-        np.random.shuffle(total_cultural_momentum_list)
-
         return total_cultural_momentum_list
 
     
@@ -501,7 +509,8 @@ class Network:
             ego_influence = self.calc_ego_influence_degroot()
         else:
             raise Exception("Invalid opinion dynamics model")
-
+        
+        
         self.social_component_matrix = self.calc_social_component_matrix(ego_influence)
 
         self.total_carbon_emissions = self.calc_total_emissions()

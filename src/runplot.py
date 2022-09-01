@@ -54,20 +54,20 @@ information_provision_state = False
 linear_alpha_diff_state = False #if true use the exponential form instead like theo
 homophily_state = True
 alpha_change = True
+heterogenous_cultural_momentum = True
 harsh_data = False
-heterogenous_cultural_momentum = False
 
 #Social emissions model
-K = 10 # k nearest neighbours INTEGER
+K = 12 # k nearest neighbours INTEGER
 M = 3  # number of behaviours
-N = 100  # number of agents
+N = 30  # number of agents
 
 total_time = 100
-culture_momentum_real = 10
+culture_momentum_real = 4
 delta_t = 0.1  # time step size
 averaging_method = "Arithmetic" #"Geometric"#"Arithmetic"#"Threshold weighted arithmetic"
 
-compression_factor = 10
+compression_factor = 5
 
 prob_rewire = 0.1  # re-wiring probability?
 
@@ -86,25 +86,25 @@ homophilly_rate = 1
 discount_factor = 0.6#0.6
 present_discount_factor = 0.8#0.8
 
-confirmation_bias = 30
+confirmation_bias = 25
 
 if heterogenous_cultural_momentum:
-    quick_changers_prop = 0.2
-    lagards_prop = 0.2
-    culture_momentum_quick_real = int(round(culture_momentum_real/10))
-    culture_momentum_lagard_real = int(round(5*culture_momentum_real))
+    quick_changers_prop = 0 #0.2#proportion of population that are quick changers that have very light memory
+    lagards_prop = 0 #0.2#proportion of population that are quick changers that have very long memory
+    ratio_quick_changers = 0.25
+    ratio_lagards = 4
 
 #harsh data parameters
 if harsh_data:
-    green_extreme_max = 8
-    green_extreme_min = 2
-    green_extreme_prop = 2/5
+    green_extreme_max = 8#beta distribution value max
+    green_extreme_min = 2#beta distribution value min
+    green_extreme_prop = 2/5# proportion of population that are green
     indifferent_max = 2
     indifferent_min = 2
-    indifferent_prop = 1/5
+    indifferent_prop = 1/5#proportion that are indifferent
     brown_extreme_min = 2
     brown_extreme_max = 8
-    brown_extreme_prop = 2/5
+    brown_extreme_prop = 2/5#proportion that are brown
     if green_extreme_prop + indifferent_prop + brown_extreme_prop != 1:
         print(green_extreme_prop + indifferent_prop + brown_extreme_prop)
         raise Exception("Invalid proportions")
@@ -165,8 +165,8 @@ params = {
 if heterogenous_cultural_momentum:
     params["quick_changers_prop"] = quick_changers_prop
     params["lagards_prop"] = lagards_prop
-    params["culture_momentum_quick_real"] = culture_momentum_quick_real
-    params["culture_momentum_lagard_real"] = culture_momentum_lagard_real
+    params["ratio_quick_changers"] = ratio_quick_changers
+    params["ratio_lagards"] = ratio_lagards
 
     #params["alpha_quick_changers_cultural_momentum"]= alpha_quick_changers_cultural_momentum
     #params["beta_quick_changers_cultural_momentum"]= beta_quick_changers_cultural_momentum
@@ -308,6 +308,9 @@ round_dec = 2
 nrows = 2
 ncols = 3
 
+alpha_quick, alpha_normal, alpha_lagard = 0.9,0.7,0.9
+colour_quick, colour_normal, colour_lagard = "indianred", "grey", "cornflowerblue"
+
 #print("time_steps_max", time_steps_max)
 frame_num = ncols * nrows - 1
 scale_factor = time_steps_max*2
@@ -319,7 +322,7 @@ num_counts = 100000
 bin_num_agents = int(round(N/10))
 dpi_save = 2000
 
-min_k,max_k = 2,N - 1# Cover all the possible bases with the max k though it does slow it down
+min_k,max_k = 2,10#N - 1# Cover all the possible bases with the max k though it does slow it down
 alpha_val = 0.25
 size_points = 5
 min_culture_distance = 0.5
@@ -336,7 +339,7 @@ frames_list_exponetial = False
 if __name__ == "__main__":
 
     if RUN == False:
-        FILENAME = "results/_DEGROOT_200_3_50_0.1_10_0.1_1_0.02_1_1_1_1_1"
+        FILENAME = "results/_DEGROOT_1000_3_100_0.1_12_0.1_1_0.02_10"
     else:
         # start_time = time.time()
         # print("start_time =", time.ctime(time.time()))
@@ -380,8 +383,8 @@ if __name__ == "__main__":
         ###PLOTS
         #plot_beta_distributions(FILENAME,alpha_attract,beta_attract,alpha_threshold,beta_threshold,bin_num,num_counts,dpi_save,)
         plot_culture_timeseries(FILENAME, Data, dpi_save)
-        plot_green_adoption_timeseries(FILENAME, Data, dpi_save)
-        plot_value_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save)
+        #plot_green_adoption_timeseries(FILENAME, Data, dpi_save)
+        #plot_value_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save)
         #plot_threshold_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save)
         #plot_attract_timeseries(FILENAME, Data, nrows_behave, ncols_behave, dpi_save)
         #plot_total_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
@@ -396,23 +399,22 @@ if __name__ == "__main__":
         
         #prints_weighting_matrix(FILENAME,Data,cmap_weighting,nrows,ncols,frames_list,round_dec,dpi_save)
         #prints_behavioural_matrix(FILENAME,Data,cmap,nrows,ncols,frames_list,round_dec,dpi_save)
-        #prints_culture_network(FILENAME,Data,layout,cmap,node_size,nrows,ncols,norm_neg_pos,frames_list,round_dec,dpi_save,norm_zero_one)
+        #prints_culture_network(FILENAME,Data,layout,cmap,node_size,nrows,ncols,norm_zero_one,frames_list,round_dec,dpi_save)
         #print_network_social_component_matrix(FILENAME,Data,cmap,nrows,ncols,frames_list,round_dec,dpi_save)
         #print_culture_histogram(FILENAME, Data, "individual_culture", nrows, ncols, frames_list,round_dec,dpi_save, bin_num_agents)
         #prints_behaviour_timeseries_plot_colour_culture(FILENAME, Data, "behaviour_attract", "Attractiveness", nrows_behave, ncols_behave, dpi_save,cmap,norm_zero_one)
 
         ###ANIMATIONS
-        #ani_a = animate_network_information_provision(FILENAME,Data,interval,fps,round_dec,cmap_weighting)
-        #ani_b = animate_network_social_component_matrix(FILENAME,Data,interval,fps,round_dec,cmap)
+       
+        #ani_b = animate_network_social_component_matrix(FILENAME,Data,interval,fps,round_dec,cmap,norm_zero_one)
         #ani_c = animate_weighting_matrix(FILENAME,Data,interval,fps,round_dec,cmap_weighting)
         #ani_d = animate_behavioural_matrix(FILENAME,Data,interval,fps,cmap,round_dec)
-        #ani_e = animate_culture_network(FILENAME,Data,layout,cmap,node_size,interval,fps,norm_neg_pos,round_dec)
-        #ani_f = animate_culture_network_and_weighting(FILENAME,Data,layout,cmap,node_size,interval,fps,norm_neg_pos,round_dec,cmap_edge)
-        #ani_h = multi_animation(FILENAME,Data,cmap,cmap,layout,node_size,interval,fps,norm_neg_pos,norm_zero_one)
-        #ani_i = multi_animation_four(FILENAME,Data,cmap,cmap,layout,node_size,interval,fps,norm_neg_pos)
-        #ani_j = multi_animation_alt(FILENAME,Data,cmap,cmap,layout,node_size,interval,fps,norm_neg_pos)
-        #ani_k = multi_animation_scaled(FILENAME,Data,cmap,cmap,layout,node_size,interval,fps,scale_factor,frames_proportion,norm_neg_pos)
+        #ani_e = animate_culture_network(FILENAME,Data,layout,cmap,node_size,interval,fps,norm_zero_one,round_dec)
+        #ani_f = animate_culture_network_and_weighting(FILENAME,Data,layout,cmap,node_size,interval,fps,norm_zero_one,round_dec,cmap_edge)
+        
+        #Shows the 2D movement of attitudes and their culture, equivalent to prints_behaviour_timeseries_plot_colour_culture
         #ani_l = animate_behaviour_scatter(FILENAME,Data,"behaviour_attract",norm_zero_one, cmap,interval,fps,round_dec)
+
 
         if cluster_plots:
             k_clusters,win_score, scores = k_means_calc(Data,min_k,max_k,size_points)#CALCULATE THE OPTIMAL NUMBER OF CLUSTERS USING SILOUTTE SCORE, DOENST WORK FOR 1
@@ -420,12 +422,13 @@ if __name__ == "__main__":
             Euclidean_cluster_plot(FILENAME, Data, k_clusters,alpha_val,min_culture_distance, dpi_save)
 
         if heterogenous_cultural_momentum:
-            live_plot_heterogenous_culture_momentum(FILENAME, social_network, dpi_save)
+            live_plot_heterogenous_culture_momentum(FILENAME, social_network, dpi_save, alpha_quick, alpha_normal, alpha_lagard, colour_quick, colour_normal, colour_lagard)
 
         if carbon_price_state:
             plot_carbon_price_timeseries(FILENAME,Data,dpi_save)
         if information_provision_state:
             print_network_information_provision(FILENAME,Data,cmap,nrows,ncols,frames_list,round_dec,dpi_save)
+             #ani_a = animate_network_information_provision(FILENAME,Data,interval,fps,round_dec,cmap_weighting)
 
         print(
             "PLOT time taken: %s minutes" % ((time.time() - start_time) / 60),

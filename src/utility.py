@@ -438,9 +438,9 @@ def generate_title_list(
 
     title_list = []
     
-    for i in range(len(col_list)):
-        for v in range(len(row_list)):
-            title_list.append(("%s = %s, %s = %s") % (property_col,str(col_list[i]), property_row,str(row_list[v])))
+    for i in range(len(row_list)):
+        for j in range(len(col_list)):
+            title_list.append(("%s = %s, %s = %s") % (property_row,str(row_list[i]), property_col,str(col_list[j])))
 
     print(title_list)
     
