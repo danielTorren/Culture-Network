@@ -4,6 +4,11 @@ import os
 import pandas as pd
 import numpy as np
 from network import Network
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score as silhouette_score
+from logging import raiseExceptions
+from tslearn.clustering import TimeSeriesKMeans
+from tslearn.clustering import silhouette_score as tslearn_silhouette_score
 
 def produceName_alt(parameters: list) -> str:
     fileName = "results/"
@@ -299,3 +304,147 @@ def frame_distribution_prints(time_list: list, scale_factor: int, frame_num: int
 
 
     return sorted(frames_list_int)
+
+def k_means_calc(Data,min_k,max_k,size_points):
+    """
+    #Z=pd.DataFrame(x) #converting into data frame for ease
+    if size_points == 1:
+        last_columns = np.asarray(Data["individual_culture"].iloc[: , -size_points]).reshape(-1,1)#THE RESHAPE MAKES IT AN ARRAY OF ARRAY WHERE EACH ENTRY HAS ITS own ENTRY INSTEAD OF A SINGLE LIST OF DATA
+    elif size_points > Data["individual_culture"].shape[1]:
+        raiseExceptions("Size points larger than number of available data points, lower")
+    else:
+        last_columns = np.asarray(Data["individual_culture"].iloc[: , -size_points:])
+        print("Steps used: ",size_points,"/",len(Data["network_time"]), ", or last time taken",Data["network_time"][-size_points], "of ", Data["network_time"][-1])
+    """
+
+    last_columns = np.asarray(Data["individual_culture"])
+    #print("Steps used: ",size_points,"/",len(time_list), ", or last time taken",time_list[-size_points], "of ", time_list[-1])
+
+    scores = {}
+    for k in range(min_k,max_k + 1):#+1 so it actually does the max number 
+        tsKMean = TimeSeriesKMeans(n_clusters=k,
+                            metric="dtw",
+                            #metric_params={"gamma": .01},
+                            verbose=False,
+        )
+        tsKMean.fit(last_columns)
+        label=tsKMean.predict(last_columns)
+        #print("last_columns",last_columns)
+        #print("label",label)        
+        #print("ts vs sk?", tslearn_silhouette_score(last_columns, label, metric="dtw"), silhouette_score(last_columns, label))
+        #scores[k] = silhouette_score(last_columns, label)
+        scores[k] = tslearn_silhouette_score(last_columns, label, metric="dtw")
+    
+    fin_max = max(scores, key=scores.get)
+
+    print("k cluster, highest score = ",fin_max, scores[fin_max])
+
+    return fin_max, scores[fin_max], scores
+
+def live_k_means_calc(Data_culture, time_list,min_k,max_k,size_points):
+    if size_points == 1:
+        last_columns = Data_culture[:,-size_points:].reshape(-1,1)#THE RESHAPE MAKES IT AN ARRAY OF ARRAY WHERE EACH ENTRY HAS ITS own ENTRY INSTEAD OF A SINGLE LIST OF DATA
+    elif size_points > Data_culture.shape[1]:
+        print("Points difference = ",size_points,Data_culture.shape[1])
+        raiseExceptions("Size points larger than number of available data points, lower")
+    else:
+        last_columns = Data_culture[:,-size_points:]
+    #size_points = int(round(len(Data_culture[0])/2))
+    #last_columns = Data_culture[:,-size_points:]
+    print("Steps used: ",size_points,"/",len(time_list), ", or last time taken",time_list[-size_points], "of ", time_list[-1])
+    #print(last_columns,last_columns.T)
+    scores = {}
+    for k in range(min_k,max_k + 1):#+1 so it actually does the max number 
+        tsKMean_norm = TimeSeriesKMeans(n_clusters=k,
+                            metric="dtw",
+                            #metric_params={"gamma": .01},
+                            verbose=False,
+        )
+        tsKMean_norm.fit(last_columns)
+        label_norm=tsKMean_norm.predict(last_columns)
+        scores[k] = tslearn_silhouette_score(last_columns, label_norm, metric="dtw")
+
+        print(k,scores[k])
+    
+    fin_max = max(scores, key=scores.get)
+
+    print("k cluster, highest score = ",fin_max, scores[fin_max])
+
+    return fin_max, scores[fin_max], scores
+
+def get_km_euclid(k_clusters,X_train):
+
+    km = TimeSeriesKMeans(n_clusters=k_clusters, verbose=False)
+    y_pred = km.fit_predict(X_train)#YOU HAVE TO FIT PREDICT TO THEN GET THE CLUSTER CENTERS LATER
+    return km
+
+
+def get_km_sDTW(k_clusters,X_train,gamma):
+    sdtw_km = TimeSeriesKMeans(n_clusters=k_clusters,
+                            metric="softdtw",
+                            metric_params={"gamma": .01},
+                            verbose=True,
+    )
+
+    y_pred = sdtw_km.fit_predict(X_train)
+    return sdtw_km
+
+def get_km_DTW(k_clusters,X_train,gamma):
+    sdtw_km = TimeSeriesKMeans(n_clusters=k_clusters,
+                            metric="dtw",
+                            #metric_params={"gamma": .01},
+                            verbose=True,
+    )
+
+    y_pred = sdtw_km.fit_predict(X_train)
+    return sdtw_km
+
+def produce_param_list(params,porperty_list, property):
+    params_list = []
+    for i in porperty_list:
+        params[property] = i
+        params_list.append(params.copy())#have to make a copy so that it actually appends a new dict and not just the location of the params dict
+    return params_list
+
+def add_varaiables_to_dict(params,variable_parameters,X):
+    for i in range(len(X)):
+        params[variable_parameters[i][0]] = X[i]
+    return params
+
+def produce_param_list_SA(param_values,params,variable_parameters):
+    params_list = []
+    for i, X in enumerate(param_values):
+        variable_params_added = add_varaiables_to_dict(params,variable_parameters,X)
+        params_list.append(variable_params_added.copy())
+    return params_list
+
+def produce_param_list_double(params,param_col,col_list,param_row,row_list):
+
+    params_list = []
+
+    for i in row_list:
+        for j in col_list:
+            params[param_row] = i
+            params[param_col] = j
+            params_list.append(params.copy())
+    return params_list
+    
+def generate_title_list(
+    property_col,
+    col_list,
+    property_row,
+    row_list,
+    ):
+
+    title_list = []
+    
+    for i in range(len(col_list)):
+        for v in range(len(row_list)):
+            title_list.append(("%s = %s, %s = %s") % (property_col,str(col_list[i]), property_row,str(row_list[v])))
+
+    print(title_list)
+    
+    return  title_list
+
+
+

@@ -1,3 +1,4 @@
+from logging import raiseExceptions
 from run import run
 from plot import (
     plot_culture_timeseries,
@@ -32,13 +33,18 @@ from plot import (
     plot_green_adoption_timeseries,
     prints_behaviour_timeseries_plot_colour_culture,
     live_plot_heterogenous_culture_momentum,
+    Euclidean_cluster_plot,
+    plot_k_cluster_scores,
+    plot_behaviour_scatter,
+    animate_behaviour_scatter,
 )
-from utility import loadData, get_run_properties, frame_distribution_prints
+from utility import loadData, get_run_properties, frame_distribution_prints,k_means_calc,loadObjects
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap, SymLogNorm, Normalize
 from matplotlib.cm import get_cmap
 import time
 import numpy as np
+
 
 # Params
 save_data = True
@@ -48,10 +54,8 @@ information_provision_state = False
 linear_alpha_diff_state = False #if true use the exponential form instead like theo
 homophily_state = True
 alpha_change = True
-nur_attitude = False
-value_culture_def = False
 harsh_data = False
-heterogenous_cultural_momentum = True
+heterogenous_cultural_momentum = False
 
 #Social emissions model
 K = 10 # k nearest neighbours INTEGER
@@ -61,20 +65,20 @@ N = 100  # number of agents
 total_time = 100
 culture_momentum_real = 10
 delta_t = 0.1  # time step size
+averaging_method = "Arithmetic" #"Geometric"#"Arithmetic"#"Threshold weighted arithmetic"
+
+compression_factor = 10
 
 prob_rewire = 0.1  # re-wiring probability?
 
 time_steps_max = int(
     total_time / delta_t
 )  # number of time steps max, will stop if culture converges
-
+#print("time steps max" , time_steps_max)
 set_seed = 1  ##reproducibility INTEGER
-phi_list_lower,phi_list_upper = 0.5,1
-phi_list = np.linspace(phi_list_lower, phi_list_upper, num=M)
-#print(phi_list)
-learning_error_scale = 0.01  # 1 standard distribution is 2% error
+phi_list_lower,phi_list_upper = 0.1,1
 
-carbon_emissions = [1]*M
+learning_error_scale = 0.02  # 1 standard distribution is 2% error
 
 inverse_homophily = 0.3#0.2
 homophilly_rate = 1
@@ -84,13 +88,11 @@ present_discount_factor = 0.8#0.8
 
 confirmation_bias = 30
 
-
 if heterogenous_cultural_momentum:
     quick_changers_prop = 0.2
     lagards_prop = 0.2
     culture_momentum_quick_real = int(round(culture_momentum_real/10))
     culture_momentum_lagard_real = int(round(5*culture_momentum_real))
-
 
 #harsh data parameters
 if harsh_data:
@@ -129,6 +131,7 @@ if carbon_price_state:
 params = {
     "opinion_dynamics": opinion_dynamics,
     "save_data": save_data, 
+    "compression_factor": compression_factor,
     "time_steps_max": time_steps_max, 
     "carbon_price_state" : carbon_price_state,
     "information_provision_state" : information_provision_state,
@@ -136,6 +139,8 @@ params = {
     "homophily_state": homophily_state,
     "alpha_change" : alpha_change,
     "heterogenous_cultural_momentum" : heterogenous_cultural_momentum,
+    "harsh_data": harsh_data,
+    "averaging_method": averaging_method,
     "delta_t": delta_t,
     "phi_list_lower": phi_list_lower,
     "phi_list_upper": phi_list_upper,
@@ -146,15 +151,15 @@ params = {
     "set_seed": set_seed,
     "culture_momentum_real": culture_momentum_real,
     "learning_error_scale": learning_error_scale,
-    "carbon_emissions" : carbon_emissions,
+    "alpha_attract": alpha_attract,
+    "beta_attract": beta_attract,
+    "alpha_threshold": alpha_threshold,
+    "beta_threshold": beta_threshold,
     "discount_factor": discount_factor,
     "inverse_homophily": inverse_homophily,#1 is total mixing, 0 is no mixing
     "homophilly_rate" : homophilly_rate,
     "present_discount_factor": present_discount_factor,
     "confirmation_bias": confirmation_bias,
-    "nur_attitude": nur_attitude,
-    "value_culture_def": value_culture_def, 
-    "harsh_data": harsh_data,
 }
 
 if heterogenous_cultural_momentum:
@@ -223,7 +228,7 @@ data_save_network_list = [
     "average_culture",
     "min_culture",
     "max_culture",
-    "green_adoption"
+    "green_adoption",
 ] 
 data_save_network_array_list = [
     "weighting_matrix",
@@ -275,7 +280,6 @@ loadBooleanArray = [
     "behaviour_value",
     "behaviour_threshold",
     "behaviour_attract",
-
 ]
 if information_provision_state:
     loadBooleanArray.append("behaviour_information_provision")
@@ -291,11 +295,7 @@ cmap = LinearSegmentedColormap.from_list("BrownGreen", ["sienna", "whitesmoke", 
 
 #norm_neg_pos = plt.cm.ScalarMappable(cmap=cmap, norm=Normalize(vmin=-1, vmax=1))
 norm_neg_pos = Normalize(vmin=-1, vmax=1)
-
-if value_culture_def:
-    norm_zero_one  = Normalize(vmin=-1, vmax=1)
-else:
-    norm_zero_one  = Normalize(vmin=0, vmax=1)
+norm_zero_one  = Normalize(vmin=0, vmax=1)
 
 #log_norm = SymLogNorm(linthresh=0.15, linscale=1, vmin=-1.0, vmax=1.0, base=10)  # this works at least its correct
 cmap_weighting = "Reds"
@@ -319,15 +319,24 @@ num_counts = 100000
 bin_num_agents = int(round(N/10))
 dpi_save = 2000
 
+min_k,max_k = 2,N - 1# Cover all the possible bases with the max k though it does slow it down
+alpha_val = 0.25
+size_points = 5
+min_culture_distance = 0.5
+
 RUN = True
+LOAD_LIVE_DATA = False
+LOAD_STATIC_DATA = True
 PLOT = True
+cluster_plots = False
 SHOW_PLOT = True
+
 frames_list_exponetial = False
 
 if __name__ == "__main__":
 
     if RUN == False:
-        FILENAME = "results/_DEGROOT_1000_3_100_0.01_30_0.2_10_0.05_0.2_0.3_0.3_0.2_0.1"
+        FILENAME = "results/_DEGROOT_200_3_50_0.1_10_0.1_1_0.02_1_1_1_1_1"
     else:
         # start_time = time.time()
         # print("start_time =", time.ctime(time.time()))
@@ -337,60 +346,60 @@ if __name__ == "__main__":
         # print ("RUN time taken: %s minutes" % ((time.time()-start_time)/60), "or %s s"%((time.time()-start_time)))
 
     if PLOT:
-
         start_time = time.time()
         print("start_time =", time.ctime(time.time()))
 
         dataName = FILENAME + "/Data"
-        Data = loadData(dataName, loadBooleanCSV, loadBooleanArray)
-        Data = get_run_properties(Data, FILENAME, paramList)
+
+        if LOAD_LIVE_DATA:
+            "LOAD LIVE OBJECT"
+            live_network = loadObjects(dataName)
+
+        if LOAD_STATIC_DATA:
+            "LOAD DATA"
+            Data = loadData(dataName, loadBooleanCSV, loadBooleanArray)
+            Data = get_run_properties(Data, FILENAME, paramList)
 
 
         #####BODGES!!
         Data["network_time"] = np.asarray(Data["network_time"])[
             0
         ]  # for some reason pandas does weird shit
+        Data["phi_list"] = np.linspace(phi_list_lower, phi_list_upper, num=M)# ALSO DONE IN NETWORK BUT NEEDED FOR PLOTS AND HAVENT SAVED IT AS OF YET# ITS A PAIN TO GET IT IN
 
         
         if frames_list_exponetial: 
             frames_proportion = int(round(len(Data["network_time"]) / 2))
             frames_list = frame_distribution_prints( Data["network_time"], scale_factor, frame_num )
+            print("frames prints:",frames_list)
         else:
-            frames_list = [int(round(x)) for x in np.linspace(0,time_steps_max, num=frame_num + 1)]
-             
-        print("frames prints:",frames_list)
+            #print(len(Data["network_weighting_matrix"]))
+            #print(Data["network_time"], len(Data["network_time"]))
+            frames_list = [int(round(x)) for x in np.linspace(0, len(Data["network_time"])-1 , num=frame_num + 1)]# -1 is so its within range as linspace is inclusive
 
         ###PLOTS
         #plot_beta_distributions(FILENAME,alpha_attract,beta_attract,alpha_threshold,beta_threshold,bin_num,num_counts,dpi_save,)
-        #plot_culture_timeseries(FILENAME, Data, dpi_save)
-        #plot_green_adoption_timeseries(FILENAME, Data, dpi_save)
-        #plot_value_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save, phi_list)
-        #plot_threshold_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save, phi_list)
-        #plot_attract_timeseries(FILENAME, Data, nrows_behave, ncols_behave, dpi_save, phi_list)
+        plot_culture_timeseries(FILENAME, Data, dpi_save)
+        plot_green_adoption_timeseries(FILENAME, Data, dpi_save)
+        plot_value_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save)
+        #plot_threshold_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save)
+        #plot_attract_timeseries(FILENAME, Data, nrows_behave, ncols_behave, dpi_save)
         #plot_total_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
-        ##plot_av_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
+        #plot_av_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
         #plot_weighting_matrix_convergence_timeseries(FILENAME, Data, dpi_save)
         #plot_cultural_range_timeseries(FILENAME, Data, dpi_save)
         #plot_average_culture_timeseries(FILENAME,Data,dpi_save)
         #plot_weighting_link_timeseries(FILENAME, Data, "Link strength", dpi_save,min_val)
-
-        if RUN:
-            print("RUN")
-            live_plot_heterogenous_culture_momentum(FILENAME, social_network, dpi_save)
-
-        if carbon_price_state:
-            plot_carbon_price_timeseries(FILENAME,Data,dpi_save)
+        #plot_behaviour_scatter(FILENAME,Data,"behaviour_attract",dpi_save)
 
         ###PRINTS
         
         #prints_weighting_matrix(FILENAME,Data,cmap_weighting,nrows,ncols,frames_list,round_dec,dpi_save)
         #prints_behavioural_matrix(FILENAME,Data,cmap,nrows,ncols,frames_list,round_dec,dpi_save)
-        #prints_culture_network(FILENAME,Data,layout,cmap,node_size,nrows,ncols,norm_zero_one,frames_list,round_dec,dpi_save)
+        #prints_culture_network(FILENAME,Data,layout,cmap,node_size,nrows,ncols,norm_neg_pos,frames_list,round_dec,dpi_save,norm_zero_one)
         #print_network_social_component_matrix(FILENAME,Data,cmap,nrows,ncols,frames_list,round_dec,dpi_save)
         #print_culture_histogram(FILENAME, Data, "individual_culture", nrows, ncols, frames_list,round_dec,dpi_save, bin_num_agents)
-        prints_behaviour_timeseries_plot_colour_culture(FILENAME, Data, "behaviour_attract", "Attractiveness", nrows_behave, ncols_behave, dpi_save, phi_list,cmap,norm_zero_one)
-        if information_provision_state:
-            print_network_information_provision(FILENAME,Data,cmap,nrows,ncols,frames_list,round_dec,dpi_save)
+        #prints_behaviour_timeseries_plot_colour_culture(FILENAME, Data, "behaviour_attract", "Attractiveness", nrows_behave, ncols_behave, dpi_save,cmap,norm_zero_one)
 
         ###ANIMATIONS
         #ani_a = animate_network_information_provision(FILENAME,Data,interval,fps,round_dec,cmap_weighting)
@@ -403,11 +412,25 @@ if __name__ == "__main__":
         #ani_i = multi_animation_four(FILENAME,Data,cmap,cmap,layout,node_size,interval,fps,norm_neg_pos)
         #ani_j = multi_animation_alt(FILENAME,Data,cmap,cmap,layout,node_size,interval,fps,norm_neg_pos)
         #ani_k = multi_animation_scaled(FILENAME,Data,cmap,cmap,layout,node_size,interval,fps,scale_factor,frames_proportion,norm_neg_pos)
+        #ani_l = animate_behaviour_scatter(FILENAME,Data,"behaviour_attract",norm_zero_one, cmap,interval,fps,round_dec)
+
+        if cluster_plots:
+            k_clusters,win_score, scores = k_means_calc(Data,min_k,max_k,size_points)#CALCULATE THE OPTIMAL NUMBER OF CLUSTERS USING SILOUTTE SCORE, DOENST WORK FOR 1
+            #k_clusters = 2 # UNCOMMENT TO SET K MANUALLY
+            Euclidean_cluster_plot(FILENAME, Data, k_clusters,alpha_val,min_culture_distance, dpi_save)
+
+        if heterogenous_cultural_momentum:
+            live_plot_heterogenous_culture_momentum(FILENAME, social_network, dpi_save)
+
+        if carbon_price_state:
+            plot_carbon_price_timeseries(FILENAME,Data,dpi_save)
+        if information_provision_state:
+            print_network_information_provision(FILENAME,Data,cmap,nrows,ncols,frames_list,round_dec,dpi_save)
 
         print(
             "PLOT time taken: %s minutes" % ((time.time() - start_time) / 60),
             "or %s s" % ((time.time() - start_time)),
         )
 
-        if SHOW_PLOT:
-            plt.show()
+    if SHOW_PLOT:
+        plt.show()

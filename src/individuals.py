@@ -1,5 +1,7 @@
+from logging import raiseExceptions
 import numpy.typing as npt
 import numpy as np
+from scipy.stats import gmean
 
 class Individual:
 
@@ -8,17 +10,23 @@ class Individual:
     """
 
     def __init__(
-        self, individual_params, init_data_attracts, init_data_thresholds, normalized_discount_list , culture_momentum
+        self, individual_params, init_data_attracts, init_data_thresholds, normalized_discount_vector , culture_momentum
     ):
         
-        self.init_attracts = init_data_attracts
         self.init_thresholds = init_data_thresholds
+
 
         self.attracts = init_data_attracts
         self.thresholds = init_data_thresholds
-        self.normalized_discount_list = normalized_discount_list
-        self.culture_momentum = culture_momentum
 
+        self.normalized_discount_vector = normalized_discount_vector
+        #print(self.normalized_discount_vector, sum(self.normalized_discount_vector))
+
+        self.culture_momentum = culture_momentum
+        #self.culture_momentum = individual_params["culture_momentum"]
+        #self.discount_list = individual_params["discount_list"]
+        #self.sum_discount_list = sum(self.discount_list)
+        
         self.M = individual_params["M"]
         self.t = individual_params["t"]
         self.delta_t = individual_params["delta_t"]
@@ -26,10 +34,14 @@ class Individual:
         self.carbon_intensive_list = individual_params["carbon_emissions"]
         self.carbon_price_state = individual_params["carbon_price_state"]
         self.information_provision_state = individual_params["information_provision_state"]
-        self.nur_attitude = individual_params["nur_attitude"]
-        self.value_culture_def = individual_params["value_culture_def"]
-
+        self.averaging_method = individual_params["averaging_method"]
+        self.compression_factor = individual_params["compression_factor"]
         self.phi_array = individual_params["phi_array"]
+
+        if self.averaging_method == "Threshold weighted arithmetic":
+            self.threshold_sum = sum(self.init_thresholds)
+            self.threshold_weighting_array = self.init_thresholds/self.threshold_sum
+        
 
         if self.carbon_price_state:
             self.carbon_price = individual_params["carbon_price"]
@@ -45,7 +57,9 @@ class Individual:
         if self.information_provision_state:
             self.information_provision = self.calc_information_provision()
         
-        self.total_carbon_emissions, self.av_behaviour  = self.update_total_emissions_av_behaviour()
+        self.total_carbon_emissions = self.update_total_emissions()
+        self.av_behaviour = self.update_av_behaviour()
+        #self.total_carbon_emissions, self.av_behaviour  = self.update_total_emissions_av_behaviour()
 
         self.av_behaviour_list = [self.av_behaviour]*self.culture_momentum
         self.culture = self.calc_culture()
@@ -61,30 +75,20 @@ class Individual:
                 self.history_information_provision = [self.information_provision]
 
     def update_av_behaviour_list(self):
-        if len(self.av_behaviour_list) < self.culture_momentum:
-            self.av_behaviour_list.insert(0,self.av_behaviour)
-        else:
-            self.av_behaviour_list.pop()
-            self.av_behaviour_list.insert(0,self.av_behaviour)
-        #print("self.av_behaviour_list", self.av_behaviour_list)
+        self.av_behaviour_list.pop()
+        self.av_behaviour_list.insert(0,self.av_behaviour)
 
     def calc_culture(self) -> float:
-        return np.matmul(self.normalized_discount_list, self.av_behaviour_list)#here discount list is normalized
+        return np.matmul(self.normalized_discount_vector, self.av_behaviour_list)#here discount list is normalized
 
     def update_values(self):
         self.values = self.attracts - self.thresholds
 
-    def update_attracts(self,social_component_with_phi):
-        if self.nur_attitude:
-            if self.information_provision_state:
-                self.attracts = self.init_attracts*(1 - self.phi_array) + social_component_with_phi + self.information_provision
-            else:
-                self.attracts = self.init_attracts*(1 - self.phi_array) + social_component_with_phi
+    def update_attracts(self,social_component):
+        if self.information_provision_state:
+            self.attracts = self.attracts*(1 - self.phi_array*self.delta_t) + self.phi_array*self.delta_t*(social_component) + self.information_provision  
         else:
-            if self.information_provision_state:
-                self.attracts = self.attracts*(1 - self.delta_t*self.phi_array) + self.delta_t*(social_component_with_phi + self.information_provision)  
-            else:
-                self.attracts = self.attracts*(1 - self.delta_t*self.phi_array) + self.delta_t*(social_component_with_phi)  
+            self.attracts = self.attracts*(1 - self.phi_array*self.delta_t) + self.phi_array*self.delta_t*(social_component)  
 
     def update_thresholds(self):
         for m in range(self.M):
@@ -93,20 +97,28 @@ class Individual:
             else:
                 self.thresholds[m] = self.init_thresholds[m] - self.carbon_price*self.carbon_intensive_list[m]
 
-    def update_total_emissions_av_behaviour(self):
+    def update_total_emissions(self):
         total_emissions = 0  # calc_carbon_emission
-        total_behaviour = 0  # calc_behaviour_av
-        
         for i in range(self.M):
-            if self.value_culture_def:
-                total_behaviour += self.values[i] #attracts! # calc_behaviour_av
-            else:
-                total_behaviour += self.attracts[i]
-
             if (self.values[i] <= 0):  # calc_carbon_emissions if less than or equal to 0 then it is a less environmetally friendly behaviour(brown)
                 total_emissions += self.carbon_intensive_list[i]  # calc_carbon_emissions
-        average_behaviour = total_behaviour/self.M
-        return total_emissions, average_behaviour  # calc_carbon_emissions #calc_behaviour_a
+        return total_emissions
+    
+    def update_total_emissions_alt(self):
+        total_emissions = sum(self.carbon_intensive_list[i] for i in range(self.M) if self.values[i] <= 0)
+        return total_emissions
+
+    def update_av_behaviour(self):
+        if self.averaging_method == "Arithmetic":
+            return np.mean(self.attracts)
+        elif self.averaging_method == "Geometric":
+            return gmean(self.attracts)
+        elif self.averaging_method == "Quadratic":
+            return np.sqrt(np.mean(self.attracts**2))
+        elif self.averaging_method == "Threshold weighted arithmetic":
+            return np.matmul(self.threshold_weighting_array, self.attracts)#/(self.M)
+        else:
+            raiseExceptions("Invalid averaging method choosen try: Arithmetic or Geometric")
 
     def calc_information_provision_boost(self,i):
         return self.attract_information_provision_list[i]*(1 - np.exp(-self.nu*(self.attract_information_provision_list[i] - self.attracts[i])))
@@ -148,24 +160,30 @@ class Individual:
         if self.information_provision_state:
             self.history_information_provision.append(self.information_provision)
 
-    def next_step(self, t:float, social_component_with_phi: npt.NDArray):
+    def next_step(self, t:float,steps: int,  social_component: npt.NDArray):
         self.t = t
+        self.steps = steps
+
         if self.information_provision_state:
             self.update_information_provision()
 
         self.update_values()
         #print("before", self.attracts)
-        self.update_attracts(social_component_with_phi)
+        self.update_attracts(social_component)
 
         if self.carbon_price_state:
             self.update_thresholds()
 
-        self.total_carbon_emissions, self.av_behaviour = self.update_total_emissions_av_behaviour()
+        self.total_carbon_emissions = self.update_total_emissions()
+        self.av_behaviour = self.update_av_behaviour()
+
         self.update_av_behaviour_list()
+
         self.culture = self.calc_culture()
         #print("inv culture", self.culture)
         if self.save_data:
-            self.save_data_individual()
+            if self.steps%self.compression_factor == 0:
+                self.save_data_individual()
         
 
 
