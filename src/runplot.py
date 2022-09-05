@@ -12,7 +12,7 @@ from plot import (
     multi_animation_scaled,
     plot_value_timeseries,
     plot_threshold_timeseries,
-    plot_attract_timeseries,
+    plot_attitude_timeseries,
     standard_behaviour_timeseries_plot,
     plot_carbon_price_timeseries,
     plot_total_carbon_emissions_timeseries,
@@ -40,185 +40,72 @@ from plot import (
 )
 from utility import loadData, get_run_properties, frame_distribution_prints,k_means_calc,loadObjects
 import matplotlib.pyplot as plt
-from matplotlib.colors import LinearSegmentedColormap, SymLogNorm, Normalize
+from matplotlib.colors import LinearSegmentedColormap, Normalize
 from matplotlib.cm import get_cmap
 import time
 import numpy as np
 
-
-# Params
-save_data = True
-opinion_dynamics =  "DEGROOT" #  "DEGROOT"  "SELECT"
-carbon_price_state = False
-information_provision_state = False
-linear_alpha_diff_state = False #if true use the exponential form instead like theo
-homophily_state = True
-alpha_change = True
-heterogenous_cultural_momentum = True
-harsh_data = False
-
-#Social emissions model
-K = 12 # k nearest neighbours INTEGER
-M = 3  # number of behaviours
-N = 30  # number of agents
-
-total_time = 100
-culture_momentum_real = 4
-delta_t = 0.1  # time step size
-averaging_method = "Arithmetic" #"Geometric"#"Arithmetic"#"Threshold weighted arithmetic"
-
-compression_factor = 5
-
-prob_rewire = 0.1  # re-wiring probability?
-
-time_steps_max = int(
-    total_time / delta_t
-)  # number of time steps max, will stop if culture converges
-#print("time steps max" , time_steps_max)
-set_seed = 1  ##reproducibility INTEGER
-phi_list_lower,phi_list_upper = 0.1,1
-
-learning_error_scale = 0.02  # 1 standard distribution is 2% error
-
-inverse_homophily = 0.3#0.2
-homophilly_rate = 1
-
-discount_factor = 0.6#0.6
-present_discount_factor = 0.8#0.8
-
-confirmation_bias = 25
-
-if heterogenous_cultural_momentum:
-    quick_changers_prop = 0 #0.2#proportion of population that are quick changers that have very light memory
-    lagards_prop = 0 #0.2#proportion of population that are quick changers that have very long memory
-    ratio_quick_changers = 0.25
-    ratio_lagards = 4
-
-#harsh data parameters
-if harsh_data:
-    green_extreme_max = 8#beta distribution value max
-    green_extreme_min = 2#beta distribution value min
-    green_extreme_prop = 2/5# proportion of population that are green
-    indifferent_max = 2
-    indifferent_min = 2
-    indifferent_prop = 1/5#proportion that are indifferent
-    brown_extreme_min = 2
-    brown_extreme_max = 8
-    brown_extreme_prop = 2/5#proportion that are brown
-    if green_extreme_prop + indifferent_prop + brown_extreme_prop != 1:
-        print(green_extreme_prop + indifferent_prop + brown_extreme_prop)
-        raise Exception("Invalid proportions")
-else:
-    alpha_attract = 1#2  ##inital distribution parameters - doing the inverse inverts it!
-    beta_attract = 1#3
-    alpha_threshold = 1#3
-    beta_threshold = 1#2
-
-#Infromation provision parameters
-if information_provision_state:
-    nu = 1# how rapidly extra gains in attractiveness are made
-    eta = 0.2#decay rate of information provision boost
-    attract_information_provision_list = np.array([0.5*(1/delta_t)]*M)#
-    t_IP_matrix = np.array([[],[],[]]) #REAL TIME; list stating at which time steps an information provision policy should be aplied for each behaviour
-
-#Carbon price parameters
-if carbon_price_state:
-    carbon_price_policy_start = 5#in simualation time to start the policy
-    carbon_price_init = 0.0#
-    #social_cost_carbon = 0.5
-    carbon_price_gradient = 0#social_cost_carbon/time_steps_max# social cost of carbon/total time
-
 params = {
-    "opinion_dynamics": opinion_dynamics,
-    "save_data": save_data, 
-    "compression_factor": compression_factor,
-    "time_steps_max": time_steps_max, 
-    "carbon_price_state" : carbon_price_state,
-    "information_provision_state" : information_provision_state,
-    "linear_alpha_diff_state": linear_alpha_diff_state,
-    "homophily_state": homophily_state,
-    "alpha_change" : alpha_change,
-    "heterogenous_cultural_momentum" : heterogenous_cultural_momentum,
-    "harsh_data": harsh_data,
-    "averaging_method": averaging_method,
-    "delta_t": delta_t,
-    "phi_list_lower": phi_list_lower,
-    "phi_list_upper": phi_list_upper,
-    "N": N,
-    "M": M,
-    "K": K,
-    "prob_rewire": prob_rewire,
-    "set_seed": set_seed,
-    "culture_momentum_real": culture_momentum_real,
-    "learning_error_scale": learning_error_scale,
-    "alpha_attract": alpha_attract,
-    "beta_attract": beta_attract,
-    "alpha_threshold": alpha_threshold,
-    "beta_threshold": beta_threshold,
-    "discount_factor": discount_factor,
-    "inverse_homophily": inverse_homophily,#1 is total mixing, 0 is no mixing
-    "homophilly_rate" : homophilly_rate,
-    "present_discount_factor": present_discount_factor,
-    "confirmation_bias": confirmation_bias,
+    "total_time": 100,
+    "delta_t": 0.05,
+    "compression_factor": 10,
+    "save_data": True, 
+    "alpha_change" : 1.0,
+    "harsh_data": False,
+    "averaging_method": "Arithmetic",
+    "phi_list_lower": 0.1,
+    "phi_list_upper": 1.0,
+    "N": 100,
+    "M": 3,
+    "K": 20,
+    "prob_rewire": 0.05,
+    "set_seed": 1,
+    "culture_momentum_real": 5,
+    "learning_error_scale": 0.02,
+    "discount_factor": 0.6,
+    "present_discount_factor": 0.8,
+    "inverse_homophily": 0.1,#1 is total mixing, 0 is no mixing
+    "homophilly_rate" : 1.5,
+    "confirmation_bias": 25,
 }
 
-if heterogenous_cultural_momentum:
-    params["quick_changers_prop"] = quick_changers_prop
-    params["lagards_prop"] = lagards_prop
-    params["ratio_quick_changers"] = ratio_quick_changers
-    params["ratio_lagards"] = ratio_lagards
+params["time_steps_max"] = int(params["total_time"] / params["delta_t"])
 
-    #params["alpha_quick_changers_cultural_momentum"]= alpha_quick_changers_cultural_momentum
-    #params["beta_quick_changers_cultural_momentum"]= beta_quick_changers_cultural_momentum
-    #params["alpha_lagards_cultural_momentum"]= alpha_lagards_cultural_momentum
-    #params["beta_lagards_cultural_momentum"]= beta_lagards_cultural_momentum
 #behaviours!
-if harsh_data:#trying to create a polarised society!
-    params["green_extreme_max"]= green_extreme_max
-    params["green_extreme_min"]= green_extreme_min
-    params["green_extreme_prop"]= green_extreme_prop
-    params["indifferent_max"]= indifferent_max
-    params["indifferent_min"]= indifferent_min
-    params["indifferent_prop"]= indifferent_prop
-    params["brown_extreme_min"]= brown_extreme_min 
-    params["brown_extreme_max"]= brown_extreme_max
-    params["brown_extreme_prop"]= brown_extreme_prop
+if params["harsh_data"]:#trying to create a polarised society!
+    params["green_extreme_max"]= 8
+    params["green_extreme_min"]= 2
+    params["green_extreme_prop"]= 2/5
+    params["indifferent_max"]= 2
+    params["indifferent_min"]= 2
+    params["indifferent_prop"]= 1/5
+    params["brown_extreme_min"]= 2
+    params["brown_extreme_max"]= 8
+    params["brown_extreme_prop"]= 2/5
+    if params["green_extreme_prop"] + params["indifferent_prop"] + params["brown_extreme_prop"] != 1:
+        raise Exception("Invalid proportions")
 else:
-    params["alpha_attract"] = alpha_attract
-    params["beta_attract"] = beta_attract
-    params["alpha_threshold"] = alpha_threshold
-    params["beta_threshold"] = beta_threshold
+    params["alpha_attitude"] = 1
+    params["beta_attitude"] = 1
+    params["alpha_threshold"] = 1
+    params["beta_threshold"] = 1
 
-
-if carbon_price_state:
-    params["carbon_price_init"] = carbon_price_init
-    params["carbon_price_policy_start"] =  carbon_price_policy_start
-    params["carbon_price_gradient"] =  carbon_price_gradient
-
-if information_provision_state:
-    params["nu"] = nu
-    params["eta"] =  eta
-    params["attract_information_provision_list"] = attract_information_provision_list
-    params["t_IP_matrix"] =  t_IP_matrix
-
-
-params_name = [#THOSE USEd to create the save list?
-    opinion_dynamics,
-    time_steps_max,
-    M,
-    N,
-    delta_t,
-    K,
-    prob_rewire,
-    set_seed,
-    learning_error_scale,
-    culture_momentum_real,
-]
 
 # SAVING DATA
-# THINGS TO SAVE
+params_name = [#THOSE USEd to create the save list?
+    params["time_steps_max"],
+    params["M"],
+    params["N"],
+    params["delta_t"],
+    params["K"],
+    params["prob_rewire"],
+    params["set_seed"],
+    params["learning_error_scale"],
+    params["culture_momentum_real"],
+]
 
-data_save_behaviour_array_list = ["value", "attract", "threshold"]
+# THINGS TO SAVE
+data_save_behaviour_array_list = ["value", "attitude", "threshold"]
 data_save_individual_list = ["culture", "carbon_emissions"]
 data_save_network_list = [
     "time",
@@ -235,12 +122,6 @@ data_save_network_array_list = [
     "social_component_matrix",
 ]
 
-if information_provision_state:
-    data_save_behaviour_array_list.append( "information_provision")
-
-if carbon_price_state:
-    data_save_network_list.append("carbon_price")
-
 to_save_list = [
     data_save_behaviour_array_list,
     data_save_individual_list,
@@ -250,7 +131,6 @@ to_save_list = [
 
 # LOAD DATA
 paramList = [
-    "opinion_dynamics",
     "time_steps_max",
     "M",
     "N",
@@ -261,7 +141,6 @@ paramList = [
     "learning_error_scale",
     "culture_momentum_real",
 ]
-
 loadBooleanCSV = [
     "individual_culture",
     "individual_carbon_emissions",
@@ -273,23 +152,19 @@ loadBooleanCSV = [
     "network_min_culture",
     "network_max_culture",
     "network_green_adoption",
-]  # "network_cultural_var",,"network_carbon_price"
+] 
 loadBooleanArray = [
     "network_weighting_matrix",
     "network_social_component_matrix",
     "behaviour_value",
     "behaviour_threshold",
-    "behaviour_attract",
+    "behaviour_attitude",
 ]
-if information_provision_state:
-    loadBooleanArray.append("behaviour_information_provision")
-    
-if carbon_price_state:
-    loadBooleanCSV.append("network_carbon_price")
+
 
 ###PLOT STUFF
 nrows_behave = 1
-ncols_behave = M
+ncols_behave = params["M"]
 node_size = 50
 cmap = LinearSegmentedColormap.from_list("BrownGreen", ["sienna", "whitesmoke", "olivedrab"], gamma=1)
 
@@ -313,13 +188,12 @@ colour_quick, colour_normal, colour_lagard = "indianred", "grey", "cornflowerblu
 
 #print("time_steps_max", time_steps_max)
 frame_num = ncols * nrows - 1
-scale_factor = time_steps_max*2
 
 min_val = 1e-3
 
 bin_num = 1000
 num_counts = 100000
-bin_num_agents = int(round(N/10))
+bin_num_agents = int(round(params["N"]/10))
 dpi_save = 2000
 
 min_k,max_k = 2,10#N - 1# Cover all the possible bases with the max k though it does slow it down
@@ -334,7 +208,6 @@ PLOT = True
 cluster_plots = False
 SHOW_PLOT = True
 
-frames_list_exponetial = False
 
 if __name__ == "__main__":
 
@@ -368,32 +241,24 @@ if __name__ == "__main__":
         Data["network_time"] = np.asarray(Data["network_time"])[
             0
         ]  # for some reason pandas does weird shit
-        Data["phi_list"] = np.linspace(phi_list_lower, phi_list_upper, num=M)# ALSO DONE IN NETWORK BUT NEEDED FOR PLOTS AND HAVENT SAVED IT AS OF YET# ITS A PAIN TO GET IT IN
+        Data["phi_list"] = np.linspace(params["phi_list_lower"], params["phi_list_upper"], num=params["M"])# ALSO DONE IN NETWORK BUT NEEDED FOR PLOTS AND HAVENT SAVED IT AS OF YET# ITS A PAIN TO GET IT IN
 
-        
-        if frames_list_exponetial: 
-            frames_proportion = int(round(len(Data["network_time"]) / 2))
-            frames_list = frame_distribution_prints( Data["network_time"], scale_factor, frame_num )
-            print("frames prints:",frames_list)
-        else:
-            #print(len(Data["network_weighting_matrix"]))
-            #print(Data["network_time"], len(Data["network_time"]))
-            frames_list = [int(round(x)) for x in np.linspace(0, len(Data["network_time"])-1 , num=frame_num + 1)]# -1 is so its within range as linspace is inclusive
+        frames_list = [int(round(x)) for x in np.linspace(0, len(Data["network_time"])-1 , num=frame_num + 1)]# -1 is so its within range as linspace is inclusive
 
         ###PLOTS
-        #plot_beta_distributions(FILENAME,alpha_attract,beta_attract,alpha_threshold,beta_threshold,bin_num,num_counts,dpi_save,)
+        #plot_beta_distributions(FILENAME,alpha_attitude,beta_attitude,alpha_threshold,beta_threshold,bin_num,num_counts,dpi_save,)
         plot_culture_timeseries(FILENAME, Data, dpi_save)
         #plot_green_adoption_timeseries(FILENAME, Data, dpi_save)
         #plot_value_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save)
         #plot_threshold_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save)
-        #plot_attract_timeseries(FILENAME, Data, nrows_behave, ncols_behave, dpi_save)
+        #plot_attitude_timeseries(FILENAME, Data, nrows_behave, ncols_behave, dpi_save)
         #plot_total_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
         #plot_av_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
         #plot_weighting_matrix_convergence_timeseries(FILENAME, Data, dpi_save)
         #plot_cultural_range_timeseries(FILENAME, Data, dpi_save)
         #plot_average_culture_timeseries(FILENAME,Data,dpi_save)
         #plot_weighting_link_timeseries(FILENAME, Data, "Link strength", dpi_save,min_val)
-        #plot_behaviour_scatter(FILENAME,Data,"behaviour_attract",dpi_save)
+        #plot_behaviour_scatter(FILENAME,Data,"behaviour_attitude",dpi_save)
 
         ###PRINTS
         
@@ -402,7 +267,7 @@ if __name__ == "__main__":
         #prints_culture_network(FILENAME,Data,layout,cmap,node_size,nrows,ncols,norm_zero_one,frames_list,round_dec,dpi_save)
         #print_network_social_component_matrix(FILENAME,Data,cmap,nrows,ncols,frames_list,round_dec,dpi_save)
         #print_culture_histogram(FILENAME, Data, "individual_culture", nrows, ncols, frames_list,round_dec,dpi_save, bin_num_agents)
-        #prints_behaviour_timeseries_plot_colour_culture(FILENAME, Data, "behaviour_attract", "Attractiveness", nrows_behave, ncols_behave, dpi_save,cmap,norm_zero_one)
+        #prints_behaviour_timeseries_plot_colour_culture(FILENAME, Data, "behaviour_attitude", "attitudeiveness", nrows_behave, ncols_behave, dpi_save,cmap,norm_zero_one)
 
         ###ANIMATIONS
        
@@ -413,22 +278,13 @@ if __name__ == "__main__":
         #ani_f = animate_culture_network_and_weighting(FILENAME,Data,layout,cmap,node_size,interval,fps,norm_zero_one,round_dec,cmap_edge)
         
         #Shows the 2D movement of attitudes and their culture, equivalent to prints_behaviour_timeseries_plot_colour_culture
-        #ani_l = animate_behaviour_scatter(FILENAME,Data,"behaviour_attract",norm_zero_one, cmap,interval,fps,round_dec)
+        #ani_l = animate_behaviour_scatter(FILENAME,Data,"behaviour_attitude",norm_zero_one, cmap,interval,fps,round_dec)
 
 
         if cluster_plots:
             k_clusters,win_score, scores = k_means_calc(Data,min_k,max_k,size_points)#CALCULATE THE OPTIMAL NUMBER OF CLUSTERS USING SILOUTTE SCORE, DOENST WORK FOR 1
             #k_clusters = 2 # UNCOMMENT TO SET K MANUALLY
             Euclidean_cluster_plot(FILENAME, Data, k_clusters,alpha_val,min_culture_distance, dpi_save)
-
-        if heterogenous_cultural_momentum:
-            live_plot_heterogenous_culture_momentum(FILENAME, social_network, dpi_save, alpha_quick, alpha_normal, alpha_lagard, colour_quick, colour_normal, colour_lagard)
-
-        if carbon_price_state:
-            plot_carbon_price_timeseries(FILENAME,Data,dpi_save)
-        if information_provision_state:
-            print_network_information_provision(FILENAME,Data,cmap,nrows,ncols,frames_list,round_dec,dpi_save)
-             #ani_a = animate_network_information_provision(FILENAME,Data,interval,fps,round_dec,cmap_weighting)
 
         print(
             "PLOT time taken: %s minutes" % ((time.time() - start_time) / 60),

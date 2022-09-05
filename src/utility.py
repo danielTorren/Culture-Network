@@ -124,10 +124,8 @@ def save_behaviours(data: Network, steps: int, N: int, M: int) -> dict:
     dataDict = {}
     #print(steps, N, M)
     data_behaviour_value = np.zeros([steps, N, M])
-    data_behaviour_attract = np.zeros([steps, N, M])
+    data_behaviour_attitude = np.zeros([steps, N, M])
     data_behaviour_threshold = np.zeros([steps, N, M])
-    if data.information_provision_state:
-        data_behaviour_information_provision = np.zeros([steps, N, M])
     # print("steps",steps,N,M)
     for t in range(steps):
         #print("TIME")
@@ -137,24 +135,18 @@ def save_behaviours(data: Network, steps: int, N: int, M: int) -> dict:
                 data_behaviour_value[t][n][m] = (
                     data.agent_list[n].history_behaviour_values[t][m]
                 )
-                #print("ATRACT: ", data.agent_list[n].history_behaviour_attracts[t])
-                data_behaviour_attract[t][n][m] = (
-                    data.agent_list[n].history_behaviour_attracts[t][m]
+                #print("ATRACT: ", data.agent_list[n].history_behaviour_attitudes[t])
+                data_behaviour_attitude[t][n][m] = (
+                    data.agent_list[n].history_behaviour_attitudes[t][m]
                 )
                 data_behaviour_threshold[t][n][m] = (
                     data.agent_list[n].history_behaviour_thresholds[t][m]
                 )
-                if data.information_provision_state:
-                    data_behaviour_information_provision[t][n][m] = (
-                        data.agent_list[n].history_information_provision[t][m]
-                    )
 
     dataDict["value"] = data_behaviour_value
-    dataDict["attract"] = data_behaviour_attract
+    dataDict["attitude"] = data_behaviour_attitude
     
     dataDict["threshold"] = data_behaviour_threshold
-    if data.information_provision_state:
-        dataDict["information_provision"] = data_behaviour_information_provision
 
     # print(np.shape(dataDict["value"]))
 
@@ -163,7 +155,7 @@ def save_behaviours(data: Network, steps: int, N: int, M: int) -> dict:
 
 def save_list_array(dataName: str, dataSaveList: list, dataDict: dict, agentClass: str):
     for i in dataSaveList:
-        arrayName = dataName + "/" + agentClass + "_" + i  #'/Tenant_LandDet.csv'
+        arrayName = dataName + "/" + agentClass + "_" + i 
         np.savez(arrayName, dataDict[i])
 
 
@@ -412,6 +404,8 @@ def add_varaiables_to_dict(params,variable_parameters,X):
     return params
 
 def produce_param_list_SA(param_values,params,variable_parameters):
+    "param_values are the satelli samples, params are the fixed variables, variable parameters is the list of SA variables, we want the name!"
+
     params_list = []
     for i, X in enumerate(param_values):
         variable_params_added = add_varaiables_to_dict(params,variable_parameters,X)
@@ -434,17 +428,36 @@ def generate_title_list(
     col_list,
     property_row,
     row_list,
+    round_dec,
     ):
 
     title_list = []
     
     for i in range(len(row_list)):
         for j in range(len(col_list)):
-            title_list.append(("%s = %s, %s = %s") % (property_row,str(row_list[i]), property_col,str(col_list[j])))
+            title_list.append(("%s = %s, %s = %s") % (property_row,str(round(row_list[i],round_dec)), property_col,str(round(col_list[j], round_dec))))
 
     print(title_list)
     
     return  title_list
+
+def sa_save_Y(Y,fileName):
+    with open(fileName + "/Y.pkl", 'wb') as f:
+        pickle.dump(Y, f)
+    
+def sa_load_Y(fileName) -> dict:
+    with open(fileName + "/Y.pkl", 'rb') as f:
+        Y = pickle.load(f)
+    return Y
+
+def sa_save_problem(problem,fileName):
+    with open(fileName + "/problem.pkl", 'wb') as f:
+        pickle.dump(problem, f)
+    
+def sa_load_problem(fileName) -> dict:
+    with open(fileName + "/problem.pkl", 'rb') as f:
+        problem = pickle.load(f)
+    return problem
 
 
 

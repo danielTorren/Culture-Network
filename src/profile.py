@@ -22,8 +22,8 @@ if __name__ == "__main__":
 
     prob_rewire = 0.2  # re-wiring probability?
 
-    alpha_attract = 1#2  ##inital distribution parameters - doing the inverse inverts it!
-    beta_attract = 1#3
+    alpha_attitude = 1#2  ##inital distribution parameters - doing the inverse inverts it!
+    beta_attitude = 1#3
     alpha_threshold = 1#3
     beta_threshold = 1#2
 
@@ -45,9 +45,9 @@ if __name__ == "__main__":
 
     #Infromation provision parameters
     if information_provision_state:
-        nu = 1# how rapidly extra gains in attractiveness are made
+        nu = 1# how rapidly extra gains in attitudeiveness are made
         eta = 0.2#decay rate of information provision boost
-        attract_information_provision_list = np.array([0.5*(1/delta_t)]*M)#
+        attitude_information_provision_list = np.array([0.5*(1/delta_t)]*M)#
         t_IP_matrix = np.array([[],[],[]]) #REAL TIME; list stating at which time steps an information provision policy should be aplied for each behaviour
 
     #Carbon price parameters
@@ -76,8 +76,8 @@ if __name__ == "__main__":
         "set_seed": set_seed,
         "culture_momentum_real": culture_momentum_real,
         "learning_error_scale": learning_error_scale,
-        "alpha_attract": alpha_attract,
-        "beta_attract": beta_attract,
+        "alpha_attitude": alpha_attitude,
+        "beta_attitude": beta_attitude,
         "alpha_threshold": alpha_threshold,
         "beta_threshold": beta_threshold,
         "carbon_emissions" : carbon_emissions,

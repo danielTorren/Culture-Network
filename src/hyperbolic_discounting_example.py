@@ -21,26 +21,28 @@ def plot_discount_factors_beta_delta(f, const_delta_discount_list, const_beta_di
     for i in range(len(delta_vals) - 1):
         ax.plot(time_list, const_beta_discount_list[i+1], linestyle = "-",label =  r"$\beta$ = %s , $\delta$ = %s" % (beta_vals[0],delta_vals[i+1]) )
 
-    ax.set_xlabel(r"Time/\delta t")
+    ax.set_xlabel(r"Time/$\Delta t$")
     ax.set_ylabel(r"Discount Value")
     ax.set_xticks(np.arange(0, -culture_momentum, step=-5))
     ax.legend()
 
-    fig.savefig(f, dpi=dpi_save)
+    fig.savefig(f, dpi=dpi_save,format='eps')
 
 if __name__ == "__main__":
 
-    delta_t = 1
-    culture_momentum = 21
+    delta_t = 0.5
+    culture_momentum = 11
     beta_vals = [0.8,0.6,0.4]
     delta_vals = [0.8,0.7,0.6,0.5]
 
-    FILENAME = "results/plot_discount_factors_beta_delta.png"
+    FILENAME = "results/plot_discount_factors_beta_delta.eps"
     dpi_save = 1200
-    time_list =  np.asarray([delta_t*x for x in range(culture_momentum)])
+    steps = int(culture_momentum/delta_t)
+
+    time_list =  np.asarray([delta_t*x for x in range(steps)])
     const_delta_discount_list, const_beta_discount_list = calc_data_discount(beta_vals, delta_vals,time_list)
 
-    time_list_plot = np.asarray([-delta_t*x for x in range(culture_momentum)])#so time is negative, past influences less
+    time_list_plot = np.asarray([-delta_t*x for x in range(steps)])#so time is negative, past influences less
     plot_discount_factors_beta_delta(FILENAME, const_delta_discount_list, const_beta_discount_list,beta_vals, delta_vals,time_list_plot,culture_momentum, dpi_save)
 
     plt.show()

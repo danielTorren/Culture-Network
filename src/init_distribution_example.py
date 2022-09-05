@@ -4,8 +4,8 @@ from typing import Union
 import pickle
 
 ##inital distribution parameters - doing the inverse inverts it!
-alpha_attract = 3
-beta_attract = 2
+alpha_attitude = 3
+beta_attitude = 2
 
 alpha_threshold = 3
 beta_threshold = 2
@@ -15,22 +15,22 @@ num_counts = 100000
 
 
 def plot_beta(
-    alpha_attract: Union[int, float], beta_attract: Union[int, float], alpha_threshold: Union[int, float], beta_threshold: Union[int, float], bin_num: Union[int, float], num_counts: Union[int, float]
+    alpha_attitude: Union[int, float], beta_attitude: Union[int, float], alpha_threshold: Union[int, float], beta_threshold: Union[int, float], bin_num: Union[int, float], num_counts: Union[int, float]
 ) -> None:
 
     fig, ax = plt.subplots()
 
     ax.hist(
-        np.random.beta(alpha_attract, beta_attract, num_counts),
+        np.random.beta(alpha_attitude, beta_attitude, num_counts),
         bin_num,
         density=True,
         facecolor="g",
         alpha=0.5,
         histtype="stepfilled",
-        label="Attract: alpha = "
-        + str(alpha_attract)
+        label="attitude: alpha = "
+        + str(alpha_attitude)
         + ", beta = "
-        + str(beta_attract),
+        + str(beta_attitude),
     )
     ax.hist(
         np.random.beta(alpha_threshold, beta_threshold, num_counts),
@@ -50,6 +50,6 @@ def plot_beta(
 
 
 plot_beta(
-    alpha_attract, beta_attract, alpha_threshold, beta_threshold, bin_num, num_counts
+    alpha_attitude, beta_attitude, alpha_threshold, beta_threshold, bin_num, num_counts
 )
 plt.show()

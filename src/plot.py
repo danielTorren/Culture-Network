@@ -29,8 +29,8 @@ def print_culture_time_series_generic(fileName: str, Data_list: list[Network], p
     plt.tight_layout()
 
     plotName = fileName + "/Prints"
-    f = plotName + "/print_culture_time_series_%s.png" % (property_varied)
-    fig.savefig(f, dpi=dpi_save)
+    f = plotName + "/print_culture_time_series_%s.eps" % (property_varied)
+    fig.savefig(f, dpi=dpi_save,format='eps')
 
 ####I THINK THIS IS THE SAME THING??????
 
@@ -52,12 +52,12 @@ def live_print_culture_timeseries(fileName, Data_list, property_varied, title_li
     plt.tight_layout()
 
     plotName = fileName + "/Plots"
-    f = plotName + "/live_plot_culture_timeseries_%s.png" % property_varied
-    fig.savefig(f, dpi=dpi_save)
+    f = plotName + "/live_plot_culture_timeseries_%s.eps" % property_varied
+    fig.savefig(f, dpi=dpi_save,format='eps')
 
 def live_print_culture_timeseries_vary(fileName, Data_list, property_varied_row, property_varied_col, title_list,nrows, ncols,  dpi_save):
 
-    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7), constrained_layout=True)
 
     y_title = "Culture"
 
@@ -72,11 +72,9 @@ def live_print_culture_timeseries_vary(fileName, Data_list, property_varied_row,
         ax.set_ylim(0,1)
         #ax.axvline(culture_momentum, color='r',linestyle = "--")
 
-    plt.tight_layout()
-
     plotName = fileName + "/Prints"
-    f = plotName + "/live_print_culture_timeseries_vary_%s_and_%s.png" % (property_varied_row,property_varied_col)
-    fig.savefig(f, dpi=dpi_save)
+    f = plotName + "/live_print_culture_timeseries_vary_%s_and_%s.eps" % (property_varied_row,property_varied_col)
+    fig.savefig(f, dpi=dpi_save,format='eps')
 
 def live_phase_diagram_k_means_vary(fileName, Data_array, property_varied_row, property_varied_values_row,property_varied_col,property_varied_values_col,min_k,max_k,size_points, cmap,dpi_save):
 
@@ -108,8 +106,8 @@ def live_phase_diagram_k_means_vary(fileName, Data_array, property_varied_row, p
     plt.tight_layout()
 
     plotName = fileName + "/Plots"
-    f = plotName + "/live_phase_diagram_k_means_vary_%s_and_%s.png" % (property_varied_row,property_varied_col)
-    fig.savefig(f, dpi=dpi_save)
+    f = plotName + "/live_phase_diagram_k_means_vary_%s_and_%s.eps" % (property_varied_row,property_varied_col)
+    fig.savefig(f, dpi=dpi_save,format='eps')
 
 
 def print_culture_timeseries_vary_array(fileName: str, Data_array: list[Network] , property_varied_row, property_varied_values_row,property_varied_col,property_varied_values_col,  nrows:int, ncols:int , dpi_save:int):
@@ -135,8 +133,8 @@ def print_culture_timeseries_vary_array(fileName: str, Data_array: list[Network]
     fig.supylabel(r"%s" % y_title)
     
     plotName = fileName + "/Prints"
-    f = plotName + "/print_culture_timeseries_vary_array_%s_%s.png" % (property_varied_row,property_varied_col)
-    fig.savefig(f, dpi=dpi_save)
+    f = plotName + "/print_culture_timeseries_vary_array_%s_%s.eps" % (property_varied_row,property_varied_col)
+    fig.savefig(f, dpi=dpi_save,format='eps')
 
 def print_culture_time_series_clusters(FILENAME: str, Data_list: list, property_varied_values: list, property_varied:str, min_k,max_k,size_points, alpha: float, min_culture_distance: float, nrows:int, ncols:int, dpi_save:int, round_dec):
     
@@ -164,8 +162,8 @@ def print_culture_time_series_clusters(FILENAME: str, Data_list: list, property_
         ax.set_title(r"{} = {}".format(property_varied,round(property_varied_values[i], round_dec)))
 
     plotName = FILENAME + "/Prints"
-    f = plotName + "/print_culture_time_series_{}__clusters.png".format(property_varied)
-    fig.savefig(f, dpi=dpi_save)
+    f = plotName + "/print_culture_time_series_{}__clusters.eps".format(property_varied)
+    fig.savefig(f, dpi=dpi_save,format='eps')
 
 def print_culture_time_series_clusters_two_properties(FILENAME: str, Data_list: list, property_varied_values_row: list, property_varied_values_column: list, property_varied_row:str, property_varied_column:str, min_k,max_k,size_points, alpha: float, min_culture_distance: float,distance_measure: str, nrows:int, ncols:int, dpi_save:int, round_dec, gamma = 0.01):
 
@@ -215,8 +213,8 @@ def print_culture_time_series_clusters_two_properties(FILENAME: str, Data_list: 
     fig.supylabel(r"%s" % y_title)
     
     plotName = FILENAME + "/Prints"
-    f = plotName + "/print_culture_time_series_clusters_two_properties_{}_{}_{}.png".format(property_varied_row, property_varied_column, distance_measure)
-    fig.savefig(f, dpi=dpi_save)
+    f = plotName + "/print_culture_time_series_clusters_two_properties_{}_{}_{}.eps".format(property_varied_row, property_varied_column, distance_measure)
+    fig.savefig(f, dpi=dpi_save,format='eps')
 
 def print_culture_time_series_two_properties(FILENAME: str, Data_list: list, property_varied_values_row: list, property_varied_values_column: list, property_varied_row:str, property_varied_column:str, nrows:int, ncols:int, dpi_save:int, round_dec):
 
@@ -245,8 +243,8 @@ def print_culture_time_series_two_properties(FILENAME: str, Data_list: list, pro
     fig.supylabel(r"%s" % y_title)
     
     plotName = FILENAME + "/Prints"
-    f = plotName + "/print_culture_time_series_two_properties_{}_{}.png".format(property_varied_row, property_varied_column)
-    fig.savefig(f, dpi=dpi_save)
+    f = plotName + "/print_culture_time_series_two_properties_{}_{}.eps".format(property_varied_row, property_varied_column)
+    fig.savefig(f, dpi=dpi_save,format='eps')
 
 
 
@@ -268,8 +266,8 @@ def prints_behaviour_timeseries_plot(FILENAME: str, Data: DataFrame, property:st
     plt.tight_layout()
     
     plotName = FILENAME + "/Plots"
-    f = plotName + "/" + property + "_prints_timeseries.png"
-    fig.savefig(f, dpi=dpi_save)
+    f = plotName + "/" + property + "_prints_timeseries.eps"
+    fig.savefig(f, dpi=dpi_save,format='eps')
 
 def prints_behaviour_timeseries_plot_colour_culture(
     FILENAME: str, Data: DataFrame, property:str, y_title:str, nrows:int, ncols:int, dpi_save:int, culture_cmap, norm_zero_one
@@ -306,8 +304,8 @@ def prints_behaviour_timeseries_plot_colour_culture(
     cbar_culture.set_label(r"Culture")
 
     plotName = FILENAME + "/Plots"
-    f = plotName + "/" + property + "_prints_behaviour_timeseries_plot_colour_culture.png"
-    fig.savefig(f, dpi=dpi_save)
+    f = plotName + "/" + property + "_prints_behaviour_timeseries_plot_colour_culture.eps"
+    fig.savefig(f, dpi=dpi_save,format='eps')
 
 
 def standard_behaviour_timeseries_plot(FILENAME: str, Data: DataFrame, property:str, y_title:str, dpi_save:int):
@@ -322,8 +320,8 @@ def standard_behaviour_timeseries_plot(FILENAME: str, Data: DataFrame, property:
     ax.set_ylabel(r"%s" % y_title)
 
     plotName = FILENAME + "/Plots"
-    f = plotName + "/" + property + "_timeseries.png"
-    fig.savefig(f, dpi=dpi_save)
+    f = plotName + "/" + property + "_timeseries.eps"
+    fig.savefig(f, dpi=dpi_save,format='eps')
 
 
 def plot_value_timeseries(FILENAME: str, Data: DataFrame, nrows:int, ncols:int, dpi_save:int,):
@@ -338,13 +336,13 @@ def plot_threshold_timeseries(FILENAME: str, Data: DataFrame, nrows:int, ncols:i
     )
 
 
-def plot_attract_timeseries(FILENAME: str, Data: DataFrame, nrows:int, ncols:int, dpi_save:int):
+def plot_attitude_timeseries(FILENAME: str, Data: DataFrame, nrows:int, ncols:int, dpi_save:int):
     
-    #print(Data["behaviour_attract"],np.shape(Data["behaviour_attract"]))
+    #print(Data["behaviour_attitude"],np.shape(Data["behaviour_attitude"]))
 
 
     prints_behaviour_timeseries_plot(
-        FILENAME, Data, "behaviour_attract", "Attractiveness", nrows, ncols, dpi_save,
+        FILENAME, Data, "behaviour_attitude", "attitudeiveness", nrows, ncols, dpi_save,
     )
 
 
@@ -367,8 +365,8 @@ def plot_av_carbon_emissions_timeseries(FILENAME: str, Data: DataFrame, dpi_save
     ax.set_ylabel(r"%s" % y_title)
 
     plotName = FILENAME + "/Plots"
-    f = plotName + "/" + property + "_timeseries.png"
-    fig.savefig(f, dpi=dpi_save)
+    f = plotName + "/" + property + "_timeseries.eps"
+    fig.savefig(f, dpi=dpi_save,format='eps')
 
 def plot_network_timeseries(FILENAME: str, Data: DataFrame,y_title:str, property:str,  dpi_save:int):
 
@@ -379,8 +377,8 @@ def plot_network_timeseries(FILENAME: str, Data: DataFrame,y_title:str, property
     ax.set_ylabel(r"%s" % y_title)
     ax.axvline(Data["culture_momentum_real"], color='r',linestyle = "--")
     plotName = FILENAME + "/Plots"
-    f = plotName + "/" + property + "_timeseries.png"
-    fig.savefig(f, dpi=dpi_save)
+    f = plotName + "/" + property + "_timeseries.eps"
+    fig.savefig(f, dpi=dpi_save,format='eps')
 
 
 def plot_carbon_price_timeseries(FILENAME: str, Data: DataFrame, dpi_save:int):
@@ -432,8 +430,8 @@ def plot_average_culture_timeseries(FILENAME: str, Data: DataFrame, dpi_save:int
     )
 
     plotName = FILENAME + "/Plots"
-    f = plotName + "/" + property + "_timeseries.png"
-    fig.savefig(f, dpi=dpi_save)
+    f = plotName + "/" + property + "_timeseries.eps"
+    fig.savefig(f, dpi=dpi_save,format='eps')
 
 
 def plot_culture_timeseries(FILENAME: str, Data: DataFrame, dpi_save:int):
@@ -451,8 +449,8 @@ def plot_culture_timeseries(FILENAME: str, Data: DataFrame, dpi_save:int):
     ax.axvline(Data["culture_momentum_real"], color='r',linestyle = "--")
 
     plotName = FILENAME + "/Plots"
-    f = plotName + "/" + "cultural_evolution.png"
-    fig.savefig(f, dpi=dpi_save)
+    f = plotName + "/" + "cultural_evolution.eps"
+    fig.savefig(f, dpi=dpi_save,format='eps')
 
 # make animate_network_social_component_matrix
 def animate_network_social_component_matrix(FILENAME: str, Data: DataFrame, interval:int, fps:int, round_dec:int, cmap: Union[LinearSegmentedColormap,str], norm_zero_one):
@@ -709,8 +707,8 @@ def prints_weighting_matrix(
     cbar.set_label("Weighting matrix")
 
     plotName = FILENAME + "/Prints"
-    f = plotName + "/" + "prints_weighting_matrix.png"
-    fig.savefig(f, dpi=dpi_save)
+    f = plotName + "/" + "prints_weighting_matrix.eps"
+    fig.savefig(f, dpi=dpi_save,format='eps')
 
 
 def prints_behavioural_matrix(
@@ -737,8 +735,8 @@ def prints_behavioural_matrix(
     cbar.set_label("Behavioural Value")
 
     plotName = FILENAME + "/Prints"
-    f = plotName + "/" + "prints_behavioural_matrix.png"
-    fig.savefig(f, dpi=dpi_save)
+    f = plotName + "/" + "prints_behavioural_matrix.eps"
+    fig.savefig(f, dpi=dpi_save,format='eps')
 
 def print_network_social_component_matrix(
     FILENAME: str, Data: DataFrame, cmap_behaviour: Union[LinearSegmentedColormap,str], nrows:int, ncols:int, frames_list:list[int], round_dec:int, dpi_save:int
@@ -768,8 +766,8 @@ def print_network_social_component_matrix(
     cbar.set_label("Social Learning")
 
     plotName = FILENAME + "/Prints"
-    f = plotName + "/" + "prints_network_social_component_matrix.png"
-    fig.savefig(f, dpi=dpi_save)
+    f = plotName + "/" + "prints_network_social_component_matrix.eps"
+    fig.savefig(f, dpi=dpi_save,format='eps')
 
 def print_network_information_provision(
     FILENAME: str, Data: DataFrame, cmap_behaviour: Union[LinearSegmentedColormap,str], nrows:int, ncols:int, frames_list:list[int], round_dec:int, dpi_save:int
@@ -802,8 +800,8 @@ def print_network_information_provision(
     cbar.set_label("Information Provision")
 
     plotName = FILENAME + "/Prints"
-    f = plotName + "/" + "prints_behaviour_information_provision_matrix.png"
-    fig.savefig(f, dpi=dpi_save)
+    f = plotName + "/" + "prints_behaviour_information_provision_matrix.eps"
+    fig.savefig(f, dpi=dpi_save,format='eps')
 
 
 def prints_culture_network(
@@ -848,8 +846,8 @@ def prints_culture_network(
     cbar = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap_culture, norm=norm_zero_one),ax=axes.ravel().tolist())
     cbar.set_label("Culture")
 
-    f = FILENAME + "/Prints/prints_culture_network.png"
-    fig.savefig(f, dpi=dpi_save)
+    f = FILENAME + "/Prints/prints_culture_network.eps"
+    fig.savefig(f, dpi=dpi_save,format='eps')
 
 
 
@@ -869,8 +867,8 @@ def plot_average_culture_no_range_comparison(fileName: str, Data_list: list[Netw
     ax.legend()
 
     plotName = fileName + "/Plots"
-    f = plotName + "/%s_plot_average_culture_no_range_comparison.png" % (property)
-    fig.savefig(f, dpi=dpi_save)
+    f = plotName + "/%s_plot_average_culture_no_range_comparison.eps" % (property)
+    fig.savefig(f, dpi=dpi_save,format='eps')
 
 def plot_average_culture_comparison(fileName: str, Data_list: list[Network], dpi_save:int, property_list:list, property,round_dec):
     y_title = "Average Culture"
@@ -894,8 +892,8 @@ def plot_average_culture_comparison(fileName: str, Data_list: list[Network], dpi
 
     plotName = fileName + "/Plots"
     
-    f = plotName + "/%s_comparing_av_cultures.png" % (property)
-    fig.savefig(f, dpi=dpi_save)
+    f = plotName + "/%s_comparing_av_cultures.eps" % (property)
+    fig.savefig(f, dpi=dpi_save,format='eps')
 
 def plot_carbon_emissions_total_comparison(fileName: str, Data_list: list[Network], dpi_save:int, property_list:list, property,round_dec):
     y_title = "Total Emissions"
@@ -909,8 +907,8 @@ def plot_carbon_emissions_total_comparison(fileName: str, Data_list: list[Networ
     ax.legend()
 
     plotName = fileName + "/Plots"
-    f = plotName + "/%s_comparing_total_emissions.png" % (property)
-    fig.savefig(f, dpi=dpi_save)
+    f = plotName + "/%s_comparing_total_emissions.eps" % (property)
+    fig.savefig(f, dpi=dpi_save,format='eps')
 
 def plot_weighting_matrix_convergence_comparison(fileName: str, Data_list: list[Network], dpi_save:int, property_list:list, property,round_dec):
     y_title = "Weighting matrix convergence"
@@ -925,8 +923,8 @@ def plot_weighting_matrix_convergence_comparison(fileName: str, Data_list: list[
     ax.legend()
 
     plotName = fileName + "/Plots"
-    f = plotName + "/%s_comparing_weighting_matrix_convergence.png" % (property)
-    fig.savefig(f, dpi=dpi_save)
+    f = plotName + "/%s_comparing_weighting_matrix_convergence.eps" % (property)
+    fig.savefig(f, dpi=dpi_save,format='eps')
 
 def plot_cum_weighting_matrix_convergence_comparison(fileName: str, Data_list: list[Network], dpi_save:int, property_list:list, property,round_dec):
     y_title = "Cumulative weighting matrix convergence"
@@ -940,8 +938,8 @@ def plot_cum_weighting_matrix_convergence_comparison(fileName: str, Data_list: l
     ax.legend()
 
     plotName = fileName + "/Plots"
-    f = plotName + "/%s_comparing_cum_weighting_matrix_convergence.png" % (property)
-    fig.savefig(f, dpi=dpi_save)
+    f = plotName + "/%s_comparing_cum_weighting_matrix_convergence.eps" % (property)
+    fig.savefig(f, dpi=dpi_save,format='eps')
 
 def plot_live_link_change_comparison(fileName: str, Data_list: list[Network], dpi_save:int, property_list:list, property, round_dec):
     
@@ -956,8 +954,8 @@ def plot_live_link_change_comparison(fileName: str, Data_list: list[Network], dp
     plt.tight_layout()
 
     plotName = fileName + "/Plots"
-    f = plotName + "/%s_live_link_change.png" % (property)
-    fig.savefig(f, dpi=dpi_save)
+    f = plotName + "/%s_live_link_change.eps" % (property)
+    fig.savefig(f, dpi=dpi_save,format='eps')
 
 def plot_live_cum_link_change_comparison(fileName: str, Data_list: list[Network], dpi_save:int, property_list:list, property,round_dec):
     
@@ -974,8 +972,8 @@ def plot_live_cum_link_change_comparison(fileName: str, Data_list: list[Network]
     plt.tight_layout()
 
     plotName = fileName + "/Plots"
-    f = plotName + "/%s_live_cum_link_change.png" % (property)
-    fig.savefig(f, dpi=dpi_save)
+    f = plotName + "/%s_live_cum_link_change.eps" % (property)
+    fig.savefig(f, dpi=dpi_save,format='eps')
 
 def plot_live_link_change_per_agent_comparison(fileName: str, Data_list: list[Network], dpi_save:int, property_list:list, property,round_dec):
     
@@ -990,8 +988,8 @@ def plot_live_link_change_per_agent_comparison(fileName: str, Data_list: list[Ne
     plt.tight_layout()
 
     plotName = fileName + "/Plots"
-    f = plotName + "/%s_live_link_change_per_agent.png" % (property)
-    fig.savefig(f, dpi=dpi_save)
+    f = plotName + "/%s_live_link_change_per_agent.eps" % (property)
+    fig.savefig(f, dpi=dpi_save,format='eps')
 
 def plot_live_cum_link_change_per_agent_comparison(fileName: str, Data_list: list[Network], dpi_save:int, property_list:list, property,round_dec):
     
@@ -1009,8 +1007,8 @@ def plot_live_cum_link_change_per_agent_comparison(fileName: str, Data_list: lis
     plt.tight_layout()
 
     plotName = fileName + "/Plots"
-    f = plotName + "/%s_live_cum_link_change_per_agent.png" % (property)
-    fig.savefig(f, dpi=dpi_save)
+    f = plotName + "/%s_live_cum_link_change_per_agent.eps" % (property)
+    fig.savefig(f, dpi=dpi_save,format='eps')
 
 def print_live_intial_culture_networks(fileName: str, Data_list: list[Network], dpi_save:int, property_list:list, property,nrows: int, ncols:int , layout: str, norm_zero_one, cmap, node_size,round_dec):
     
@@ -1041,8 +1039,8 @@ def print_live_intial_culture_networks(fileName: str, Data_list: list[Network], 
     cbar.set_label("Culture")
 
     plotName = fileName + "/Prints"
-    f = plotName + "/%s_print_intial_culture_networks.png" % (property)
-    fig.savefig(f, dpi=dpi_save)
+    f = plotName + "/%s_print_intial_culture_networks.eps" % (property)
+    fig.savefig(f, dpi=dpi_save,format='eps')
 
 def prints_init_weighting_matrix(fileName: str, Data_list: list[Network], dpi_save:int,nrows: int, ncols:int, cmap,property_list:list, property,round_dec):
 
@@ -1068,8 +1066,8 @@ def prints_init_weighting_matrix(fileName: str, Data_list: list[Network], dpi_sa
     cbar.set_label("Weighting matrix")
 
     plotName = fileName + "/Prints"
-    f = plotName + "/%s_prints_init_weighting_matrix.png" % (property)
-    fig.savefig(f, dpi=dpi_save)
+    f = plotName + "/%s_prints_init_weighting_matrix.eps" % (property)
+    fig.savefig(f, dpi=dpi_save,format='eps')
 
 def prints_final_weighting_matrix(fileName: str, Data_list: list[Network], dpi_save:int,nrows: int, ncols:int, cmap,property_list:list, property,round_dec):
 
@@ -1095,8 +1093,8 @@ def prints_final_weighting_matrix(fileName: str, Data_list: list[Network], dpi_s
     cbar.set_label("Weighting matrix")
 
     plotName = fileName + "/Prints"
-    f = plotName + "/%s_prints_final_weighting_matrix.png" % (property)
-    fig.savefig(f, dpi=dpi_save)
+    f = plotName + "/%s_prints_final_weighting_matrix.eps" % (property)
+    fig.savefig(f, dpi=dpi_save,format='eps')
 
 # animation of changing culture
 def live_compare_animate_culture_network_and_weighting(
@@ -1295,8 +1293,8 @@ def live_compare_plot_animate_behaviour_scatter(fileName,Data_list,norm_zero_one
             colour_adjust = norm_zero_one(individual_culture_list)
             ani_step_colours = cmap_culture(colour_adjust)
 
-            x = [v.history_behaviour_attracts[i][0] for v in Data_list[j].agent_list] #Data_list[j][property][i].T[0]
-            y = [v.history_behaviour_attracts[i][1] for v in Data_list[j].agent_list] #Data_list[j][property][i].T[1]
+            x = [v.history_behaviour_attitudes[i][0] for v in Data_list[j].agent_list] #Data_list[j][property][i].T[0]
+            y = [v.history_behaviour_attitudes[i][1] for v in Data_list[j].agent_list] #Data_list[j][property][i].T[1]
 
             #print(x,y)
 
@@ -1339,6 +1337,21 @@ def live_compare_plot_animate_behaviour_scatter(fileName,Data_list,norm_zero_one
 
 """SA"""
 
+def bar_sensitivity_analysis_plot(FILENAME,data, names, yerr, dpi_save):
+    """
+    Create bar chart of results.
+    """
+
+    fig, ax = plt.subplots(figsize=(14, 7))
+    data.plot(kind='bar', yerr=yerr, ax=ax)#Pandas data frame plot
+    ax.set_xticks(ticks = range(len(names)), labels = names ,rotation=30, horizontalalignment="left")
+
+    plt.tight_layout()
+
+    plotName = FILENAME + "/Prints"
+    f = plotName + "/" + "prints_SA_matrix.eps"
+    fig.savefig(f, dpi=dpi_save,format='eps')
+
 def prints_SA_matrix(FILENAME, Data,title_list,cmap,nrows, ncols, dpi_save , labels):
 
 
@@ -1363,8 +1376,8 @@ def prints_SA_matrix(FILENAME, Data,title_list,cmap,nrows, ncols, dpi_save , lab
     #plt.tight_layout()
 
     plotName = FILENAME + "/Prints"
-    f = plotName + "/" + "prints_SA_matrix.png"
-    fig.savefig(f, dpi=dpi_save)
+    f = plotName + "/" + "prints_SA_matrix.eps"
+    fig.savefig(f, dpi=dpi_save,format='eps')
 
 """OTHER"""
 
@@ -1394,8 +1407,8 @@ def print_culture_timeseries_vary_conformity_bias(fileName: str, Data_list: list
     fig.supylabel(r"%s" % y_title)
     
     plotName = fileName + "/Prints"
-    f = plotName + "/print_culture_timeseries_vary_conformity_bias.png"
-    fig.savefig(f, dpi=dpi_save)
+    f = plotName + "/print_culture_timeseries_vary_conformity_bias.eps"
+    fig.savefig(f, dpi=dpi_save,format='eps')
 
 
 def print_culture_histgram(fileName: str, Data_list: list[Network] , title_list:str, nrows:int, ncols:int , dpi_save:int):
@@ -1414,8 +1427,8 @@ def print_culture_histgram(fileName: str, Data_list: list[Network] , title_list:
         ax.set_xlabel(r"Time")
     
     plotName = fileName + "/Prints"
-    f = plotName + "/print_culture_timeseries.png"
-    fig.savefig(f, dpi=dpi_save)
+    f = plotName + "/print_culture_timeseries.eps"
+    fig.savefig(f, dpi=dpi_save,format='eps')
 
 def print_culture_histogram(
     FILENAME: str, Data: DataFrame, property:str, nrows:int, ncols:int, frames_list, round_dec, dpi_save,bin_num
@@ -1435,8 +1448,8 @@ def print_culture_histogram(
     plt.tight_layout()
 
     plotName = FILENAME + "/Plots"
-    f = plotName + "/print_culture_histogram.png"
-    fig.savefig(f, dpi=dpi_save)
+    f = plotName + "/print_culture_histogram.eps"
+    fig.savefig(f, dpi=dpi_save,format='eps')
 
 
 # animation of changing culture
@@ -1567,8 +1580,8 @@ def plot_weighting_link_timeseries(FILENAME: str, Data: DataFrame, y_title:str, 
     ax.set_ylabel(r"%s" % y_title)
 
     plotName = FILENAME + "/Plots"
-    f = plotName + "/plot_weighting_link_timeseries.png"
-    fig.savefig(f, dpi=dpi_save)
+    f = plotName + "/plot_weighting_link_timeseries.eps"
+    fig.savefig(f, dpi=dpi_save,format='eps')
 
 def live_plot_heterogenous_culture_momentum(fileName: str, Data: Network, dpi_save:int, alpha_quick, alpha_normal, alpha_lagard, colour_quick, colour_normal, colour_lagard):
     ##plot cultural evolution of agents
@@ -1590,8 +1603,8 @@ def live_plot_heterogenous_culture_momentum(fileName: str, Data: Network, dpi_sa
     ax.legend(by_label.values(), by_label.keys())
     
     plotName = fileName + "/Plots"
-    f = plotName + "/live_plot_heterogenous_culture_momentum.png"
-    fig.savefig(f, dpi=dpi_save)
+    f = plotName + "/live_plot_heterogenous_culture_momentum.eps"
+    fig.savefig(f, dpi=dpi_save,format='eps')
 
 def live_print_heterogenous_culture_momentum(fileName: str, Data_list: Network, dpi_save:int, alpha_quick, alpha_normal, alpha_lagard, colour_quick, colour_normal, colour_lagard, nrows, ncols, property_varied, real_momentum_normal_list, round_dec, real_momentum_quick_list, real_momentum_lagards_list):
 
@@ -1615,8 +1628,8 @@ def live_print_heterogenous_culture_momentum(fileName: str, Data_list: Network, 
         ax.legend(by_label.values(), by_label.keys())
     
     plotName = fileName + "/Prints"
-    f = plotName + "/live_print_heterogenous_culture_momentum.png"
-    fig.savefig(f, dpi=dpi_save)
+    f = plotName + "/live_print_heterogenous_culture_momentum.eps"
+    fig.savefig(f, dpi=dpi_save,format='eps')
 
 def live_print_heterogenous_culture_momentum_double(fileName: str, Data_list: Network, dpi_save:int, alpha_quick, alpha_normal, alpha_lagard, colour_quick, colour_normal, colour_lagard, nrows, ncols, round_dec, property_varied_row, property_varied_col, title_list, param_row, param_col):
 
@@ -1639,8 +1652,8 @@ def live_print_heterogenous_culture_momentum_double(fileName: str, Data_list: Ne
         ax.legend(by_label.values(), by_label.keys())
     
     plotName = fileName + "/Prints"
-    f = plotName + "/live_print_heterogenous_culture_momentum_%s_and_%s.png" % (property_varied_row,property_varied_col)
-    fig.savefig(f, dpi=dpi_save)
+    f = plotName + "/live_print_heterogenous_culture_momentum_%s_and_%s.eps" % (property_varied_row,property_varied_col)
+    fig.savefig(f, dpi=dpi_save,format='eps')
 
 
 """CLUSTER PLOTS"""
@@ -1670,8 +1683,8 @@ def Euclidean_cluster_plot(fileName: str, Data,k_clusters: int, alpha: float, mi
         ax.set_title("Euclidean $k$-means")
 
         plotName = fileName + "/Plots"
-        f = plotName + "/Euclid_cluster_plot.png"
-        fig.savefig(f, dpi=dpi_save)
+        f = plotName + "/Euclid_cluster_plot.eps"
+        fig.savefig(f, dpi=dpi_save,format='eps')
 
 def plot_k_cluster_scores(fileName,scores,dpi_save):
     x = scores.keys()
@@ -1683,8 +1696,8 @@ def plot_k_cluster_scores(fileName,scores,dpi_save):
     ax.set_ylabel(r"Silhouette score")
 
     plotName = fileName + "/Plots"
-    f = plotName + "/plot_k_cluster_scores.png"
-    fig.savefig(f, dpi=dpi_save)
+    f = plotName + "/plot_k_cluster_scores.eps"
+    fig.savefig(f, dpi=dpi_save,format='eps')
 
 def plot_behaviour_scatter(fileName,Data,property,dpi_save):
     PropertyData = Data[property].transpose()
@@ -1698,14 +1711,14 @@ def plot_behaviour_scatter(fileName,Data,property,dpi_save):
     ax.set_ylabel(r"Attitude")
 
     plotName = fileName + "/Plots"
-    f = plotName + "/plot_attitude_scatter.png"
-    fig.savefig(f, dpi=dpi_save)
+    f = plotName + "/plot_attitude_scatter.eps"
+    fig.savefig(f, dpi=dpi_save,format='eps')
 
 def live_plot_attitude_scatter(fileName,Data,dpi_save):
     attitudes_list = []
 
     for i in Data.M:
-        attitudes = np.asarray([[v.history_attracts for v in i] for i in Data.agent_list])
+        attitudes = np.asarray([[v.history_attitudes for v in i] for i in Data.agent_list])
         attitudes_list.append(attitudes.T)
 
     fig, ax = plt.subplots()
@@ -1714,8 +1727,8 @@ def live_plot_attitude_scatter(fileName,Data,dpi_save):
     ax.set_ylabel(r"Attitude")
 
     plotName = fileName + "/Plots"
-    f = plotName + "/live_plot_attitude_scatter.png"
-    fig.savefig(f, dpi=dpi_save)
+    f = plotName + "/live_plot_attitude_scatter.eps"
+    fig.savefig(f, dpi=dpi_save,format='eps')
 
 
 def plot_alpha_variation(FILENAME,num_counts,phi_list,dpi_save):
@@ -1739,8 +1752,8 @@ def plot_alpha_variation(FILENAME,num_counts,phi_list,dpi_save):
     ax.set_ylabel(r"$\alpha$")
     ax.legend()
     plotName = FILENAME + "/Plots"
-    f = plotName + "/plot_alpha_variation.png"
-    fig.savefig(f, dpi=dpi_save)
+    f = plotName + "/plot_alpha_variation.eps"
+    fig.savefig(f, dpi=dpi_save,format='eps')
 
 
 
@@ -2031,8 +2044,8 @@ def multi_animation_scaled(
 
 def plot_beta_distributions(
     FILENAME:str,
-    alpha_attract:float,
-    beta_attract:float,
+    alpha_attitude:float,
+    beta_attitude:float,
     alpha_threshold:float,
     beta_threshold:float,
     bin_num:int,
@@ -2043,16 +2056,16 @@ def plot_beta_distributions(
     fig, ax = plt.subplots()
 
     ax.hist(
-        np.random.beta(alpha_attract, beta_attract, num_counts),
+        np.random.beta(alpha_attitude, beta_attitude, num_counts),
         bin_num,
         density=True,
         facecolor="g",
         alpha=0.5,
         histtype="stepfilled",
-        label="Attract: alpha = "
-        + str(alpha_attract)
+        label="attitude: alpha = "
+        + str(alpha_attitude)
         + ", beta = "
-        + str(beta_attract),
+        + str(beta_attitude),
     )
     ax.hist(
         np.random.beta(alpha_threshold, beta_threshold, num_counts),
@@ -2070,8 +2083,8 @@ def plot_beta_distributions(
     ax.set_ylabel(r"PDF")
     ax.legend()
     plotName = FILENAME + "/Plots"
-    f = plotName + "/" + property + "_timeseries.png"
-    fig.savefig(f, dpi=dpi_save)
+    f = plotName + "/" + property + "_timeseries.eps"
+    fig.savefig(f, dpi=dpi_save,format='eps')
 
 def multi_animation_four(
     FILENAME: str, Data: DataFrame, cmap_behaviour: Union[LinearSegmentedColormap,str], cmap_culture: Union[LinearSegmentedColormap,str], layout: str, node_size:int,  interval:int,
