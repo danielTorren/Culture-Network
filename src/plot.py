@@ -32,6 +32,8 @@ def print_culture_time_series_generic(fileName: str, Data_list: list[Network], p
     f = plotName + "/print_culture_time_series_%s.eps" % (property_varied)
     fig.savefig(f, dpi=dpi_save,format='eps')
 
+
+
 ####I THINK THIS IS THE SAME THING??????
 
 def live_print_culture_timeseries(fileName, Data_list, property_varied, title_list,nrows, ncols,  dpi_save):
@@ -51,9 +53,39 @@ def live_print_culture_timeseries(fileName, Data_list, property_varied, title_li
 
     plt.tight_layout()
 
-    plotName = fileName + "/Plots"
+    plotName = fileName + "/Prints"
     f = plotName + "/live_plot_culture_timeseries_%s.eps" % property_varied
     fig.savefig(f, dpi=dpi_save,format='eps')
+
+def live_print_culture_timeseries_with_weighting(fileName, Data_list, property_varied, title_list, nrows, ncols,  dpi_save, cmap):
+    
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7), constrained_layout=True)
+
+    y_title = "Culture"
+
+    for i in range(ncols):
+        for v in Data_list[i].agent_list:
+            axes[0][i].plot(np.asarray(Data_list[i].history_time), np.asarray(v.history_culture))
+
+        axes[0][i].set_xlabel(r"Time")
+        axes[0][i].set_ylabel(r"%s" % y_title)
+        axes[0][i].set_title(title_list[i])
+        axes[0][i].set_ylim(0,1)
+
+        axes[1][i].matshow(Data_list[i].history_weighting_matrix[-1], cmap=cmap, norm=Normalize(vmin=0, vmax=1),aspect="auto")
+        axes[1][i].set_xlabel(r"n")
+        axes[1][i].set_ylabel(r"k")
+        #print("matrix", Data_list[i].history_weighting_matrix[-1])
+        #print("alpha_change",Data_list[i].alpha_change)
+    # colour bar axes
+    cbar = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap, norm=Normalize(vmin=0, vmax=1)),ax=axes.ravel().tolist())  # This does a mapabble on the fly i think, not sure
+    cbar.set_label(r"$\alpha_{n,k}$")
+
+
+    plotName = fileName + "/Prints"
+    f = plotName + "/lowres_live_print_culture_timeseries_with_weighting_%s.png" % property_varied
+    fig.savefig(f, dpi=dpi_save,format='png')
+    #fig.savefig(f, dpi=dpi_save,format='eps')
 
 def live_print_culture_timeseries_vary(fileName, Data_list, property_varied_row, property_varied_col, title_list,nrows, ncols,  dpi_save):
 
@@ -1337,22 +1369,22 @@ def live_compare_plot_animate_behaviour_scatter(fileName,Data_list,norm_zero_one
 
 """SA"""
 
-def bar_sensitivity_analysis_plot(FILENAME,data, names, yerr, dpi_save):
+def bar_sensitivity_analysis_plot(FILENAME,data, names, yerr, dpi_save,N_samples):
     """
     Create bar chart of results.
     """
 
     fig, ax = plt.subplots(figsize=(14, 7))
-    data.plot(kind='bar', yerr=yerr, ax=ax)#Pandas data frame plot
-    ax.set_xticks(ticks = range(len(names)), labels = names ,rotation=30, horizontalalignment="left")
-
+    data.plot(kind='barh', xerr=yerr, ax=ax)#Pandas data frame plot
+    ax.set_yticks(ticks = range(len(names)), labels = names )#,rotation=0.0, horizontalalignment="center"
+    ax.set_xlim(left=0)
     plt.tight_layout()
 
     plotName = FILENAME + "/Prints"
-    f = plotName + "/" + "prints_SA_matrix.eps"
+    f = plotName + "/" + "%s_%s_bar_sensitivity_analysis_plot.eps" % (len(names),N_samples)
     fig.savefig(f, dpi=dpi_save,format='eps')
 
-def prints_SA_matrix(FILENAME, Data,title_list,cmap,nrows, ncols, dpi_save , labels):
+def prints_SA_matrix(FILENAME, Data,title_list,cmap,nrows, ncols, dpi_save , labels, N_samples ):
 
 
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
@@ -1370,13 +1402,13 @@ def prints_SA_matrix(FILENAME, Data,title_list,cmap,nrows, ncols, dpi_save , lab
         xaxis = np.arange(len(labels))
         ax.set_xticks(xaxis)
         ax.set_yticks(xaxis)
-        ax.set_xticklabels(labels, rotation = 45)
-        ax.set_yticklabels(labels, rotation = 45)
+        ax.set_xticklabels(labels, rotation = 90)
+        ax.set_yticklabels(labels, rotation = 0)
         #ax.xticks(rotation=45, ha='right')
     #plt.tight_layout()
 
     plotName = FILENAME + "/Prints"
-    f = plotName + "/" + "prints_SA_matrix.eps"
+    f = plotName + "/" + "%s_%s_prints_SA_matrix.eps" % (len(labels), N_samples)
     fig.savefig(f, dpi=dpi_save,format='eps')
 
 """OTHER"""

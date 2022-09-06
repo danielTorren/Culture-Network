@@ -102,12 +102,14 @@ class Network:
             self.neighbours_list,
         ) = self.create_weighting_matrix()
 
+
         ego_influence = self.calc_ego_influence_degroot()
 
         self.social_component_matrix = self.calc_social_component_matrix(ego_influence)
 
-        if self.alpha_change == 1 or 0.5:
-            self.weighting_matrix,__ = self.update_weightings()  # Should I update the weighting matrix? I feel like it makes sense if its not time dependant.
+        if self.alpha_change != 0.0:
+            self.weighting_matrix,__ = self.update_weightings() 
+
 
         if self.save_data:
             self.total_carbon_emissions = self.calc_total_emissions()
@@ -360,11 +362,11 @@ class Network:
         self.update_individuals()
 
         # update network parameters for next step
-        if self.alpha_change == 1:
+        if self.alpha_change == 1.0:
                 if self.save_data:
-                        self.weighting_matrix,self.weighting_matrix_convergence = self.update_weightings()
+                    self.weighting_matrix,self.weighting_matrix_convergence = self.update_weightings()
                 else:
-                        self.weighting_matrix,__ = self.update_weightings()
+                    self.weighting_matrix,__ = self.update_weightings()
         
         self.behavioural_attitude_matrix = self.calc_behavioural_attitude_matrix()
         ego_influence = self.calc_ego_influence_degroot()

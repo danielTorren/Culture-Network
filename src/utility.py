@@ -398,17 +398,17 @@ def produce_param_list(params,porperty_list, property):
         params_list.append(params.copy())#have to make a copy so that it actually appends a new dict and not just the location of the params dict
     return params_list
 
-def add_varaiables_to_dict(params,variable_parameters,X):
-    for i in range(len(X)):
-        params[variable_parameters[i][0]] = X[i]
+def add_varaiables_to_dict(params,variable_parameters_dict,X):
+    for v in range(len(X)):
+        params[variable_parameters_dict[v]["property"]] = X[v]
     return params
 
-def produce_param_list_SA(param_values,params,variable_parameters):
+def produce_param_list_SA(param_values,params,variable_parameters_dict):
     "param_values are the satelli samples, params are the fixed variables, variable parameters is the list of SA variables, we want the name!"
 
     params_list = []
     for i, X in enumerate(param_values):
-        variable_params_added = add_varaiables_to_dict(params,variable_parameters,X)
+        variable_params_added = add_varaiables_to_dict(params,variable_parameters_dict,X)
         params_list.append(variable_params_added.copy())
     return params_list
 

@@ -46,7 +46,7 @@ import time
 import numpy as np
 
 params = {
-    "total_time": 100,
+    "total_time": 200,
     "delta_t": 0.05,
     "compression_factor": 10,
     "save_data": True, 
@@ -55,7 +55,7 @@ params = {
     "averaging_method": "Arithmetic",
     "phi_list_lower": 0.1,
     "phi_list_upper": 1.0,
-    "N": 100,
+    "N": 200,
     "M": 3,
     "K": 20,
     "prob_rewire": 0.05,
@@ -66,7 +66,7 @@ params = {
     "present_discount_factor": 0.8,
     "inverse_homophily": 0.1,#1 is total mixing, 0 is no mixing
     "homophilly_rate" : 1.5,
-    "confirmation_bias": 25,
+    "confirmation_bias": 30,
 }
 
 params["time_steps_max"] = int(params["total_time"] / params["delta_t"])
@@ -247,7 +247,7 @@ if __name__ == "__main__":
 
         ###PLOTS
         #plot_beta_distributions(FILENAME,alpha_attitude,beta_attitude,alpha_threshold,beta_threshold,bin_num,num_counts,dpi_save,)
-        plot_culture_timeseries(FILENAME, Data, dpi_save)
+        #plot_culture_timeseries(FILENAME, Data, dpi_save)
         #plot_green_adoption_timeseries(FILENAME, Data, dpi_save)
         #plot_value_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save)
         #plot_threshold_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save)

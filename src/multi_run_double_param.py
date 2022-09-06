@@ -20,7 +20,7 @@ from plot import (
 )
 
 params = {
-    "total_time": 100,
+    "total_time": 200,
     "delta_t": 0.05,
     "compression_factor": 10,
     "save_data": True, 
@@ -29,7 +29,7 @@ params = {
     "averaging_method": "Arithmetic",
     "phi_list_lower": 0.1,
     "phi_list_upper": 1.0,
-    "N": 100,
+    "N": 200,
     "M": 3,
     "K": 20,
     "prob_rewire": 0.05,
@@ -40,7 +40,7 @@ params = {
     "present_discount_factor": 0.8,
     "inverse_homophily": 0.1,#1 is total mixing, 0 is no mixing
     "homophilly_rate" : 1.5,
-    "confirmation_bias": 25,
+    "confirmation_bias": 30,
 }
 
 params["time_steps_max"] = int(params["total_time"] / params["delta_t"])
@@ -120,8 +120,11 @@ if __name__ == "__main__":
         createFolderSA(fileName)
 
         ### GENERATE DATA
-        row_list = np.linspace(param_min_row,param_max_row, nrows)
-        col_list = np.linspace(param_min_col,param_max_col, ncols)
+        #print(np.linspace(param_min_row,param_max_row, nrows), type(np.linspace(param_min_row,param_max_row, nrows)))
+        #print(np.asarray([0.05, 0.5, 1.0, 5.0]), type(np.asarray([0.05, 0.5, 1.0, 5.0])))
+        #quit()
+        row_list = np.asarray([0.08, 0.5, 1.0, 5.0])#np.linspace(param_min_row,param_max_row, nrows)
+        col_list = np.asarray([0.08, 0.5, 1.0, 5.0])#np.linspace(param_min_col,param_max_col, ncols)
         params_list = produce_param_list_double(params,param_col,col_list,param_row,row_list)
         
         data_list  = parallel_run(params_list)  

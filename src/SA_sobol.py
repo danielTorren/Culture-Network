@@ -65,61 +65,38 @@ else:
 #################################
 
 # variable parameters
-variable_parameters = [
-    ("M",1,10), 
-    ("K",2,30),
-    ("N",20,200),
-    ("prob_rewire",0.0,0.2),
-    ("set_seed",0,10000), 
-    ("culture_momentum_real",0.1,50),
-    ("learning_error_scale",0.0,0.5), 
-    ("alpha_attitude", 0.1,8),
-    ("beta_attitude", 0.1,8),
-    ("alpha_threshold", 0.1,8),
-    ("beta_threshold", 0.1,8),
-    ("discount_factor",0.0,1.0),
-    ("inverse_homophily",0.0,1.0), 
-    ("present_discount_factor",0.0,1.0),
-    ("confirmation_bias",0.0,100),
+"""THE ORDER MATTERS WHEN REPLOTING, FIX THIS!"""
+variable_parameters_dict = [
+    {"property": "N","min":50,"max":200, "title": r"$N$"}, 
+    {"property":"M","min":1,"max": 10, "title": r"$M$"}, 
+    {"property":"K","min":2,"max":30 , "title": r"$K$"}, 
+    {"property":"prob_rewire","min":0.0, "max":0.2 , "title": r"$p_r$"}, 
+    {"property":"set_seed","min":0, "max":10000, "title": r"Seed"}, 
+    {"property":"culture_momentum_real","min":1,"max": 50, "title": r"$T_{\rho}$"}, 
+    {"property":"learning_error_scale","min":0.0,"max":0.5 , "title": r"$\eta$" }, 
+    #{"property":"alpha_attitude","min":0.1, "max": 8, "title": r"Attitude $\alpha$"}, 
+    #{"property":"beta_attitude","min":0.1, "max":8 , "title": r"Attitude $\beta$"}, 
+    #{"property":"alpha_threshold","min":0.1, "max": 8, "title": r"Threshold $\alpha$"}, 
+    #{"property":"beta_threshold","min":0.1, "max": 8, "title": r"Threshold $\beta$"}, 
+    {"property":"discount_factor","min":0.0, "max":1.0 , "title": r"$\delta$"}, 
+    {"property":"inverse_homophily","min":0.0, "max": 1.0, "title": r"$h$"}, 
+    {"property":"present_discount_factor","min":0.0, "max": 1.0, "title": r"$\beta$"}, 
+    {"property":"confirmation_bias","min":0.0, "max":100 , "title": r"$\theta$"}, 
 ]
-"""
-Put ones not used here
-"""
 
-names = [
-    r"$M$",
-    r"$K$",
-    r"$N$",
-    r"$p_r$",
-    r"$Seed$",
-    r"$T_{\rho}$",
-    r"$\eta$",
-    r"$Attitude \alpha_{init}$",
-    r"$Attitude \beta_{init}$",
-    r"$Threshold \alpha_{init}$",
-    r"$Threshold \beta_{init}$",
-    r"$\delta$",
-    r"$h$",
-    r"$\beta$",
-    r"$\theta$",
-]
-"""
-Put ones not used here
-"""
 
-results_property = "Carbon Emissions/NM"
-N_samples = 16#256#16  # 1024
 
 # Visualize
 dpi_save = 1200
 
-def generate_problem(variable_parameters):
+def generate_problem(variable_parameters_dict,N_samples):
 
-    D_vars = len(variable_parameters)
+    D_vars = len(variable_parameters_dict)
     samples = N_samples * (2*D_vars + 2)
     print("samples: ",samples)
-    names_list = [x[0] for x in variable_parameters]
-    bounds_list = [[x[1],x[2]] for x in variable_parameters]
+
+    names_list = [x["property"] for x in variable_parameters_dict]
+    bounds_list = [[x["min"],x["max"]] for x in variable_parameters_dict]
 
     problem = {
         "num_vars": D_vars,
@@ -140,9 +117,12 @@ def generate_problem(variable_parameters):
 
     return problem, fileName, param_values
 
-def generate_sa_data(base_params,variable_parameters,param_values):
-    params_list_sa = produce_param_list_SA(param_values,base_params,variable_parameters)
+def generate_sa_data(base_params,variable_parameters_dict,param_values,results_property):
+
+    params_list_sa = produce_param_list_SA(param_values,base_params,variable_parameters_dict)
+
     Y = parallel_run_sa(params_list_sa,results_property)
+    
     return np.asarray(Y)
 
 def get_data_bar_chart(Si_df):
@@ -164,25 +144,32 @@ def get_data_bar_chart(Si_df):
 
 if __name__ == "__main__":
 
-    RUN = True#False,True
+    RUN = 1#False,True
 
     if RUN:
+        results_property = "Carbon Emissions/NM"
+        N_samples = 32#256#256#16  # 1024
+
         # run the thing
-        problem, fileName, param_values = generate_problem(variable_parameters)
+        problem, fileName, param_values = generate_problem(variable_parameters_dict,N_samples)
         sa_save_problem(problem,fileName)
-        Y = generate_sa_data(base_params,variable_parameters,param_values)
+        Y = generate_sa_data(base_params,variable_parameters_dict,param_values,results_property)
         sa_save_Y(Y,fileName)
     else:
-        fileName = "results/SA_24_2_4"
+        fileName = "results/SA_512_15_16"
         problem = sa_load_problem(fileName)
         Y = sa_load_Y(fileName)
     
     Si = sobol.analyze(problem, Y, print_to_console=False)
 
+    ###PLOT RESULTS
+    
+    names = [x["title"] for x in variable_parameters_dict]
+
     #### Bar chart
     total, first, second = Si.to_df()
     data_sa, yerr = get_data_bar_chart(total)
-    bar_sensitivity_analysis_plot(fileName, data_sa, names, yerr , dpi_save)
+    bar_sensitivity_analysis_plot(fileName, data_sa, names, yerr , dpi_save,N_samples)
 
     #Matrix plot
     data = [np.asarray(Si["S2"]),np.asarray(Si["S2_conf"])]
@@ -190,6 +177,6 @@ if __name__ == "__main__":
     cmap = "Blues"
     nrows = 1
     ncols = 2
-    prints_SA_matrix(fileName, data,title_list,cmap,nrows, ncols, dpi_save, problem["names"])
+    prints_SA_matrix(fileName, data,title_list,cmap,nrows, ncols, dpi_save, names,N_samples)
 
     plt.show()
