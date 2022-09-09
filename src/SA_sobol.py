@@ -6,18 +6,21 @@ from utility import (
     createFolderSA,
     produce_param_list_SA
 )
-from run import parallel_run_sa
+from run import parallel_run_sa, average_seed_parallel_run_sa
 import numpy as np
 from SALib.sample import saltelli
 from SALib.analyze import sobol
+import random
+from datetime import datetime
 import matplotlib.pyplot as plt
 from plot import (
     prints_SA_matrix,
     bar_sensitivity_analysis_plot,
 )
-import pandas as pd
+#print("Hey",random.seed(datetime.now()))
 
 base_params = {
+    "seed_list": [1,2,3,4,5],
     "total_time": 100,
     "delta_t": 0.05,
     "compression_factor": 10,
@@ -31,7 +34,7 @@ base_params = {
     "M": 3,
     "K": 20,
     "prob_rewire": 0.05,
-    "set_seed": 1,
+    "set_seed": 0, #SET SEED TO 0 IF YOU WANT RANDOM SEED! #1,#None,#random.seed(datetime.now()),#1,
     "culture_momentum_real": 5,
     "learning_error_scale": 0.02,
     "discount_factor": 0.6,
@@ -57,10 +60,10 @@ if base_params["harsh_data"]:#trying to create a polarised society!
     if base_params["green_extreme_prop"] + base_params["indifferent_prop"] + base_params["brown_extreme_prop"] != 1:
         raise Exception("Invalid proportions")
 else:
-    base_params["alpha_attitude"] = 1
-    base_params["beta_attitude"] = 1
-    base_params["alpha_threshold"] = 1
-    base_params["beta_threshold"] = 1
+    base_params["alpha_attitude"] = 0.1
+    base_params["beta_attitude"] = 0.1
+    base_params["alpha_threshold"] = 2
+    base_params["beta_threshold"] = 2
 
 #################################
 
@@ -71,7 +74,7 @@ variable_parameters_dict = [
     {"property":"M","min":1,"max": 10, "title": r"$M$"}, 
     {"property":"K","min":2,"max":30 , "title": r"$K$"}, 
     {"property":"prob_rewire","min":0.0, "max":0.2 , "title": r"$p_r$"}, 
-    {"property":"set_seed","min":0, "max":10000, "title": r"Seed"}, 
+    #{"property":"set_seed","min":1, "max":10000, "title": r"Seed"}, 
     {"property":"culture_momentum_real","min":1,"max": 50, "title": r"$T_{\rho}$"}, 
     {"property":"learning_error_scale","min":0.0,"max":0.5 , "title": r"$\eta$" }, 
     #{"property":"alpha_attitude","min":0.1, "max": 8, "title": r"Attitude $\alpha$"}, 
@@ -83,7 +86,6 @@ variable_parameters_dict = [
     {"property":"present_discount_factor","min":0.0, "max": 1.0, "title": r"$\beta$"}, 
     {"property":"confirmation_bias","min":0.0, "max":100 , "title": r"$\theta$"}, 
 ]
-
 
 
 # Visualize
@@ -117,11 +119,47 @@ def generate_problem(variable_parameters_dict,N_samples):
 
     return problem, fileName, param_values
 
+def average_generate_problem(variable_parameters_dict,N_samples,average_reps):
+
+    D_vars = len(variable_parameters_dict)
+    samples = N_samples * (2*D_vars + 2)
+    print("samples: ",samples)
+
+    names_list = [x["property"] for x in variable_parameters_dict]
+    bounds_list = [[x["min"],x["max"]] for x in variable_parameters_dict]
+
+    problem = {
+        "num_vars": D_vars,
+        "names": names_list,
+        "bounds": bounds_list,
+    }
+
+    ########################################
+
+    fileName = "results/average_SA_%s_%s_%s_%s" % (str(average_reps),str(samples),str(D_vars),str(N_samples))
+    print("fileName: ", fileName)
+    createFolderSA(fileName)
+    
+    # GENERATE PARAMETER VALUES
+    param_values = saltelli.sample(
+        problem, N_samples
+    )  # NumPy matrix. #N(2D +2) samples where N is 1024 and D is the number of parameters
+
+    return problem, fileName, param_values
+
 def generate_sa_data(base_params,variable_parameters_dict,param_values,results_property):
 
     params_list_sa = produce_param_list_SA(param_values,base_params,variable_parameters_dict)
 
     Y = parallel_run_sa(params_list_sa,results_property)
+    
+    return np.asarray(Y)
+
+def average_generate_sa_data(base_params,variable_parameters_dict,param_values,results_property):
+
+    params_list_sa = produce_param_list_SA(param_values,base_params,variable_parameters_dict)
+
+    Y = average_seed_parallel_run_sa(params_list_sa,results_property)
     
     return np.asarray(Y)
 
@@ -144,23 +182,36 @@ def get_data_bar_chart(Si_df):
 
 if __name__ == "__main__":
 
-    RUN = 1#False,True
+    RUN = 0#False,True
+
 
     if RUN:
         results_property = "Carbon Emissions/NM"
-        N_samples = 32#256#256#16  # 1024
+        N_samples = 4
 
+        """
         # run the thing
         problem, fileName, param_values = generate_problem(variable_parameters_dict,N_samples)
         sa_save_problem(problem,fileName)
         Y = generate_sa_data(base_params,variable_parameters_dict,param_values,results_property)
         sa_save_Y(Y,fileName)
+        """
+
+        ##AVERAGE RUNS
+        average_reps = len(base_params["seed_list"])
+        print(average_reps)
+        average_problem, average_fileName, average_param_values = average_generate_problem(variable_parameters_dict,N_samples,average_reps)
+        sa_save_problem(average_problem,average_fileName)
+        average_Y = average_generate_sa_data(base_params,variable_parameters_dict,average_param_values,results_property)
+        sa_save_Y(average_Y,average_fileName)
     else:
-        fileName = "results/SA_512_15_16"
-        problem = sa_load_problem(fileName)
-        Y = sa_load_Y(fileName)
+        average_fileName = "results/average_SA_5_88_10_4"
+        N_samples = 4
+        average_problem = sa_load_problem(average_fileName)
+        average_Y = sa_load_Y(average_fileName)
     
-    Si = sobol.analyze(problem, Y, print_to_console=False)
+    #Si = sobol.analyze(problem, Y, print_to_console=False)
+    Si = sobol.analyze(average_problem, average_Y, print_to_console=False)
 
     ###PLOT RESULTS
     
@@ -169,7 +220,8 @@ if __name__ == "__main__":
     #### Bar chart
     total, first, second = Si.to_df()
     data_sa, yerr = get_data_bar_chart(total)
-    bar_sensitivity_analysis_plot(fileName, data_sa, names, yerr , dpi_save,N_samples)
+    #bar_sensitivity_analysis_plot(fileName, data_sa, names, yerr , dpi_save,N_samples)
+    bar_sensitivity_analysis_plot(average_fileName, data_sa, names, yerr , dpi_save,N_samples)
 
     #Matrix plot
     data = [np.asarray(Si["S2"]),np.asarray(Si["S2_conf"])]
@@ -177,6 +229,6 @@ if __name__ == "__main__":
     cmap = "Blues"
     nrows = 1
     ncols = 2
-    prints_SA_matrix(fileName, data,title_list,cmap,nrows, ncols, dpi_save, names,N_samples)
+    prints_SA_matrix(average_fileName, data,title_list,cmap,nrows, ncols, dpi_save, names,N_samples)
 
     plt.show()

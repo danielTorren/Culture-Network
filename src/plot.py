@@ -1074,6 +1074,52 @@ def print_live_intial_culture_networks(fileName: str, Data_list: list[Network], 
     f = plotName + "/%s_print_intial_culture_networks.eps" % (property)
     fig.savefig(f, dpi=dpi_save,format='eps')
 
+
+def print_live_intial_culture_networks_and_culture_timeseries(fileName: str, Data_list: list[Network], dpi_save:int, property_list:list, property, ncols:int , layout: str, norm_zero_one, cmap, node_size,round_dec):
+    y_title = "Culture"
+    fig, axes = plt.subplots(nrows=2, ncols=ncols, figsize=(14, 7), constrained_layout=True)
+
+    for i in range(ncols):
+        #####NETWORK
+        G = nx.from_numpy_matrix(Data_list[i].history_weighting_matrix[0])
+        pos_culture_network = prod_pos(layout, G)
+        # print(i,ax)
+        axes[0][i].set_title(r"{} = {}".format(property,round(property_list[i], round_dec)))
+
+        indiv_culutre_list = [v.history_culture[0] for v in Data_list[i].agent_list]
+        #print(indiv_culutre_list)
+        colour_adjust = norm_zero_one(indiv_culutre_list)
+        ani_step_colours = cmap(colour_adjust)
+
+        nx.draw(
+            G,
+            node_color=ani_step_colours,
+            ax=axes[1][i],
+            pos=pos_culture_network,
+            node_size=node_size,
+            edgecolors="black",
+        )
+
+        #####CULTURE TIME SERIES
+        for v in Data_list[i].agent_list:
+            axes[0][i].plot(np.asarray(Data_list[i].history_time), np.asarray(v.history_culture))
+
+        axes[0][i].set_xlabel(r"Time")
+        axes[0][i].set_ylabel(r"%s" % y_title)
+        axes[0][i].set_ylim(0,1)
+
+    # colour bar axes
+    cbar = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap, norm=norm_zero_one),ax=axes.ravel().tolist())
+    cbar.set_label("Culture")
+
+    plotName = fileName + "/Prints"
+    f = plotName + "/%s_print_live_intial_culture_networks_and_culture_timeseries.png" % (property)
+    fig.savefig(f, dpi=dpi_save)
+
+    f_eps = plotName + "/%s_print_live_intial_culture_networks_and_culture_timeseries.eps" % (property)
+    fig.savefig(f_eps, dpi=dpi_save,format='eps')
+
+
 def prints_init_weighting_matrix(fileName: str, Data_list: list[Network], dpi_save:int,nrows: int, ncols:int, cmap,property_list:list, property,round_dec):
 
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))

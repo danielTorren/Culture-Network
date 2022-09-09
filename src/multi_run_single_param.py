@@ -28,6 +28,7 @@ from plot import (
     live_print_heterogenous_culture_momentum,
     live_print_culture_timeseries,
     live_print_culture_timeseries_with_weighting,
+    print_live_intial_culture_networks_and_culture_timeseries,
 )
 
 params = {
@@ -40,9 +41,9 @@ params = {
     "averaging_method": "Arithmetic",
     "phi_list_lower": 0.1,
     "phi_list_upper": 1.0,
-    "N": 50,
+    "N": 100,
     "M": 3,
-    "K": 10,
+    "K": 15,
     "prob_rewire": 0.05,
     "set_seed": 1,
     "culture_momentum_real": 5,
@@ -50,8 +51,8 @@ params = {
     "discount_factor": 0.6,
     "present_discount_factor": 0.8,
     "inverse_homophily": 0.5,#1 is total mixing, 0 is no mixing
-    "homophilly_rate" : 1.5,
-    "confirmation_bias": 20,
+    "homophilly_rate" : 1,
+    "confirmation_bias": 0,
 }
 
 params["time_steps_max"] = int(params["total_time"] / params["delta_t"])
@@ -108,22 +109,22 @@ min_culture_distance = 0.5
 
 if __name__ == "__main__":
 
-        nrows = 2
+        nrows = 1
         ncols = 3#due to screen ratio want more cols than rows usually
         reps = nrows*ncols
 
-        property_varied = "alpha_change"#"culture_momentum"#"confirmation_bias"#"inverse_homophily" #MAKE SURE ITS TYPES CORRECTLY
-        property_varied_title = "Alpha Change"
+        property_varied = "inverse_homophily"#"alpha_change"#"culture_momentum"#"confirmation_bias"#"inverse_homophily" #MAKE SURE ITS TYPES CORRECTLY
+        property_varied_title = "inverse homophily"
         param_min = 0.0
-        param_max = 1.0#50.0
+        param_max = 0.5#50.0
 
-        title_list = [r"Static uniform $\alpha_{n,k}$", r"Static culturally determined $\alpha_{n,k}$", r"Dynamic culturally determined $\alpha_{n,k}$"]
+        #title_list = [r"Static uniform $\alpha_{n,k}$", r"Static culturally determined $\alpha_{n,k}$", r"Dynamic culturally determined $\alpha_{n,k}$"]
 
     
         fileName = "results/%s_variation_%s_%s_%s_%s_%s_%s" % (property_varied,str(params["N"]),str(params["time_steps_max"]),str(params["K"]), str(param_min), str(param_max), str(reps))
         print("fileName: ", fileName)
 
-        property_values_list = np.asarray([0.0, 0.5, 1.0])#np.linspace(param_min,param_max, reps)
+        property_values_list = np.linspace(param_min,param_max, reps) #np.asarray([0.0, 0.5, 1.0])#np.linspace(param_min,param_max, reps)
         params_list = produce_param_list(params,property_values_list, property_varied)
         data = parallel_run(params_list)#better if a Multiple of 4
 
@@ -147,7 +148,8 @@ if __name__ == "__main__":
         #print_live_intial_culture_networks(fileName, data, dpi_save, property_values_list, property_varied, nrows, ncols , layout, norm_zero_one, cmap, node_size,round_dec)
         #prints_init_weighting_matrix(fileName, data, dpi_save,nrows, ncols, cmap_weighting,property_values_list, property_varied,round_dec)
         #prints_final_weighting_matrix(fileName, data, dpi_save,nrows, ncols, cmap_weighting,property_values_list, property_varied,round_dec)
-        live_print_culture_timeseries_with_weighting(fileName, data, property_varied, title_list, nrows, ncols, dpi_save, cmap_weighting)
+        #live_print_culture_timeseries_with_weighting(fileName, data, property_varied, title_list, nrows, ncols, dpi_save, cmap_weighting)
+        print_live_intial_culture_networks_and_culture_timeseries(fileName, data, dpi_save, property_values_list, property_varied_title, ncols, layout, norm_zero_one, cmap, node_size,round_dec)
 
         #ani_a =  multi_animation_weighting(fileName,data, cmap_weighting,  interval, fps, round_dec, nrows, ncols)
         #ani_b = live_compare_animate_culture_network_and_weighting(fileName,data,layout,cmap,node_size,interval,fps,norm_zero_one,round_dec,cmap_edge, ncols, nrows,property_varied_title,property_values_list)

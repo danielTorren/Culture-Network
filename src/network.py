@@ -2,10 +2,7 @@ import numpy as np
 import networkx as nx
 from individuals import Individual
 import numpy.typing as npt
-from random import randrange,seed
-from scipy.stats import gmean
 from logging import raiseExceptions
-
 
 class Network:
 
@@ -15,12 +12,16 @@ class Network:
     """
 
     def __init__(self, parameters:list):
-       
-        self.set_seed = int(round(parameters["set_seed"]))
-        seed(self.set_seed)
-        np.random.seed(
-            self.set_seed
-        )  # not sure if i have to be worried about the randomness of the system being reproducible
+        """
+        # randomly initialize the RNG from some platform-dependent source of entropy
+        np.random.seed(None)
+        # get the initial state of the RNG
+        st0 = np.random.get_state()
+        print("seed",st0)
+        """
+        
+        self.set_seed = parameters["set_seed"]
+        np.random.seed(self.set_seed)  # not sure if i have to be worried about the randomness of the system being reproducible
         
         self.alpha_change = parameters["alpha_change"]
         self.save_data = parameters["save_data"]
@@ -207,7 +208,7 @@ class Network:
     def partial_shuffle(self, l, swap_reps=5):
         n = len(l)
         for _ in range(swap_reps):
-            a, b = randrange(n), randrange(n)
+            a, b = np.random.randint(low = 0, high = n, size=2)
             l[b], l[a] = l[a], l[b]
         return l
     

@@ -149,3 +149,24 @@ def parallel_run_sa(params_list,results_property):
     else:
         raiseExceptions("Invalid results property")
     return results_parallel_sa
+
+def average_get_carbon_emissions_result(params):
+    Y_list = []
+    for v in params["seed_list"]:
+        params["set_seed"] = v
+        data = generate_data(params)
+        Y_list.append(data.total_carbon_emissions/(data.N*data.M))
+    return np.mean(Y_list)
+
+def average_seed_parallel_run_sa(params_list,results_property):
+    num_cores = multiprocessing.cpu_count()
+    if results_property == "Carbon Emissions/NM":
+        results_parallel_sa = Parallel(n_jobs=num_cores,verbose=10)(delayed(average_get_carbon_emissions_result)(i) for i in params_list)
+    else:
+        raiseExceptions("Invalid results property")
+        
+    return results_parallel_sa
+
+def average_seed_run_sa(params_list,results_property):
+    results_parallel_sa = [average_get_carbon_emissions_result(i) for i in params_list]
+    return results_parallel_sa
