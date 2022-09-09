@@ -422,6 +422,18 @@ def produce_param_list_double(params,param_col,col_list,param_row,row_list):
             params[param_col] = j
             params_list.append(params.copy())
     return params_list
+
+def produce_param_list_double_phi_list(params,param_col,col_list,param_row,row_list):
+
+    params_list = []
+
+    for i in row_list:
+        for j in col_list:
+            params[param_row] = i
+            params[param_col] = j
+            params["M"] = i + j
+            params_list.append(params.copy())
+    return params_list
     
 def generate_title_list(
     property_col,

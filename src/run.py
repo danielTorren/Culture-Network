@@ -138,6 +138,10 @@ def parallel_run(params_list):
     data_parallel = Parallel(n_jobs=num_cores,verbose=10)(delayed(generate_data)(i) for i in params_list)
     return data_parallel
 
+def live_run(params_list):
+    data = [generate_data(i) for i in params_list]
+    return data
+
 def get_carbon_emissions_result(params):
     data = generate_data(params)
     return data.total_carbon_emissions/(data.N*data.M)

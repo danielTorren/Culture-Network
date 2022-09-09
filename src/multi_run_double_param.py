@@ -3,7 +3,7 @@ from run import parallel_run
 import matplotlib.pyplot as plt
 import numpy as np
 from network import Network
-from utility import createFolderSA,produce_param_list_double,generate_title_list
+from utility import createFolderSA,produce_param_list_double,generate_title_list,produce_param_list_double_phi_list
 from matplotlib.colors import LinearSegmentedColormap,  Normalize
 from matplotlib.cm import get_cmap
 from plot import (
@@ -20,7 +20,7 @@ from plot import (
 )
 
 params = {
-    "total_time": 200,
+    "total_time": 100,
     "delta_t": 0.05,
     "compression_factor": 10,
     "save_data": True, 
@@ -29,18 +29,18 @@ params = {
     "averaging_method": "Arithmetic",
     "phi_list_lower": 0.1,
     "phi_list_upper": 1.0,
-    "N": 200,
-    "M": 3,
-    "K": 20,
+    "N": 100,
+    #"M": 3,
+    "K": 15,
     "prob_rewire": 0.05,
     "set_seed": 1,
     "culture_momentum_real": 5,
     "learning_error_scale": 0.02,
     "discount_factor": 0.6,
     "present_discount_factor": 0.8,
-    "inverse_homophily": 0.1,#1 is total mixing, 0 is no mixing
-    "homophilly_rate" : 1.5,
-    "confirmation_bias": 30,
+    "inverse_homophily": 0.2,#1 is total mixing, 0 is no mixing
+    "homophilly_rate" : 1,
+    "confirmation_bias": 10,
 }
 
 params["time_steps_max"] = int(params["total_time"] / params["delta_t"])
@@ -59,10 +59,10 @@ if params["harsh_data"]:#trying to create a polarised society!
     if params["green_extreme_prop"] + params["indifferent_prop"] + params["brown_extreme_prop"] != 1:
         raise Exception("Invalid proportions")
 else:
-    params["alpha_attitude"] = 1
-    params["beta_attitude"] = 1
-    params["alpha_threshold"] = 1
-    params["beta_threshold"] = 1
+    params["alpha_attitude"] = 0.1
+    params["beta_attitude"] = 0.1
+    params["alpha_threshold"] = 2
+    params["beta_threshold"] = 2
 
 ###PLOT STUFF
 node_size = 50
@@ -100,19 +100,20 @@ min_culture_distance = 0.5
 
 if __name__ == "__main__":
 
-        nrows = 4
+        nrows = 5
         ncols = 4#due to screen ratio want more cols than rows usually
         reps = nrows*ncols
 
-        param_min_row = 0.1
-        param_max_row = 5
-        param_min_col = 0.1
-        param_max_col = 5#50.0
+        param_min_row = 0
+        param_max_row = 6
+        param_min_col = 1
+        param_max_col = 6
 
-        property_row = r"$\alpha$"#"Heteogenity proportion" #"Confirmation bias"
-        param_row = "alpha_attitude"#"quick_changers_prop"
-        property_col = r"$\beta$" #"Cultural momentum"#"Inverse homophily"
-        param_col = "beta_attitude"#"culture_momentum_real"#"inverse_homophily"
+        property_row = r"$M_{asocial}$"#"Heteogenity proportion" #"Confirmation bias"
+        param_row = "zero_phi_num"#"quick_changers_prop"
+
+        property_col = r"$M_{social}$" #"Cultural momentum"#"Inverse homophily"
+        param_col = "one_phi_num"#"culture_momentum_real"#"inverse_homophily"
 
 
         fileName = "results/%s_%s_%s_%s_%s_%s_%s_%s_%s_%s" % (param_col,param_row,str(params["N"]),str(params["time_steps_max"]),str(params["K"]),str(param_min_col), str(param_max_col), str(param_min_row), str(param_max_row), str(reps))
@@ -123,9 +124,10 @@ if __name__ == "__main__":
         #print(np.linspace(param_min_row,param_max_row, nrows), type(np.linspace(param_min_row,param_max_row, nrows)))
         #print(np.asarray([0.05, 0.5, 1.0, 5.0]), type(np.asarray([0.05, 0.5, 1.0, 5.0])))
         #quit()
-        row_list = np.asarray([0.08, 0.5, 1.0, 5.0])#np.linspace(param_min_row,param_max_row, nrows)
-        col_list = np.asarray([0.08, 0.5, 1.0, 5.0])#np.linspace(param_min_col,param_max_col, ncols)
-        params_list = produce_param_list_double(params,param_col,col_list,param_row,row_list)
+        row_list = [0,1,2,4,6]#np.linspace(param_min_row,param_max_row, nrows)#np.asarray([0.08, 0.5, 1.0, 5.0])#
+        col_list = [1,2,4,6]#np.linspace(param_min_col,param_max_col, ncols)#np.asarray([0.08, 0.5, 1.0, 5.0])#
+
+        params_list = produce_param_list_double_phi_list(params,param_col,col_list,param_row,row_list)#produce_param_list_double(params,param_col,col_list,param_row,row_list)
         
         data_list  = parallel_run(params_list)  
         data_array = np.reshape(data_list, (len(row_list), len(col_list)))

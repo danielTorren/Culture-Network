@@ -19,7 +19,7 @@ class Network:
         st0 = np.random.get_state()
         print("seed",st0)
         """
-        
+
         self.set_seed = parameters["set_seed"]
         np.random.seed(self.set_seed)  # not sure if i have to be worried about the randomness of the system being reproducible
         
@@ -36,6 +36,7 @@ class Network:
 
         #network
         self.M = int(round(parameters["M"]))
+        print("M", self.M)
         self.N = int(round(parameters["N"]))
         self.K = int(
             round(parameters["K"])
@@ -60,7 +61,16 @@ class Network:
         self.learning_error_scale = parameters["learning_error_scale"]
 
         #social influence of behaviours
-        self.phi_array = np.linspace(parameters["phi_list_lower"], parameters["phi_list_upper"], num=self.M)# CONSPICUOUS CONSUMPTION OF BEHAVIOURS - THE HIgher the more social prestige associated with this behaviour
+        zero_list = []
+        ones_list = []
+        if parameters["zero_phi_num"] != 0:
+            zero_list = [0]*parameters["zero_phi_num"]
+        if parameters["one_phi_num"] != 0:
+            ones_list = [1]*parameters["one_phi_num"]
+        self.phi_array =  np.asarray(zero_list + ones_list)       
+       
+        print("self.phi_array",self.phi_array)
+        #self.phi_array = np.linspace(parameters["phi_list_lower"], parameters["phi_list_upper"], num=self.M)#parameters["phi_list"] #CONSPICUOUS CONSUMPTION OF BEHAVIOURS - THE HIgher the more social prestige associated with this behaviour
         
         #emissions associated with each behaviour
         self.carbon_emissions = [1]*self.M #parameters["carbon_emissions"], removed for the sake of the SA
