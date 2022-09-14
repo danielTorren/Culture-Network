@@ -141,6 +141,56 @@ def live_phase_diagram_k_means_vary(fileName, Data_array, property_varied_row, p
     f = plotName + "/live_phase_diagram_k_means_vary_%s_and_%s.eps" % (property_varied_row,property_varied_col)
     fig.savefig(f, dpi=dpi_save,format='eps')
 
+def live_multirun_diagram_mean_coefficient_variance(fileName, Data_list, property_varied, property_varied_values, property_title,  cmap,dpi_save,norm_zero_one):
+
+
+    fig, ax = plt.subplots( figsize=(14, 7))
+
+    x_data = [i.average_culture for i in Data_list]
+    y_data = [i.std_culture/i.average_culture for i in Data_list]
+    ax.set_xlabel(r"$\mu$")
+    ax.set_ylabel(r"$\sigma /\mu$")
+
+    colour_adjust = norm_zero_one(property_varied_values)
+    scat_colours = cmap(colour_adjust)
+
+    ax.scatter(x_data, y_data,s= 60, c = scat_colours,edgecolors='black', linewidths=1)
+
+    cbar = fig.colorbar(
+        plt.cm.ScalarMappable(cmap=cmap, norm= Normalize(vmin = min(property_varied_values), vmax=max(property_varied_values))), ax=ax, location='right',
+    )  # This does a mapabble on the fly i think, not sure
+    cbar.set_label(r"%s" % (property_title)) 
+
+    plt.tight_layout()
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/live_plot_diagram_mean_coefficient_variance_%s_and_%s.eps" % (property_varied, len(property_varied_values))
+    fig.savefig(f, dpi=dpi_save,format='eps')
+
+def live_average_multirun_diagram_mean_coefficient_variance(fileName, mean_data, coefficient_variance_data, property_varied, property_varied_values, property_title,  cmap,dpi_save,norm):
+
+
+    fig, ax = plt.subplots( figsize=(14, 7))
+    ax.set_xlabel(r"$\mu$")
+    ax.set_ylabel(r"$\sigma /\mu$")
+
+    colour_adjust = norm(property_varied_values)
+    scat_colours = cmap(colour_adjust)
+
+    ax.scatter(mean_data, coefficient_variance_data,s= 60, c = scat_colours,edgecolors='black', linewidths=1)
+
+    cbar = fig.colorbar(
+        plt.cm.ScalarMappable(cmap=cmap, norm = norm), ax=ax, location='right',#Normalize(vmin = min(property_varied_values), vmax=max(property_varied_values))
+    )  # This does a mapabble on the fly i think, not sure
+    cbar.set_label(r"%s" % (property_title)) 
+
+    plt.tight_layout()
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/live_plot_diagram_mean_coefficient_variance_%s_and_%s.eps" % (property_varied, len(property_varied_values))
+    fig.savefig(f, dpi=dpi_save,format='eps')
+
+
 
 def print_culture_timeseries_vary_array(fileName: str, Data_array: list[Network] , property_varied_row, property_varied_values_row,property_varied_col,property_varied_values_col,  nrows:int, ncols:int , dpi_save:int):
 
@@ -1428,6 +1478,31 @@ def bar_sensitivity_analysis_plot(FILENAME,data, names, yerr, dpi_save,N_samples
 
     plotName = FILENAME + "/Prints"
     f = plotName + "/" + "%s_%s_bar_sensitivity_analysis_plot.eps" % (len(names),N_samples)
+    fig.savefig(f, dpi=dpi_save,format='eps')
+
+def scatter_sensitivity_analysis_plot(FILENAME,data, names, xerr, dpi_save,N_samples):
+    """
+    Create scatter chart of results.
+    """
+
+    fig, ax = plt.subplots(figsize=(14, 7))
+    #data.plot(kind='barh', xerr=yerr, ax=ax)#Pandas data frame plot
+    #print("data", data)
+    #print("data numpy",data["ST"].tolist())
+    #print("names",names)
+    #print("xerr",xerr)
+    #print("xerrr numpy", xerr.to_numpy())
+
+    ax.errorbar(data["ST"].tolist(),names, xerr=xerr["ST"].tolist(), fmt="o", ecolor = "k")
+    #ax.scatter(data,names,xerr=yerr)
+    #ax.set_yticks(ticks = range(len(names)), labels = names )#,rotation=0.0, horizontalalignment="center"
+    ax.set_xlim(left=0)
+    ax.set_xlabel(r"Total Sobol sensitivity")
+    ax.set_ylabel(r"Exogenous parameters")
+    plt.tight_layout()
+
+    plotName = FILENAME + "/Prints"
+    f = plotName + "/" + "%s_%s_scatter_sensitivity_analysis_plot.eps" % (len(names),N_samples)
     fig.savefig(f, dpi=dpi_save,format='eps')
 
 def prints_SA_matrix(FILENAME, Data,title_list,cmap,nrows, ncols, dpi_save , labels, N_samples ):

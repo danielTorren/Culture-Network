@@ -40,7 +40,7 @@ from plot import (
 )
 from utility import loadData, get_run_properties, frame_distribution_prints,k_means_calc,loadObjects
 import matplotlib.pyplot as plt
-from matplotlib.colors import LinearSegmentedColormap, Normalize
+from matplotlib.colors import LinearSegmentedColormap, Normalize,SymLogNorm
 from matplotlib.cm import get_cmap
 import time
 import numpy as np
@@ -171,6 +171,7 @@ cmap = LinearSegmentedColormap.from_list("BrownGreen", ["sienna", "whitesmoke", 
 #norm_neg_pos = plt.cm.ScalarMappable(cmap=cmap, norm=Normalize(vmin=-1, vmax=1))
 norm_neg_pos = Normalize(vmin=-1, vmax=1)
 norm_zero_one  = Normalize(vmin=0, vmax=1)
+log_norm = SymLogNorm(linthresh=0.15, linscale=1, vmin=-1.0, vmax=1.0, base=10)  # this works at least its correct
 
 #log_norm = SymLogNorm(linthresh=0.15, linscale=1, vmin=-1.0, vmax=1.0, base=10)  # this works at least its correct
 cmap_weighting = "Reds"

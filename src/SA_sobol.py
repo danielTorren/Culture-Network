@@ -16,11 +16,12 @@ import matplotlib.pyplot as plt
 from plot import (
     prints_SA_matrix,
     bar_sensitivity_analysis_plot,
+    scatter_sensitivity_analysis_plot,
 )
 #print("Hey",random.seed(datetime.now()))
 
 base_params = {
-    "seed_list": [1,2,3,4,5],
+    "seed_list": [1,2,3,4],
     "total_time": 100,
     "delta_t": 0.05,
     "compression_factor": 10,
@@ -76,11 +77,11 @@ variable_parameters_dict = [
     {"property":"prob_rewire","min":0.0, "max":0.2 , "title": r"$p_r$"}, 
     #{"property":"set_seed","min":1, "max":10000, "title": r"Seed"}, 
     {"property":"culture_momentum_real","min":1,"max": 50, "title": r"$T_{\rho}$"}, 
-    {"property":"learning_error_scale","min":0.0,"max":0.5 , "title": r"$\eta$" }, 
-    #{"property":"alpha_attitude","min":0.1, "max": 8, "title": r"Attitude $\alpha$"}, 
-    #{"property":"beta_attitude","min":0.1, "max":8 , "title": r"Attitude $\beta$"}, 
-    #{"property":"alpha_threshold","min":0.1, "max": 8, "title": r"Threshold $\alpha$"}, 
-    #{"property":"beta_threshold","min":0.1, "max": 8, "title": r"Threshold $\beta$"}, 
+    {"property":"learning_error_scale","min":0.0,"max":0.5 , "title": r"$\epsilon$" }, 
+    {"property":"alpha_attitude","min":0.1, "max": 8, "title": r"Attitude $\alpha$"}, 
+    {"property":"beta_attitude","min":0.1, "max":8 , "title": r"Attitude $\beta$"}, 
+    {"property":"alpha_threshold","min":0.1, "max": 8, "title": r"Threshold $\alpha$"}, 
+    {"property":"beta_threshold","min":0.1, "max": 8, "title": r"Threshold $\beta$"}, 
     {"property":"discount_factor","min":0.0, "max":1.0 , "title": r"$\delta$"}, 
     {"property":"inverse_homophily","min":0.0, "max": 1.0, "title": r"$h$"}, 
     {"property":"present_discount_factor","min":0.0, "max": 1.0, "title": r"$\beta$"}, 
@@ -182,12 +183,12 @@ def get_data_bar_chart(Si_df):
 
 if __name__ == "__main__":
 
-    RUN = 0#False,True
+    RUN = 1#False,True
 
 
     if RUN:
         results_property = "Carbon Emissions/NM"
-        N_samples = 4
+        N_samples = 64#256
 
         """
         # run the thing
@@ -205,8 +206,8 @@ if __name__ == "__main__":
         average_Y = average_generate_sa_data(base_params,variable_parameters_dict,average_param_values,results_property)
         sa_save_Y(average_Y,average_fileName)
     else:
-        average_fileName = "results/average_SA_5_88_10_4"
-        N_samples = 4
+        average_fileName = "results/average_SA_4_120_14_4"
+        N_samples = 256
         average_problem = sa_load_problem(average_fileName)
         average_Y = sa_load_Y(average_fileName)
     
@@ -221,7 +222,8 @@ if __name__ == "__main__":
     total, first, second = Si.to_df()
     data_sa, yerr = get_data_bar_chart(total)
     #bar_sensitivity_analysis_plot(fileName, data_sa, names, yerr , dpi_save,N_samples)
-    bar_sensitivity_analysis_plot(average_fileName, data_sa, names, yerr , dpi_save,N_samples)
+    #bar_sensitivity_analysis_plot(average_fileName, data_sa, names, yerr , dpi_save,N_samples)
+    scatter_sensitivity_analysis_plot(average_fileName, data_sa, names, yerr , dpi_save,N_samples)
 
     #Matrix plot
     data = [np.asarray(Si["S2"]),np.asarray(Si["S2_conf"])]
@@ -229,6 +231,6 @@ if __name__ == "__main__":
     cmap = "Blues"
     nrows = 1
     ncols = 2
-    prints_SA_matrix(average_fileName, data,title_list,cmap,nrows, ncols, dpi_save, names,N_samples)
+    #prints_SA_matrix(average_fileName, data,title_list,cmap,nrows, ncols, dpi_save, names,N_samples)
 
     plt.show()

@@ -22,7 +22,7 @@ def plot_discount_factors_beta_delta(f, const_delta_discount_list, const_beta_di
         ax.plot(time_list, const_beta_discount_list[i+1], linestyle = "-",label =  r"$\beta$ = %s , $\delta$ = %s" % (beta_vals[0],delta_vals[i+1]) )
 
     ax.set_xlabel(r"Time/$\Delta t$")
-    ax.set_ylabel(r"Discount Value")
+    ax.set_ylabel(r"$D_s$")
     ax.set_xticks(np.arange(0, -culture_momentum, step=-5))
     ax.legend()
 

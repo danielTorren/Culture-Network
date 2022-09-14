@@ -123,6 +123,8 @@ class Network:
                 self.cultural_var,
                 self.min_culture,
                 self.max_culture,
+                self.std_culture,
+
             ) = self.calc_network_culture()
             self.weighting_matrix_convergence = 0 # there is no convergence in the first step, to deal with time issues when plotting
 
@@ -137,6 +139,7 @@ class Network:
             self.history_average_culture = [self.average_culture]
             self.history_min_culture = [self.min_culture]
             self.history_max_culture = [self.max_culture]
+            self.history_std_culture = [self.std_culture]
             self.history_green_adoption = [self.green_adoption]
 
     def normlize_matrix(self, matrix: npt.NDArray) ->  npt.NDArray:
@@ -325,6 +328,7 @@ class Network:
             max(culture_list) - min(culture_list),
             max(culture_list),
             min(culture_list),
+            np.std(culture_list),
         )
 
     def calc_green_adoption(self):
@@ -352,6 +356,7 @@ class Network:
         self.history_cultural_var.append(self.cultural_var)
         self.history_min_culture.append(self.min_culture)
         self.history_max_culture.append(self.max_culture)
+        self.history_std_culture.append(self.std_culture)
         self.history_green_adoption.append(self.green_adoption)
 
     def next_step(self):
@@ -380,6 +385,7 @@ class Network:
                 self.cultural_var,
                 self.min_culture,
                 self.max_culture,
+                self.std_culture,
             ) = self.calc_network_culture()
             self.green_adoption = self.calc_green_adoption()            
             self.save_data_network()
