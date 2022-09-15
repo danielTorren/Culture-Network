@@ -178,10 +178,6 @@ if __name__ == "__main__":
 
         params_list = produce_param_list(params,property_values_list, property_varied)
         mean_data, coefficient_variance_data = average_seed_parallel_run_mena_coefficient_variance(params_list)
-
-
-
-
         
         live_average_multirun_diagram_mean_coefficient_variance(fileName, mean_data,coefficient_variance_data, property_varied, property_values_list,property_varied_title, cmap_weighting, dpi_save, log_norm)
 

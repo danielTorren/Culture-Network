@@ -105,8 +105,11 @@ def live_print_culture_timeseries_vary(fileName, Data_list, property_varied_row,
         #ax.axvline(culture_momentum, color='r',linestyle = "--")
 
     plotName = fileName + "/Prints"
-    f = plotName + "/live_print_culture_timeseries_vary_%s_and_%s.eps" % (property_varied_row,property_varied_col)
-    fig.savefig(f, dpi=dpi_save,format='eps')
+    f = plotName + "/live_print_culture_timeseries_vary_%s_and_%s" % (property_varied_row,property_varied_col)
+    fig.savefig(f + ".eps", dpi=dpi_save,format='eps')
+    fig.savefig(f + ".png", dpi=dpi_save,format='png')
+
+
 
 def live_phase_diagram_k_means_vary(fileName, Data_array, property_varied_row, property_varied_values_row,property_varied_col,property_varied_values_col,min_k,max_k,size_points, cmap,dpi_save):
 
@@ -187,9 +190,77 @@ def live_average_multirun_diagram_mean_coefficient_variance(fileName, mean_data,
     plt.tight_layout()
 
     plotName = fileName + "/Plots"
-    f = plotName + "/live_plot_diagram_mean_coefficient_variance_%s_and_%s.eps" % (property_varied, len(property_varied_values))
-    fig.savefig(f, dpi=dpi_save,format='eps')
+    f = plotName + "/live_plot_diagram_mean_coefficient_variance_%s_and_%s" % (property_varied, len(property_varied_values))
+    fig.savefig(f + ".eps", dpi=dpi_save,format='eps')
+    fig.savefig(f + ".png", dpi=dpi_save,format='png')
 
+def live_average_multirun_n_diagram_mean_coefficient_variance(fileName, combined_data ,variable_parameters_dict,dpi_save,):
+
+    fig, ax = plt.subplots( figsize=(14, 7),constrained_layout=True)# 
+    ax.set_xlabel(r"$\mu$")
+    ax.set_ylabel(r"$\sigma /\mu$")
+
+    for i in variable_parameters_dict.keys():
+        colour_adjust = variable_parameters_dict[i]["norm"](variable_parameters_dict[i]["vals"])
+        scatter_colours = variable_parameters_dict[i]["cmap"](colour_adjust)
+        ax.scatter(combined_data[i]["mean_data"], combined_data[i]["coefficient_variance_data"], marker= variable_parameters_dict[i]["marker"], s= 60, c = scatter_colours, edgecolors='black', linewidths=1)
+
+        cbar = fig.colorbar(
+            plt.cm.ScalarMappable(cmap=variable_parameters_dict[i]["cmap"], norm = variable_parameters_dict[i]["norm"]), ax=ax, location=variable_parameters_dict[i]["cbar_loc"], aspect = 60,pad = 0.05
+        ) 
+        cbar.set_label(r"%s" % (variable_parameters_dict[i]["title"])) 
+
+    #plt.tight_layout()
+    #plt.subplots_adjust(wspace=0.1, hspace=0.1)
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/live_plot_diagram_mean_coefficient_variance"
+    fig.savefig(f + ".eps", dpi=dpi_save,format='eps')
+    fig.savefig(f + ".png", dpi=dpi_save,format='png')
+
+def live_average_multirun_double_phase_diagram_mean(fileName,Z, property_varied_row, property_varied_values_row,property_varied_col,property_varied_values_col, cmap,dpi_save,round_dec):
+
+    fig, ax = plt.subplots(figsize=(14, 7),constrained_layout=True)
+
+    ax.set_xlabel(r"%s" % property_varied_col)
+    ax.set_ylabel(r"%s" % property_varied_row)
+
+    X, Y = np.meshgrid(property_varied_values_col, property_varied_values_row)
+    contours = ax.contour(X, Y, Z, colors='black')
+    ax.clabel(contours, inline=True, fontsize=8)
+
+    cp = ax.contourf(X, Y, Z, cmap = cmap, alpha=0.5)
+    cbar = fig.colorbar(cp, ax=ax,)
+    cbar.set_label("Mean idenity")
+
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/live_average_multirun_double_phase_diagram_mean"
+    fig.savefig(f + ".eps", dpi=dpi_save,format='eps')
+    fig.savefig(f + ".png", dpi=dpi_save,format='png')
+
+
+
+def live_average_multirun_double_phase_diagram_C_of_V(fileName, Z, property_varied_row, property_varied_values_row,property_varied_col,property_varied_values_col, cmap,dpi_save,round_dec):
+
+    fig, ax = plt.subplots(figsize=(14, 7),constrained_layout=True)
+
+    ax.set_xlabel(r"%s" % property_varied_col)
+    ax.set_ylabel(r"%s" % property_varied_row)
+
+    X, Y = np.meshgrid(property_varied_values_col, property_varied_values_row)
+    contours = ax.contour(X, Y, Z, colors='black')
+    ax.clabel(contours, inline=True, fontsize=8)
+
+    cp = ax.contourf(X, Y, Z, cmap = cmap, alpha=0.5)
+    cbar = fig.colorbar(cp, ax=ax,)
+    cbar.set_label("Coefficient of variance of idenity")
+
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/live_average_multirun_double_phase_diagram_C_of_V"
+    fig.savefig(f + ".eps", dpi=dpi_save,format='eps')
+    fig.savefig(f + ".png", dpi=dpi_save,format='png')
 
 
 def print_culture_timeseries_vary_array(fileName: str, Data_array: list[Network] , property_varied_row, property_varied_values_row,property_varied_col,property_varied_values_col,  nrows:int, ncols:int , dpi_save:int):

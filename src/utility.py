@@ -9,6 +9,7 @@ from sklearn.metrics import silhouette_score as silhouette_score
 from logging import raiseExceptions
 from tslearn.clustering import TimeSeriesKMeans
 from tslearn.clustering import silhouette_score as tslearn_silhouette_score
+from matplotlib.colors import Normalize, LogNorm
 
 def produceName_alt(parameters: list) -> str:
     fileName = "results/"
@@ -20,6 +21,11 @@ def  produceName_SA(parameters_tuples: list) -> str:
     fileName = "results/SA"
     for i in parameters_tuples:
         fileName = fileName + "_" + str(i[0]) + "_" + str(i[1]) + "_" + str(i[2])
+    return fileName
+
+def  produceName_multi_run_n(variable_parameters_dict: list,fileName: str) -> str:
+    for i in variable_parameters_dict.keys():
+        fileName = fileName + "_" + i
     return fileName
 
 def createFolder(fileName: str) -> str:
@@ -413,7 +419,6 @@ def produce_param_list_SA(param_values,params,variable_parameters_dict):
     return params_list
 
 def produce_param_list_double(params,param_col,col_list,param_row,row_list):
-
     params_list = []
 
     for i in row_list:
@@ -422,7 +427,31 @@ def produce_param_list_double(params,param_col,col_list,param_row,row_list):
             params[param_col] = j
             params_list.append(params.copy())
     return params_list
+
+def produce_param_list_n(params,variable_parameters_dict):
+    "create a list of the params. This only varies one parameter at a time with the other set to whatever is in the params dict"
+    params_list = []
+    for i in variable_parameters_dict.values():
+        for j in range(i["reps"]):
+            params_copy = params.copy()#Copy it so that i am varying one parameter at a time independently
+            params_copy[i["property"]] = i["vals"][j]
+            params_list.append(params_copy)
+    return params_list
+
+def produce_param_list_n_double(params,variable_parameters_dict, param_row,param_col):
+    "create a list of the params. This only varies one parameter at a time with the other set to whatever is in the params dict"
+    params_list = []
+
+    for i in variable_parameters_dict[param_row]["vals"]:
+        for j in variable_parameters_dict[param_col]["vals"]:
+            params[param_row] = i
+            params[param_col] = j
+            params_list.append(params.copy())
+
+    print("params_list",params_list)
     
+    return params_list
+
 def generate_title_list(
     property_col,
     col_list,
@@ -458,6 +487,69 @@ def sa_load_problem(fileName) -> dict:
     with open(fileName + "/problem.pkl", 'rb') as f:
         problem = pickle.load(f)
     return problem
+
+
+def multi_n_save_data_list(data_list,fileName):
+    with open(fileName + "/data_list.pkl", 'wb') as f:
+        pickle.dump(data_list, f)
+    
+def multi_n_load_data_list(fileName) -> dict:
+    with open(fileName + "/data_list.pkl", 'rb') as f:
+        data_list = pickle.load(f)
+    return data_list
+
+
+def multi_n_save_mean_data_list(mean_data_list,fileName):
+    with open(fileName + "/mean_data_list.pkl", 'wb') as f:
+        pickle.dump(mean_data_list, f)
+    
+def multi_n_load_mean_data_list(fileName) -> dict:
+    with open(fileName + "/mean_data_list.pkl", 'rb') as f:
+        mean_data_list = pickle.load(f)
+    return mean_data_list
+
+def multi_n_save_coefficient_variance_data_list(coefficient_variance_data_list,fileName):
+    with open(fileName + "/coefficient_variance_data_list.pkl", 'wb') as f:
+        pickle.dump(coefficient_variance_data_list, f)
+    
+def multi_n_load_coefficient_variance_data_list(fileName) -> dict:
+    with open(fileName + "/coefficient_variance_data_list.pkl", 'rb') as f:
+        coefficient_variance_data_list = pickle.load(f)
+    return coefficient_variance_data_list
+
+
+def multi_n_save_variable_parameters_dict_list(variable_parameters_dict,fileName):
+    with open(fileName + "/variable_parameters_dict.pkl", 'wb') as f:
+        pickle.dump(variable_parameters_dict, f)
+    
+def multi_n_load_variable_parameters_dict_list(fileName) -> dict:
+    with open(fileName + "/variable_parameters_dict.pkl", 'rb') as f:
+        variable_parameters_dict = pickle.load(f)
+    return variable_parameters_dict
+
+def multi_n_save_combined_data(combined_data,fileName):
+    with open(fileName + "/combined_data.pkl", 'wb') as f:
+        pickle.dump(combined_data, f)
+    
+def multi_n_load_combined_data(fileName) -> dict:
+    with open(fileName + "/combined_data.pkl", 'rb') as f:
+        combined_data = pickle.load(f)
+    return combined_data
+
+
+def generate_vals_variable_parameters_and_norms(variable_parameters_dict):
+    for i in variable_parameters_dict.values():
+        if i["divisions"] == "linear": 
+            i["vals"] = np.linspace(i["min"],i["max"],i["reps"])
+            i["norm"] = Normalize()
+        elif i["divisions"] == "log": 
+            i["vals"] = np.logspace(i["min"],i["max"], i["reps"])
+            i["norm"] = LogNorm()
+        else:
+            raiseExceptions("Invalid divisions, try linear or log")
+    return variable_parameters_dict
+
+        
 
 
 

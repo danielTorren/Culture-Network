@@ -176,11 +176,24 @@ def average_seed_parallel_run_sa(params_list,results_property):
         raiseExceptions("Invalid results property")
     return results_parallel_sa
 
-def average_seed_parallel_run_mena_coefficient_variance(params_list):
+def average_seed_parallel_run_mean_coefficient_variance(params_list):
     num_cores = multiprocessing.cpu_count()
     results = Parallel(n_jobs=num_cores,verbose=10)(delayed(average_get_mean_coifficient_variance_result)(i) for i in params_list)#results_mean, results_coefficient_variance
     results_mean, results_coefficient_variance = zip(*results)
-    return results_mean, results_coefficient_variance#results_mean, results_coefficient_variance
+    return np.asarray(results_mean), np.asarray(results_coefficient_variance)#results_mean, results_coefficient_variance
+
+def average_seed_parallel_run_mean_coefficient_variance_multi_run_n(params_list,variable_parameters_dict):
+
+    """Due to parralllisation I cant be sure which data corresponds to which so I need to vary the indivdiual parameters in seperate parallel loops"""
+    counter = 0
+    combined_data = {}
+
+    for i in variable_parameters_dict.keys():
+        results_mean, results_coefficient_variance = average_seed_parallel_run_mean_coefficient_variance(params_list[counter:counter + variable_parameters_dict[i]["reps"]])
+        counter += variable_parameters_dict[i]["reps"]
+        combined_data["%s" % (i)] = {"mean_data": results_mean, "coefficient_variance_data": results_coefficient_variance}
+
+    return combined_data 
 
 def average_seed_run_sa(params_list,results_property):
     results_parallel_sa = [average_get_carbon_emissions_result(i) for i in params_list]

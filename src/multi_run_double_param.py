@@ -1,11 +1,12 @@
 from logging import raiseExceptions
-from run import parallel_run
+from run import parallel_run, average_seed_parallel_run_mean_coefficient_variance
 import matplotlib.pyplot as plt
 import numpy as np
 from network import Network
 from utility import createFolderSA,produce_param_list_double,generate_title_list
 from matplotlib.colors import LinearSegmentedColormap,  Normalize
 from matplotlib.cm import get_cmap
+import os
 from plot import (
     live_print_culture_timeseries,
     print_culture_timeseries_vary_array,
@@ -17,10 +18,28 @@ from plot import (
     live_compare_animate_weighting_matrix,
     live_compare_animate_behaviour_matrix,
     live_print_heterogenous_culture_momentum_double,
+    live_average_multirun_double_phase_diagram_mean,
+    live_average_multirun_double_phase_diagram_C_of_V,
+)
+### FOR AVERAGE
+from utility import (
+    createFolderSA,
+    produceName_multi_run_n,
+    produce_param_list_n,
+    multi_n_save_variable_parameters_dict_list,
+    multi_n_load_variable_parameters_dict_list,
+    generate_vals_variable_parameters_and_norms,
+    multi_n_save_combined_data,
+    multi_n_load_combined_data,
+    produce_param_list_n_double,
+    multi_n_load_mean_data_list,
+    multi_n_load_coefficient_variance_data_list,
+    multi_n_save_mean_data_list,
+    multi_n_save_coefficient_variance_data_list,
 )
 
 params = {
-    "total_time": 200,
+    "total_time": 30,
     "delta_t": 0.05,
     "compression_factor": 10,
     "save_data": True, 
@@ -29,7 +48,7 @@ params = {
     "averaging_method": "Arithmetic",
     "phi_list_lower": 0.1,
     "phi_list_upper": 1.0,
-    "N": 200,
+    "N": 100,
     "M": 3,
     "K": 20,
     "prob_rewire": 0.05,
@@ -38,9 +57,9 @@ params = {
     "learning_error_scale": 0.02,
     "discount_factor": 0.6,
     "present_discount_factor": 0.8,
-    "inverse_homophily": 0.1,#1 is total mixing, 0 is no mixing
-    "homophilly_rate" : 1.5,
-    "confirmation_bias": 30,
+    "inverse_homophily": 0.2,#1 is total mixing, 0 is no mixing
+    "homophilly_rate" : 1,
+    "confirmation_bias": 20,
 }
 
 params["time_steps_max"] = int(params["total_time"] / params["delta_t"])
@@ -59,8 +78,8 @@ if params["harsh_data"]:#trying to create a polarised society!
     if params["green_extreme_prop"] + params["indifferent_prop"] + params["brown_extreme_prop"] != 1:
         raise Exception("Invalid proportions")
 else:
-    params["alpha_attitude"] = 1
-    params["beta_attitude"] = 1
+    params["alpha_attitude"] = 0.2
+    params["beta_attitude"] = 0.2
     params["alpha_threshold"] = 1
     params["beta_threshold"] = 1
 
@@ -98,22 +117,43 @@ alpha_val = 0.25
 size_points = 5
 min_culture_distance = 0.5
 
+SINGLE = 0
+
 if __name__ == "__main__":
+    nrows = 4
+    ncols = 4#due to screen ratio want more cols than rows usually
+    reps = nrows*ncols
 
-        nrows = 4
-        ncols = 4#due to screen ratio want more cols than rows usually
-        reps = nrows*ncols
+    """Runs parallel loops over reps of each variable parameters dict entry"""
+    variable_parameters_dict = {
+        #"discount_factor": {"property":"discount_factor","min":-1, "max":0 , "title": r"$\delta$", "divisions": "log", "cmap": get_cmap("Reds"), "cbar_loc": "right", "marker": "o"}, 
+        "inverse_homophily": {"property":"inverse_homophily","min":0.0, "max": 1.0, "title": r"$h$", "divisions": "linear", "cmap": get_cmap("Blues"), "cbar_loc": "right", "marker": "v", "reps": nrows}, 
+        "confirmation_bias": {"property":"confirmation_bias","min":0, "max":30 , "title": r"$\theta$", "divisions": "linear", "cmap": get_cmap("Greens"), "cbar_loc": "right", "marker": "p", "reps": ncols}, 
+        #"prob_rewire": {"property":"prob_rewire","min":0.0, "max":1 , "title": r"$p_r$", "divisions": "linear", "cmap": get_cmap("Purples"), "cbar_loc": "right", "marker": "d"}, 
+        #"learning_error_scale": {"property":"learning_error_scale","min":0.0,"max":1.0 , "title": r"$\epsilon$", "divisions": "linear", "cmap": get_cmap("Oranges"), "cbar_loc": "right", "marker": "*"},
+        #"N": {"property": "N","min":50,"max":200, "title": r"$N$", "divisions": "linear", "cmap": get_cmap("Reds"), "cbar_loc": "right", "marker": "o"}, 
+        #"M": {"property":"M","min":1,"max": 10, "title": r"$M$", "divisions": "linear", "cmap": get_cmap("Greens"), "cbar_loc": "right", "marker": "p"}, 
+        #{"property":"K","min":2,"max":30 , "title": r"$K$", "divisions": "linear", "cmap": get_cmap("Blues"), "cbar_loc": "right", "marker": "p"}, 
+    }
 
-        param_min_row = 0.1
-        param_max_row = 5
-        param_min_col = 0.1
-        param_max_col = 5#50.0
+    param_row = "inverse_homophily"
+    param_col = "confirmation_bias"
 
-        property_row = r"$\alpha$"#"Heteogenity proportion" #"Confirmation bias"
-        param_row = "alpha_attitude"#"quick_changers_prop"
-        property_col = r"$\beta$" #"Cultural momentum"#"Inverse homophily"
-        param_col = "beta_attitude"#"culture_momentum_real"#"inverse_homophily"
+    reps_row = variable_parameters_dict[param_row]["reps"]
+    reps_col = variable_parameters_dict[param_col]["reps"]
 
+    reps = reps_row*reps_col #64#32 # make multiple of cpu core number for efficiency
+
+    param_min_row = variable_parameters_dict[param_row]["min"]
+    param_max_row = variable_parameters_dict[param_row]["max"]
+    param_min_col = variable_parameters_dict[param_col]["min"]
+    param_max_col = variable_parameters_dict[param_col]["max"]
+
+    property_row = variable_parameters_dict[param_row]["title"]
+    property_col = variable_parameters_dict[param_col]["title"] 
+
+
+    if SINGLE:
 
         fileName = "results/%s_%s_%s_%s_%s_%s_%s_%s_%s_%s" % (param_col,param_row,str(params["N"]),str(params["time_steps_max"]),str(params["K"]),str(param_min_col), str(param_max_col), str(param_min_row), str(param_max_row), str(reps))
         print("fileName: ", fileName)
@@ -123,8 +163,8 @@ if __name__ == "__main__":
         #print(np.linspace(param_min_row,param_max_row, nrows), type(np.linspace(param_min_row,param_max_row, nrows)))
         #print(np.asarray([0.05, 0.5, 1.0, 5.0]), type(np.asarray([0.05, 0.5, 1.0, 5.0])))
         #quit()
-        row_list = np.asarray([0.08, 0.5, 1.0, 5.0])#np.linspace(param_min_row,param_max_row, nrows)
-        col_list = np.asarray([0.08, 0.5, 1.0, 5.0])#np.linspace(param_min_col,param_max_col, ncols)
+        row_list = np.linspace(param_min_row,param_max_row, nrows)#np.asarray([0.08, 0.5, 1.0, 5.0])
+        col_list = np.linspace(param_min_col,param_max_col, ncols)#np.asarray([0.08, 0.5, 1.0, 5.0])#
         params_list = produce_param_list_double(params,param_col,col_list,param_row,row_list)
         
         data_list  = parallel_run(params_list)  
@@ -142,4 +182,80 @@ if __name__ == "__main__":
         #ani_c = live_compare_animate_weighting_matrix(fileName, data_list,  cmap_weighting, interval, fps, round_dec, cmap_edge, nrows, ncols,property_col,col_list)
         #ani_d = live_compare_animate_behaviour_matrix(fileName, data_list,  cmap, interval, fps, round_dec, nrows, ncols,property_col,col_list)
 
-        plt.show()
+    else: 
+        """Runs parallel loops over reps of each variable parameters dict entry"""
+        RUN = 0
+
+        #AVERAGE OVER MULTIPLE RUNS
+        seed_list = [1,2,3]# [1,2,3,4,5] ie 5 reps per run!
+        params["seed_list"] = seed_list
+        average_reps = len(seed_list)
+
+
+        variable_parameters_dict = generate_vals_variable_parameters_and_norms(variable_parameters_dict)
+
+        if RUN:
+
+            property_varied_values_row = variable_parameters_dict[param_row]["vals"]
+            property_varied_values_col = variable_parameters_dict[param_col]["vals"]
+            
+
+            fileName = "results/average_%s_%s_%s_%s_%s_%s_%s" % (param_col,param_row,str(params["N"]),str(params["time_steps_max"]),str(params["K"]),str(reps), str(average_reps))
+
+            print("fileName: ", fileName)
+            createFolderSA(fileName)
+            
+            ### GENERATE PARAMS 
+            
+            params_list = produce_param_list_n_double(params,variable_parameters_dict, param_row,param_col)
+
+            print(reps_row,reps_col,len(params_list ))
+
+            ### GENERATE DATA
+            results_mean, results_coefficient_variance = average_seed_parallel_run_mean_coefficient_variance(params_list) 
+            print("results_mean",results_mean)
+
+            #save the data and params_list
+            multi_n_save_variable_parameters_dict_list(variable_parameters_dict, fileName)
+            multi_n_save_mean_data_list(results_mean, fileName)
+            multi_n_save_coefficient_variance_data_list(results_coefficient_variance,fileName)
+
+            matrix_mean = results_mean.reshape((reps_row, reps_col))
+            matrix_coefficient_variance = results_coefficient_variance.reshape((reps_row, reps_col))
+
+        else:
+            fileName = "results/average_confirmation_bias_inverse_homophily_100_1000_20_256_5"
+
+            if os.path.exists(fileName + '/variable_parameters_dict.pkl'): 
+                variable_parameters_dict = multi_n_load_variable_parameters_dict_list(fileName)
+
+            param_row = "inverse_homophily"
+            param_col = "confirmation_bias"
+
+            reps_row = variable_parameters_dict[param_row]["reps"]
+            reps_col = variable_parameters_dict[param_col]["reps"]
+
+            property_row = variable_parameters_dict[param_row]["title"]
+            property_col = variable_parameters_dict[param_col]["title"] 
+
+            property_varied_values_row = variable_parameters_dict[param_row]["vals"]
+            property_varied_values_col = variable_parameters_dict[param_col]["vals"]
+
+            if os.path.exists(fileName + '/mean_data_list.pkl'):
+                results_mean = multi_n_load_mean_data_list(fileName)
+            else:
+                raiseExceptions("results mean missing!")
+
+            if os.path.exists(fileName + '/coefficient_variance_data_list.pkl'):
+                results_coefficient_variance = multi_n_load_coefficient_variance_data_list(fileName)
+            else:
+                raiseExceptions("coefficient variance missing!")
+
+            matrix_mean = results_mean.reshape((reps_row, reps_col))
+            matrix_coefficient_variance = results_coefficient_variance.reshape((reps_row, reps_col))
+
+
+        live_average_multirun_double_phase_diagram_mean(fileName, matrix_mean, property_row, property_varied_values_row,property_col,property_varied_values_col, get_cmap("Blues"),dpi_save,round_dec)
+        live_average_multirun_double_phase_diagram_C_of_V(fileName, matrix_coefficient_variance, property_row, property_varied_values_row,property_col,property_varied_values_col, get_cmap("Reds"),dpi_save,round_dec)
+
+    plt.show()
