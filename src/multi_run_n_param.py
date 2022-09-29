@@ -16,6 +16,7 @@ from utility import (
 from matplotlib.cm import get_cmap
 from plot import (
     live_average_multirun_n_diagram_mean_coefficient_variance,
+    live_average_multirun_n_diagram_mean_coefficient_variance_cols
 )
 
 params = {
@@ -78,16 +79,16 @@ if __name__ == "__main__":
         params["seed_list"] = seed_list
         average_reps = len(seed_list)
 
-        
-        fileName = "results/multi_run_n_%s_%s_%s_%s" % (str(params["N"]),str(params["time_steps_max"]),str(params["K"]), str(len(seed_list)))
+        reps = 262 #total reps 
+        fileName = "results/multi_run_n_%s_%s_%s_%s_%s" % (str(params["N"]),str(params["time_steps_max"]),str(params["K"]), str(len(seed_list)), str(reps))
 
         # variable parameters
 
         """Runs parallel loops over reps of each variable parameters dict entry"""
         variable_parameters_dict = {
-            "discount_factor": {"property":"discount_factor","min":-1, "max":0 , "title": r"$\delta$", "divisions": "log", "cmap": get_cmap("Reds"), "cbar_loc": "right", "marker": "o", "reps": 16}, 
-            "inverse_homophily": {"property":"inverse_homophily","min":0.0, "max": 1.0, "title": r"$h$", "divisions": "linear", "cmap": get_cmap("Blues"), "cbar_loc": "right", "marker": "v", "reps": 16}, 
-            "confirmation_bias": {"property":"confirmation_bias","min":0, "max":40, "title": r"$\theta$", "divisions": "linear", "cmap": get_cmap("Greens"), "cbar_loc": "right", "marker": "p", "reps":16}, 
+            "discount_factor": {"property":"discount_factor","min":-2, "max":0 , "title": r"$\delta$", "divisions": "log", "cmap": get_cmap("Reds"), "cbar_loc": "right", "marker": "o", "reps": 16}, 
+            "inverse_homophily": {"property":"inverse_homophily","min":0.0, "max": 1.0, "title": r"$h$", "divisions": "linear", "cmap": get_cmap("Blues"), "cbar_loc": "right", "marker": "v", "reps": 128}, 
+            "confirmation_bias": {"property":"confirmation_bias","min":0, "max":40, "title": r"$\theta$", "divisions": "linear", "cmap": get_cmap("Greens"), "cbar_loc": "right", "marker": "p", "reps":128}, 
             #"prob_rewire": {"property":"prob_rewire","min":0.0, "max":1 , "title": r"$p_r$", "divisions": "linear", "cmap": get_cmap("Purples"), "cbar_loc": "right", "marker": "d", "reps": 16}, 
             #"learning_error_scale": {"property":"learning_error_scale","min":0.0,"max":1.0 , "title": r"$\epsilon$", "divisions": "linear", "cmap": get_cmap("Oranges"), "cbar_loc": "right", "marker": "*", "reps": 16},
             #"N": {"property": "N","min":50,"max":200, "title": r"$N$", "divisions": "linear", "cmap": get_cmap("Reds"), "cbar_loc": "right", "marker": "o", "reps": 8}, 
@@ -109,21 +110,24 @@ if __name__ == "__main__":
         #save the data and params_list
         multi_n_save_variable_parameters_dict_list(variable_parameters_dict, fileName)
         multi_n_save_combined_data(combined_data, fileName)
-
     else:
-        fileName = "results/multi_run_n_100_200_20_8_5"
+        fileName = "results/multi_run_n_100_600_20_5_262"
         NEW_VARIABLES_PARAMS = 1
 
         if os.path.exists(fileName + '/variable_parameters_dict.pkl') and NEW_VARIABLES_PARAMS == 0: 
             variable_parameters_dict = multi_n_load_variable_parameters_dict_list(fileName)
         else:
             variable_parameters_dict = {
-                #"discount_factor": {"property":"discount_factor","min":-1, "max":0 , "title": r"$\delta$", "divisions": "log", "cmap": get_cmap("Reds"), "cbar_loc": "right", "marker": "o"}, 
-                "inverse_homophily": {"property":"inverse_homophily","min":0.0, "max": 1.0, "title": r"$h$", "divisions": "linear", "cmap": get_cmap("Greens"), "cbar_loc": "right", "marker": "v"}, 
-                "confirmation_bias": {"property":"confirmation_bias","min":0, "max":100 , "title": r"$\theta$", "divisions": "linear", "cmap": get_cmap("Blues"), "cbar_loc": "right", "marker": "p"}, 
-                #"prob_rewire": {"property":"prob_rewire","min":0.0, "max":1 , "title": r"$p_r$", "divisions": "linear", "cmap": get_cmap("Purples"), "cbar_loc": "right", "marker": "d"}, 
-                "learning_error_scale": {"property":"learning_error_scale","min":0.0,"max":1.0 , "title": r"$\epsilon$", "divisions": "linear", "cmap": get_cmap("Oranges"), "cbar_loc": "right", "marker": "o"},
+                "discount_factor": {"property":"discount_factor","min":-2, "max":0 , "title": r"$\delta$", "divisions": "log", "cmap": get_cmap("Reds"), "cbar_loc": "right", "marker": "o", "reps": 16}, 
+                "inverse_homophily": {"property":"inverse_homophily","min":0.0, "max": 1.0, "title": r"$h$", "divisions": "linear", "cmap": get_cmap("Blues"), "cbar_loc": "right", "marker": "v", "reps": 128}, 
+                "confirmation_bias": {"property":"confirmation_bias","min":0, "max":40, "title": r"$\theta$", "divisions": "linear", "cmap": get_cmap("Greens"), "cbar_loc": "right", "marker": "p", "reps":128}, 
+                #"prob_rewire": {"property":"prob_rewire","min":0.0, "max":1 , "title": r"$p_r$", "divisions": "linear", "cmap": get_cmap("Purples"), "cbar_loc": "right", "marker": "d", "reps": 16}, 
+                #"learning_error_scale": {"property":"learning_error_scale","min":0.0,"max":1.0 , "title": r"$\epsilon$", "divisions": "linear", "cmap": get_cmap("Oranges"), "cbar_loc": "right", "marker": "*", "reps": 16},
+                #"N": {"property": "N","min":50,"max":200, "title": r"$N$", "divisions": "linear", "cmap": get_cmap("Reds"), "cbar_loc": "right", "marker": "o", "reps": 8}, 
+                #"M": {"property":"M","min":1,"max": 10, "title": r"$M$", "divisions": "linear", "cmap": get_cmap("Greens"), "cbar_loc": "right", "marker": "p", "reps": 16}, 
+                #{"property":"K","min":2,"max":30 , "title": r"$K$", "divisions": "linear", "cmap": get_cmap("Blues"), "cbar_loc": "right", "marker": "p", "reps": 16}, 
             }
+
             variable_parameters_dict = generate_vals_variable_parameters_and_norms(variable_parameters_dict)
 
         if os.path.exists(fileName + '/combined_data.pkl'):
@@ -135,4 +139,5 @@ if __name__ == "__main__":
 
     #plot_a = live_average_multirun_n_diagram_mean_coefficient_variance(fileName, mean_data_list,coefficient_variance_data_list ,variable_parameters_dict,dpi_save)
     plot_b = live_average_multirun_n_diagram_mean_coefficient_variance(fileName, combined_data ,variable_parameters_dict,dpi_save,)
+    plot_c = live_average_multirun_n_diagram_mean_coefficient_variance_cols(fileName, combined_data ,variable_parameters_dict,dpi_save)
     plt.show()

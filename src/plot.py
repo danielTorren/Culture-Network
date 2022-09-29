@@ -218,6 +218,33 @@ def live_average_multirun_n_diagram_mean_coefficient_variance(fileName, combined
     fig.savefig(f + ".eps", dpi=dpi_save,format='eps')
     fig.savefig(f + ".png", dpi=dpi_save,format='png')
 
+def live_average_multirun_n_diagram_mean_coefficient_variance_cols(fileName, combined_data ,variable_parameters_dict,dpi_save):
+
+    fig, axes = plt.subplots( figsize=(14, 7),constrained_layout=True, nrows = 1, ncols = len(variable_parameters_dict.keys()))# 
+
+    key_list = list(variable_parameters_dict.keys())
+
+    for i, ax in enumerate(axes.flat):
+        ax.set_xlabel(r"$\mu$")
+        ax.set_ylabel(r"$\sigma /\mu$")
+        colour_adjust = variable_parameters_dict[key_list[i]]["norm"](variable_parameters_dict[key_list[i]]["vals"])
+        scatter_colours = variable_parameters_dict[key_list[i]]["cmap"](colour_adjust)
+        ax.scatter(combined_data[key_list[i]]["mean_data"], combined_data[key_list[i]]["coefficient_variance_data"], marker= variable_parameters_dict[key_list[i]]["marker"], s= 60, c = scatter_colours, edgecolors='black', linewidths=1)
+
+        cbar = fig.colorbar(
+            plt.cm.ScalarMappable(cmap=variable_parameters_dict[key_list[i]]["cmap"], norm = variable_parameters_dict[key_list[i]]["norm"]), ax=ax, location=variable_parameters_dict[key_list[i]]["cbar_loc"], aspect = 60,pad = 0.05
+        ) 
+        cbar.set_label(r"%s" % (variable_parameters_dict[key_list[i]]["title"])) 
+
+    #plt.tight_layout()
+    #plt.subplots_adjust(wspace=0.1, hspace=0.1)
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/live_plot_diagram_mean_coefficient_variance_cols"
+    fig.savefig(f + ".eps", dpi=dpi_save,format='eps')
+    fig.savefig(f + ".png", dpi=dpi_save,format='png')
+
+
 def live_average_multirun_double_phase_diagram_mean(fileName,Z, property_varied_row, property_varied_values_row,property_varied_col,property_varied_values_col, cmap,dpi_save,round_dec):
 
     fig, ax = plt.subplots(figsize=(14, 7),constrained_layout=True)
@@ -1551,7 +1578,7 @@ def bar_sensitivity_analysis_plot(FILENAME,data, names, yerr, dpi_save,N_samples
     f = plotName + "/" + "%s_%s_bar_sensitivity_analysis_plot.eps" % (len(names),N_samples)
     fig.savefig(f, dpi=dpi_save,format='eps')
 
-def scatter_sensitivity_analysis_plot(FILENAME,data, names, xerr, dpi_save,N_samples):
+def scatter_total_sensitivity_analysis_plot(FILENAME,data, names, xerr, dpi_save,N_samples):
     """
     Create scatter chart of results.
     """
@@ -1575,6 +1602,33 @@ def scatter_sensitivity_analysis_plot(FILENAME,data, names, xerr, dpi_save,N_sam
     plotName = FILENAME + "/Prints"
     f = plotName + "/" + "%s_%s_scatter_sensitivity_analysis_plot.eps" % (len(names),N_samples)
     fig.savefig(f, dpi=dpi_save,format='eps')
+
+def multi_scatter_total_sensitivity_analysis_plot(FILENAME, data_dict, names, dpi_save,N_samples, order):
+    """
+    Create scatter chart of results.
+    """
+
+    fig, ax = plt.subplots(figsize=(14, 7))
+
+    if order == "First":
+        for i in data_dict.values():
+            l, caps, c = ax.errorbar(i["data"]["S1"].tolist(),names, xerr=i["yerr"]["S1"].tolist(), fmt="o", ecolor = "k", color = i["colour"], label = i["title"])
+    elif order == "Total":
+        for i in data_dict.values():
+            l, caps, c = ax.errorbar(i["data"]["ST"].tolist(),names, xerr=i["yerr"]["ST"].tolist(), fmt="o", ecolor = "k", color = i["colour"], label = i["title"])
+    else:
+        print("INVALID ORDER")
+
+    ax.legend()
+    ax.set_xlim(left=0)
+    ax.set_xlabel(r"%s Sobol sensitivity" % (order))
+    ax.set_ylabel(r"Exogenous parameters")
+    plt.tight_layout()
+
+    plotName = FILENAME + "/Prints"
+    f = plotName + "/" + "%s_%s_%s_multi_scatter_sensitivity_analysis_plot.eps" % (len(names),N_samples, order)
+    fig.savefig(f, dpi=dpi_save,format='eps')
+
 
 def prints_SA_matrix(FILENAME, Data,title_list,cmap,nrows, ncols, dpi_save , labels, N_samples ):
 

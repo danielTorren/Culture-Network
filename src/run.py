@@ -168,6 +168,21 @@ def average_get_mean_coifficient_variance_result(params):
         coefficient_variance_list.append(data.std_culture/data.average_culture)
     return np.mean(mean_list), np.mean(coefficient_variance_list)
 
+def average_get_emmissions_mu_variance(params):
+    emissions_list = []
+    mean_list = []
+    coefficient_variance_list = []
+    norm_factor = params["N"]*params["M"]
+    for v in params["seed_list"]:
+        params["set_seed"] = v
+        data = generate_data(params)
+        emissions_list.append(data.total_carbon_emissions/norm_factor)
+        mean_list.append(data.average_culture/norm_factor)
+        coefficient_variance_list.append(data.std_culture/(data.average_culture/norm_factor))
+    return np.mean(emissions_list), np.mean(mean_list), np.mean(coefficient_variance_list)    
+
+
+
 def average_seed_parallel_run_sa(params_list,results_property):
     num_cores = multiprocessing.cpu_count()
     if results_property == "Carbon Emissions/NM":
@@ -175,6 +190,13 @@ def average_seed_parallel_run_sa(params_list,results_property):
     else:
         raiseExceptions("Invalid results property")
     return results_parallel_sa
+
+def average_seed_parallel_run_sa_emmissions_mu_variance(params_list):
+    num_cores = multiprocessing.cpu_count()
+    results = Parallel(n_jobs=num_cores,verbose=10)(delayed(average_get_emmissions_mu_variance)(i) for i in params_list)#results_mean, results_coefficient_variance
+    results_emissions, results_mean, results_coefficient_variance = zip(*results)
+    return np.asarray(results_emissions),np.asarray(results_mean), np.asarray(results_coefficient_variance)#results_mean, results_coefficient_variance
+
 
 def average_seed_parallel_run_mean_coefficient_variance(params_list):
     num_cores = multiprocessing.cpu_count()

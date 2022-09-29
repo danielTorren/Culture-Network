@@ -470,12 +470,12 @@ def generate_title_list(
     
     return  title_list
 
-def sa_save_Y(Y,fileName):
-    with open(fileName + "/Y.pkl", 'wb') as f:
+def sa_save_Y(Y,fileName, YName):
+    with open(fileName + "/%s.pkl" % (YName), 'wb') as f:
         pickle.dump(Y, f)
     
-def sa_load_Y(fileName) -> dict:
-    with open(fileName + "/Y.pkl", 'rb') as f:
+def sa_load_Y(fileName, YName) -> dict:
+    with open(fileName + "/%s.pkl" % (YName), 'rb') as f:
         Y = pickle.load(f)
     return Y
 
@@ -549,7 +549,7 @@ def generate_vals_variable_parameters_and_norms(variable_parameters_dict):
             raiseExceptions("Invalid divisions, try linear or log")
     return variable_parameters_dict
 
-        
+
 
 
 
