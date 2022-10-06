@@ -67,7 +67,7 @@ else:
 ###PLOT STUFF
 dpi_save = 1200
 
-RUN = 1
+RUN = 0
 
 if __name__ == "__main__":
 

@@ -17,7 +17,9 @@ from plot import (
     prints_SA_matrix,
     bar_sensitivity_analysis_plot,
     scatter_total_sensitivity_analysis_plot,
-    multi_scatter_total_sensitivity_analysis_plot
+    multi_scatter_total_sensitivity_analysis_plot,
+    multi_scatter_sidebyside_total_sensitivity_analysis_plot,
+    multi_scatter_seperate_total_sensitivity_analysis_plot
 )
 #print("Hey",random.seed(datetime.now()))
 
@@ -78,11 +80,13 @@ variable_parameters_dict = [
     {"property":"prob_rewire","min":0.0, "max":0.2 , "title": r"$p_r$"}, 
     #{"property":"set_seed","min":1, "max":10000, "title": r"Seed"}, 
     {"property":"culture_momentum_real","min":1,"max": 50, "title": r"$T_{\rho}$"}, 
-    {"property":"learning_error_scale","min":0.0,"max":0.5 , "title": r"$\epsilon$" }, 
+    {"property":"learning_error_scale","min":0.0,"max":0.5 , "title": r"$\epsilon$" },
+
     {"property":"alpha_attitude","min":0.1, "max": 8, "title": r"Attitude $\alpha$"}, 
     {"property":"beta_attitude","min":0.1, "max":8 , "title": r"Attitude $\beta$"}, 
     {"property":"alpha_threshold","min":0.1, "max": 8, "title": r"Threshold $\alpha$"}, 
     {"property":"beta_threshold","min":0.1, "max": 8, "title": r"Threshold $\beta$"}, 
+    
     {"property":"discount_factor","min":0.0, "max":1.0 , "title": r"$\delta$"}, 
     {"property":"inverse_homophily","min":0.0, "max": 1.0, "title": r"$h$"}, 
     {"property":"present_discount_factor","min":0.0, "max": 1.0, "title": r"$\beta$"}, 
@@ -297,7 +301,7 @@ if __name__ == "__main__":
     EMISSIONS_MU_COEFFCIENT_VARIANCE_SA = 1
 
     if EMISSIONS_SA: 
-        RUN = 1#False,True
+        RUN = 0#False,True
         if RUN:
             N_samples = 1024#256
             average_reps,average_problem, average_fileName, average_param_values, average_Y = emmissions_run(N_samples,base_params, variable_parameters_dict,calc_second_order)
@@ -320,12 +324,12 @@ if __name__ == "__main__":
         ncols = 2
         #prints_SA_matrix(average_fileName, data,title_list,cmap,nrows, ncols, dpi_save, names,N_samples)
     elif EMISSIONS_MU_COEFFCIENT_VARIANCE_SA:
-        RUN = 1#False,True
+        RUN = 0#False,True
         if RUN:
             N_samples = 512
             average_reps,average_problem, average_fileName, average_param_values, average_Y_emissions, average_Y_mu, average_Y_coefficient_of_variance = emmissions_mu_variance_run(N_samples,base_params, variable_parameters_dict,calc_second_order)
         else:
-            average_fileName = "results/average_SA_4_512_14_32"
+            average_fileName = "results/average_SA_5_8192_14_512"
             N_samples = 4
             average_problem = sa_load_problem(average_fileName)
             average_Y_emissions = sa_load_Y(average_fileName, "Y_emissions")
@@ -336,16 +340,20 @@ if __name__ == "__main__":
 
         plot_dict = {
             "emissions" : {"title": r"$E/NM$",  "colour": "r", "linestyle": "--"},
-            "mu" : {"title": r"$\mu$", "colour": "g", "linestyle": "-"},
-            "coefficient_of_variance" : {"title": r"$\sigma/\mu$", "colour": "b","linestyle": "-."},
+            "mu" : {"title": r"$\mu/NM$", "colour": "g", "linestyle": "-"},
+            "coefficient_of_variance" : {"title": r"$\sigma NM/\mu$", "colour": "b","linestyle": "-."},
         }
 
         #print("test", data_sa_dict_total)
         data_sa_dict_total = Merge_dict_SA(data_sa_dict_total, plot_dict)
         data_sa_dict_first = Merge_dict_SA(data_sa_dict_first, plot_dict)
 
-        multi_scatter_total_sensitivity_analysis_plot(average_fileName, data_sa_dict_total, names, dpi_save,N_samples, "Total")
-        multi_scatter_total_sensitivity_analysis_plot(average_fileName, data_sa_dict_first, names, dpi_save,N_samples, "First")
+        #multi_scatter_total_sensitivity_analysis_plot(average_fileName, data_sa_dict_total, names, dpi_save,N_samples, "Total")
+        #multi_scatter_total_sensitivity_analysis_plot(average_fileName, data_sa_dict_first, names, dpi_save,N_samples, "First")
+
+        #multi_scatter_sidebyside_total_sensitivity_analysis_plot(average_fileName, data_sa_dict_total, names, dpi_save,N_samples, "Total")
+        #multi_scatter_sidebyside_total_sensitivity_analysis_plot(average_fileName, data_sa_dict_first, names, dpi_save,N_samples, "First")
+        multi_scatter_seperate_total_sensitivity_analysis_plot(average_fileName, data_sa_dict_first, names, dpi_save,N_samples, "First")
     else:
         print("NO RUN!")
 

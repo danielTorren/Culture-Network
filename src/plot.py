@@ -1629,6 +1629,75 @@ def multi_scatter_total_sensitivity_analysis_plot(FILENAME, data_dict, names, dp
     f = plotName + "/" + "%s_%s_%s_multi_scatter_sensitivity_analysis_plot.eps" % (len(names),N_samples, order)
     fig.savefig(f, dpi=dpi_save,format='eps')
 
+def multi_scatter_seperate_total_sensitivity_analysis_plot(FILENAME, data_dict, names, dpi_save,N_samples, order):
+    """
+    Create scatter chart of results.
+    """
+
+    fig, axes = plt.subplots(figsize=(14, 7), ncols = len(list(data_dict.keys())), nrows = 1)
+    dict_list = list(data_dict.keys())
+    print(dict_list)
+    print(data_dict[dict_list[0]])
+
+
+    for i, ax in enumerate(axes.flat):
+        ax.errorbar(data_dict[dict_list[i]]["data"]["S1"].tolist(),names, xerr=data_dict[dict_list[i]]["yerr"]["S1"].tolist(), fmt="o", ecolor = "k", color = data_dict[dict_list[i]]["colour"], label = data_dict[dict_list[i]]["title"])
+        ax.legend()
+        ax.set_xlim(left=0)
+        ax.set_xlabel(r"%s Sobol sensitivity" % (order))
+        ax.set_ylabel(r"Exogenous parameters")
+    
+    plt.tight_layout()
+
+    plotName = FILENAME + "/Prints"
+    f = plotName + "/" + "%s_%s_%s_multi_scatter_seperate_sensitivity_analysis_plot.eps" % (len(names),N_samples, order)
+    fig.savefig(f, dpi=dpi_save,format='eps')
+
+def multi_scatter_sidebyside_total_sensitivity_analysis_plot(FILENAME, data_dict, names, dpi_save,N_samples, order):
+    """
+    Create scatter chart of results.
+    """
+
+    fig, ax = plt.subplots(figsize=(14, 7))
+    
+    #print(y_height)
+    padding = 0.15
+    width_max = 1
+    width_scatter = (width_max - 2*padding)/len(list(data_dict.values()))# width over which scatter points are placed
+    y_height_list = np.asarray(list(range(len(names)))) + padding
+    y_height_list_copy = np.asarray(list(range(len(names)))) + padding
+    print(y_height_list)
+    #print(width_scatter)
+    #print(np.asarray(list(range(len(names)))) + width_max/2)
+    offset = 0
+    if order == "First":
+        for i in data_dict.values():
+            y_height_list_copy = y_height_list_copy + offset
+            print("y_height_list",y_height_list_copy)
+            ax.errorbar(i["data"]["S1"].tolist(),y_height_list_copy, xerr=i["yerr"]["S1"].tolist(), fmt="o", ecolor = "k", color = i["colour"], label = i["title"])
+            offset += width_scatter
+    elif order == "Total":
+        for i in data_dict.values():
+            y_height_list_copy = y_height_list_copy + offset
+            ax.errorbar(i["data"]["ST"].tolist(),y_height_list_copy, xerr=i["yerr"]["ST"].tolist(), fmt="o", ecolor = "k", color = i["colour"], label = i["title"])
+            offset += width_scatter
+    else:
+        print("INVALID ORDER")
+
+    ax.hlines(y = np.asarray(list(range(len(names) - 1))) + 1, xmin = 0, xmax = 1, linestyles = 'dashed', colors = "k", alpha = 0.3)
+    ax.set_yticks(np.asarray(list(range(len(names)))) + width_max/2,   names)
+
+    ax.legend()
+    ax.set_ylim(bottom = 0 , top = len(names))
+    ax.set_xlim(left=0, right = 1)
+    ax.set_xlabel(r"%s Sobol sensitivity" % (order))
+    ax.set_ylabel(r"Exogenous parameters")
+    plt.tight_layout()
+
+    plotName = FILENAME + "/Prints"
+    f = plotName + "/" + "%s_%s_%s_multi_scatter_sidebyside_total_sensitivity_analysis_plot.eps" % (len(names),N_samples, order)
+    fig.savefig(f, dpi=dpi_save,format='eps')
+
 
 def prints_SA_matrix(FILENAME, Data,title_list,cmap,nrows, ncols, dpi_save , labels, N_samples ):
 
