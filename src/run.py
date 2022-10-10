@@ -1,3 +1,13 @@
+"""Run simulation 
+A module that use input data to run the simualation for a given number of timesteps.
+Multiple simulations at once in parallel can also be run. 
+
+Author: Daniel Torren Peraire Daniel.Torren@uab.cat dtorrenp@hotmail.com
+
+Created: 10/10/2022
+"""
+
+#imports
 from logging import raiseExceptions
 from network import Network
 from utility import produceName_alt, createFolder, saveObjects, saveData,createFolderSA
@@ -6,8 +16,9 @@ import numpy as np
 from joblib import Parallel, delayed
 import multiprocessing
 
+#modules
 def generate_data(parameters: dict) -> Network:
-    print_simu = False
+    print_simu = 1#False
     
     if print_simu:
         start_time = time.time()
@@ -180,8 +191,6 @@ def average_get_emmissions_mu_variance(params):
         mean_list.append(data.average_culture/norm_factor)
         coefficient_variance_list.append(data.std_culture/(data.average_culture/norm_factor))
     return np.mean(emissions_list), np.mean(mean_list), np.mean(coefficient_variance_list)    
-
-
 
 def average_seed_parallel_run_sa(params_list,results_property):
     num_cores = multiprocessing.cpu_count()

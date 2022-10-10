@@ -1,3 +1,16 @@
+"""Run multiple simulations varying n parameters
+A module that use input data to generate data from multiple social networks varying n properties
+between simulations so that the differences may be compared. These multiple runs can either be single 
+shot runs or taking the average over multiple runs. Useful for getting a very broad view of the model.
+Parameter variation is idenpendant, such that there is a base set of parameters and each of n parameters
+is varied from the base line independantly.
+
+Author: Daniel Torren Peraire Daniel.Torren@uab.cat dtorrenp@hotmail.com
+
+Created: 10/10/2022
+"""
+
+#imports
 from logging import raiseExceptions
 from run import average_seed_parallel_run_mean_coefficient_variance_multi_run_n
 import matplotlib.pyplot as plt
@@ -19,6 +32,7 @@ from plot import (
     live_average_multirun_n_diagram_mean_coefficient_variance_cols
 )
 
+#constants
 params = {
     "total_time": 30,
     "delta_t": 0.05,
@@ -27,8 +41,8 @@ params = {
     "alpha_change" : 1.0,
     "harsh_data": False,
     "averaging_method": "Arithmetic",
-    "phi_list_lower": 0.1,
-    "phi_list_upper": 1.0,
+    "phi_lower": 0.1,
+    "phi_upper": 1.0,
     "N": 100,
     "M": 3,
     "K": 20,

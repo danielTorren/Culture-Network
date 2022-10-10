@@ -1,9 +1,19 @@
+"""Run multiple simulations varying two parameters
+A module that use input data to generate data from multiple social networks varying two properties
+between simulations so that the differences may be compared. These multiple runs can either be single 
+shot runs or taking the average over multiple runs. Useful for comparing the influences of these parameters
+on each other to generate phase diagrams.
+
+Author: Daniel Torren Peraire Daniel.Torren@uab.cat dtorrenp@hotmail.com
+
+Created: 10/10/2022
+"""
+
+#imports
 from logging import raiseExceptions
 from run import parallel_run, average_seed_parallel_run_mean_coefficient_variance
 import matplotlib.pyplot as plt
 import numpy as np
-from network import Network
-from utility import createFolderSA,produce_param_list_double,generate_title_list
 from matplotlib.colors import LinearSegmentedColormap,  Normalize
 from matplotlib.cm import get_cmap
 import os
@@ -21,8 +31,9 @@ from plot import (
     live_average_multirun_double_phase_diagram_mean,
     live_average_multirun_double_phase_diagram_C_of_V,
 )
-### FOR AVERAGE
 from utility import (
+    produce_param_list_double,
+    generate_title_list,
     createFolderSA,
     produceName_multi_run_n,
     produce_param_list_n,
@@ -38,6 +49,7 @@ from utility import (
     multi_n_save_coefficient_variance_data_list,
 )
 
+#constants
 params = {
     "total_time": 30,
     "delta_t": 0.05,
@@ -46,8 +58,8 @@ params = {
     "alpha_change" : 1.0,
     "harsh_data": False,
     "averaging_method": "Arithmetic",
-    "phi_list_lower": 0.1,
-    "phi_list_upper": 1.0,
+    "phi_lower": 0.1,
+    "phi_upper": 1.0,
     "N": 100,
     "M": 3,
     "K": 20,

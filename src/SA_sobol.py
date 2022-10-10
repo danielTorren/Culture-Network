@@ -1,3 +1,14 @@
+"""Performs sobol sensitivity analysis on the model. 
+A module that constructs dictionary of data to be varied then runs the multiple repeated simulations, 
+to account for stochastic variability. Then saves data and prameters used to produce that sensitivity 
+analysis data. Finally plots the results.
+
+Author: Daniel Torren Peraire Daniel.Torren@uab.cat dtorrenp@hotmail.com
+
+Created: 10/10/2022
+"""
+
+#imports
 from utility import (
     sa_save_problem,
     sa_save_Y,
@@ -32,8 +43,8 @@ base_params = {
     "alpha_change" : 1.0,
     "harsh_data": False,
     "averaging_method": "Arithmetic",
-    "phi_list_lower": 0.1,
-    "phi_list_upper": 1.0,
+    "phi_lower": 0.1,
+    "phi_upper": 1.0,
     "N": 50,
     "M": 3,
     "K": 15,

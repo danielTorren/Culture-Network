@@ -1,3 +1,12 @@
+"""Runs a single simulation to produce data which is saved and plotted 
+A module that use dictionary of data for the simulation run. The single shot simualtion is run
+for a given intial set seed. The desired plots are then produced and saved.
+
+Author: Daniel Torren Peraire Daniel.Torren@uab.cat dtorrenp@hotmail.com
+
+Created: 10/10/2022
+"""
+#imports
 from logging import raiseExceptions
 from run import run
 from plot import (
@@ -45,28 +54,29 @@ from matplotlib.cm import get_cmap
 import time
 import numpy as np
 
+#constants
 params = {
-    "total_time": 200,
-    "delta_t": 0.05,
+    "total_time": 2000,#200,
+    "delta_t": 1.0,#0.05,
     "compression_factor": 10,
     "save_data": True, 
     "alpha_change" : 1.0,
     "harsh_data": False,
     "averaging_method": "Arithmetic",
-    "phi_list_lower": 0.1,
-    "phi_list_upper": 1.0,
-    "N": 200,
-    "M": 3,
-    "K": 20,
-    "prob_rewire": 0.05,
+    "phi_lower": 0.001,
+    "phi_upper": 0.005,
+    "N": 20,
+    "M": 5,
+    "K": 10,
+    "prob_rewire": 0.2,#0.05,
     "set_seed": 1,
-    "culture_momentum_real": 5,
+    "culture_momentum_real": 100,#5,
     "learning_error_scale": 0.02,
-    "discount_factor": 0.6,
-    "present_discount_factor": 0.8,
-    "inverse_homophily": 0.1,#1 is total mixing, 0 is no mixing
-    "homophilly_rate" : 1.5,
-    "confirmation_bias": 30,
+    "discount_factor": 0.8,
+    "present_discount_factor": 0.99,
+    "inverse_homophily": 0.2,#0.1,#1 is total mixing, 0 is no mixing
+    "homophilly_rate" : 1,
+    "confirmation_bias": -100,
 }
 
 params["time_steps_max"] = int(params["total_time"] / params["delta_t"])
@@ -85,8 +95,8 @@ if params["harsh_data"]:#trying to create a polarised society!
     if params["green_extreme_prop"] + params["indifferent_prop"] + params["brown_extreme_prop"] != 1:
         raise Exception("Invalid proportions")
 else:
-    params["alpha_attitude"] = 1
-    params["beta_attitude"] = 1
+    params["alpha_attitude"] = 0.1
+    params["beta_attitude"] = 0.1
     params["alpha_threshold"] = 1
     params["beta_threshold"] = 1
 
@@ -202,24 +212,25 @@ alpha_val = 0.25
 size_points = 5
 min_culture_distance = 0.5
 
-RUN = True
-LOAD_LIVE_DATA = False
-LOAD_STATIC_DATA = True
-PLOT = True
-cluster_plots = False
-SHOW_PLOT = True
+RUN = 1#False
+LOAD_LIVE_DATA = 1
+LOAD_STATIC_DATA = 1
+PLOT = 1
+cluster_plots = 0
+SHOW_PLOT = 1
 
 
 if __name__ == "__main__":
 
     if RUN == False:
-        FILENAME = "results/_DEGROOT_1000_3_100_0.1_12_0.1_1_0.02_10"
+        FILENAME = "results/_2000_8_100_1.0_10_0.7_1_0.02_100"
     else:
         # start_time = time.time()
         # print("start_time =", time.ctime(time.time()))
         ###RUN MODEL
         #print("start_time =", time.ctime(time.time()))
         FILENAME, social_network = run(params, to_save_list, params_name)
+        #print("Final confirmation bias: ",social_network.confirmation_bias)
         # print ("RUN time taken: %s minutes" % ((time.time()-start_time)/60), "or %s s"%((time.time()-start_time)))
 
     if PLOT:
@@ -242,17 +253,17 @@ if __name__ == "__main__":
         Data["network_time"] = np.asarray(Data["network_time"])[
             0
         ]  # for some reason pandas does weird shit
-        Data["phi_list"] = np.linspace(params["phi_list_lower"], params["phi_list_upper"], num=params["M"])# ALSO DONE IN NETWORK BUT NEEDED FOR PLOTS AND HAVENT SAVED IT AS OF YET# ITS A PAIN TO GET IT IN
+        Data["phi_list"] = np.linspace(params["phi_lower"], params["phi_upper"], num=params["M"])# ALSO DONE IN NETWORK BUT NEEDED FOR PLOTS AND HAVENT SAVED IT AS OF YET# ITS A PAIN TO GET IT IN
 
         frames_list = [int(round(x)) for x in np.linspace(0, len(Data["network_time"])-1 , num=frame_num + 1)]# -1 is so its within range as linspace is inclusive
 
         ###PLOTS
         #plot_beta_distributions(FILENAME,alpha_attitude,beta_attitude,alpha_threshold,beta_threshold,bin_num,num_counts,dpi_save,)
-        #plot_culture_timeseries(FILENAME, Data, dpi_save)
+        plot_culture_timeseries(FILENAME, Data, dpi_save)
         #plot_green_adoption_timeseries(FILENAME, Data, dpi_save)
         #plot_value_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save)
         #plot_threshold_timeseries(FILENAME,Data,nrows_behave, ncols_behave,dpi_save)
-        #plot_attitude_timeseries(FILENAME, Data, nrows_behave, ncols_behave, dpi_save)
+        plot_attitude_timeseries(FILENAME, Data, nrows_behave, ncols_behave, dpi_save)
         #plot_total_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
         #plot_av_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
         #plot_weighting_matrix_convergence_timeseries(FILENAME, Data, dpi_save)

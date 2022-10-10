@@ -1,13 +1,76 @@
+"""Define individual agent class
+A module that defines "individuals" that have vectors of attitudes towards behaviours whose evolution
+is determined through weighted social interactions.
+
+Author: Daniel Torren Peraire Daniel.Torren@uab.cat dtorrenp@hotmail.com
+
+Created: 10/10/2022
+"""
+
+#imports
 from logging import raiseExceptions
 import numpy.typing as npt
 import numpy as np
-from scipy.stats import gmean
 
+#modules
 class Individual:
 
     """
-    Class for indivduals
+    Class to represent individuals with identities and behaviours
+
+    ...
+
+    Parameters
+    ----------
+    individual_params: dict,
+        useful parameters from the network 
+    init_data_attitudes: npt.NDArray[float]
+        array of inital attitudes generated previously from a beta distribution, evolves over time
+    init_data_thresholds: npt.NDArray[float]
+        array of inital thresholds generated previously from a beta distribution
+    normalized_discount_vector: npt.NDArray[float]
+        normalized single row of the discounts to individual memory when considering how the past influences current identity
+    culture_momentum: int
+        the number of steps into the past that are considered when calculating identity
+
+    Attributes
+    ----------
+    self.values = self.attitudes - self.thresholds
+    self.av_behaviour = np.mean(self.attitudes)
+    self.av_behaviour_list = [self.av_behaviour]*self.culture_momentum
+    self.culture = self.calc_culture()
+    self.total_carbon_emissions = self.update_total_emissions()
+    self.history_behaviour_values = [list(self.values)]
+    self.history_behaviour_attitudes = [list(self.attitudes)]
+    self.history_behaviour_thresholds = [list(self.thresholds)]
+    self.history_av_behaviour = [self.av_behaviour]
+    self.history_culture = [self.culture]
+    self.history_carbon_emissions = [self.total_carbon_emissions]
+    
+
+    Methods
+    -------
+    normlize_matrix(matrix: npt.NDArray) ->  npt.NDArray: 
+        Row normalize an array
+
+    def update_av_behaviour_list(self):
+
+    def calc_culture(self) -> float:
+
+    def update_values(self):
+
+    def update_attitudes(self,social_component):
+
+    def update_total_emissions(self):
+
+
+    def save_data_individual(self):
+
+    def next_step(self, t:float,steps: int,  social_component: npt.NDArray):
+
+
     """
+
 
     def __init__(
         self, individual_params, init_data_attitudes, init_data_thresholds, normalized_discount_vector , culture_momentum
@@ -23,17 +86,12 @@ class Individual:
         self.delta_t = individual_params["delta_t"]
         self.save_data = individual_params["save_data"]
         self.carbon_intensive_list = individual_params["carbon_emissions"]
-        self.averaging_method = individual_params["averaging_method"]
         self.compression_factor = individual_params["compression_factor"]
         self.phi_array = individual_params["phi_array"]
 
-        if self.averaging_method == "Threshold weighted arithmetic":
-            self.threshold_sum = sum(init_data_thresholds)
-            self.threshold_weighting_array = init_data_thresholds/self.threshold_sum
-
         self.values = self.attitudes - self.thresholds
         
-        self.av_behaviour = self.update_av_behaviour()
+        self.av_behaviour = np.mean(self.attitudes)
 
         self.av_behaviour_list = [self.av_behaviour]*self.culture_momentum
         self.culture = self.calc_culture()
@@ -63,14 +121,6 @@ class Individual:
     def update_total_emissions(self):
         return sum(self.carbon_intensive_list[i] for i in range(self.M) if self.values[i] <= 0)
 
-    def update_av_behaviour(self):
-        if self.averaging_method == "Arithmetic":
-            return np.mean(self.attitudes)
-        elif self.averaging_method == "Threshold weighted arithmetic":
-            return np.matmul(self.threshold_weighting_array, self.attitudes)#/(self.M)
-        else:
-            raiseExceptions("Invalid averaging method choosen try: Arithmetic or Geometric")
-
     def save_data_individual(self):
         self.history_behaviour_values.append(list(self.values))
         #print("test", list(self.attitudes)[0])
@@ -87,7 +137,7 @@ class Individual:
         self.update_values()
         self.update_attitudes(social_component)
 
-        self.av_behaviour = self.update_av_behaviour()
+        self.av_behaviour = np.mean(self.attitudes)
         self.update_av_behaviour_list()
 
         self.culture = self.calc_culture()

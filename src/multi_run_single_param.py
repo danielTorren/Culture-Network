@@ -1,3 +1,14 @@
+"""Run multiple single simulations varying a single parameter
+A module that use input data to generate data from multiple social networks varying a single property
+between simulations so that the differences may be compared. These multiple runs can either be single 
+shot runs or taking the average over multiple runs.
+
+Author: Daniel Torren Peraire Daniel.Torren@uab.cat dtorrenp@hotmail.com
+
+Created: 10/10/2022
+"""
+
+#imports
 from logging import raiseExceptions
 from run import parallel_run,average_seed_parallel_run_mena_coefficient_variance
 import matplotlib.pyplot as plt
@@ -33,6 +44,7 @@ from plot import (
     live_average_multirun_diagram_mean_coefficient_variance,
 )
 
+#constants
 params = {
     "total_time": 50,
     "delta_t": 0.05,
@@ -41,8 +53,8 @@ params = {
     "alpha_change" : 1.0,
     "harsh_data": False,
     "averaging_method": "Arithmetic",
-    "phi_list_lower": 0.1,
-    "phi_list_upper": 1.0,
+    "phi_lower": 0.1,
+    "phi_upper": 1.0,
     "N": 100,
     "M": 3,
     "K": 20,

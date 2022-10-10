@@ -1,7 +1,18 @@
-from ast import main
+"""Generate plot of truncated quasi-hyperbolic discounting
+A module that generates data for quasi-hyperbolic discounting this is then trucated to produce a
+moving average of agent memory. Used for illustrative purporses to explain how individuals have a
+cultural momentum which slows identity change.
+
+Author: Daniel Torren Peraire Daniel.Torren@uab.cat dtorrenp@hotmail.com
+
+Created: 10/10/2022
+"""
+
+#imports
 import matplotlib.pyplot as plt
 import numpy as np
 
+#modules
 def calc_discount_list(present_discount_factor,discount_factor,time_list_beahviours):
     discount_list = present_discount_factor*(discount_factor)**(time_list_beahviours)
     discount_list[0] = 1

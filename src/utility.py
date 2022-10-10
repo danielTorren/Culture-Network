@@ -1,3 +1,12 @@
+"""Contains functions that are not crucial to the simulation itself. 
+A module that aides in preparing folders, saving, loading and generating data for plots.
+
+Author: Daniel Torren Peraire Daniel.Torren@uab.cat dtorrenp@hotmail.com
+
+Created: 10/10/2022
+"""
+
+#imports
 import pickle
 import csv
 import os
@@ -11,6 +20,7 @@ from tslearn.clustering import TimeSeriesKMeans
 from tslearn.clustering import silhouette_score as tslearn_silhouette_score
 from matplotlib.colors import Normalize, LogNorm
 
+#modules
 def produceName_alt(parameters: list) -> str:
     fileName = "results/"
     for i in parameters:
