@@ -114,13 +114,15 @@ class Network:
     weighting_matrix: npt.NDArray[float]
         an NxN array how how much each agent values the opinion of their neighbour. Note that is it not symetric and agent i doesn't need to value the 
         opinion of agent j as much as j does i's opinion
-    network: networkx graph
+    network: nx.Graph
         a networkx watts strogatz small world graph
     social_component_matrix: npt.NDArray[float]
         NxM array of influence of neighbours on an individual's attitudes towards M behaviours
     average_culture: float
         average identity of society
-    cultural_var: float
+    std_culture : float
+        standard deviation of agent identies at time t
+    var_culture: float
         variance of agent identies at time t
     min_culture: float
         minimum individual identity at time t
@@ -136,8 +138,8 @@ class Network:
         time series of weighting_matrix
     history_social_component_matrix: list[npt.NDArray[float]]
         time series of social_component_matrix
-    history_cultural_var: list[float]
-        time series of cultural_var
+    history_var_culture: list[float]
+        time series of var_culture
     history_time: list[float]
         time series of time
     history_total_carbon_emission: list[float]
@@ -146,6 +148,8 @@ class Network:
         time series of weighting_matrix_convergence
     history_average_culture: list[float]
         time series of average agent culture
+    history_std_culture: list[float]
+        time series of std_culture
     history_min_culture: list[float]
         time series of min_culture
     history_green_adoption: list[float]
@@ -167,9 +171,9 @@ class Network:
     partial_shuffle(l, swap_reps) -> list:
         Partially shuffle a list using Fisher Yates shuffle
     quick_calc_culture(attitude_matrix) -> list: 
-        Calculate the identity of individuals not using class properties. Used once for intial homophily measures
+        Calculate the identity of individuals not using class properties. Used once for initial homophily measures
     generate_init_data_behaviours() -> tuple:
-        Generate the intial values for agent behavioural attitudes and thresholds 
+        Generate the initial values for agent behavioural attitudes and thresholds 
     create_agent_list() -> list:
         Create list of Individual objects that each have behaviours
     calc_behavioural_attitude_matrix() ->  npt.NDArray:
@@ -179,7 +183,7 @@ class Network:
     calc_ego_influence_degroot() ->  npt.NDArray:
         Calculate the influence of neighbours using the Degroot model of weighted aggregation
     calc_social_component_matrix() ->  npt.NDArray:
-        Combine neighbour influence and social leanring error to updated individual behavioural attitudes
+        Combine neighbour influence and social learning error to updated individual behavioural attitudes
     calc_total_weighting_matrix_difference(matrix_before: npt.NDArray, matrix_after: npt.NDArray)-> float:
         Calculate the total change in link strength over one time step
     update_weightings()-> float:
@@ -191,7 +195,7 @@ class Network:
     calc_green_adoption() -> float:
         Calculate the percentage of green behaviours adopted
     update_individuals():
-        Update Idividual objects with new information
+        Update Individual objects with new information
     save_data_network():
         Save time series data
     next_step():
@@ -200,15 +204,17 @@ class Network:
 
     def __init__(self, parameters:list):
         """
-        # randomly initialize the RNG from some platform-dependent source of entropy
-        np.random.seed(None)
-        # get the initial state of the RNG
-        st0 = np.random.get_state()
-        print("seed",st0)
+        Constructs all the necessary attributes for the Network object.
+
+        Parameters
+        ----------
+        parameters : dict
+            Dictionary of parameters used to generate attributes, dict used for readability instead of super long list of input parameters
+
         """
-        
+
         self.set_seed = parameters["set_seed"]
-        np.random.seed(self.set_seed)  # not sure if i have to be worried about the randomness of the system being reproducible
+        np.random.seed(self.set_seed)
         
         self.alpha_change = parameters["alpha_change"]
         self.save_data = parameters["save_data"]
@@ -224,7 +230,7 @@ class Network:
         self.N = int(round(parameters["N"]))
         self.K = int(
             round(parameters["K"])
-        )  # round due to the sampling method producing floats, lets hope this works
+        )  # round due to the sampling method producing floats in the Sobol Sensitivity Analysis (SA)
         self.prob_rewire = parameters["prob_rewire"]
 
         #culture
@@ -246,15 +252,15 @@ class Network:
         self.learning_error_scale = parameters["learning_error_scale"]
 
         #social influence of behaviours
-        self.phi_array = np.linspace(parameters["phi_lower"], parameters["phi_upper"], num=self.M)# CONSPICUOUS CONSUMPTION OF BEHAVIOURS - THE HIgher the more social prestige associated with this behaviour
+        self.phi_array = np.linspace(parameters["phi_lower"], parameters["phi_upper"], num=self.M)
         
         #emissions associated with each behaviour
-        self.carbon_emissions = [1]*self.M #parameters["carbon_emissions"], removed for the sake of the SA
+        self.carbon_emissions = [1]*self.M
 
         #network homophily
         self.inverse_homophily = parameters["inverse_homophily"]#0-1
         self.homophilly_rate = parameters["homophilly_rate"]
-        self.shuffle_reps = int(round((self.N**self.homophilly_rate)*self.inverse_homophily))#int(round((self.N)*self.inverse_homophily))#im going to square it
+        self.shuffle_reps = int(round((self.N**self.homophilly_rate)*self.inverse_homophily))
         
         (
             self.alpha_attitude,
@@ -287,7 +293,7 @@ class Network:
 
             (
                 self.average_culture,
-                self.cultural_var,
+                self.var_culture,
                 self.min_culture,
                 self.max_culture,
 
@@ -298,22 +304,48 @@ class Network:
 
             self.history_weighting_matrix = [self.weighting_matrix]
             self.history_social_component_matrix = [self.social_component_matrix]
-            self.history_cultural_var = [self.cultural_var]
             self.history_time = [self.t]
             self.history_total_carbon_emissions = [self.total_carbon_emissions]
             self.history_weighting_matrix_convergence = [self.weighting_matrix_convergence]
             self.history_average_culture = [self.average_culture]
+            self.history_std_culture = [self.std_culture]
+            self.history_var_culture = [self.var_culture]
             self.history_min_culture = [self.min_culture]
             self.history_max_culture = [self.max_culture]
             self.history_green_adoption = [self.green_adoption]
 
     def normlize_matrix(self, matrix: npt.NDArray) ->  npt.NDArray:
+        """
+        Row normalize an array
+
+        Parameters
+        ----------
+        matrix: npt.NDArray
+            array to be row normalized
+
+        Returns
+        -------
+        norm_matrix: npt.NDArray
+            row normalized array
+        """
         row_sums = matrix.sum(axis=1)
         norm_matrix = matrix/row_sums[:, np.newaxis]
 
         return norm_matrix
 
-    def calc_normalized_discount_array(self):
+    def calc_normalized_discount_array(self) -> npt.NDArray:
+        """
+        Row normalize an array
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        normalized_discount_array: npt.NDArray
+            row normalized truncated quasi-hyperbolic discount array
+        """
         normalized_discount_array = []
         for i in self.culture_momentum_list:
             discount_row = []
@@ -328,13 +360,41 @@ class Network:
         return np.asarray(normalized_discount_array)
 
     def calc_network_density(self):
+        """
+        Print network density given by actual_connections / potential_connections
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+        """
+
         actual_connections = self.weighting_matrix.sum()
         potential_connections = (self.N * (self.N - 1)) / 2
         network_density = actual_connections / potential_connections
         print("network_density = ", network_density)
 
     def create_weighting_matrix(self)-> tuple[npt.NDArray, npt.NDArray, nx.Graph]:  
-        # SMALL WORLD
+        """
+        Create watts-strogatz small world graph using Networkx library
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        weighting_matrix: npt.NDArray[bool]
+            adjacency matrix, array giving social network structure where 1 represents a connection between agents and 0 no connection. It is symetric about the diagonal
+        norm_weighting_matrix: npt.NDArray[float]
+            an NxN array how how much each agent values the opinion of their neighbour. Note that is it not symetric and agent i doesn't need to value the 
+            opinion of agent j as much as j does i's opinion
+        ws: nx.Graph
+            a networkx watts strogatz small world graph
+        """
         ws = nx.watts_strogatz_graph(
             n=self.N, k=self.K, p=self.prob_rewire, seed=self.set_seed
         )  # Watts–Strogatz small-world graph,watts_strogatz_graph( n, k, p[, seed])
@@ -345,24 +405,63 @@ class Network:
             weighting_matrix,
             norm_weighting_matrix,
             ws,
-        )  # num_neighbours,
-
+        )
     def produce_circular_list(self,list) -> list:
-        first_half = list[::2]
-        second_half =  (list[1::2])[::-1]
+        """
+        Makes an ordered list circular so that the start and end values are matched in value and value distribution is symmetric
+
+        Parameters
+        ----------
+        list: list
+            an ordered list e.g [1,2,3,4,5]
+        Returns
+        -------
+        circular: list 
+            a circular list symmetric about its middle entry e.g [1,3,5,4,2]
+        """
+
+        first_half = list[::2]#take every second element in the list, even indicies
+        second_half =  (list[1::2])[::-1]# take every second element , odd indicies
         circular = first_half + second_half
         return circular
 
     def partial_shuffle(self, l, swap_reps) -> list:
+        """
+        Partially shuffle a list using Fisher Yates shuffle
+
+        Parameters
+        ----------
+        l: list
+            list to be partially shuffled
+        swap_reps: int
+            Number of times to switch elements in the list. e.g if = 1 then [1,2,3] could go to [1,3,2] where we have swapped the index of two elements
+
+        Returns
+        -------
+        l: list
+            partially shuffled list
+        """
+
         n = len(l)
         for _ in range(swap_reps):
-            a, b = np.random.randint(low = 0, high = n, size=2)
+            a, b = np.random.randint(low = 0, high = n, size=2)#generate pair of indicies to swap
             l[b], l[a] = l[a], l[b]
         return l
 
-    def quick_calc_culture(self,attitude_matrix) -> list:
+    def quick_calc_culture(self,attitude_matrix: npt.NDArray) -> list:
         """
-        Create culture list from the attitudeion matrix for homophilly
+        Calculate the identity of individuals not using class properties. Used once for intial homophily measures.
+        No individual objects are created yet so use this as a intermediate step
+
+        Parameters
+        ----------
+        attitude matrix: npt.NDArray
+            NxM matrix of initial behavioural attitudes
+
+        Returns
+        -------
+        cul_list: list
+            list of cultures corresponding to the attitude_matrix
         """
 
         cul_list = []
@@ -374,7 +473,23 @@ class Network:
         return cul_list
 
 
-    def generate_init_data_behaviours(self) -> tuple:
+    def generate_init_data_behaviours(self) -> tuple[npt.NDArray,npt.NDArray]:
+        """
+        Generate the initial values for agent behavioural attitudes and thresholds using Beta distribution
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        attitude_list_sorted_shuffle: npt.NDArray
+            NxM array which is sorted to the correct degree of homophily. used to create Individual objects, one from each row of the array. 
+            Entries represent how positive a persons attitudes towards a green alternative behaviour are
+        threshold_matrix: npt.NDArray
+            NxM array of behavioural thresholds, represents the barriers to entry to performing a behaviour e.g the distance of a 
+            commute or disposable income of an individual
+        """
 
         attitude_list = [np.random.beta(self.alpha_attitude, self.beta_attitude, size=self.M) for n in range(self.N)]
         threshold_list = [np.random.beta(self.alpha_threshold, self.beta_threshold, size=self.M) for n in range(self.N)]
@@ -393,7 +508,19 @@ class Network:
 
         return np.asarray(attitude_list_sorted_shuffle), threshold_matrix
 
-    def create_agent_list(self) -> list:
+    def create_agent_list(self) -> list[Individual]:
+        """
+        Create list of Individual objects that each have behaviours
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        agent_list: list[Individual]
+            List of Individual objects representing specific agents in a social network each with behavioural opinions and environmental identity
+        """
 
         individual_params = {
                 "delta_t" : self.delta_t,
@@ -410,28 +537,109 @@ class Network:
         return agent_list
 
     def calc_behavioural_attitude_matrix(self) ->  npt.NDArray:
+        """
+        Get NxM array of agent attitude towards M behaviours
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        behavioural_attitude_matrix: npt.NDArray
+            NxM array of attitudes towards M behaviours collected from Individual objects
+        """
+
         behavioural_attitude_matrix = np.array([n.attitudes for n in self.agent_list])
         return behavioural_attitude_matrix
 
     def calc_ego_influence_alt(self) ->  npt.NDArray:
-        k_list = [np.random.choice(range(self.N), 1, p=self.weighting_matrix[n])[0] for n in range(self.N)]#for each indiviudal select a neighbour using the row of the alpha matrix as the probability
-        return np.array([self.agent_list[k].attitudes for k in k_list])#make a new NxM where each row is what agent n is going to learn from their selected agent k
+        """
+        Calculate the influence of neighbours by selecting a neighbour to imitate using the network weighting link strength as a probability of selection
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        neighbour_influence: npt.NDArray
+            NxM array where each row represents a single interaction between Individuals that listen to a chosen neighbour
+        """
+        k_list = [np.random.choice(range(self.N), 1, p=self.weighting_matrix[n])[0] for n in range(self.N)]#for each individual select a neighbour using the row of the alpha matrix as the probability
+        neighbour_influence = np.array([self.agent_list[k].attitudes for k in k_list])#make a new NxM where each row is what agent n is going to learn from their selected agent k
+        return neighbour_influence
 
     def calc_ego_influence_degroot(self) ->  npt.NDArray:
-        return np.matmul(self.weighting_matrix, self.behavioural_attitude_matrix)
+        """
+        Calculate the influence of neighbours using the Degroot model of weighted aggregation
 
-    def calc_social_component_matrix(self,) ->  npt.NDArray:
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        neighbour_influence: npt.NDArray
+            NxM array where each row represents the influence of an Individual listening to its neighbours regarding their 
+            behavioural attitude opinions, this influence is weighted by the weighting_matrix
+        """
+        neighbour_influence = np.matmul(self.weighting_matrix, self.behavioural_attitude_matrix)
+        return neighbour_influence
+
+    def calc_social_component_matrix(self) ->  npt.NDArray:
+        """
+        Combine neighbour influence and social learning error to updated individual behavioural attitudes
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        social_influence: npt.NDArray
+            NxM array giving the influence of social learning from neighbours for that time step
+        """
         #ego_influence = self.calc_ego_influence_degroot()
         ego_influence = self.calc_ego_influence_alt()# calc_ego_influence_alt
-
-        return ego_influence + np.random.normal(loc=0, scale=self.learning_error_scale, size=(self.N, self.M))
+        social_influence = ego_influence + np.random.normal(loc=0, scale=self.learning_error_scale, size=(self.N, self.M))
+        return social_influence
 
     def calc_total_weighting_matrix_difference(self, matrix_before: npt.NDArray, matrix_after: npt.NDArray)-> float:
+        """
+        Calculate the total change in link strength over one time step. Meant to show how the weighting quickly converges
+
+        Parameters
+        ----------
+        matrix_before: npt.NDArray
+            NxN array of agent opinion weightings from the previous time step
+        matrix_after: npt.NDArray
+            NxN array of agent opinion weightings from the current time step 
+
+        Returns
+        -------
+        total_difference: float
+            total element wise difference between the arrays
+        """
         difference_matrix = np.subtract(matrix_before, matrix_after)
         total_difference = (np.abs(difference_matrix)).sum()
         return total_difference
 
-    def update_weightings(self)-> float:
+    def update_weightings(self)-> tuple[npt.NDArray,float]:
+        """
+        Update the link strength array according to the new agent identities
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        norm_weighting_matrix: npt.NDArray
+            Row normalized weighting array giving the strength of inter-Individual connections due to similarity in identity
+        total_difference: float
+            total element wise difference between the previous weighting arrays
+        """
         culture_list = np.array([x.culture for x in self.agent_list])
 
         difference_matrix = np.subtract.outer(culture_list, culture_list)
@@ -451,31 +659,97 @@ class Network:
             return norm_weighting_matrix,0#BODGE! bodge for mypy
 
     def calc_total_emissions(self) -> int:
-        return sum([x.total_carbon_emissions for x in self.agent_list])
+        """
+        Calculate total carbon emissions of N*M behaviours
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        total_network_emissions: float
+            total network emissions from each Individual object
+        """
+        total_network_emissions = sum([x.total_carbon_emissions for x in self.agent_list])
+        return total_network_emissions
 
     def calc_network_culture(self) ->  tuple[float, float, float, float]:
+        """
+        Return various identity properties, such as mean, variance, min and max
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        culture_mean: float
+            mean of network identity at time step t
+        culture_variance: float
+            variance of network identity at time step t
+        culture_max: float
+            max of network identity at time step t
+        culture_min: float
+            min of network identity at time step t
+        """
         culture_list = [x.culture for x in self.agent_list]
-        return (
-            np.mean(culture_list),
-            np.var(culture_list),
-            max(culture_list),
-            min(culture_list),
-        )
+        culture_mean = np.mean(culture_list)
+        culture_std = np.std(culture_list)
+        culture_variance = np.var(culture_list)
+        culture_max = max(culture_list)
+        culture_min = min(culture_list) 
+        return (culture_mean, culture_std, culture_variance, culture_max, culture_min)
 
     def calc_green_adoption(self) -> float:
+        """
+        Calculate the percentage of green behaviours adopted
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        adoption_percentage: float
+            adoption percentage of green behavioural alternatives where Individuals must have behavioural value B > 0
+        """
         adoption = 0
         for n in self.agent_list:
             for m in range(self.M):
                 if n.values[m] > 0:
                     adoption += 1
         adoption_ratio = adoption/(self.N*self.M)
-        return adoption_ratio*100
+        adoption_percentage = adoption_ratio*100
+        return adoption_percentage
 
     def update_individuals(self):
+        """
+        Update Individual objects with new information regarding social interactions
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+        """
         for i in range(self.N):
             self.agent_list[i].next_step(self.t,self.steps,self.social_component_matrix[i])
 
     def save_data_network(self):
+        """
+        Save time series data       
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+        """
         self.history_time.append(self.t)
         self.history_weighting_matrix.append(self.weighting_matrix)
         self.history_social_component_matrix.append(self.social_component_matrix)
@@ -484,12 +758,25 @@ class Network:
             self.weighting_matrix_convergence
         )
         self.history_average_culture.append(self.average_culture)
-        self.history_cultural_var.append(self.cultural_var)
+        self.history_std_culture.append(self.std_culture)
+        self.history_var_culture.append(self.var_culture)
         self.history_min_culture.append(self.min_culture)
         self.history_max_culture.append(self.max_culture)
         self.history_green_adoption.append(self.green_adoption)
 
     def next_step(self):
+        """
+        Push the simulation forwards one time step. First advance time, then update individuals with data from previous timestep
+        then produce new data and finally save it.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+        """
         # advance a time step
         self.t += self.delta_t
         self.steps += 1
@@ -515,7 +802,8 @@ class Network:
             self.total_carbon_emissions = self.calc_total_emissions()
             (
                 self.average_culture,
-                self.cultural_var,
+                self.std_culture,
+                self.var_culture,
                 self.min_culture,
                 self.max_culture,
             ) = self.calc_network_culture()

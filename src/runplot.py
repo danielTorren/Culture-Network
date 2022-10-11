@@ -77,28 +77,15 @@ params = {
     "inverse_homophily": 0.2,#0.1,#1 is total mixing, 0 is no mixing
     "homophilly_rate" : 1,
     "confirmation_bias": -100,
+    "alpha_attitude": 0.1,
+    "beta_attitude": 0.1,
+    "alpha_threshold": 1,
+    "beta_threshold": 1,
 }
 
 params["time_steps_max"] = int(params["total_time"] / params["delta_t"])
 
-#behaviours!
-if params["harsh_data"]:#trying to create a polarised society!
-    params["green_extreme_max"]= 8
-    params["green_extreme_min"]= 2
-    params["green_extreme_prop"]= 2/5
-    params["indifferent_max"]= 2
-    params["indifferent_min"]= 2
-    params["indifferent_prop"]= 1/5
-    params["brown_extreme_min"]= 2
-    params["brown_extreme_max"]= 8
-    params["brown_extreme_prop"]= 2/5
-    if params["green_extreme_prop"] + params["indifferent_prop"] + params["brown_extreme_prop"] != 1:
-        raise Exception("Invalid proportions")
-else:
-    params["alpha_attitude"] = 0.1
-    params["beta_attitude"] = 0.1
-    params["alpha_threshold"] = 1
-    params["beta_threshold"] = 1
+
 
 
 # SAVING DATA

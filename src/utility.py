@@ -419,15 +419,6 @@ def add_varaiables_to_dict(params,variable_parameters_dict,X):
         params[variable_parameters_dict[v]["property"]] = X[v]
     return params
 
-def produce_param_list_SA(param_values,params,variable_parameters_dict):
-    "param_values are the satelli samples, params are the fixed variables, variable parameters is the list of SA variables, we want the name!"
-
-    params_list = []
-    for i, X in enumerate(param_values):
-        variable_params_added = add_varaiables_to_dict(params,variable_parameters_dict,X)
-        params_list.append(variable_params_added.copy())
-    return params_list
-
 def produce_param_list_double(params,param_col,col_list,param_row,row_list):
     params_list = []
 

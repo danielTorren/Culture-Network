@@ -1,5 +1,5 @@
 """Run simulation 
-A module that use input data to run the simualation for a given number of timesteps.
+A module that use input data to run the simulation for a given number of timesteps.
 Multiple simulations at once in parallel can also be run. 
 
 Author: Daniel Torren Peraire Daniel.Torren@uab.cat dtorrenp@hotmail.com
@@ -8,17 +8,63 @@ Created: 10/10/2022
 """
 
 #imports
-from logging import raiseExceptions
 from network import Network
-from utility import produceName_alt, createFolder, saveObjects, saveData,createFolderSA
+from utility import produceName_alt, createFolder, saveObjects, saveData
 import time
 import numpy as np
+import numpy.typing as npt
 from joblib import Parallel, delayed
 import multiprocessing
 
 #modules
 def generate_data(parameters: dict) -> Network:
-    print_simu = 1#False
+    """
+    Generate the Network object which itself contains list of Individual objects. Run this forward in time for the desired number of steps
+
+    Parameters
+    ----------
+    parameters: dict
+        Dictionary of parameters used to generate attributes, dict used for readability instead of super long list of input parameters
+
+        An example of this is:
+
+        params = {
+            "total_time": 2000,#200,
+            "delta_t": 1.0,#0.05,
+            "compression_factor": 10,
+            "save_data": True, 
+            "alpha_change" : 1.0,
+            "harsh_data": False,
+            "averaging_method": "Arithmetic",
+            "phi_lower": 0.001,
+            "phi_upper": 0.005,
+            "N": 20,
+            "M": 5,
+            "K": 10,
+            "prob_rewire": 0.2,#0.05,
+            "set_seed": 1,
+            "culture_momentum_real": 100,#5,
+            "learning_error_scale": 0.02,
+            "discount_factor": 0.8,
+            "present_discount_factor": 0.99,
+            "inverse_homophily": 0.2,#0.1,#1 is total mixing, 0 is no mixing
+            "homophilly_rate" : 1,
+            "confirmation_bias": -100,
+            "alpha_attitude": 0.1,
+            "beta_attitude": 0.1,
+            "alpha_threshold": 1,
+            "beta_threshold": 1,
+        }
+
+        params["time_steps_max"] = int(params["total_time"] / params["delta_t"])
+
+    Returns
+    -------
+    social_network: Network
+        Social network that has evolved from initial conditions
+    """
+
+    print_simu = 1#Whether of not to print how long the single shot simulation took
     
     if print_simu:
         start_time = time.time()
@@ -38,9 +84,27 @@ def generate_data(parameters: dict) -> Network:
         )
     return social_network
 
+###SINGLE SHOT RUNS
+def run(parameters: dict, to_save_list: list, params_name: list) -> tuple[str,Network]:
+    """
+    Calls generate_data to get the simulation Network results then creates folders and saves both objects 
+    and object data separately for re-use or analysis
 
-def run(parameters: dict, to_save_list: list, params_name: list) -> str:
-    ###GENERATE THE DATA TO BE SAVED
+    Parameters
+    ----------
+    parameters: dict
+        Dictionary of parameters used to generate attributes, dict used for readability instead of super long list of input parameters. See generate_data for an example
+    to_save_list: list
+        list of parameters to be saved into either CSV or npz files 
+    params_name: list
+        list of parameter names used for file name creation
+    Returns
+    -------
+    fileName: str
+        name of file where results may be found
+    social_network: Network
+        Social network that has evolved from initial conditions
+    """
 
     social_network = generate_data(parameters)
 
@@ -71,161 +135,126 @@ def run(parameters: dict, to_save_list: list, params_name: list) -> str:
     else:
         return 0, social_network
 
-def two_parameter_run(
-    params,
-    fileName,
-    property_col,
-    param_col,
-    col_list,
-    property_row,
-    param_row,
-    row_list,
-):
+def parallel_run(params_list: list[dict]) -> list[Network]:
+    """
+    Generate data from a list of parameter dictionaries, parallelize the execution of each single shot simulation
+
+    Parameters
+    ----------
+    params_list: list[dict],
+        list of dictionary of parameters used to generate attributes, dict used for readability instead of super long list of input parameters. 
+        Each entry corresponds to a different society. See generate_data for an example
     
-    data_array = []
-    data_list = []
+    Returns
+    -------
+    data_parallel: list[list[Network]]
+        serialized list of networks, each generated with a different set of parameters
+    """
 
-    for i in row_list:
-        data_col = []
-        for j in col_list:
-            params[param_row] = i
-            params[param_col] = j
-            
-            #no change in attention
-            data_col.append(generate_data(params))
-        data_list = data_list + data_col
-        data_array.append(data_col)
-    
-    title_list = []
-    for i in range(len(col_list)):
-        for v in range(len(row_list)):
-            title_list.append(("%s = %s, %s = %s") % (property_col,str(col_list[i]), property_row,str(row_list[v])))
-
-    print(title_list)
-
-    createFolderSA(fileName)
-    
-    return data_array, data_list, title_list
-
-def parallel_two_parameter_run(
-    params,
-    fileName,
-    property_col,
-    param_col,
-    col_list,
-    property_row,
-    param_row,
-    row_list,
-):
-    
-    data_array = []
-    data_list = []
-
-    for i in row_list:
-        data_col = []
-        for j in col_list:
-            params[param_row] = i
-            params[param_col] = j
-            
-            #no change in attention
-            data_col.append(generate_data(params))
-        data_list = data_list + data_col
-        data_array.append(data_col)
-    
-    title_list = []
-    for i in range(len(col_list)):
-        for v in range(len(row_list)):
-            title_list.append(("%s = %s, %s = %s") % (property_col,str(col_list[i]), property_row,str(row_list[v])))
-
-    print(title_list)
-
-    createFolderSA(fileName)
-    
-    return data_array, data_list, title_list
-
-
-def parallel_run(params_list):
     num_cores = multiprocessing.cpu_count()
     data_parallel = Parallel(n_jobs=num_cores,verbose=10)(delayed(generate_data)(i) for i in params_list)
     return data_parallel
 
-def get_carbon_emissions_result(params):
-    data = generate_data(params)
-    return data.total_carbon_emissions/(data.N*data.M)
+###SENSITIVITY ANALYSIS RUNS
+def generate_sensitivity_output(params: dict) -> tuple[float,float,float,float]:
+    """
+    Generate data from a set of parameter contained in a dictionary. Average results over multiple stochastic seeds contained in params["seed_list"]
+    
+    Parameters
+    ----------
+    params: dict,
+        dictionary of parameters used to generate attributes, dict used for readability instead of super long list of input parameters. See generate_data for an example
+    
+    Returns
+    -------
+    stochastic_norm_emissions: float
+        normalized societal emissions at the end of the allowed time, normalize by number of agents and behaviours per agent. Averaged for different stochastic values 
+    stochastic_norm_mean: float
+        normalized mean societal identity at the end of the allowed time, normalize by number of agents and behaviours per agent and averaged for different stochastic values 
+    stochastic_norm_var: float
+        variance of societal identity at the end of the allowed time, averaged for different stochastic values 
+    stochastic_norm_coefficient_variance: float
+        coefficient of variance (std/mu) of societal identity at the end of the allowed time, averaged for different stochastic values 
+    """
 
-def parallel_run_sa(params_list,results_property):
-    num_cores = multiprocessing.cpu_count()
-    if results_property == "Carbon Emissions/NM":
-        results_parallel_sa = Parallel(n_jobs=num_cores,verbose=10)(delayed(get_carbon_emissions_result)(i) for i in params_list)
-    else:
-        raiseExceptions("Invalid results property")
-    return results_parallel_sa
-
-def average_get_carbon_emissions_result(params):
-    Y_list = []
-    for v in params["seed_list"]:
-        params["set_seed"] = v
-        data = generate_data(params)
-        Y_list.append(data.total_carbon_emissions/(data.N*data.M))
-    return np.mean(Y_list)
-
-def average_get_mean_coifficient_variance_result(params):
-    mean_list = []
-    coefficient_variance_list = []
-    for v in params["seed_list"]:
-        params["set_seed"] = v
-        data = generate_data(params)
-        mean_list.append(data.average_culture)
-        coefficient_variance_list.append(data.std_culture/data.average_culture)
-    return np.mean(mean_list), np.mean(coefficient_variance_list)
-
-def average_get_emmissions_mu_variance(params):
     emissions_list = []
     mean_list = []
+    var_list = []
     coefficient_variance_list = []
     norm_factor = params["N"]*params["M"]
     for v in params["seed_list"]:
         params["set_seed"] = v
         data = generate_data(params)
+        #Insert more measures below that want to be used for evaluating the
         emissions_list.append(data.total_carbon_emissions/norm_factor)
         mean_list.append(data.average_culture/norm_factor)
+        var_list.append(data.var_culture/norm_factor)
         coefficient_variance_list.append(data.std_culture/(data.average_culture/norm_factor))
-    return np.mean(emissions_list), np.mean(mean_list), np.mean(coefficient_variance_list)    
+    stochastic_norm_emissions, stochastic_norm_mean, stochastic_norm_var, stochastic_norm_coefficient_variance = np.mean(emissions_list), np.mean(mean_list), np.mean(var_list),np.mean(coefficient_variance_list)
+    return stochastic_norm_emissions, stochastic_norm_mean, stochastic_norm_var, stochastic_norm_coefficient_variance
 
-def average_seed_parallel_run_sa(params_list,results_property):
+def parallel_run_sa(params_list: list[dict]) -> tuple[npt.NDArray, npt.NDArray, npt.NDArray, npt.NDArray]:
+    """
+    Generate data for sensitivity analysis for model varying lots of parameters dictated by params_list, producing output 
+    measures emissions,mean,variance and coefficient of variance. Results averaged over multiple runs with different stochastic seed
+
+    Parameters
+    ----------
+    params_list: list[dict],
+        list of dictionary of parameters used to generate attributes, dict used for readability instead of super long list of input parameters. 
+        Each entry corresponds to a different society. See generate_data for an example
+
+    Returns
+    -------
+    results_emissions: npt.NDArray
+        Array of normalized societal emissions at the end of the allowed time, normalize by number of agents and behaviours per agent. 
+    results_mean: npt.NDArray
+        Array of normalized mean societal identity
+    results_var: npt.NDArray
+        Array of variance of societal identity for different parameter runs 
+    results_coefficient_variance: npt.NDArray
+        Array of coefficient of variance (std/mu) of societal identity for different parameter runs 
+    """
+
     num_cores = multiprocessing.cpu_count()
-    if results_property == "Carbon Emissions/NM":
-        results_parallel_sa = Parallel(n_jobs=num_cores,verbose=10)(delayed(average_get_carbon_emissions_result)(i) for i in params_list)
-    else:
-        raiseExceptions("Invalid results property")
-    return results_parallel_sa
+    results = Parallel(n_jobs=num_cores,verbose=10)(delayed(generate_sensitivity_output)(i) for i in params_list)
+    results_emissions, results_mean, results_var, results_coefficient_variance = zip(*results)
+    return np.asarray(results_emissions),np.asarray(results_mean), np.asarray(results_var), np.asarray(results_coefficient_variance)
 
-def average_seed_parallel_run_sa_emmissions_mu_variance(params_list):
-    num_cores = multiprocessing.cpu_count()
-    results = Parallel(n_jobs=num_cores,verbose=10)(delayed(average_get_emmissions_mu_variance)(i) for i in params_list)#results_mean, results_coefficient_variance
-    results_emissions, results_mean, results_coefficient_variance = zip(*results)
-    return np.asarray(results_emissions),np.asarray(results_mean), np.asarray(results_coefficient_variance)#results_mean, results_coefficient_variance
+def parallel_run_multi_run_n(params_list,variable_parameters_dict):
 
+    """
+    Generate data for sensitivity analysis for model varying lots of parameters dictated by params_list, producing output 
+    measures emissions,mean,variance and coefficient of variance. Results averaged over multiple runs with different stochastic seed.
+    Due to parallisation I cant be sure which data corresponds to which so I need to vary the individual parameters in separate parallel loops
 
-def average_seed_parallel_run_mean_coefficient_variance(params_list):
-    num_cores = multiprocessing.cpu_count()
-    results = Parallel(n_jobs=num_cores,verbose=10)(delayed(average_get_mean_coifficient_variance_result)(i) for i in params_list)#results_mean, results_coefficient_variance
-    results_mean, results_coefficient_variance = zip(*results)
-    return np.asarray(results_mean), np.asarray(results_coefficient_variance)#results_mean, results_coefficient_variance
+    Parameters
+    ----------
+    params_list: list[dict],
+        dictionary of parameters used to generate attributes, dict used for readability instead of super long list of input parameters. 
+        This is the baseline and from this we vary n parameters independantly found in variable_parameters_dict. See generate_data for an example
+    variable_parameters_dict:
+        dictionary containing the parameters to be varied and extra data for this, each entry represents one variable parameter e.g
+        variable_parameters_dict = {
+            "discount_factor": {"property":"discount_factor","min":-2, "max":0 , "title": r"$\delta$", "divisions": "log", "cmap": get_cmap("Reds"), "cbar_loc": "right", "marker": "o", "reps": 16}, 
+            "inverse_homophily": {"property":"inverse_homophily","min":0.0, "max": 1.0, "title": r"$h$", "divisions": "linear", "cmap": get_cmap("Blues"), "cbar_loc": "right", "marker": "v", "reps": 128}, 
+        }
+    
 
-def average_seed_parallel_run_mean_coefficient_variance_multi_run_n(params_list,variable_parameters_dict):
-
-    """Due to parralllisation I cant be sure which data corresponds to which so I need to vary the indivdiual parameters in seperate parallel loops"""
+    Returns
+    -------
+    combined_data: dict[dict[str:npt.NDArray]]
+        dictionary of dictionaries containing arrays of emissions, identity mean, identity variance and identity coefficient of variance. 
+        Each dictionary of data corresponds to one parameter being varied ie if i vary confirmation bias and discount parameter my outer dictionary
+        would have two entries each dictionaries containing data for the different sensitivity measures.
+    """
     counter = 0
     combined_data = {}
 
     for i in variable_parameters_dict.keys():
-        results_mean, results_coefficient_variance = average_seed_parallel_run_mean_coefficient_variance(params_list[counter:counter + variable_parameters_dict[i]["reps"]])
+        results = parallel_run_sa(params_list[counter:counter + variable_parameters_dict[i]["reps"]])
+        results_emissions, results_mean, results_var, results_coefficient_variance = zip(*results)
         counter += variable_parameters_dict[i]["reps"]
-        combined_data["%s" % (i)] = {"mean_data": results_mean, "coefficient_variance_data": results_coefficient_variance}
+        combined_data["%s" % (i)] = {"emissions_data": results_emissions,"mean_data": results_mean, "variance_data": results_var,"coefficient_variance_data": results_coefficient_variance}
 
     return combined_data 
-
-def average_seed_run_sa(params_list,results_property):
-    results_parallel_sa = [average_get_carbon_emissions_result(i) for i in params_list]
-    return results_parallel_sa
