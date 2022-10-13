@@ -136,27 +136,6 @@ def plot_threshold_timeseries(FILENAME: str, Data: DataFrame, dpi_save:int):
 
     plot_individual_timeseries(FILENAME, Data, y_title, property, dpi_save, ylim_low)
 
-"""
-def plot_value_timeseries(fileName: str, Data: Network, dpi_save:int):
-    fig, axes = plt.subplots(nrows=1, ncols=Data.M, figsize=(14, 7))
-    y_title = r"Behavioural value, B"
-
-    for i, ax in enumerate(axes.flat):
-        for v in Data.agent_list:
-            print(v.history_behaviour_values[:][0], v.history_behaviour_values[:][1])
-            ax.plot(np.asarray(Data.history_time), np.asarray(v.history_behaviour_values[:][i]))
-        ax.set_xlabel(r"Time")
-        ax.set_ylabel(r"%s" % y_title)
-        ax.set_ylim(-1,1)
-
-    plt.tight_layout()
-
-    plotName = fileName + "/Plots"
-    f = plotName + "/plot_value_timeseries.eps"
-    fig.savefig(f, dpi=dpi_save,format='eps')
-
-"""
-
 
 #################################################################################################################
 

@@ -148,12 +148,12 @@ if __name__ == "__main__":
 
     print("property_values_list",property_values_list)
     #property_values_list = SymLogNorm(linthresh=0.15, linscale=1, vmin=param_min, vmax=1.0, base=10)  # this works at least its correct
+    
+    f = open("src/constants/base_params.json")
+    params = json.load(f)
+    params["time_steps_max"] = int(params["total_time"] / params["delta_t"])
 
     if SINGLE:
-        f = open("src/constants/base_params.json")
-        params = json.load(f)
-        params["time_steps_max"] = int(params["total_time"] / params["delta_t"])
-
         #SINGLE SHOT RUNS NO AVERAGING OVER STOCHASTIC EFFECTS
         fileName = "results/%s_variation_%s_%s_%s_%s_%s_%s" % (property_varied,str(params["N"]),str(params["time_steps_max"]),str(params["K"]), str(param_min), str(param_max), str(reps))
         print("fileName: ", fileName)
