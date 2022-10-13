@@ -13,7 +13,6 @@ import numpy as np
 import networkx as nx
 from individuals import Individual
 import numpy.typing as npt
-from logging import raiseExceptions
 
 #modules
 class Network:
@@ -289,14 +288,14 @@ class Network:
             self.total_carbon_emissions = self.calc_total_emissions()
             
             # calc_netork density
-            self.calc_network_density()
+            #self.calc_network_density()
 
             (
                 self.average_culture,
+                self.std_culture,
                 self.var_culture,
                 self.min_culture,
                 self.max_culture,
-
             ) = self.calc_network_culture()
             self.weighting_matrix_convergence = 0 # there is no convergence in the first step, to deal with time issues when plotting
 

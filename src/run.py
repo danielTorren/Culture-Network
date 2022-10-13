@@ -9,7 +9,6 @@ Created: 10/10/2022
 
 #imports
 from network import Network
-from utility import produceName_alt, createFolder, saveObjects, saveData
 import time
 import numpy as np
 import numpy.typing as npt
@@ -17,6 +16,7 @@ from joblib import Parallel, delayed
 import multiprocessing
 
 #modules
+####SINGLE SHOT RUN
 def generate_data(parameters: dict) -> Network:
     """
     Generate the Network object which itself contains list of Individual objects. Run this forward in time for the desired number of steps
@@ -64,7 +64,7 @@ def generate_data(parameters: dict) -> Network:
         Social network that has evolved from initial conditions
     """
 
-    print_simu = 1#Whether of not to print how long the single shot simulation took
+    print_simu = 0#Whether of not to print how long the single shot simulation took
     
     if print_simu:
         start_time = time.time()
@@ -84,65 +84,15 @@ def generate_data(parameters: dict) -> Network:
         )
     return social_network
 
-###SINGLE SHOT RUNS
-def run(parameters: dict, to_save_list: list, params_name: list) -> tuple[str,Network]:
-    """
-    Calls generate_data to get the simulation Network results then creates folders and saves both objects 
-    and object data separately for re-use or analysis
-
-    Parameters
-    ----------
-    parameters: dict
-        Dictionary of parameters used to generate attributes, dict used for readability instead of super long list of input parameters. See generate_data for an example
-    to_save_list: list
-        list of parameters to be saved into either CSV or npz files 
-    params_name: list
-        list of parameter names used for file name creation
-    Returns
-    -------
-    fileName: str
-        name of file where results may be found
-    social_network: Network
-        Social network that has evolved from initial conditions
-    """
-
-    social_network = generate_data(parameters)
-
-    if parameters["save_data"]:
-        steps = len(social_network.history_cultural_var)
-        start_time = time.time()
-        fileName = produceName_alt(params_name)
-        dataName = createFolder(fileName)
-        saveObjects(social_network, dataName)
-        saveData(
-            social_network,
-            dataName,
-            steps,
-            parameters["N"],
-            parameters["M"],
-            to_save_list[0],
-            to_save_list[1],
-            to_save_list[2],
-            to_save_list[3],
-        )
-        print("File Path:", fileName)
-        print(
-            "SAVE time taken: %s minutes" % ((time.time() - start_time) / 60),
-            "or %s s" % ((time.time() - start_time)),
-        )
-
-        return fileName, social_network
-    else:
-        return 0, social_network
-
-def parallel_run(params_list: list[dict]) -> list[Network]:
+###MULTIPLE RUNS
+def parallel_run(params_dict: dict[dict]) -> list[Network]:
     """
     Generate data from a list of parameter dictionaries, parallelize the execution of each single shot simulation
 
     Parameters
     ----------
-    params_list: list[dict],
-        list of dictionary of parameters used to generate attributes, dict used for readability instead of super long list of input parameters. 
+    params_dict: dict[dict],
+        dictionary of dictionary of parameters used to generate attributes, dict used for readability instead of super long list of input parameters. 
         Each entry corresponds to a different society. See generate_data for an example
     
     Returns
@@ -152,11 +102,12 @@ def parallel_run(params_list: list[dict]) -> list[Network]:
     """
 
     num_cores = multiprocessing.cpu_count()
-    data_parallel = Parallel(n_jobs=num_cores,verbose=10)(delayed(generate_data)(i) for i in params_list)
+    data_parallel = Parallel(n_jobs=num_cores,verbose=10)(delayed(generate_data)(i) for i in params_dict)
     return data_parallel
 
 ###SENSITIVITY ANALYSIS RUNS
-def generate_sensitivity_output(params: dict) -> tuple[float,float,float,float]:
+def generate_sensitivity_output(params: dict):
+    #-> tuple[float,float,float,float]
     """
     Generate data from a set of parameter contained in a dictionary. Average results over multiple stochastic seeds contained in params["seed_list"]
     
@@ -175,33 +126,42 @@ def generate_sensitivity_output(params: dict) -> tuple[float,float,float,float]:
         variance of societal identity at the end of the allowed time, averaged for different stochastic values 
     stochastic_norm_coefficient_variance: float
         coefficient of variance (std/mu) of societal identity at the end of the allowed time, averaged for different stochastic values 
+    
     """
 
     emissions_list = []
     mean_list = []
     var_list = []
     coefficient_variance_list = []
+
     norm_factor = params["N"]*params["M"]
+
     for v in params["seed_list"]:
         params["set_seed"] = v
         data = generate_data(params)
+
         #Insert more measures below that want to be used for evaluating the
         emissions_list.append(data.total_carbon_emissions/norm_factor)
         mean_list.append(data.average_culture/norm_factor)
-        var_list.append(data.var_culture/norm_factor)
+        var_list.append(data.var_culture)
         coefficient_variance_list.append(data.std_culture/(data.average_culture/norm_factor))
-    stochastic_norm_emissions, stochastic_norm_mean, stochastic_norm_var, stochastic_norm_coefficient_variance = np.mean(emissions_list), np.mean(mean_list), np.mean(var_list),np.mean(coefficient_variance_list)
+
+    stochastic_norm_emissions  = np.mean(emissions_list)
+    stochastic_norm_mean = np.mean(mean_list)
+    stochastic_norm_var = np.mean(var_list)
+    stochastic_norm_coefficient_variance = np.mean(coefficient_variance_list)
+
     return stochastic_norm_emissions, stochastic_norm_mean, stochastic_norm_var, stochastic_norm_coefficient_variance
 
-def parallel_run_sa(params_list: list[dict]) -> tuple[npt.NDArray, npt.NDArray, npt.NDArray, npt.NDArray]:
+def parallel_run_sa(params_dict: dict[dict]) -> tuple[npt.NDArray, npt.NDArray, npt.NDArray, npt.NDArray]:
     """
-    Generate data for sensitivity analysis for model varying lots of parameters dictated by params_list, producing output 
+    Generate data for sensitivity analysis for model varying lots of parameters dictated by params_dict, producing output 
     measures emissions,mean,variance and coefficient of variance. Results averaged over multiple runs with different stochastic seed
 
     Parameters
     ----------
-    params_list: list[dict],
-        list of dictionary of parameters used to generate attributes, dict used for readability instead of super long list of input parameters. 
+    params_dict: dict[dict],
+        dictionary of dictionary of parameters used to generate attributes, dict used for readability instead of super long list of input parameters. 
         Each entry corresponds to a different society. See generate_data for an example
 
     Returns
@@ -217,20 +177,21 @@ def parallel_run_sa(params_list: list[dict]) -> tuple[npt.NDArray, npt.NDArray, 
     """
 
     num_cores = multiprocessing.cpu_count()
-    results = Parallel(n_jobs=num_cores,verbose=10)(delayed(generate_sensitivity_output)(i) for i in params_list)
-    results_emissions, results_mean, results_var, results_coefficient_variance = zip(*results)
+
+    results_emissions, results_mean, results_var, results_coefficient_variance = Parallel(n_jobs=num_cores,verbose=10)(delayed(generate_sensitivity_output)(i) for i in params_dict)
+
     return np.asarray(results_emissions),np.asarray(results_mean), np.asarray(results_var), np.asarray(results_coefficient_variance)
 
-def parallel_run_multi_run_n(params_list,variable_parameters_dict):
+def parallel_run_multi_run_n(params_dict: dict,variable_parameters_dict: dict):
 
     """
-    Generate data for sensitivity analysis for model varying lots of parameters dictated by params_list, producing output 
+    Generate data for sensitivity analysis for model varying lots of parameters dictated by params_dict, producing output 
     measures emissions,mean,variance and coefficient of variance. Results averaged over multiple runs with different stochastic seed.
     Due to parallisation I cant be sure which data corresponds to which so I need to vary the individual parameters in separate parallel loops
 
     Parameters
     ----------
-    params_list: list[dict],
+    params_dict: dict[dict],
         dictionary of parameters used to generate attributes, dict used for readability instead of super long list of input parameters. 
         This is the baseline and from this we vary n parameters independantly found in variable_parameters_dict. See generate_data for an example
     variable_parameters_dict:
@@ -251,10 +212,14 @@ def parallel_run_multi_run_n(params_list,variable_parameters_dict):
     counter = 0
     combined_data = {}
 
-    for i in variable_parameters_dict.keys():
-        results = parallel_run_sa(params_list[counter:counter + variable_parameters_dict[i]["reps"]])
-        results_emissions, results_mean, results_var, results_coefficient_variance = zip(*results)
-        counter += variable_parameters_dict[i]["reps"]
-        combined_data["%s" % (i)] = {"emissions_data": results_emissions,"mean_data": results_mean, "variance_data": results_var,"coefficient_variance_data": results_coefficient_variance}
+    for v in variable_parameters_dict.keys():
+        #results = [generate_sensitivity_output(v) for v in params_dict[counter:counter + variable_parameters_dict[i]["reps"]]]
+        #print(results)
+        #quit()
+        results_emissions, results_mean, results_var, results_coefficient_variance = parallel_run_sa(params_dict[counter:counter + variable_parameters_dict[v]["reps"]])
+        counter += variable_parameters_dict[v]["reps"]
+        combined_data["%s" % (v)] = {"emissions_data": results_emissions,"mean_data": results_mean, "variance_data": results_var,"coefficient_variance_data": results_coefficient_variance}
 
     return combined_data 
+
+

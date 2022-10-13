@@ -3,22 +3,29 @@ A module that use input data to generate data from multiple social networks vary
 between simulations so that the differences may be compared. These multiple runs can either be single 
 shot runs or taking the average over multiple runs.
 
+TWO MODES 
+    Single parameters can be varied to cover a list of points. This can either be done in SINGLE = True where individual 
+    runs are used as the output and gives much greater variety of possible plots but all these plots use the same initial
+    seed. Alternatively can be run such that multiple averages of the simulation are produced and then the data accessible 
+    is the emissions, mean identity, variance of identity and the coefficient of variance of identity.
+
 Author: Daniel Torren Peraire Daniel.Torren@uab.cat dtorrenp@hotmail.com
 
 Created: 10/10/2022
 """
 
 #imports
-from logging import raiseExceptions
-from run import parallel_run,average_seed_parallel_run_mena_coefficient_variance
+from run import parallel_run,parallel_run_sa
 import matplotlib.pyplot as plt
 import numpy as np
-from network import Network
-from utility import createFolderSA,produce_param_list
+from utility import createFolder
 from matplotlib.colors import LinearSegmentedColormap,  Normalize,LogNorm
 from matplotlib.cm import get_cmap
+import json
 from plot import (
-    print_culture_time_series_generic,
+    live_multirun_diagram_mean_coefficient_variance,
+    live_average_multirun_diagram_mean_coefficient_variance,
+    live_print_culture_timeseries,
     plot_average_culture_comparison,
     plot_carbon_emissions_total_comparison,
     plot_weighting_matrix_convergence_comparison,
@@ -27,73 +34,20 @@ from plot import (
     plot_live_cum_link_change_comparison,
     plot_live_link_change_per_agent_comparison,
     plot_live_cum_link_change_per_agent_comparison,
-    print_culture_time_series_clusters,
+    live_multirun_diagram_mean_coefficient_variance,
     print_live_intial_culture_networks,
     prints_init_weighting_matrix,
     prints_final_weighting_matrix,
-    multi_animation_weighting,
+    live_print_culture_timeseries_with_weighting,
+    print_live_intial_culture_networks_and_culture_timeseries,
     live_compare_animate_culture_network_and_weighting,
     live_compare_animate_weighting_matrix,
     live_compare_animate_behaviour_matrix,
     live_compare_plot_animate_behaviour_scatter,
-    live_print_heterogenous_culture_momentum,
-    live_print_culture_timeseries,
-    live_print_culture_timeseries_with_weighting,
-    print_live_intial_culture_networks_and_culture_timeseries,
-    live_multirun_diagram_mean_coefficient_variance,
-    live_average_multirun_diagram_mean_coefficient_variance,
 )
 
 #constants
-params = {
-    "total_time": 50,
-    "delta_t": 0.05,
-    "compression_factor": 10,
-    "save_data": True, 
-    "alpha_change" : 1.0,
-    "harsh_data": False,
-    "averaging_method": "Arithmetic",
-    "phi_lower": 0.1,
-    "phi_upper": 1.0,
-    "N": 100,
-    "M": 3,
-    "K": 20,
-    "prob_rewire": 0.05,
-    "set_seed": 1,
-    "culture_momentum_real": 5,
-    "learning_error_scale": 0.02,
-    "discount_factor": 0.6,
-    "present_discount_factor": 0.8,
-    "inverse_homophily": 0.2,#1 is total mixing, 0 is no mixing
-    "homophilly_rate" : 1,
-    "confirmation_bias": 20,
-}
-
-params["time_steps_max"] = int(params["total_time"] / params["delta_t"])
-
-#behaviours!
-if params["harsh_data"]:#trying to create a polarised society!
-    params["green_extreme_max"]= 8
-    params["green_extreme_min"]= 2
-    params["green_extreme_prop"]= 2/5
-    params["indifferent_max"]= 2
-    params["indifferent_min"]= 2
-    params["indifferent_prop"]= 1/5
-    params["brown_extreme_min"]= 2
-    params["brown_extreme_max"]= 8
-    params["brown_extreme_prop"]= 2/5
-    if params["green_extreme_prop"] + params["indifferent_prop"] + params["brown_extreme_prop"] != 1:
-        raise Exception("Invalid proportions")
-else:
-    params["alpha_attitude"] = 1
-    params["beta_attitude"] = 1
-    params["alpha_threshold"] = 1
-    params["beta_threshold"] = 1
-
-
 ###PLOT STUFF
-nrows_behave = 1
-ncols_behave = params["M"]
 node_size = 50
 cmap = LinearSegmentedColormap.from_list("BrownGreen", ["sienna", "whitesmoke", "olivedrab"], gamma=1)
 
@@ -122,10 +76,64 @@ min_culture_distance = 0.5
 
 SINGLE = 0
 
-if __name__ == "__main__":
+#modules
+def produce_param_list(params: dict,property_list: list, property: str) -> list[dict]:
+    """
+    Produce a list of the dicts for each experiment
 
+    Parameters
+    ----------
+    params: dict
+        base parameters from which we vary e.g
+        params = {
+                "total_time": 2000,#200,
+                "delta_t": 1.0,#0.05,
+                "compression_factor": 10,
+                "save_data": True, 
+                "alpha_change" : 1.0,
+                "harsh_data": False,
+                "averaging_method": "Arithmetic",
+                "phi_lower": 0.001,
+                "phi_upper": 0.005,
+                "N": 20,
+                "M": 5,
+                "K": 10,
+                "prob_rewire": 0.2,#0.05,
+                "set_seed": 1,
+                "culture_momentum_real": 100,#5,
+                "learning_error_scale": 0.02,
+                "discount_factor": 0.8,
+                "present_discount_factor": 0.99,
+                "inverse_homophily": 0.2,#0.1,#1 is total mixing, 0 is no mixing
+                "homophilly_rate" : 1,
+                "confirmation_bias": -100,
+                "alpha_attitude": 0.1,
+                "beta_attitude": 0.1,
+                "alpha_threshold": 1,
+                "beta_threshold": 1,
+            }
+            params["time_steps_max"] = int(params["total_time"] / params["delta_t"])
+    porperty_list: list
+        list of values for the property to be varied
+    property: str
+        property to be varied
+
+    Returns
+    -------
+    params_list: list[dict]
+        list of parameter dicts, each entry corresponds to one experiment to be tested
+    """
+
+    params_list = []
+    for i in property_list:
+        params[property] = i
+        params_list.append(params.copy())#have to make a copy so that it actually appends a new dict and not just the location of the params dict
+    return params_list
+    
+if __name__ == "__main__":
+    """The number of rows and cols set the number of experiments ie 4 rows and 3 cols gives 12 experiments"""
     nrows = 1
-    ncols = 24#48#48#due to screen ratio want more cols than rows usually
+    ncols = 24#due to screen ratio want more cols than rows usually
     reps = nrows*ncols# make multiples of the number of cores for efficieny
 
     property_varied = "confirmation_bias"#"alpha_change"#"culture_momentum"#"confirmation_bias"#"inverse_homophily" #MAKE SURE ITS TYPES CORRECTLY
@@ -136,27 +144,29 @@ if __name__ == "__main__":
 
     #property_values_list = np.linspace(param_min,param_max, reps) #np.asarray([0.0, 0.5, 1.0])#np.linspace(param_min,param_max, reps)
     property_values_list = np.logspace(param_min,param_max, reps)
-    #data = parallel_run(params_list)#better if a Multiple of 4
     log_norm = LogNorm()#cant take log of negative numbers, unlike log s
 
-    print(property_values_list)
+    print("property_values_list",property_values_list)
     #property_values_list = SymLogNorm(linthresh=0.15, linscale=1, vmin=param_min, vmax=1.0, base=10)  # this works at least its correct
 
     if SINGLE:
-    
+        f = open("src/constants/base_params.json")
+        params = json.load(f)
+        params["time_steps_max"] = int(params["total_time"] / params["delta_t"])
+
+        #SINGLE SHOT RUNS NO AVERAGING OVER STOCHASTIC EFFECTS
         fileName = "results/%s_variation_%s_%s_%s_%s_%s_%s" % (property_varied,str(params["N"]),str(params["time_steps_max"]),str(params["K"]), str(param_min), str(param_max), str(reps))
         print("fileName: ", fileName)
-        createFolderSA(fileName)
+        createFolder(fileName)
 
         params_list = produce_param_list(params,property_values_list, property_varied)
         data = parallel_run(params_list)#better if a Multiple of 4
 
         ###WORKING 
-
-        #print_culture_time_series_generic(fileName, data, property_values_list, property_varied_title, dpi_save,nrows, ncols,round_dec)
+        """Comment out those plots that you dont want to produce"""
         #live_print_culture_timeseries(fileName, data, property_varied, title_list, nrows, ncols, dpi_save)
         #plot_average_culture_comparison(fileName, data, dpi_save,property_values_list, property_varied,round_dec)
-        #plot_carbon_emissions_total_comparison(fileName, data, dpi_save,property_values_list, property_varied,round_dec)
+        plot_carbon_emissions_total_comparison(fileName, data, dpi_save,property_values_list, property_varied,round_dec)
         #plot_weighting_matrix_convergence_comparison(fileName, data, dpi_save,property_values_list, property_varied,round_dec)
         #plot_average_culture_no_range_comparison(fileName, data, dpi_save,property_values_list, property_varied,round_dec)
         #plot_live_link_change_comparison(fileName, data, dpi_save,property_values_list, property_varied,round_dec)
@@ -165,8 +175,6 @@ if __name__ == "__main__":
         #plot_live_cum_link_change_per_agent_comparison(fileName, data, dpi_save,property_values_list, property_varied,round_dec)
         live_multirun_diagram_mean_coefficient_variance(fileName, data, property_varied, property_values_list,property_varied_title, cmap,dpi_save,norm_zero_one)
     
-
-        #print_culture_time_series_clusters(fileName, data, property_values_list, property_varied_title, min_k,max_k,size_points, alpha_val, min_culture_distance, nrows, ncols, dpi_save, round_dec)
         #print_live_intial_culture_networks(fileName, data, dpi_save, property_values_list, property_varied, nrows, ncols , layout, norm_zero_one, cmap, node_size,round_dec)
         #prints_init_weighting_matrix(fileName, data, dpi_save,nrows, ncols, cmap_weighting,property_values_list, property_varied,round_dec)
         #prints_final_weighting_matrix(fileName, data, dpi_save,nrows, ncols, cmap_weighting,property_values_list, property_varied,round_dec)
@@ -180,18 +188,19 @@ if __name__ == "__main__":
         #ani_e = live_compare_plot_animate_behaviour_scatter(fileName,data,norm_zero_one, cmap, nrows, ncols,property_varied, property_values_list,interval, fps,round_dec)
     else:
         #AVERAGE OVER MULTIPLE RUNS
+        """ Set the number of stochastic repetitions by changing the number of entries in the seed list."""
         seed_list = [1,2,3,4,5]#ie 5 reps per run!
         params["seed_list"] = seed_list
         average_reps = len(seed_list)
 
         fileName = "results/average_%s_variation_%s_%s_%s_%s_%s_%s_%s" % (property_varied,str(params["N"]),str(params["time_steps_max"]),str(params["K"]), str(param_min), str(param_max), str(reps), str(average_reps))
         print("fileName: ", fileName)
-        createFolderSA(fileName)
+        createFolder(fileName)
 
         params_list = produce_param_list(params,property_values_list, property_varied)
-        mean_data, coefficient_variance_data = average_seed_parallel_run_mena_coefficient_variance(params_list)
+        results_emissions, results_mean, results_var, results_coefficient_variance = parallel_run_sa(params_list)
         
-        live_average_multirun_diagram_mean_coefficient_variance(fileName, mean_data,coefficient_variance_data, property_varied, property_values_list,property_varied_title, cmap_weighting, dpi_save, log_norm)
+        live_average_multirun_diagram_mean_coefficient_variance(fileName, results_mean,results_coefficient_variance, property_varied, property_values_list,property_varied_title, cmap_weighting, dpi_save, log_norm)
 
         plt.show()
 
