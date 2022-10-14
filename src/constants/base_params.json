@@ -1,5 +1,5 @@
 {
-    "total_time": 2000,
+    "total_time": 1000,
     "delta_t": 1.0,
     "compression_factor": 10,
     "save_data": 1, 
@@ -7,9 +7,9 @@
     "averaging_method": "Arithmetic",
     "phi_lower": 0.005,
     "phi_upper": 0.01,
-    "N": 50,
+    "N": 20,
     "M": 3,
-    "K": 10,
+    "K": 4,
     "prob_rewire": 0.2,
     "set_seed": 1,
     "seed_list": [1,2,3],

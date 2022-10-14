@@ -142,9 +142,9 @@ def generate_sensitivity_output(params: dict):
 
         #Insert more measures below that want to be used for evaluating the
         emissions_list.append(data.total_carbon_emissions/norm_factor)
-        mean_list.append(data.average_culture/norm_factor)
+        mean_list.append(data.average_culture)
         var_list.append(data.var_culture)
-        coefficient_variance_list.append(data.std_culture/(data.average_culture/norm_factor))
+        coefficient_variance_list.append(data.std_culture/(data.average_culture))
 
     stochastic_norm_emissions  = np.mean(emissions_list)
     stochastic_norm_mean = np.mean(mean_list)

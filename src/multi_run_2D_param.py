@@ -38,6 +38,8 @@ from plot import (
     live_average_multirun_double_phase_diagram_mean_alt,
     live_average_multirun_double_phase_diagram_C_of_V_alt,
     live_average_multirun_double_phase_diagram_C_of_V,
+    double_phase_diagram,
+    double_phase_diagram_using_meanandvariance,
 )
 from utility import (
     createFolder,
@@ -47,7 +49,7 @@ from utility import (
 )
 
 #run bools
-RUN = 1#run or load in previously saved data
+RUN = 0#run or load in previously saved data
 SINGLE = 0#determine if you runs single shots or study the averages over multiple runs for each experiment
 
 ###PLOT STUFF
@@ -352,7 +354,7 @@ if __name__ == "__main__":
 
             results_emissions, results_mu, results_var, results_coefficient_of_variance = av_two_dimensional_param_run(fileName, variable_parameters_dict, params)
         else:
-            fileName = "results/beta_attitude_alpha_attitude_50_2000_10_-1_1_-1_1_3_3"
+            fileName = "results/average_beta_attitude_alpha_attitude_20_1000_4_6_6_3"
             createFolder(fileName)
             
             variable_parameters_dict,results_emissions, results_mu, results_var, results_coefficient_of_variance = load_data_av(fileName)
@@ -360,9 +362,14 @@ if __name__ == "__main__":
         ###PLOTS FOR STOCHASTICALLY AVERAGED RUNS
         matrix_emissions, matrix_mu, matrix_var, matrix_coefficient_of_variance = reshape_results_matricies(results_emissions, results_mu, results_var, results_coefficient_of_variance,variable_parameters_dict["row"]["reps"], variable_parameters_dict["col"]["reps"])
 
-        live_average_multirun_double_phase_diagram_mean_alt(fileName, matrix_mu, variable_parameters_dict, get_cmap("Blues"),dpi_save)
-        live_average_multirun_double_phase_diagram_C_of_V_alt(fileName, matrix_mu, variable_parameters_dict, get_cmap("Reds"),dpi_save)
-        #live_average_multirun_double_phase_diagram_mean(fileName, matrix_mu, property_row, property_varied_values_row,property_col,property_varied_values_col, get_cmap("Blues"),dpi_save,round_dec)
-        #live_average_multirun_double_phase_diagram_C_of_V(fileName, matrix_coefficient_of_variance, variable_parameters_dict["row"]["property"], variable_parameters_dict["row"]["vals"],variable_parameters_dict["col"]["property"],variable_parameters_dict["col"]["vals"], get_cmap("Reds"),dpi_save,round_dec)
+        #double_phase_diagram(fileName, matrix_emissions, r"Total emissions $E/NM$", "emissions",variable_parameters_dict, get_cmap("Reds"),dpi_save)
+        #double_phase_diagram(fileName, matrix_mu, r"Average identity, $\mu$", "mu",variable_parameters_dict, get_cmap("Blues"),dpi_save)
+        #double_phase_diagram(fileName, matrix_var, r"Identity variance, $(\sigma)^2$", "variance",variable_parameters_dict, get_cmap("Greens"),dpi_save)
+        #double_phase_diagram(fileName, matrix_coefficient_of_variance, r"Identity coefficient of variance, $\sigma/\mu$", "coefficient_of_variance",variable_parameters_dict, get_cmap("Oranges"),dpi_save)
+
+        #double_phase_diagram_using_meanandvariance(fileName, matrix_emissions, r"Total emissions $E/NM$", "emissions",variable_parameters_dict, get_cmap("Reds"),dpi_save)
+        double_phase_diagram_using_meanandvariance(fileName, matrix_mu, r"Average identity, $\mu$", "mu",variable_parameters_dict, get_cmap("Blues"),dpi_save)
+        #double_phase_diagram_using_meanandvariance(fileName, matrix_var, r"Identity variance, $(\sigma)^2$", "variance",variable_parameters_dict, get_cmap("Greens"),dpi_save)
+        double_phase_diagram_using_meanandvariance(fileName, matrix_coefficient_of_variance, r"Identity coefficient of variance, $\sigma/\mu$", "coefficient_of_variance",variable_parameters_dict, get_cmap("Oranges"),dpi_save)
 
     plt.show()

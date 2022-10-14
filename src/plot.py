@@ -418,6 +418,74 @@ def live_average_multirun_double_phase_diagram_C_of_V_alt(fileName,Z, variable_p
     fig.savefig(f + ".png", dpi=dpi_save,format='png')
 
 
+def double_phase_diagram(fileName, Z, Y_title,Y_param,variable_parameters_dict, cmap,dpi_save):
+
+    fig, ax = plt.subplots(figsize=(14, 7),constrained_layout=True)
+
+    col_dict = variable_parameters_dict["col"]
+    row_dict = variable_parameters_dict["row"]
+
+    ax.set_xlabel(r"%s" % col_dict["title"])
+    ax.set_ylabel(r"%s" % row_dict["title"])
+
+    if col_dict["divisions"] == "log":
+        ax.set_xscale('log')
+    if row_dict["divisions"] == "log":
+        ax.set_yscale('log')
+
+    X, Y = np.meshgrid(col_dict["vals"], row_dict["vals"])
+    contours = ax.contour(X, Y, Z, colors='black')
+    ax.clabel(contours, inline=True, fontsize=8)
+
+    cp = ax.contourf(X, Y, Z, cmap = cmap, alpha=0.5)
+    cbar = fig.colorbar(cp, ax=ax,)
+    cbar.set_label(Y_title)
+
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/live_average_multirun_double_phase_diagram_%s" % (Y_param)
+    fig.savefig(f + ".eps", dpi=dpi_save,format='eps')
+    fig.savefig(f + ".png", dpi=dpi_save,format='png')
+
+def double_phase_diagram_using_meanandvariance(fileName, Z, Y_title,Y_param,variable_parameters_dict, cmap,dpi_save):
+
+    fig, ax = plt.subplots(figsize=(14, 7),constrained_layout=True)
+
+    col_dict = variable_parameters_dict["col"]
+    row_dict = variable_parameters_dict["row"]
+
+    ax.set_ylabel(r"$\sigma ^2$")
+    ax.set_xlabel(r"$\mu$")
+
+    @np.vectorize
+    def convert_ab_to_mu_var(a,b):
+        mu = a/(a+b)
+        var = a*b/(((a+b)**2)*(a + b + 1))
+        return mu, var
+
+    A, B = np.meshgrid(col_dict["vals"], row_dict["vals"])
+
+    MU, VAR = convert_ab_to_mu_var(A, B)
+
+    contours = ax.contour(MU, VAR, Z, colors='black')
+    ax.clabel(contours, inline=True, fontsize=8)
+
+    cp = ax.contourf(MU, VAR, Z, cmap = cmap, alpha=0.5)
+
+    norm = Normalize(vmin=cp.cvalues.min(), vmax=cp.cvalues.max())
+    # a previous version of this used
+    #norm= matplotlib.colors.Normalize(vmin=cs.vmin, vmax=cs.vmax)
+    # which does not work any more
+    sm = plt.cm.ScalarMappable(norm=norm, cmap = cp.cmap)
+    cbar = fig.colorbar(sm, ax=ax,)
+    cbar.set_label(Y_title)
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/live_average_multirun_double_phase_diagram_%s_using_meanandvariance" % (Y_param)
+    fig.savefig(f + ".eps", dpi=dpi_save,format='eps')
+    fig.savefig(f + ".png", dpi=dpi_save,format='png')
+
+
 def print_culture_timeseries_vary_array(fileName: str, Data_array: list[Network] , property_varied_row,property_title_row, property_varied_values_row,property_varied_col,property_title_col,property_varied_values_col,  nrows:int, ncols:int , dpi_save:int):
 
     y_title = "Identity"
