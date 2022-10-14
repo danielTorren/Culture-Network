@@ -19,6 +19,7 @@ To perform sensitivity analysis on the model see SA_sobol, this takes ages!
 Other information:
  - figures are produced in plot.py which is a bit of a mess, I have left in functions that are not working at the moment (commented out) for the sake of inspiration and the plots are stored in either png or eps
  - its not a particularly rapid model to run for lots of time steps
+ - To use the load (or not RUN) functionality paste in the location of the folder name of the date you want to use. This is printed when you first run that set up so if say you want to test out different graph aesthetic you can quickly test this without re-running the simulation.
  
 For any questions please contact Daniel Torren Peraire at Daniel.Torren@uab.cat or dtorrenp@hotmail.com
 

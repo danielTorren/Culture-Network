@@ -12,7 +12,6 @@ Created: 10/10/2022
 
 #imports
 import matplotlib.pyplot as plt
-from matplotlib.cm import get_cmap
 import json
 from utility import (
     createFolder,
@@ -27,18 +26,6 @@ from plot import (
 )
 
 #constants
-"""Runs parallel loops over reps of each variable parameters dict entry"""
-variable_parameters_dict = {
-        "discount_factor": {"property":"discount_factor","min":-2, "max":0 , "title": r"$\delta$", "divisions": "log", "cmap": get_cmap("Reds"), "cbar_loc": "right", "marker": "o", "reps": 4}, 
-        "inverse_homophily": {"property":"inverse_homophily","min":0.0, "max": 1.0, "title": r"$h$", "divisions": "linear", "cmap": get_cmap("Blues"), "cbar_loc": "right", "marker": "v", "reps": 4}, 
-        #"confirmation_bias": {"property":"confirmation_bias","min":0, "max":40, "title": r"$\theta$", "divisions": "linear", "cmap": get_cmap("Greens"), "cbar_loc": "right", "marker": "p", "reps":128}, 
-        #"prob_rewire": {"property":"prob_rewire","min":0.0, "max":1 , "title": r"$p_r$", "divisions": "linear", "cmap": get_cmap("Purples"), "cbar_loc": "right", "marker": "d", "reps": 16}, 
-        #"learning_error_scale": {"property":"learning_error_scale","min":0.0,"max":1.0 , "title": r"$\epsilon$", "divisions": "linear", "cmap": get_cmap("Oranges"), "cbar_loc": "right", "marker": "*", "reps": 16},
-        #"N": {"property": "N","min":50,"max":200, "title": r"$N$", "divisions": "linear", "cmap": get_cmap("Reds"), "cbar_loc": "right", "marker": "o", "reps": 8}, 
-        #"M": {"property":"M","min":1,"max": 10, "title": r"$M$", "divisions": "linear", "cmap": get_cmap("Greens"), "cbar_loc": "right", "marker": "p", "reps": 16}, 
-        #{"property":"K","min":2,"max":30 , "title": r"$K$", "divisions": "linear", "cmap": get_cmap("Blues"), "cbar_loc": "right", "marker": "p", "reps": 16}, 
-    }
-
 ###PLOT STUFF
 dpi_save = 1200
 
@@ -133,16 +120,21 @@ def produce_param_list_n(params,variable_parameters_dict):
 if __name__ == "__main__":
 
     if RUN:
-        f = open("src/constants/base_params.json")
-        params = json.load(f)
+        #load base params
+        f_base_params = open("src/constants/base_params.json")
+        params = json.load(f_base_params)
+        f_base_params.close()
         params["time_steps_max"] = int(params["total_time"] / params["delta_t"])
-        #AVERAGE OVER MULTIPLE RUNS
-        seed_list = [1,2,3,4,5]#ie 5 reps per run!
-        params["seed_list"] = seed_list
-        average_reps = len(seed_list)
 
-        reps = 4 #total reps 
-        fileName = "results/multi_run_n_%s_%s_%s_%s_%s" % (str(params["N"]),str(params["time_steps_max"]),str(params["K"]), str(len(seed_list)), str(reps))
+        #load variable params
+        f_variable_parameters = open("src/constants/variable_parameters_dict_n.json")
+        variable_parameters_dict = json.load(f_variable_parameters)
+        f_variable_parameters.close()
+        
+        reps = sum([x["reps"] for x in variable_parameters_dict.values()])
+
+        #AVERAGE OVER MULTIPLE RUNS
+        fileName = "results/multi_run_n_%s_%s_%s_%s_%s" % (str(params["N"]),str(params["time_steps_max"]),str(params["K"]), str(params["seed_list"]), str(reps))
     
         produceName_multi_run_n(variable_parameters_dict,fileName)
         createFolder(fileName)

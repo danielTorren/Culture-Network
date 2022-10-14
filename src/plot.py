@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from matplotlib.colors import Normalize,LinearSegmentedColormap,SymLogNorm
 from matplotlib.collections import LineCollection
+from matplotlib.cm import get_cmap
 from typing import Union
 from networkx import Graph
 from network import Network
@@ -274,7 +275,7 @@ def live_average_multirun_n_diagram_mean_coefficient_variance(fileName, combined
         ax.scatter(combined_data[i]["mean_data"], combined_data[i]["coefficient_variance_data"], marker= variable_parameters_dict[i]["marker"], s= 60, c = scatter_colours, edgecolors='black', linewidths=1)
 
         cbar = fig.colorbar(
-            plt.cm.ScalarMappable(cmap=variable_parameters_dict[i]["cmap"], norm = variable_parameters_dict[i]["norm"]), ax=ax, location=variable_parameters_dict[i]["cbar_loc"], aspect = 60,pad = 0.05
+            plt.cm.ScalarMappable(cmap=get_cmap(variable_parameters_dict[i]["cmap"]), norm = variable_parameters_dict[i]["norm"]), ax=ax, location=variable_parameters_dict[i]["cbar_loc"], aspect = 60,pad = 0.05
         ) 
         cbar.set_label(r"%s" % (variable_parameters_dict[i]["title"])) 
 
@@ -296,7 +297,7 @@ def live_average_multirun_n_diagram_mean_coefficient_variance_cols(fileName, com
         ax.set_xlabel(r"$\mu$")
         ax.set_ylabel(r"$\sigma /\mu$")
         colour_adjust = variable_parameters_dict[key_list[i]]["norm"](variable_parameters_dict[key_list[i]]["vals"])
-        scatter_colours = variable_parameters_dict[key_list[i]]["cmap"](colour_adjust)
+        scatter_colours = get_cmap(variable_parameters_dict[key_list[i]]["cmap"])(colour_adjust)
         ax.scatter(combined_data[key_list[i]]["mean_data"], combined_data[key_list[i]]["coefficient_variance_data"], marker= variable_parameters_dict[key_list[i]]["marker"], s= 60, c = scatter_colours, edgecolors='black', linewidths=1)
 
         cbar = fig.colorbar(
@@ -320,6 +321,8 @@ def live_average_multirun_double_phase_diagram_mean(fileName,Z, property_varied_
     ax.set_xlabel(r"%s" % property_varied_col)
     ax.set_ylabel(r"%s" % property_varied_row)
 
+    ax.set_yscale('log')
+
     X, Y = np.meshgrid(property_varied_values_col, property_varied_values_row)
     contours = ax.contour(X, Y, Z, colors='black')
     ax.clabel(contours, inline=True, fontsize=8)
@@ -331,6 +334,35 @@ def live_average_multirun_double_phase_diagram_mean(fileName,Z, property_varied_
 
     plotName = fileName + "/Plots"
     f = plotName + "/live_average_multirun_double_phase_diagram_mean"
+    fig.savefig(f + ".eps", dpi=dpi_save,format='eps')
+    fig.savefig(f + ".png", dpi=dpi_save,format='png')
+
+def live_average_multirun_double_phase_diagram_mean_alt(fileName, Z, variable_parameters_dict, cmap,dpi_save):
+
+    fig, ax = plt.subplots(figsize=(14, 7),constrained_layout=True)
+
+    col_dict = variable_parameters_dict["col"]
+    row_dict = variable_parameters_dict["row"]
+
+    ax.set_xlabel(r"%s" % col_dict["property"])
+    ax.set_ylabel(r"%s" % row_dict["property"])
+
+    if col_dict["divisions"] == "log":
+        ax.set_xscale('log')
+    if row_dict["divisions"] == "log":
+        ax.set_yscale('log')
+
+    X, Y = np.meshgrid(col_dict["vals"], row_dict["vals"])
+    contours = ax.contour(X, Y, Z, colors='black')
+    ax.clabel(contours, inline=True, fontsize=8)
+
+    cp = ax.contourf(X, Y, Z, cmap = cmap, alpha=0.5)
+    cbar = fig.colorbar(cp, ax=ax,)
+    cbar.set_label("Mean idenity")
+
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/live_average_multirun_double_phase_diagram_mean_alt"
     fig.savefig(f + ".eps", dpi=dpi_save,format='eps')
     fig.savefig(f + ".png", dpi=dpi_save,format='png')
 
@@ -354,6 +386,34 @@ def live_average_multirun_double_phase_diagram_C_of_V(fileName, Z, property_vari
 
     plotName = fileName + "/Plots"
     f = plotName + "/live_average_multirun_double_phase_diagram_C_of_V"
+    fig.savefig(f + ".eps", dpi=dpi_save,format='eps')
+    fig.savefig(f + ".png", dpi=dpi_save,format='png')
+
+def live_average_multirun_double_phase_diagram_C_of_V_alt(fileName,Z, variable_parameters_dict, cmap,dpi_save):
+
+    fig, ax = plt.subplots(figsize=(14, 7),constrained_layout=True)
+
+    col_dict = variable_parameters_dict["col"]
+    row_dict = variable_parameters_dict["row"]
+
+    ax.set_xlabel(r"%s" % col_dict["property"])
+    ax.set_ylabel(r"%s" % row_dict["property"])
+
+    if col_dict["divisions"] == "log":
+        ax.set_xscale('log')
+    if row_dict["divisions"] == "log":
+        ax.set_yscale('log')
+
+    X, Y = np.meshgrid(col_dict["vals"], row_dict["vals"])
+    contours = ax.contour(X, Y, Z, colors='black')
+    ax.clabel(contours, inline=True, fontsize=8)
+
+    cp = ax.contourf(X, Y, Z, cmap = cmap, alpha=0.5)
+    cbar = fig.colorbar(cp, ax=ax,)
+    cbar.set_label("Coefficient of variance of idenity")
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/live_average_multirun_double_phase_diagram_C_of_V_alt"
     fig.savefig(f + ".eps", dpi=dpi_save,format='eps')
     fig.savefig(f + ".png", dpi=dpi_save,format='png')
 

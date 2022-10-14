@@ -35,6 +35,8 @@ from plot import (
     live_compare_animate_behaviour_matrix,
     #live_print_heterogenous_culture_momentum_double,
     live_average_multirun_double_phase_diagram_mean,
+    live_average_multirun_double_phase_diagram_mean_alt,
+    live_average_multirun_double_phase_diagram_C_of_V_alt,
     live_average_multirun_double_phase_diagram_C_of_V,
 )
 from utility import (
@@ -44,15 +46,9 @@ from utility import (
     load_object,
 )
 
-#constants
-variable_parameters_dict = {
-        "inverse_homophily": {"position": "row","property":"inverse_homophily","min":0.0, "max": 1.0, "title": r"$h$", "divisions": "linear", "reps": 3}, 
-        "confirmation_bias": {"position": "col","property":"confirmation_bias","min":0, "max":30 , "title": r"$\theta$", "divisions": "linear", "reps": 2}, 
-    }
-
 #run bools
 RUN = 1#run or load in previously saved data
-SINGLE = 1#determine if you runs single shots or study the averages over multiple runs for each experiment
+SINGLE = 0#determine if you runs single shots or study the averages over multiple runs for each experiment
 
 ###PLOT STUFF
 dpi_save = 1200
@@ -67,7 +63,7 @@ cmap = LinearSegmentedColormap.from_list("BrownGreen", ["sienna", "whitesmoke", 
 norm_zero_one  = Normalize(vmin=0, vmax=1)
 
 #modules
-def produce_param_list_n_double(params_dict: dict,variable_parameters_dict: dict[dict], param_row: str,param_col: str) -> list[dict]:
+def produce_param_list_n_double(params_dict: dict,variable_parameters_dict: dict[dict]) -> list[dict]:
     """Creates a list of the param dictionaries. This only varies both parameters at the same time in a grid like fashion.
     
     Parameters
@@ -106,32 +102,30 @@ def produce_param_list_n_double(params_dict: dict,variable_parameters_dict: dict
     variable_parameters_dict: dict[dict]
         dictionary of dictionaries containing details for range of parameters to vary. e.g.
             variable_parameters_dict = {
-                "inverse_homophily": {"position": "row","property":"inverse_homophily","min":0.0, "max": 1.0, "title": r"$h$", "divisions": "linear", "reps": 2}, 
+                "inverse_homophily": {"position": "row","property":"inverse_homophily","min":0.0, "max": 1.0, "title": r"$h$", "divisions": "log", "reps": 2}, 
                 "confirmation_bias": {"position": "col","property":"confirmation_bias","min":0, "max":30 , "title": r"$\theta$", "divisions": "linear", "reps": 2}, 
             }
-    param_row: str
-        property varied in the row direction
-    param_col: str
-        property varied in the col direction
     
     Returns
     -------
     params_list: list[dict]
         list of parameter dicts, each entry corresponds to one experiment to be tested
     """
+
     params_list = []
 
-    for i in variable_parameters_dict[param_row]["vals"]:
-        for j in variable_parameters_dict[param_col]["vals"]:
-            params_dict[param_row] = i
-            params_dict[param_col] = j
-            params_list.append(params_dict.copy())   
+    for i in variable_parameters_dict["row"]["vals"]:
+        for j in variable_parameters_dict["row"]["vals"]:
+            params_dict[variable_parameters_dict["row"]["property"]] = i
+            params_dict[variable_parameters_dict["col"]["property"]] = j
+            params_list.append(params_dict.copy()) 
+    
     return params_list
 
 def generate_title_list(
-    property_col: str,
+    title_col: str,
     col_list: list,
-    property_row: str,
+    title_row: str,
     row_list: list,
     round_dec: float,
     ) -> list[str]:
@@ -139,12 +133,12 @@ def generate_title_list(
     
     Parameters
     ----------
-    property_col: str
-        property varied in the col direction
+    title_col: str
+        title of property varied in the col direction
     col_list: list
         list of values for property varied in the col direction
-    property_row: str
-        property varied in the row direction
+    title_row: str
+        title of property varied in the row direction
     row_list: list
         list of values for property varied in the row direction
     round_dec:
@@ -159,11 +153,11 @@ def generate_title_list(
     
     for i in range(len(row_list)):
         for j in range(len(col_list)):
-            title_list.append(("%s = %s, %s = %s") % (property_row,str(round(row_list[i],round_dec)), property_col,str(round(col_list[j], round_dec))))
+            title_list.append(("%s = %s, %s = %s") % (title_row,str(round(row_list[i],round_dec)), title_col,str(round(col_list[j], round_dec))))
     
     return  title_list
 
-def shot_two_dimensional_param_run(fileName: str,params: dict,variable_parameters_dict: dict[dict], param_row: str,param_col: str,reps_row: int,reps_col: int) -> tuple[list[Network], npt.NDArray,list[str]]:
+def shot_two_dimensional_param_run(fileName: str,params: dict,variable_parameters_dict: dict[dict],reps_row: int,reps_col: int) -> tuple[list[Network], npt.NDArray,list[str]]:
     """Generate results for the case of varying two parameters in a single shot for each experiment, also create folder 
     and titles for plots and save data
     
@@ -175,10 +169,6 @@ def shot_two_dimensional_param_run(fileName: str,params: dict,variable_parameter
         dictionary of parameters used to generate attributes, dict used for readability instead of super long list of input parameters.
     variable_parameters_dict: dict[dict]
         dictionary of dictionaries containing details for range of parameters to vary. see produce_param_list_n_double for an example
-    param_row: str
-        property varied in the row direction
-    param_col: str,
-        property varied in the col direction
     reps_row: int
         repetitions along the row direction of experiment e.g. if i want to vary from 0 - 10, how may divisions to make
     reps_col: int
@@ -193,19 +183,16 @@ def shot_two_dimensional_param_run(fileName: str,params: dict,variable_parameter
         list of titles one for each experiment    
     """
     createFolder(fileName)    
-    params_dict_list = produce_param_list_n_double(params,variable_parameters_dict, param_row,param_col)
+    params_dict_list = produce_param_list_n_double(params,variable_parameters_dict)
     
     data_list = parallel_run(params_dict_list) 
     data_array = np.reshape(data_list, (reps_row, reps_col))
 
-    title_list = generate_title_list(property_col,property_varied_values_row,property_row,property_varied_values_col, round_dec)
-
     save_data_shot(fileName, variable_parameters_dict, data_list, data_array)
 
-    return data_list, data_array, title_list
+    return data_list, data_array
 
-
-def av_two_dimensional_param_run(fileName: str, variable_parameters_dict: dict[dict], params: dict, param_row: str, param_col: str) -> tuple[ npt.NDArray, npt.NDArray, npt.NDArray, npt.NDArray]:
+def av_two_dimensional_param_run(fileName: str, variable_parameters_dict: dict[dict], params: dict) -> tuple[ npt.NDArray, npt.NDArray, npt.NDArray, npt.NDArray]:
     """Generate results for the case of varying two parameters in multiple stochastically averaged runs for each experiment, also create folder 
     and titles for plots and save data
     
@@ -217,10 +204,6 @@ def av_two_dimensional_param_run(fileName: str, variable_parameters_dict: dict[d
         dictionary of dictionaries containing details for range of parameters to vary. See produce_param_list_n_double for an example
     params: dict
         dictionary of parameters used to generate attributes, dict used for readability instead of super long list of input parameters. See produce_param_list_n_double for an example
-    param_row: str
-        property varied in the row direction
-    param_col: str,
-        property varied in the col direction
     
     Returns
     -------
@@ -235,7 +218,7 @@ def av_two_dimensional_param_run(fileName: str, variable_parameters_dict: dict[d
     """
 
     createFolder(fileName)
-    params_list = produce_param_list_n_double(params,variable_parameters_dict, param_row,param_col)
+    params_list = produce_param_list_n_double(params,variable_parameters_dict)
     results_emissions, results_mu, results_var, results_coefficient_of_variance = parallel_run_sa(params_list)
     
     #save the data and params_list
@@ -315,56 +298,33 @@ def load_data_av(fileName):
 if __name__ == "__main__":
     if SINGLE:
         if RUN:
-            f = open("src/constants/base_params.json")
-            params = json.load(f)
+            #load base params
+            f_base_params = open("src/constants/base_params.json")
+            params = json.load(f_base_params)
+            f_base_params.close()
             params["time_steps_max"] = int(params["total_time"] / params["delta_t"])
+
+            #load variable params
+            f_variable_parameters = open("src/constants/variable_parameters_dict_2D.json")
+            variable_parameters_dict = json.load(f_variable_parameters)
+            f_variable_parameters.close()
+
             variable_parameters_dict = generate_vals_variable_parameters_and_norms(variable_parameters_dict)
 
-            (
-                param_row, 
-                param_col, 
-                reps_row, 
-                reps_col, 
-                reps, 
-                property_row, 
-                property_col, 
-                param_min_row, 
-                param_max_row , 
-                param_min_col, 
-                param_max_col,
-                property_varied_values_row, 
-                property_varied_values_col
-            )  = get_params(variable_parameters_dict)
-
-            fileName = "results/%s_%s_%s_%s_%s_%s_%s_%s_%s_%s" % (param_col,param_row,str(params["N"]),str(params["time_steps_max"]),str(params["K"]),str(param_min_col), str(param_max_col), str(param_min_row), str(param_max_row), str(reps))
+            fileName = "results/%s_%s_%s_%s_%s_%s_%s_%s_%s_%s_%s" % (variable_parameters_dict["col"]["property"],variable_parameters_dict["row"]["property"],str(params["N"]),str(params["time_steps_max"]),str(params["K"]),str(variable_parameters_dict["col"]["min"]), str(variable_parameters_dict["col"]["max"]), str(variable_parameters_dict["row"]["min"]), str(variable_parameters_dict["row"]["max"]), variable_parameters_dict["col"]["reps"],variable_parameters_dict["row"]["reps"])
             print("fileName: ", fileName)
 
-            data_list, data_array,  title_list = shot_two_dimensional_param_run(fileName,params,variable_parameters_dict, param_row,param_col,reps_row,reps_col)
+            title_list = generate_title_list(variable_parameters_dict["col"]["title"],variable_parameters_dict["col"]["vals"],variable_parameters_dict["row"]["title"],variable_parameters_dict["row"]["vals"], round_dec)
+            data_list, data_array = shot_two_dimensional_param_run(fileName,params,variable_parameters_dict,variable_parameters_dict["row"]["reps"],variable_parameters_dict["col"]["reps"])
 
         else:
-            fileName = "results/confirmation_bias_inverse_homophily_50_150_10_0_30_0.0_1.0_6"
+            fileName = "results/beta_attitude_alpha_attitude_50_2000_10_-1_1_-1_1_3_3"
             variable_parameters_dict, data_list, data_array = load_data_shot(fileName)
             
-            (
-                param_row, 
-                param_col, 
-                reps_row, 
-                reps_col, 
-                _, 
-                property_row, 
-                property_col, 
-                _, 
-                _ , 
-                _, 
-                _,
-                property_varied_values_row, 
-                property_varied_values_col
-            )  = get_params(variable_parameters_dict)
-
-            title_list = generate_title_list(property_col,property_varied_values_row,property_row,property_varied_values_col, round_dec)
+            title_list = generate_title_list(variable_parameters_dict["col"]["title"],variable_parameters_dict["col"]["vals"],variable_parameters_dict["row"]["title"],variable_parameters_dict["row"]["vals"], round_dec)
 
         ### PLOTS FOR SINGLE SHOT RUNS
-        live_print_culture_timeseries_vary(fileName, data_list, param_row, param_col,title_list, reps_row, reps_col,  dpi_save)
+        live_print_culture_timeseries_vary(fileName, data_list, variable_parameters_dict["row"]["property"], variable_parameters_dict["col"]["property"],title_list, variable_parameters_dict["row"]["reps"], variable_parameters_dict["col"]["reps"],  dpi_save)
         #BROKEN print_culture_timeseries_vary_array(fileName, data_array, param_col,property_col,property_varied_values_col,param_row, property_row,property_varied_values_row,  reps_row, reps_col , dpi_save)
 
         #ani_b = live_compare_animate_culture_network_and_weighting(fileName,data_list,layout,cmap,node_size,interval,fps,norm_zero_one,round_dec,cmap_edge, reps_col, reps_row,property_col,property_varied_values_col)
@@ -373,64 +333,36 @@ if __name__ == "__main__":
 
     else: 
         if RUN:
-            f = open("src/constants/base_params.json")
-            params = json.load(f)
+            #load base params
+            f_base_params = open("src/constants/base_params.json")
+            params = json.load(f_base_params)
+            f_base_params.close()
             params["time_steps_max"] = int(params["total_time"] / params["delta_t"])
 
-            #AVERAGE OVER MULTIPLE RUNS
-            seed_list = [1,2,3]# [1,2,3,4,5] ie 5 reps per run!
-            params["seed_list"] = seed_list
-            average_reps = len(seed_list)
-            
+            #load variable params
+            f_variable_parameters = open("src/constants/variable_parameters_dict_2D.json")
+            variable_parameters_dict = json.load(f_variable_parameters)
+            f_variable_parameters.close()
+
+            #AVERAGE OVER MULTIPLE RUNS           
             variable_parameters_dict = generate_vals_variable_parameters_and_norms(variable_parameters_dict)
 
-            (
-                param_row, 
-                param_col, 
-                reps_row, 
-                reps_col, 
-                reps, 
-                property_row, 
-                property_col, 
-                param_min_row, 
-                param_max_row , 
-                param_min_col, 
-                param_max_col,
-                property_varied_values_row, 
-                property_varied_values_col
-            )  = get_params(variable_parameters_dict)
-
-
-            fileName = "results/average_%s_%s_%s_%s_%s_%s_%s" % (param_col,param_row,str(params["N"]),str(params["time_steps_max"]),str(params["K"]),str(reps), str(average_reps))
+            fileName = "results/average_%s_%s_%s_%s_%s_%s_%s_%s" % (variable_parameters_dict["col"]["property"],variable_parameters_dict["row"]["property"],str(params["N"]),str(params["time_steps_max"]),str(params["K"]),str(variable_parameters_dict["col"]["reps"]),str(variable_parameters_dict["row"]["reps"]), len(params["seed_list"]))
             print("fileName: ", fileName)
 
-            results_emissions, results_mu, results_var, results_coefficient_of_variance = av_two_dimensional_param_run(fileName, variable_parameters_dict, params,param_row,param_col)
+            results_emissions, results_mu, results_var, results_coefficient_of_variance = av_two_dimensional_param_run(fileName, variable_parameters_dict, params)
         else:
-            fileName = "results/average_confirmation_bias_inverse_homophily_50_150_10_4_3"
+            fileName = "results/beta_attitude_alpha_attitude_50_2000_10_-1_1_-1_1_3_3"
             createFolder(fileName)
             
             variable_parameters_dict,results_emissions, results_mu, results_var, results_coefficient_of_variance = load_data_av(fileName)
 
-            (
-                _, 
-                _, 
-                reps_row, 
-                reps_col, 
-                _, 
-                property_row, 
-                property_col, 
-                _, 
-                _ , 
-                _, 
-                _,
-                property_varied_values_row, 
-                property_varied_values_col
-            )  = get_params(variable_parameters_dict)
-
         ###PLOTS FOR STOCHASTICALLY AVERAGED RUNS
-        matrix_emissions, matrix_mu, matrix_var, matrix_coefficient_of_variance = reshape_results_matricies(results_emissions, results_mu, results_var, results_coefficient_of_variance,reps_row, reps_col)
+        matrix_emissions, matrix_mu, matrix_var, matrix_coefficient_of_variance = reshape_results_matricies(results_emissions, results_mu, results_var, results_coefficient_of_variance,variable_parameters_dict["row"]["reps"], variable_parameters_dict["col"]["reps"])
 
-        live_average_multirun_double_phase_diagram_mean(fileName, matrix_mu, property_row, property_varied_values_row,property_col,property_varied_values_col, get_cmap("Blues"),dpi_save,round_dec)
-        live_average_multirun_double_phase_diagram_C_of_V(fileName, matrix_coefficient_of_variance, property_row, property_varied_values_row,property_col,property_varied_values_col, get_cmap("Reds"),dpi_save,round_dec)
+        live_average_multirun_double_phase_diagram_mean_alt(fileName, matrix_mu, variable_parameters_dict, get_cmap("Blues"),dpi_save)
+        live_average_multirun_double_phase_diagram_C_of_V_alt(fileName, matrix_mu, variable_parameters_dict, get_cmap("Reds"),dpi_save)
+        #live_average_multirun_double_phase_diagram_mean(fileName, matrix_mu, property_row, property_varied_values_row,property_col,property_varied_values_col, get_cmap("Blues"),dpi_save,round_dec)
+        #live_average_multirun_double_phase_diagram_C_of_V(fileName, matrix_coefficient_of_variance, variable_parameters_dict["row"]["property"], variable_parameters_dict["row"]["vals"],variable_parameters_dict["col"]["property"],variable_parameters_dict["col"]["vals"], get_cmap("Reds"),dpi_save,round_dec)
 
     plt.show()

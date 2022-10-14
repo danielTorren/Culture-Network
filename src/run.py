@@ -177,8 +177,8 @@ def parallel_run_sa(params_dict: dict[dict]) -> tuple[npt.NDArray, npt.NDArray, 
     """
 
     num_cores = multiprocessing.cpu_count()
-
-    results_emissions, results_mean, results_var, results_coefficient_variance = Parallel(n_jobs=num_cores,verbose=10)(delayed(generate_sensitivity_output)(i) for i in params_dict)
+    res = Parallel(n_jobs=num_cores,verbose=10)(delayed(generate_sensitivity_output)(i) for i in params_dict)
+    results_emissions, results_mean, results_var, results_coefficient_variance = zip(*res)
 
     return np.asarray(results_emissions),np.asarray(results_mean), np.asarray(results_var), np.asarray(results_coefficient_variance)
 
