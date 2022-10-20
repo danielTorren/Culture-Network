@@ -1711,8 +1711,6 @@ def multi_scatter_seperate_total_sensitivity_analysis_plot(
         figsize=(14, 7), ncols=len(list(data_dict.keys())), nrows=1
     )
     dict_list = list(data_dict.keys())
-    print(dict_list)
-    print(data_dict[dict_list[0]])
 
     for i, ax in enumerate(axes.flat):
         ax.errorbar(
