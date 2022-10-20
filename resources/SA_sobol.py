@@ -178,7 +178,7 @@ def generate_problem(
     calc_second_order = False
 
     if calc_second_order:
-        samples = N_samples * (2 * D_vars + 2)
+        samples = N_samples * (2*D_vars + 2)
     else:
         samples = N_samples * (D_vars + 2)
 
@@ -195,7 +195,7 @@ def generate_problem(
 
     ########################################
 
-    fileName = "results/SA_%s_%s_%s_%s" % (
+    fileName = "results/SA_AV_reps_%s_samples_%s_D_vars_%s_N_samples_%s" % (
         str(AV_reps),
         str(samples),
         str(D_vars),

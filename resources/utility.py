@@ -31,8 +31,8 @@ def createFolder(fileName: str) -> str:
 
     # print(fileName)
     # check for resutls folder
-    if str(os.path.exists("Results")) == "False":
-        os.mkdir("Results")
+    if str(os.path.exists("results")) == "False":
+        os.mkdir("results")
 
     # check for runName folder
     if str(os.path.exists(fileName)) == "False":

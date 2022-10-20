@@ -61,7 +61,7 @@ if __name__ == "__main__":
 
         # load variable params
         f_variable_parameters = open(
-            "constants/variable_parameters_dict_2D.json"
+            "constants/variable_parameters_dict_SA.json"
         )
         variable_parameters_dict = json.load(f_variable_parameters)
         f_variable_parameters.close()
