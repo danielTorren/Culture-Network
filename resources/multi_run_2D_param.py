@@ -215,6 +215,7 @@ def av_two_dimensional_param_run(
     # save the data and params_list
     save_data_av(
         fileName,
+        variable_parameters_dict,
         results_emissions,
         results_mu,
         results_var,
@@ -297,6 +298,7 @@ def save_data_shot(fileName, variable_parameters_dict, data_list, data_array):
 
 def save_data_av(
     fileName,
+    variable_parameters_dict,
     results_emissions,
     results_mu,
     results_var,

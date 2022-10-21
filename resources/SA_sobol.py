@@ -108,7 +108,6 @@ def sa_run(
     problem, fileName, param_values = generate_problem(
         variable_parameters_dict, N_samples, AV_reps, calc_second_order
     )
-    save_object(problem, fileName + "/Data", "problem")
 
     params_list_sa = produce_param_list_SA(
         param_values, base_params, variable_parameters_dict
@@ -117,14 +116,13 @@ def sa_run(
     Y_emissions, Y_mu, Y_var, Y_coefficient_of_variance = parallel_run_sa(
         params_list_sa
     )
-
-    save_object(problem, fileName + "/Data", "Y_emissions")
+    
+    save_object(variable_parameters_dict, fileName + "/Data", "variable_parameters_dict")
+    save_object(problem, fileName + "/Data", "problem")
     save_object(Y_emissions, fileName + "/Data", "Y_emissions")
     save_object(Y_mu, fileName + "/Data", "Y_mu")
     save_object(Y_var, fileName + "/Data", "Y_var")
-    save_object(
-        Y_coefficient_of_variance, fileName + "/Data", "Y_coefficient_of_variance"
-    )
+    save_object(Y_coefficient_of_variance, fileName + "/Data", "Y_coefficient_of_variance")
 
     return (
         AV_reps,

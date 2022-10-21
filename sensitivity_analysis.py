@@ -28,8 +28,8 @@ from resources.SA_sobol import (
 
 # constants
 RUN = 1  # False,True
-fileName = "results/SA_5_16_2_4"
-N_samples = 4
+fileName = "results/SA_AV_reps_5_samples_128_D_vars_14_N_samples_8"
+N_samples = 256
 calc_second_order = False
 
 ##########################################################################
@@ -77,6 +77,7 @@ if __name__ == "__main__":
             Y_coefficient_of_variance,
         ) = sa_run(N_samples, base_params, variable_parameters_dict, calc_second_order)
     else:
+        variable_parameters_dict = load_object(fileName + "/Data", "variable_parameters_dict")
         problem = load_object(fileName + "/Data", "problem")
         Y_emissions = load_object(fileName + "/Data", "Y_emissions")
         Y_mu = load_object(fileName + "/Data", "Y_mu")
