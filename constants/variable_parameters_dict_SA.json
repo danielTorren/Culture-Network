@@ -11,5 +11,5 @@
     "b_threshold":{"property":"b_threshold","min":0.1, "max": 8, "title": "$b$ Threshold"},
     "discount_factor":{"property":"discount_factor","min":0.0, "max":1.0 , "title": "$\\delta$"},
     "homophily": {"property": "homophily","min": 0.0,"max": 1.0,"title": "$h$"},
-    "confirmation_bias":{"property":"confirmation_bias","min":0.0, "max":100 , "title": "$\theta$"}
+    "confirmation_bias":{"property":"confirmation_bias","min":0.0, "max":100 , "title": "$\\theta$"}
 }

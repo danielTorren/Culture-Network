@@ -173,8 +173,7 @@ def generate_problem(
         https://salib.readthedocs.io/en/latest/api/SALib.sample.html#SALib.sample.saltelli.sample for more details
     """
     D_vars = len(variable_parameters_dict)
-    calc_second_order = False
-
+    
     if calc_second_order:
         samples = N_samples * (2*D_vars + 2)
     else:
@@ -269,6 +268,7 @@ def analyze_results(
         calc_second_order=calc_second_order,
         print_to_console=False,
     )
+
     Si_mu = sobol.analyze(
         problem, Y_mu, calc_second_order=calc_second_order, print_to_console=False
     )
