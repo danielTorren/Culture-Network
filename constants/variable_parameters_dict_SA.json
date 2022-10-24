@@ -5,12 +5,11 @@
     "prob_rewire": {"property": "prob_rewire","min": 0.0,"max": 1.0,"title": "$p_r$"},
     "culture_momentum_real":{"property":"culture_momentum_real","min":1,"max": 100, "title": "$T_{\\rho}$"},
     "learning_error_scale":{"property":"learning_error_scale","min":0.0,"max":0.5 , "title": "$\\epsilon$" },
-    "alpha_attitude":{"property":"alpha_attitude","min":0.1, "max": 8, "title": "Attitude $\\alpha$"},
-    "beta_attitude":{"property":"beta_attitude","min":0.1, "max":8 , "title": "Attitude $\\beta$"},
-    "alpha_threshold":{"property":"alpha_threshold","min":0.1, "max": 8, "title": "Threshold $\\alpha$"},
-    "beta_threshold":{"property":"beta_threshold","min":0.1, "max": 8, "title": "Threshold $\\beta$"},
+    "a_attitude":{"property":"a_attitude","min":0.1, "max": 8, "title": "$a$ Attitude"},
+    "b_attitude":{"property":"b_attitude","min":0.1, "max":8 , "title": "$b$ Attitude"},
+    "a_threshold":{"property":"a_threshold","min":0.1, "max": 8, "title": "$a$ Threshold"},
+    "b_threshold":{"property":"b_threshold","min":0.1, "max": 8, "title": "$b$ Threshold"},
     "discount_factor":{"property":"discount_factor","min":0.0, "max":1.0 , "title": "$\\delta$"},
-    "inverse_homophily": {"property": "inverse_homophily","min": 0.0,"max": 1.0,"title": "$h$"},
-    "present_discount_factor":{"property":"present_discount_factor","min":0.0, "max": 1.0, "title": "$\\beta$"},
+    "homophily": {"property": "homophily","min": 0.0,"max": 1.0,"title": "$h$"},
     "confirmation_bias":{"property":"confirmation_bias","min":0.0, "max":100 , "title": "$\theta$"}
 }

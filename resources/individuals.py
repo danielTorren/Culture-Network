@@ -216,9 +216,7 @@ class Individual:
         -------
         float
         """
-        return sum(
-            self.carbon_intensive_list[i] for i in range(self.M) if self.values[i] <= 0
-        )
+        return sum(((1-self.values[i])/2)*self.carbon_intensive_list[i] for i in range(self.M))# normalized Beta now used for emissions
 
     def save_data_individual(self):
         """

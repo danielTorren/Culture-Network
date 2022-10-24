@@ -1,4 +1,4 @@
 {
-    "row":{"property":"alpha_attitude","min":-1, "max": 1, "title": "a","divisions": "log", "reps": 32}, 
-    "col":{"property":"beta_attitude","min":-1, "max":1 , "title": "b","divisions": "log", "reps": 32}  
+    "row":{"property":"a_attitude","min":-1, "max": 1, "title": "a Attitude","divisions": "log", "reps": 3}, 
+    "col":{"property":"b_attitude","min":-1, "max":1 , "title": "b Attitude","divisions": "log", "reps": 3}  
 }

@@ -64,7 +64,7 @@ def generate_data(parameters: dict) -> Network:
         Social network that has evolved from initial conditions
     """
 
-    print_simu = 1  # Whether of not to print how long the single shot simulation took
+    print_simu = 0  # Whether of not to print how long the single shot simulation took
 
     if print_simu:
         start_time = time.time()

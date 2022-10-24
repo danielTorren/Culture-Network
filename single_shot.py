@@ -7,7 +7,6 @@ Author: Daniel Torren Peraire Daniel.Torren@uab.cat dtorrenp@hotmail.com
 Created: 10/10/2022
 """
 # imports
-import os
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap, Normalize, SymLogNorm
 from matplotlib.cm import get_cmap
@@ -143,7 +142,7 @@ if __name__ == "__main__":
         ###PLOTS
         plot_culture_timeseries(FILENAME, Data, dpi_save)
         # plot_green_adoption_timeseries(FILENAME, Data, dpi_save)
-        # plot_total_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
+        plot_total_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
         # plot_weighting_matrix_convergence_timeseries(FILENAME, Data, dpi_save)
         # plot_cultural_range_timeseries(FILENAME, Data, dpi_save)
         # plot_average_culture_timeseries(FILENAME,Data,dpi_save)

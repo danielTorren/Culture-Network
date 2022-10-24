@@ -252,6 +252,37 @@ def produce_param_list_SA(
         params_list.append(base_params_copy)
     return params_list
 
+def analyze_results(
+    problem: dict,
+    Y_emissions: npt.NDArray,
+    Y_mu: npt.NDArray,
+    Y_var: npt.NDArray,
+    Y_coefficient_of_variance: npt.NDArray,
+    calc_second_order: bool,
+) -> tuple:
+    """
+    Perform sobol analysis on simulation results
+    """
+    Si_emissions = sobol.analyze(
+        problem,
+        Y_emissions,
+        calc_second_order=calc_second_order,
+        print_to_console=False,
+    )
+    Si_mu = sobol.analyze(
+        problem, Y_mu, calc_second_order=calc_second_order, print_to_console=False
+    )
+    Si_var = sobol.analyze(
+        problem, Y_var, calc_second_order=calc_second_order, print_to_console=False
+    )
+    Si_coefficient_of_variance = sobol.analyze(
+        problem,
+        Y_coefficient_of_variance,
+        calc_second_order=calc_second_order,
+        print_to_console=False,
+    )
+
+    return Si_emissions , Si_mu , Si_var , Si_coefficient_of_variance
 
 def get_plot_data(
     problem: dict,
@@ -295,24 +326,7 @@ def get_plot_data(
         dictionary containing dictionaries each with data regarding the first order sobol analysis results for each output measure
     """
 
-    Si_emissions = sobol.analyze(
-        problem,
-        Y_emissions,
-        calc_second_order=calc_second_order,
-        print_to_console=False,
-    )
-    Si_mu = sobol.analyze(
-        problem, Y_mu, calc_second_order=calc_second_order, print_to_console=False
-    )
-    Si_var = sobol.analyze(
-        problem, Y_var, calc_second_order=calc_second_order, print_to_console=False
-    )
-    Si_coefficient_of_variance = sobol.analyze(
-        problem,
-        Y_coefficient_of_variance,
-        calc_second_order=calc_second_order,
-        print_to_console=False,
-    )
+    Si_emissions , Si_mu , Si_var , Si_coefficient_of_variance = analyze_results(problem,Y_emissions,Y_mu,Y_var,Y_coefficient_of_variance,calc_second_order) 
 
     #### Bar chart
     if calc_second_order:

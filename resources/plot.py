@@ -1815,21 +1815,22 @@ def multi_scatter_sidebyside_total_sensitivity_analysis_plot(
 
 
 def prints_SA_matrix(
-    FILENAME, Data, title_list, cmap, nrows, ncols, dpi_save, labels, N_samples
+    FILENAME, Data, title_list, cmap, nrows, ncols, dpi_save, labels, N_samples, title_property, Y_property
 ):
 
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
 
+    type_matrix = ["index","confidence"]
     for i, ax in enumerate(axes.flat):
         matrix = ax.matshow(
             Data[i],
             cmap=cmap,
             aspect="auto",
         )
-        ax.set_title(title_list[i])
+        #ax.set_title(title_list[i])
         # colour bar axes
         cbar = fig.colorbar(
-            matrix, ax=ax
+            matrix, ax=ax, label = "Second order sobol %s: %s" % (type_matrix[i],title_property)
         )  # This does a mapabble on the fly i think, not sure
         xaxis = np.arange(len(labels))
         ax.set_xticks(xaxis)
@@ -1840,7 +1841,7 @@ def prints_SA_matrix(
     # plt.tight_layout()
 
     plotName = FILENAME + "/Prints"
-    f = plotName + "/" + "%s_%s_prints_SA_matrix.eps" % (len(labels), N_samples)
+    f = plotName + "/" + "%s_%s_prints_SA_matrix_property_%s.eps" % (len(labels), N_samples,Y_property)
     fig.savefig(f, dpi=dpi_save, format="eps")
 
 

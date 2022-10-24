@@ -39,6 +39,8 @@ class Network:
     compression_factor: int
         how often data is saved. If set to 1 its every step, then 10 is every 10th steps. Higher value gives lower
         resolution for graphs but more managable saved or end object size
+    degroot_aggregation:
+        determines whether using Degroot or voter model style social learning
     t: float
         keep track of time, increased with each step by time step delta_t
     steps: int
@@ -68,9 +70,6 @@ class Network:
         others being fast to change
     discount_factor: float
         the degree to which each previous time step has a decreasing importance to an individuals memory. Domain = [0,1]
-    present_discount_factor: float
-        the degree to which a single time step in the past is worth less than the present vs immediate past. The lower this parameter
-        the more emphasis is put on the present as the most important moment
     normalized_discount_array: npt.NDArray[float]
         array where each row represents the specific agent and the columns a time series that is the length of that
         agents culture_momentum. The array is row normalized so that each row sums to 1
@@ -88,14 +87,16 @@ class Network:
         list is generated using a linspace function using input parameters phi_array_lower and phi_array_upper. each element has domain = [0,1]
     carbon_emissions: list
         list of emissions of each behaviour, defaulted to 1 for each behaviour if its performed in a brown way, B =< 0
-    inverse_homophily: float
-        the degree to which an agents neighbours are dis-similar to them identity wise. A value of 0 means agents are placed in the small world social network
-        next to their cultural peers. The closer to 1 the more times agents are swapped around in the network using the Fisher Yates shuffle. Needs to be positive but recommended [0,1]
+    action_observation: float
+        Do actions matter more than attitudes in opinion formation
+    homophily: float
+        the degree to which an agents neighbours are similar to them identity wise. A value of 1 means agents are placed in the small world social network
+        next to their cultural peers. The closer to 0 the more times agents are swapped around in the network using the Fisher Yates shuffle. Domain [0,1]
     homophilly_rate: float
-        the greater this value the more shuffling of individuals occur for a given value of inverse_homophily
+        the greater this value the more shuffling of individuals occur for a given value of homophily
     shuffle_reps: int
         the number of time indivdiuals swap positions within the social network, note that this doesn't affect the actual network structure
-    alpha_attitude,beta_attitude, alpha_threshold, beta_threshold: float
+    a_attitude,bb_attitude, a_threshold, b_threshold: float
         parameters used to generate the beta distribution for the intial agent attitudes and threholds for each behaviour respectively.
         The same distribution is used for all agents adn behaviours
     attitude_matrix_init: npt.NDArray[float]
@@ -106,8 +107,6 @@ class Network:
         Indivdual objects
     agent_list: list[Individual]
         list of Individuals objects containing behaviours of each individual
-    behavioural_attitude_matrix: npt.NDArray[float]
-        array of shape (N,M) with the values of the attitudes of each agent towards M behaviours which evolves over time
     adjacency_matrix: npt.NDArray[bool]
         array giveing social network structure where 1 represents a connection between agents and 0 no connection. It is symetric about the diagonal
     weighting_matrix: npt.NDArray[float]
@@ -175,9 +174,7 @@ class Network:
         Generate the initial values for agent behavioural attitudes and thresholds
     create_agent_list() -> list:
         Create list of Individual objects that each have behaviours
-    calc_behavioural_attitude_matrix() ->  npt.NDArray:
-        Get NxM array of agent attitude towards M behaviours
-    calc_ego_influence_alt() ->  npt.NDArray:
+    calc_ego_influence_voter() ->  npt.NDArray:
         Calculate the influence of neighbours by selecting a neighbour to imitate using the link strength as a probability of selection
     calc_ego_influence_degroot() ->  npt.NDArray:
         Calculate the influence of neighbours using the Degroot model of weighted aggregation
@@ -218,6 +215,7 @@ class Network:
         self.alpha_change = parameters["alpha_change"]
         self.save_data = parameters["save_data"]
         self.compression_factor = parameters["compression_factor"]
+        self.degroot_aggregation = parameters["degroot_aggregation"]
 
         # time
         self.t = 0
@@ -242,7 +240,6 @@ class Network:
 
         # time discounting
         self.discount_factor = parameters["discount_factor"]
-        self.present_discount_factor = parameters["present_discount_factor"]
         self.normalized_discount_array = self.calc_normalized_discount_array()
 
         # social learning and bias
@@ -253,30 +250,33 @@ class Network:
         self.learning_error_scale = parameters["learning_error_scale"]
 
         # social influence of behaviours
-        self.phi_array = np.linspace(
-            parameters["phi_lower"], parameters["phi_upper"], num=self.M
-        )
+        self.phi_lower = parameters["phi_lower"]
+        self.phi_upper = parameters["phi_upper"]
+        self.phi_array = np.linspace(self.phi_lower, self.phi_upper, num=self.M)
 
         # emissions associated with each behaviour
         self.carbon_emissions = [1] * self.M
 
+        #how much are individuals influenced by what they see or hear, do opinions or actions more
+        self.action_observation = parameters["action_observation"]
+
         # network homophily
-        self.inverse_homophily = parameters["inverse_homophily"]  # 0-1
+        self.homophily = parameters["homophily"]  # 0-1
         self.homophilly_rate = parameters["homophilly_rate"]
         self.shuffle_reps = int(
-            round((self.N**self.homophilly_rate) * self.inverse_homophily)
+            round((self.N**self.homophilly_rate) * (1 - self.homophily))
         )
 
         (
-            self.alpha_attitude,
-            self.beta_attitude,
-            self.alpha_threshold,
-            self.beta_threshold,
+            self.a_attitude,
+            self.b_attitude,
+            self.a_threshold,
+            self.b_threshold,
         ) = (
-            parameters["alpha_attitude"],
-            parameters["beta_attitude"],
-            parameters["alpha_threshold"],
-            parameters["beta_threshold"],
+            parameters["a_attitude"],
+            parameters["b_attitude"],
+            parameters["a_threshold"],
+            parameters["b_threshold"],
         )
 
         (
@@ -284,7 +284,6 @@ class Network:
             self.threshold_matrix_init,
         ) = self.generate_init_data_behaviours()
         self.agent_list = self.create_agent_list()
-        self.behavioural_attitude_matrix = self.calc_behavioural_attitude_matrix()
 
         # create network
         (
@@ -366,8 +365,7 @@ class Network:
             discount_row = []
             for v in range(i):
                 discount_row.append(
-                    self.present_discount_factor
-                    * (self.discount_factor) ** (self.delta_t * v)
+                    (self.discount_factor) ** (self.delta_t * v)
                 )
             discount_row[0] = 1.0
 
@@ -514,11 +512,11 @@ class Network:
         """
 
         attitude_list = [
-            np.random.beta(self.alpha_attitude, self.beta_attitude, size=self.M)
+            np.random.beta(self.a_attitude, self.b_attitude, size=self.M)
             for n in range(self.N)
         ]
         threshold_list = [
-            np.random.beta(self.alpha_threshold, self.beta_threshold, size=self.M)
+            np.random.beta(self.a_threshold, self.b_threshold, size=self.M)
             for n in range(self.N)
         ]
 
@@ -580,24 +578,7 @@ class Network:
 
         return agent_list
 
-    def calc_behavioural_attitude_matrix(self) -> npt.NDArray:
-        """
-        Get NxM array of agent attitude towards M behaviours
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        behavioural_attitude_matrix: npt.NDArray
-            NxM array of attitudes towards M behaviours collected from Individual objects
-        """
-
-        behavioural_attitude_matrix = np.array([n.attitudes for n in self.agent_list])
-        return behavioural_attitude_matrix
-
-    def calc_ego_influence_alt(self) -> npt.NDArray:
+    def calc_ego_influence_voter(self) -> npt.NDArray:
         """
         Calculate the influence of neighbours by selecting a neighbour to imitate using the network weighting link strength as a probability of selection
 
@@ -615,7 +596,7 @@ class Network:
             for n in range(self.N)
         ]  # for each individual select a neighbour using the row of the alpha matrix as the probability
         neighbour_influence = np.array(
-            [self.agent_list[k].attitudes for k in k_list]
+            [((1-self.action_observation)*self.agent_list[k].attitudes  + self.action_observation*((self.agent_list[k].values + 1)/2) ) for k in k_list]
         )  # make a new NxM where each row is what agent n is going to learn from their selected agent k
         return neighbour_influence
 
@@ -633,8 +614,10 @@ class Network:
             NxM array where each row represents the influence of an Individual listening to its neighbours regarding their
             behavioural attitude opinions, this influence is weighted by the weighting_matrix
         """
+
+        behavioural_attitude_matrix = np.array( [((1-self.action_observation)*n.attitudes  + self.action_observation*((n.values + 1)/2) ) for n in self.agent_list] )
         neighbour_influence = np.matmul(
-            self.weighting_matrix, self.behavioural_attitude_matrix
+            self.weighting_matrix, behavioural_attitude_matrix
         )
         return neighbour_influence
 
@@ -651,8 +634,10 @@ class Network:
         social_influence: npt.NDArray
             NxM array giving the influence of social learning from neighbours for that time step
         """
-        # ego_influence = self.calc_ego_influence_degroot()
-        ego_influence = self.calc_ego_influence_alt()  # calc_ego_influence_alt
+        if self.degroot_aggregation:
+            ego_influence = self.calc_ego_influence_degroot()
+        else:
+            ego_influence = self.calc_ego_influence_voter()
         social_influence = ego_influence + np.random.normal(
             loc=0, scale=self.learning_error_scale, size=(self.N, self.M)
         )
@@ -863,7 +848,6 @@ class Network:
             else:
                 self.weighting_matrix, __ = self.update_weightings()
 
-        self.behavioural_attitude_matrix = self.calc_behavioural_attitude_matrix()
         self.social_component_matrix = self.calc_social_component_matrix()
 
         if self.steps % self.compression_factor == 0 and self.save_data:

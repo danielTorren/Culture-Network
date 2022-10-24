@@ -82,23 +82,26 @@ alpha_val = 0.25
 size_points = 5
 min_culture_distance = 0.5
 
-SINGLE = 0
+SINGLE = 1
 
 if __name__ == "__main__":
     """The number of rows and cols set the number of experiments ie 4 rows and 3 cols gives 12 experiments"""
-    nrows = 1
-    ncols = 24  # due to screen ratio want more cols than rows usually
+    nrows = 2
+    ncols = 4  # due to screen ratio want more cols than rows usually
     reps = nrows * ncols  # make multiples of the number of cores for efficieny
 
-    property_varied = "confirmation_bias"  # "alpha_change"#"culture_momentum"#"confirmation_bias"#"inverse_homophily" #MAKE SURE ITS TYPES CORRECTLY
-    property_varied_title = "Confirmation bias"
-    param_min = -1.0
-    param_max = 2.0  # 50.0
+    property_varied = "action_observation"  # "alpha_change"#"culture_momentum"#"confirmation_bias"#"inverse_homophily" #MAKE SURE ITS TYPES CORRECTLY
+    property_varied_title = "AO"
+    param_min = 0
+    param_max = 1  # 50.0
+    #
     # title_list = [r"Static uniform $\alpha_{n,k}$", r"Static culturally determined $\alpha_{n,k}$", r"Dynamic culturally determined $\alpha_{n,k}$"]
 
-    # property_values_list = np.linspace(param_min,param_max, reps) #np.asarray([0.0, 0.5, 1.0])#np.linspace(param_min,param_max, reps)
-    property_values_list = np.logspace(param_min, param_max, reps)
-    log_norm = LogNorm()  # cant take log of negative numbers, unlike log s
+
+    property_values_list = np.linspace(param_min,param_max, reps) #np.asarray([0.0, 0.5, 1.0])#np.linspace(param_min,param_max, reps)
+    title_list = ["%s = %s" % (property_varied_title,str(i)) for i in property_values_list]
+    #property_values_list = np.logspace(param_min, param_max, reps)
+    #log_norm = LogNorm()  # cant take log of negative numbers, unlike log s
 
     print("property_values_list", property_values_list)
     # property_values_list = SymLogNorm(linthresh=0.15, linscale=1, vmin=param_min, vmax=1.0, base=10)  # this works at least its correct
@@ -126,7 +129,7 @@ if __name__ == "__main__":
 
         ###WORKING
         """Comment out those plots that you dont want to produce"""
-        # live_print_culture_timeseries(fileName, data, property_varied, title_list, nrows, ncols, dpi_save)
+        live_print_culture_timeseries(fileName, data, property_varied, title_list, nrows, ncols, dpi_save)
         # plot_average_culture_comparison(fileName, data, dpi_save,property_values_list, property_varied,round_dec)
         plot_carbon_emissions_total_comparison(
             fileName, data, dpi_save, property_values_list, property_varied, round_dec
@@ -136,17 +139,17 @@ if __name__ == "__main__":
         # plot_live_link_change_comparison(fileName, data, dpi_save,property_values_list, property_varied,round_dec)
         # plot_live_cum_link_change_comparison(fileName, data, dpi_save,property_values_list, property_varied,round_dec)
         # plot_live_link_change_per_agent_comparison(fileName, data, dpi_save,property_values_list, property_varied,round_dec)
-        # plot_live_cum_link_change_per_agent_comparison(fileName, data, dpi_save,property_values_list, property_varied,round_dec)
-        live_multirun_diagram_mean_coefficient_variance(
-            fileName,
-            data,
-            property_varied,
-            property_values_list,
-            property_varied_title,
-            cmap,
-            dpi_save,
-            norm_zero_one,
-        )
+        plot_live_cum_link_change_per_agent_comparison(fileName, data, dpi_save,property_values_list, property_varied,round_dec)
+        #live_multirun_diagram_mean_coefficient_variance(
+        #    fileName,
+        #    data,
+        #    property_varied,
+        #    property_values_list,
+        #    property_varied_title,
+        #    cmap,
+        #    dpi_save,
+        #    norm_zero_one,
+        #)
 
         # print_live_intial_culture_networks(fileName, data, dpi_save, property_values_list, property_varied, nrows, ncols , layout, norm_zero_one, cmap, node_size,round_dec)
         # prints_init_weighting_matrix(fileName, data, dpi_save,nrows, ncols, cmap_weighting,property_values_list, property_varied,round_dec)
@@ -187,6 +190,7 @@ if __name__ == "__main__":
             results_coefficient_variance,
         ) = parallel_run_sa(params_list)
 
+        """
         live_average_multirun_diagram_mean_coefficient_variance(
             fileName,
             results_mean,
@@ -198,5 +202,5 @@ if __name__ == "__main__":
             dpi_save,
             log_norm,
         )
-
-        plt.show()
+        """
+    plt.show()
