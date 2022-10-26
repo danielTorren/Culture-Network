@@ -13,6 +13,7 @@ import numpy as np
 import networkx as nx
 import numpy.typing as npt
 from resources.individuals import Individual
+from resources.green_individuals import Green_individual
 
 # modules
 class Network:
@@ -152,6 +153,8 @@ class Network:
         time series of min_culture
     history_green_adoption: list[float]
         time series of green_adoption
+    prop_green: float
+        proportion of network that are green emitters
 
 
     Methods
@@ -225,6 +228,7 @@ class Network:
         # network
         self.M = int(round(parameters["M"]))
         self.N = int(round(parameters["N"]))
+        self.green_N = parameters["green_N"]
         self.K = int(
             round(parameters["K"])
         )  # round due to the sampling method producing floats in the Sobol Sensitivity Analysis (SA)
@@ -283,7 +287,9 @@ class Network:
             self.attitude_matrix_init,
             self.threshold_matrix_init,
         ) = self.generate_init_data_behaviours()
+        
         self.agent_list = self.create_agent_list()
+        self.mix_in_green_individuals()
 
         # create network
         (
@@ -577,6 +583,21 @@ class Network:
         ]
 
         return agent_list
+
+    def mix_in_green_individuals(self):
+        individual_params = {
+            "M": self.M,
+            "save_data": self.save_data,
+            "carbon_emissions": self.carbon_emissions,
+            "compression_factor": self.compression_factor,
+        }
+
+        #randomly mix in the greens 
+        n_list_green = np.random.choice(self.N, self.green_N,  replace=False)
+        print("n_list_green",n_list_green, len(n_list_green), self.green_N)
+        for i in n_list_green:
+            self.agent_list[i] = Green_individual(individual_params)
+
 
     def calc_ego_influence_voter(self) -> npt.NDArray:
         """

@@ -1,5 +1,5 @@
 {
-    "total_time": 20,
+    "total_time": 2000,
     "delta_t": 1.0,
     "compression_factor": 10,
     "save_data": 1, 
@@ -19,10 +19,11 @@
     "discount_factor": 0.95,
     "homophily": 0.8,
     "homophilly_rate" : 1,
-    "confirmation_bias": 30,
+    "confirmation_bias": 10,
     "a_attitude": 1,
     "b_attitude": 1,
     "a_threshold": 1,
     "b_threshold": 1,
-    "action_observation": 0.0
+    "action_observation": 0.0,
+    "green_N": 5
 }

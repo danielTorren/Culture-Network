@@ -141,16 +141,16 @@ if __name__ == "__main__":
 
         ###PLOTS
         plot_culture_timeseries(FILENAME, Data, dpi_save)
-        # plot_green_adoption_timeseries(FILENAME, Data, dpi_save)
+        plot_green_adoption_timeseries(FILENAME, Data, dpi_save)
         plot_total_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
-        # plot_weighting_matrix_convergence_timeseries(FILENAME, Data, dpi_save)
+        plot_weighting_matrix_convergence_timeseries(FILENAME, Data, dpi_save)
         # plot_cultural_range_timeseries(FILENAME, Data, dpi_save)
         # plot_average_culture_timeseries(FILENAME,Data,dpi_save)
         # plot_cum_link_change_per_agent(FILENAME,Data,dpi_save)
 
         # plot_value_timeseries(FILENAME,Data,dpi_save)
         # plot_threshold_timeseries(FILENAME,Data,dpi_save)
-        # plot_attitude_timeseries(FILENAME,Data,dpi_save)
+        plot_attitude_timeseries(FILENAME,Data,dpi_save)
 
         """
         #####BROKEN ATM
