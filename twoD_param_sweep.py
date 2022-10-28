@@ -177,7 +177,6 @@ if __name__ == "__main__":
                 len(params["seed_list"]),
             )
             print("fileName: ", fileName)
-            print("variable_parameters_dict",variable_parameters_dict)
 
             (
                 results_emissions,
