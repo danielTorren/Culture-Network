@@ -1713,15 +1713,26 @@ def multi_scatter_seperate_total_sensitivity_analysis_plot(
     dict_list = list(data_dict.keys())
 
     for i, ax in enumerate(axes.flat):
-        ax.errorbar(
-            data_dict[dict_list[i]]["data"]["S1"].tolist(),
-            names,
-            xerr=data_dict[dict_list[i]]["yerr"]["S1"].tolist(),
-            fmt="o",
-            ecolor="k",
-            color=data_dict[dict_list[i]]["colour"],
-            label=data_dict[dict_list[i]]["title"],
-        )
+        if order == "First":
+            ax.errorbar(
+                data_dict[dict_list[i]]["data"]["S1"].tolist(),
+                names,
+                xerr=data_dict[dict_list[i]]["yerr"]["S1"].tolist(),
+                fmt="o",
+                ecolor="k",
+                color=data_dict[dict_list[i]]["colour"],
+                label=data_dict[dict_list[i]]["title"],
+            )
+        else:
+            ax.errorbar(
+                data_dict[dict_list[i]]["data"]["ST"].tolist(),
+                names,
+                xerr=data_dict[dict_list[i]]["yerr"]["ST"].tolist(),
+                fmt="o",
+                ecolor="k",
+                color=data_dict[dict_list[i]]["colour"],
+                label=data_dict[dict_list[i]]["title"],
+            )
         ax.legend()
         ax.set_xlim(left=0)
         ax.set_xlabel(r"%s Sobol sensitivity" % (order))
@@ -1736,7 +1747,14 @@ def multi_scatter_seperate_total_sensitivity_analysis_plot(
         + "%s_%s_%s_multi_scatter_seperate_sensitivity_analysis_plot.eps"
         % (len(names), N_samples, order)
     )
+    f_png = (
+        plotName
+        + "/"
+        + "%s_%s_%s_multi_scatter_seperate_sensitivity_analysis_plot.png"
+        % (len(names), N_samples, order)
+    )
     fig.savefig(f, dpi=dpi_save, format="eps")
+    #fig.savefig(f_png, dpi=dpi_save, format="png")
 
 
 def multi_scatter_sidebyside_total_sensitivity_analysis_plot(
@@ -1760,7 +1778,6 @@ def multi_scatter_sidebyside_total_sensitivity_analysis_plot(
     if order == "First":
         for i in data_dict.values():
             y_height_list_copy = y_height_list_copy + offset
-            print("y_height_list", y_height_list_copy)
             ax.errorbar(
                 i["data"]["S1"].tolist(),
                 y_height_list_copy,
@@ -1841,8 +1858,10 @@ def prints_SA_matrix(
     # plt.tight_layout()
 
     plotName = FILENAME + "/Prints"
-    f = plotName + "/" + "%s_prints_SA_matrix_property_%s.eps" % (len(labels), Y_property)
-    fig.savefig(f, dpi=dpi_save, format="eps")
+    #f = plotName + "/" + "%s_prints_SA_matrix_property_%s.eps" % (len(labels), Y_property)
+    f_png = plotName + "/" + "%s_prints_SA_matrix_property_%s.png" % (len(labels), Y_property)
+    #fig.savefig(f, dpi=dpi_save, format="eps")
+    fig.savefig(f_png, dpi=dpi_save, format="png")
 
 
 #############################################################################################################################################

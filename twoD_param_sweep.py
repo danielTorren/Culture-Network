@@ -52,7 +52,7 @@ from resources.multi_run_2D_param import (
 # run bools
 RUN = 1  # run or load in previously saved data
 SINGLE = 0  # determine if you runs single shots or study the averages over multiple runs for each experiment
-
+fileName = "results/average_homophily_confirmation_bias_200_2000_20_64_64_5"
 
 ###PLOT STUFF
 dpi_save = 1200
@@ -119,7 +119,6 @@ if __name__ == "__main__":
             )
 
         else:
-            fileName = "results/beta_attitude_alpha_attitude_50_2000_10_-1_1_-1_1_3_3"
             variable_parameters_dict, data_list, data_array = load_data_shot(fileName)
 
             title_list = generate_title_list(
@@ -167,7 +166,7 @@ if __name__ == "__main__":
                 variable_parameters_dict
             )
 
-            fileName = "results/average_%s_%s_%s_%s_%s_%s_%s_%s" % (
+            fileName = "results/twoD_Average_%s_%s_%s_%s_%s_%s_%s_%s" % (
                 variable_parameters_dict["col"]["property"],
                 variable_parameters_dict["row"]["property"],
                 str(params["N"]),
@@ -178,6 +177,7 @@ if __name__ == "__main__":
                 len(params["seed_list"]),
             )
             print("fileName: ", fileName)
+            print("variable_parameters_dict",variable_parameters_dict)
 
             (
                 results_emissions,
@@ -186,7 +186,6 @@ if __name__ == "__main__":
                 results_coefficient_of_variance,
             ) = av_two_dimensional_param_run(fileName, variable_parameters_dict, params)
         else:
-            fileName = "results/average_beta_attitude_alpha_attitude_200_1500_20_6_6_5"
             createFolder(fileName)
 
             (
@@ -212,14 +211,14 @@ if __name__ == "__main__":
             variable_parameters_dict["col"]["reps"],
         )
 
-        double_phase_diagram(fileName, matrix_emissions, r"Total emissions $E/NM$", "emissions",variable_parameters_dict, get_cmap("Reds"),dpi_save)
+        double_phase_diagram(fileName, matrix_emissions, r"Total normalised emissions $E/NM$", "emissions",variable_parameters_dict, get_cmap("Reds"),dpi_save)
         double_phase_diagram(fileName, matrix_mu, r"Average identity, $\mu$", "mu",variable_parameters_dict, get_cmap("Blues"),dpi_save)
-        double_phase_diagram(fileName, matrix_var, r"Identity variance, $(\sigma)^2$", "variance",variable_parameters_dict, get_cmap("Greens"),dpi_save)
+        double_phase_diagram(fileName, matrix_var, r"Identity variance, $\sigma^2$", "variance",variable_parameters_dict, get_cmap("Greens"),dpi_save)
         double_phase_diagram(fileName, matrix_coefficient_of_variance, r"Identity coefficient of variance, $\sigma/\mu$", "coefficient_of_variance",variable_parameters_dict, get_cmap("Oranges"),dpi_save)
 
-        #double_phase_diagram_using_meanandvariance(fileName, matrix_emissions, r"Total emissions $E/NM$", "emissions",variable_parameters_dict, get_cmap("Reds"),dpi_save)
-        #double_phase_diagram_using_meanandvariance(fileName,matrix_mu,r"Average identity, $\mu$","mu",variable_parameters_dict,get_cmap("Blues"),dpi_save,)
-        #double_phase_diagram_using_meanandvariance(fileName, matrix_var, r"Identity variance, $(\sigma)^2$", "variance",variable_parameters_dict, get_cmap("Greens"),dpi_save)
-        #double_phase_diagram_using_meanandvariance(fileName,matrix_coefficient_of_variance,r"Identity coefficient of variance, $\sigma/\mu$","coefficient_of_variance",variable_parameters_dict,get_cmap("Oranges"),dpi_save,)
+        double_phase_diagram_using_meanandvariance(fileName, matrix_emissions, r"Total normalised emissions, $E/NM$", "emissions",variable_parameters_dict, get_cmap("Reds"),dpi_save)
+        double_phase_diagram_using_meanandvariance(fileName,matrix_mu,r"Average identity, $\mu$","mu",variable_parameters_dict,get_cmap("Blues"),dpi_save,)
+        double_phase_diagram_using_meanandvariance(fileName, matrix_var, r"Identity variance, $\sigma^2$", "variance",variable_parameters_dict, get_cmap("Greens"),dpi_save)
+        double_phase_diagram_using_meanandvariance(fileName,matrix_coefficient_of_variance,r"Identity coefficient of variance, $\sigma/\mu$","coefficient_of_variance",variable_parameters_dict,get_cmap("Oranges"),dpi_save,)
 
     plt.show()

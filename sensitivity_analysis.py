@@ -31,17 +31,17 @@ from resources.SA_sobol import (
 
 # constants
 RUN = 0  # False,True
-fileName = "results/SA_AV_reps_5_samples_112_D_vars_13_N_samples_4"
-N_samples = 4
+fileName = "results\SA_AV_reps_5_samples_28672_D_vars_13_N_samples_1024"
+N_samples = 1024
 calc_second_order = True
 
 ##########################################################################
 # plot dict properties
 plot_dict = {
-    "emissions": {"title": r"$E/NM$", "colour": "r", "linestyle": "--"},
-    "mu": {"title": r"$\mu/NM$", "colour": "g", "linestyle": "-"},
-    "var": {"title": r"$\sigma^{2}$", "colour": "k", "linestyle": "*"},
-    "coefficient_of_variance": {"title": r"$\sigma NM/\mu$","colour": "b","linestyle": "-.",},
+    "emissions": {"title": r"$E/NM$", "colour": "red", "linestyle": "--"},
+    "mu": {"title": r"$\mu$", "colour": "green", "linestyle": "-"},
+    "var": {"title": r"$\sigma^{2}$", "colour": "blue", "linestyle": "*"},
+    "coefficient_of_variance": {"title": r"$\sigma/\mu$","colour": "orange","linestyle": "-.",},
 }
 
 ############################################################################
@@ -99,23 +99,26 @@ if __name__ == "__main__":
 
     # multi_scatter_total_sensitivity_analysis_plot(fileName, data_sa_dict_total,titles, dpi_save,N_samples, "Total")
     # multi_scatter_total_sensitivity_analysis_plot(fileName, data_sa_dict_first, titles, dpi_save,N_samples, "First")
-    # multi_scatter_sidebyside_total_sensitivity_analysis_plot(fileName, data_sa_dict_total, titles, dpi_save,N_samples, "Total")
-    # multi_scatter_sidebyside_total_sensitivity_analysis_plot(fileName, data_sa_dict_first, titles, dpi_save,N_samples, "First")
-    #multi_scatter_seperate_total_sensitivity_analysis_plot(fileName, data_sa_dict_first, titles, dpi_save, N_samples, "First")
+    #multi_scatter_sidebyside_total_sensitivity_analysis_plot(fileName, data_sa_dict_total, titles, dpi_save,N_samples, "Total")
+    #multi_scatter_sidebyside_total_sensitivity_analysis_plot(fileName, data_sa_dict_first, titles, dpi_save,N_samples, "First")
+    multi_scatter_seperate_total_sensitivity_analysis_plot(fileName, data_sa_dict_first, titles, dpi_save, N_samples, "First")
+    multi_scatter_seperate_total_sensitivity_analysis_plot(fileName, data_sa_dict_total, titles, dpi_save, N_samples, "Total")
 
-    ####SECOND ORDER
-    Si_emissions , Si_mu , Si_var , Si_coefficient_of_variance = analyze_results(problem,Y_emissions,Y_mu,Y_var,Y_coefficient_of_variance,calc_second_order) 
-    second_order_data_emissions = [np.asarray(Si_emissions["S2"]),np.asarray(Si_emissions["S2_conf"])]
-    second_order_data_mu = [np.asarray(Si_mu["S2"]),np.asarray(Si_mu["S2_conf"])]
-    second_order_data_var = [np.asarray(Si_var["S2"]),np.asarray(Si_var["S2_conf"])]
-    second_order_data_coefficient_of_variance = [np.asarray(Si_coefficient_of_variance["S2"]),np.asarray(Si_coefficient_of_variance["S2_conf"])]
-    title_list = ["S2","S2_conf"]
-    nrows = 1
-    ncols = 2
+    SECOND_ORDER = 0
+    if SECOND_ORDER:
+        ####SECOND ORDER
+        Si_emissions , Si_mu , Si_var , Si_coefficient_of_variance = analyze_results(problem,Y_emissions,Y_mu,Y_var,Y_coefficient_of_variance,calc_second_order) 
+        second_order_data_emissions = [np.asarray(Si_emissions["S2"]),np.asarray(Si_emissions["S2_conf"])]
+        second_order_data_mu = [np.asarray(Si_mu["S2"]),np.asarray(Si_mu["S2_conf"])]
+        second_order_data_var = [np.asarray(Si_var["S2"]),np.asarray(Si_var["S2_conf"])]
+        second_order_data_coefficient_of_variance = [np.asarray(Si_coefficient_of_variance["S2"]),np.asarray(Si_coefficient_of_variance["S2_conf"])]
+        title_list = ["S2","S2_conf"]
+        nrows = 1
+        ncols = 2
 
-    prints_SA_matrix(fileName, second_order_data_emissions,title_list,get_cmap("Reds"),nrows, ncols, dpi_save,titles,r"$E/NM$", "emissions")
-    #prints_SA_matrix(fileName, second_order_data_mu,title_list,get_cmap("Greens"),nrows, ncols, dpi_save, titles,r"$\mu/NM$", "mu")
-    #prints_SA_matrix(fileName, second_order_data_var,title_list,get_cmap("Blues"),nrows, ncols, dpi_save, titles,r"$\sigma^{2}$", "var")
-    #prints_SA_matrix(fileName, second_order_data_coefficient_of_variance,title_list,get_cmap("Oranges"),nrows, ncols, dpi_save, titles,r"$\sigma NM/\mu$", "coefficient_of_var")
-
+        prints_SA_matrix(fileName, second_order_data_emissions,title_list,get_cmap("Reds"),nrows, ncols, dpi_save,titles,r"$E/NM$", "emissions")
+        prints_SA_matrix(fileName, second_order_data_mu,title_list,get_cmap("Greens"),nrows, ncols, dpi_save, titles,r"$\mu$", "mu")
+        prints_SA_matrix(fileName, second_order_data_var,title_list,get_cmap("Blues"),nrows, ncols, dpi_save, titles,r"$\sigma^{2}$", "var")
+        prints_SA_matrix(fileName, second_order_data_coefficient_of_variance,title_list,get_cmap("Oranges"),nrows, ncols, dpi_save, titles,r"$\sigma/\mu$", "coefficient_of_var")
+        
     plt.show()

@@ -82,7 +82,7 @@ def produce_param_list_n_double(
     params_list = []
 
     for i in variable_parameters_dict["row"]["vals"]:
-        for j in variable_parameters_dict["row"]["vals"]:
+        for j in variable_parameters_dict["col"]["vals"]:
             params_dict[variable_parameters_dict["row"]["property"]] = i
             params_dict[variable_parameters_dict["col"]["property"]] = j
             params_list.append(params_dict.copy())

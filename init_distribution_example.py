@@ -14,11 +14,11 @@ import numpy as np
 from typing import Union
 
 # constants
-alpha_attitude = 2
-beta_attitude = 4
+alpha_attitude = 1
+beta_attitude = 8
 
-alpha_threshold = 3
-beta_threshold = 2
+alpha_threshold = 0.1
+beta_threshold = 6
 
 bin_num = 1000
 num_counts = 100000

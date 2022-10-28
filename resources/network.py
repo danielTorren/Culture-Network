@@ -289,7 +289,9 @@ class Network:
         ) = self.generate_init_data_behaviours()
         
         self.agent_list = self.create_agent_list()
-        self.mix_in_green_individuals()
+
+        if self.green_N > 0:
+            self.mix_in_green_individuals()
 
         # create network
         (
@@ -298,6 +300,8 @@ class Network:
             self.network,
         ) = self.create_weighting_matrix()
 
+        self.network_density = nx.density(self.network)
+
         self.social_component_matrix = self.calc_social_component_matrix()
 
         if self.alpha_change != 0.0:
@@ -305,9 +309,6 @@ class Network:
 
         if self.save_data:
             self.total_carbon_emissions = self.calc_total_emissions()
-
-            # calc_netork density
-            # self.calc_network_density()
 
             (
                 self.average_culture,
@@ -382,24 +383,6 @@ class Network:
             normalized_discount_array.append(normalized_discount_row)
 
         return np.asarray(normalized_discount_array)
-
-    def calc_network_density(self):
-        """
-        Print network density given by actual_connections / potential_connections
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-        """
-
-        actual_connections = self.weighting_matrix.sum()
-        potential_connections = (self.N * (self.N - 1)) / 2
-        network_density = actual_connections / potential_connections
-        print("network_density = ", network_density)
 
     def create_weighting_matrix(self) -> tuple[npt.NDArray, npt.NDArray, nx.Graph]:
         """
@@ -594,7 +577,6 @@ class Network:
 
         #randomly mix in the greens 
         n_list_green = np.random.choice(self.N, self.green_N,  replace=False)
-        print("n_list_green",n_list_green, len(n_list_green), self.green_N)
         for i in n_list_green:
             self.agent_list[i] = Green_individual(individual_params)
 
