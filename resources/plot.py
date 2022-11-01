@@ -8,6 +8,7 @@ Created: 10/10/2022
 """
 
 # imports
+from matplotlib import image
 import networkx as nx
 from networkx import Graph
 import numpy as np
@@ -388,7 +389,7 @@ def live_average_multirun_n_diagram_mean_coefficient_variance(
         colour_adjust = variable_parameters_dict[i]["norm"](
             variable_parameters_dict[i]["vals"]
         )
-        scatter_colours = variable_parameters_dict[i]["cmap"](colour_adjust)
+        scatter_colours = get_cmap(variable_parameters_dict[i]["cmap"])(colour_adjust)
         ax.scatter(
             combined_data[i]["mean_data"],
             combined_data[i]["coefficient_variance_data"],
@@ -641,7 +642,7 @@ def double_phase_diagram(
 
     plotName = fileName + "/Plots"
     f = plotName + "/live_average_multirun_double_phase_diagram_%s" % (Y_param)
-    fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    #fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
     fig.savefig(f + ".png", dpi=dpi_save, format="png")
 
 
@@ -689,7 +690,56 @@ def double_phase_diagram_using_meanandvariance(
         + "/live_average_multirun_double_phase_diagram_%s_using_meanandvariance"
         % (Y_param)
     )
-    fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    #fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
+def double_matrix_plot(
+    fileName, Z, Y_title, Y_param, variable_parameters_dict, cmap, dpi_save
+):
+
+    fig, ax = plt.subplots(figsize=(14, 7), constrained_layout=True)
+
+    col_dict = variable_parameters_dict["col"]
+    row_dict = variable_parameters_dict["row"]
+
+    select_val_x = 1
+    select_val_y = 10
+
+    x_ticks_pos = [x for x in range(len(col_dict["vals"]))  if x % select_val_x == 0]
+    y_ticks_pos  = [y for y in range(len(row_dict["vals"]))  if y % select_val_y == 0]
+
+    x_ticks_label = [col_dict["vals"][x] for x in range(len(col_dict["vals"]))  if x % select_val_x == 0]
+    y_ticks_label  = [row_dict["vals"][y] for y in range(len(row_dict["vals"]))  if y % select_val_y == 0]
+
+    plt.xticks(x_ticks_pos, x_ticks_label)
+    plt.yticks(y_ticks_pos, y_ticks_label)
+
+    #ax.set_xticklabels(x_ticks)
+    #ax.set_yticklabels(y_ticks)
+
+    ax.set_xlabel(r"%s" % col_dict["title"])
+    ax.set_ylabel(r"%s" % row_dict["title"])
+
+    if col_dict["divisions"] == "log":
+        ax.set_xscale("log")
+    if row_dict["divisions"] == "log":
+        ax.set_yscale("log")
+
+    mat = ax.matshow(
+        Z,
+        cmap=cmap,
+        aspect="auto",
+    )
+    cbar = fig.colorbar(
+        mat,
+        #plt.cm.ScalarMappable(cmap=cmap, norm=Normalize(vmin=Z.min(), vmax=Z.max())),
+        ax=ax,
+    )
+    cbar.set_label(Y_title)
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/live_average_double_matrix_plot_%s" % (Y_param)
+    #fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
     fig.savefig(f + ".png", dpi=dpi_save, format="png")
 
 

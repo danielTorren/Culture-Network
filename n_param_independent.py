@@ -29,7 +29,8 @@ from resources.multi_run_n_param import (
 ###PLOT STUFF
 dpi_save = 1200
 
-RUN = 1
+RUN = 0
+fileName = "results/multi_run_n_200_2000_20_5_512"
 
 if __name__ == "__main__":
 
@@ -52,7 +53,7 @@ if __name__ == "__main__":
             str(params["N"]),
             str(params["time_steps_max"]),
             str(params["K"]),
-            str(params["seed_list"]),
+            str(len(params["seed_list"])),
             str(reps),
         )
 
@@ -73,10 +74,9 @@ if __name__ == "__main__":
         save_object(
             variable_parameters_dict, fileName + "/Data", "variable_parameters_dict"
         )
-        save_object(combined_data, fileName + "/Data", "combined data")
+        save_object(combined_data, fileName + "/Data", "combined_data")
 
     else:
-        fileName = "results/multi_run_n_100_600_20_5_262"
         createFolder(fileName)
         variable_parameters_dict = load_object(
             fileName + "/Data", "variable_parameters_dict"
