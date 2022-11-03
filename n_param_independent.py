@@ -29,7 +29,7 @@ from resources.multi_run_n_param import (
 ###PLOT STUFF
 dpi_save = 1200
 
-RUN = 0
+RUN = 1
 fileName = "results/multi_run_n_200_2000_20_5_512"
 
 if __name__ == "__main__":

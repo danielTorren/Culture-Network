@@ -1,10 +1,3 @@
 {
-    "discount_factor": {"property":"discount_factor","min":-1, "max":0 , "title": "$\\delta$", "divisions": "log", "cmap": "Reds", "cbar_loc": "right", "marker": "o", "reps": 64}, 
-    "homophily": {"property":"homophily","min":0.0, "max": 1.0, "title": "$h$", "divisions": "linear", "cmap": "Blues", "cbar_loc": "right", "marker": "v", "reps": 64}, 
-    "confirmation_bias": {"property":"confirmation_bias","min":-10, "max":100, "title": "$\theta$", "divisions": "linear", "cmap":"Greens", "cbar_loc": "right", "marker": "p", "reps":64}, 
-    "prob_rewire": {"property":"prob_rewire","min":0.0, "max":1 , "title": "$p_r$", "divisions": "linear", "cmap": "Purples", "cbar_loc": "right", "marker": "d", "reps": 64}, 
-    "learning_error_scale": {"property":"learning_error_scale","min":0.0,"max":1.0 , "title": "$\\epsilon$", "divisions": "linear", "cmap": "Oranges", "cbar_loc": "right", "marker": "*", "reps": 64},
-    "N": {"property": "N","min":50,"max":500, "title": "$N$", "divisions": "linear", "cmap": "Reds", "cbar_loc": "right", "marker": "o", "reps": 64}, 
-    "M": {"property":"M","min":1,"max": 20, "title": "$M$", "divisions": "linear", "cmap": "Greens", "cbar_loc": "right", "marker": "p", "reps": 64}, 
-    "K": {"property":"K","min":2,"max":40, "title": "$K$", "divisions": "linear", "cmap": "Blues", "cbar_loc": "right", "marker": "p", "reps": 64}
+    "action_observation_I": {"property":"action_observation_I","min":0, "max": 1, "title": "AO_I","divisions": "linear", "cmap": "Reds", "cbar_loc": "right", "marker": "o","reps": 256} 
 }

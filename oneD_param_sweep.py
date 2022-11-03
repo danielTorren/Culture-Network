@@ -74,13 +74,8 @@ colour_quick, colour_normal, colour_lagard = "indianred", "grey", "cornflowerblu
 min_val = 1e-3
 dpi_save = 600  # 1200
 
-min_k, max_k = (
-    2,
-    10,
-)  # N - 1# Cover all the possible bases with the max k though it does slow it down
 alpha_val = 0.25
 size_points = 5
-min_culture_distance = 0.5
 
 SINGLE = 1
 
@@ -90,16 +85,16 @@ if __name__ == "__main__":
     ncols = 4  # due to screen ratio want more cols than rows usually
     reps = nrows * ncols  # make multiples of the number of cores for efficieny
 
-    property_varied = "green_N"  # "alpha_change"#"culture_momentum"#"confirmation_bias"#"inverse_homophily" #MAKE SURE ITS TYPES CORRECTLY
-    property_varied_title = "green N"
-    param_min = 1
-    param_max = 70  # 50.0
+    property_varied = "action_observation_I"  # "alpha_change"#"culture_momentum"#"confirmation_bias"#"inverse_homophily" #MAKE SURE ITS TYPES CORRECTLY
+    property_varied_title = "AO"
+    param_min = 0
+    param_max = 1  # 50.0
     #
     # title_list = [r"Static uniform $\alpha_{n,k}$", r"Static culturally determined $\alpha_{n,k}$", r"Dynamic culturally determined $\alpha_{n,k}$"]
 
 
-    #property_values_list = np.linspace(param_min,param_max, reps) #np.asarray([0.0, 0.5, 1.0])#np.linspace(param_min,param_max, reps)
-    property_values_list = np.asarray([1, 5, 10, 25, 40 , 50 , 60 , 70])
+    property_values_list = np.linspace(param_min,param_max, reps) #np.asarray([0.0, 0.5, 1.0])#np.linspace(param_min,param_max, reps)
+    #property_values_list = np.asarray([1, 5, 10, 25, 40 , 50 , 60 , 70])
     title_list = ["%s = %s" % (property_varied_title,str(i)) for i in property_values_list]
     #property_values_list = np.logspace(param_min, param_max, reps)
     #log_norm = LogNorm()  # cant take log of negative numbers, unlike log s

@@ -12,6 +12,8 @@ from matplotlib import streamplot
 import matplotlib.pyplot as plt
 import numpy as np
 from typing import Union
+import seaborn as sns
+from scipy.stats import beta
 
 # constants
 alpha_attitude = 1
@@ -24,76 +26,27 @@ bin_num = 1000
 num_counts = 100000
 
 # modules
-def plot_beta(
-    f: streamplot,
-    alpha_attitude: Union[int, float],
-    beta_attitude: Union[int, float],
-    alpha_threshold: Union[int, float],
-    beta_threshold: Union[int, float],
-    bin_num: Union[int, float],
-    num_counts: Union[int, float],
-) -> None:
-
-    """
-    Produce histogram of two beta distributions to visually represent the initial distribution of attitude and threshold values
-
-    Parameters
-    ----------
-    f: str
-        filename, where plot is saved
-    alpha_attitude: Union[int, float]
-        the alpha or a value used for the beta distribution for the attitude initial values
-    beta_attitude: Union[int, float]
-        the beta or b value used for the beta distribution for the attitude initial values
-    alpha_threshold: Union[int, float]
-        the alpha or a value used for the beta distribution for the threshold initial values
-    beta_threshold: Union[int, float]
-        the beta or b value used for the beta distribution for the threshold initial values
-    bin_num: Union[int, float]
-        size of bin
-    num_counts: Union[int, float]
-        number of points drawn
-
-    Returns
-    -------
-    None
-    """
+def plot_beta_alt(f:str, a_b_combo_list: list):
 
     fig, ax = plt.subplots()
 
-    ax.hist(
-        np.random.beta(alpha_attitude, beta_attitude, num_counts),
-        bin_num,
-        density=True,
-        facecolor="g",
-        alpha=0.5,
-        histtype="stepfilled",
-        label=r"Attitude: $\alpha$ = "
-        + str(alpha_attitude)
-        + r", $\beta$ = "
-        + str(beta_attitude),
-    )
-    ax.hist(
-        np.random.beta(alpha_threshold, beta_threshold, num_counts),
-        bin_num,
-        density=True,
-        facecolor="b",
-        alpha=0.5,
-        histtype="stepfilled",
-        label=r"Threshold: $\alpha$ = "
-        + str(alpha_threshold)
-        + r", $\beta$ = "
-        + str(beta_threshold),
-    )
+    x = np.linspace(0,1,100)
+
+    for i in a_b_combo_list:
+        y = beta.pdf(x, i[0], i[1])
+        ax.plot(x,y, label = r"a = %s, b = %s" % (i[0],i[1]))
+
     ax.set_xlabel(r"x")
-    ax.set_ylabel(r"PDF")
+    ax.set_ylabel(r"Probability Density Function")
     ax.legend()
 
-    fig.savefig(f, format="eps")
+    fig.savefig(f + "%s" % (len(a_b_combo_list)) + ".eps", format="eps")
 
 
 if __name__ == "__main__":
-    FILENAME = "results/plot_beta_distribution.eps"
+    FILENAME = "results/plot_beta_distribution"
+    
+    """
     plot_beta(
         FILENAME,
         alpha_attitude,
@@ -103,5 +56,9 @@ if __name__ == "__main__":
         bin_num,
         num_counts,
     )
+    """
+    a_b_combo_list = [[5,5],[2,3],[1,1],[0.1,0.1]]
+
+    plot_beta_alt(FILENAME,a_b_combo_list)
 
     plt.show()

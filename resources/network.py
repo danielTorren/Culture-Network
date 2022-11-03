@@ -215,6 +215,16 @@ class Network:
         self.set_seed = parameters["set_seed"]
         np.random.seed(self.set_seed)
 
+        self.network_structure = parameters["network_structure"]
+        if self.network_structure == "small_world":
+            self.K = int(round(parameters["K"]))  # round due to the sampling method producing floats in the Sobol Sensitivity Analysis (SA)
+            self.prob_rewire = parameters["prob_rewire"]
+        elif self.network_structure == "erdos_renyi_graph":
+            self.prob_edge = parameters["prob_edge"]
+        elif self.network_structure == "barabasi_albert_graph":
+            self.k_new_node = int(round(parameters["k_new_node"]))#Number of edges to attach from a new node to existing nodes
+
+
         self.alpha_change = parameters["alpha_change"]
         self.save_data = parameters["save_data"]
         self.compression_factor = parameters["compression_factor"]
@@ -229,10 +239,6 @@ class Network:
         self.M = int(round(parameters["M"]))
         self.N = int(round(parameters["N"]))
         self.green_N = parameters["green_N"]
-        self.K = int(
-            round(parameters["K"])
-        )  # round due to the sampling method producing floats in the Sobol Sensitivity Analysis (SA)
-        self.prob_rewire = parameters["prob_rewire"]
 
         # culture
         self.culture_momentum_real = parameters["culture_momentum_real"]
@@ -262,7 +268,8 @@ class Network:
         self.carbon_emissions = [1] * self.M
 
         #how much are individuals influenced by what they see or hear, do opinions or actions more
-        self.action_observation = parameters["action_observation"]
+        self.action_observation_I = parameters["action_observation_I"]
+        self.action_observation_S = parameters["action_observation_I"]#["action_observation_S"]
 
         # network homophily
         self.homophily = parameters["homophily"]  # 0-1
@@ -278,7 +285,7 @@ class Network:
             self.b_threshold,
         ) = (
             parameters["a_attitude"],
-            parameters["b_attitude"],
+            parameters["a_attitude"], # parameters["b_attitude"]
             parameters["a_threshold"],
             parameters["b_threshold"],
         )
@@ -305,7 +312,7 @@ class Network:
         self.social_component_matrix = self.calc_social_component_matrix()
 
         if self.alpha_change != 0.0:
-            self.weighting_matrix, __ = self.update_weightings()
+            self.weighting_matrix, self.total_identity_differences,__ = self.update_weightings()
 
         if self.save_data:
             self.total_carbon_emissions = self.calc_total_emissions()
@@ -334,6 +341,7 @@ class Network:
             self.history_min_culture = [self.min_culture]
             self.history_max_culture = [self.max_culture]
             self.history_green_adoption = [self.green_adoption]
+            self.history_total_identity_differences = [self.total_identity_differences]
 
     def normlize_matrix(self, matrix: npt.NDArray) -> npt.NDArray:
         """
@@ -402,16 +410,26 @@ class Network:
         ws: nx.Graph
             a networkx watts strogatz small world graph
         """
-        ws = nx.watts_strogatz_graph(
-            n=self.N, k=self.K, p=self.prob_rewire, seed=self.set_seed
-        )  # Watts–Strogatz small-world graph,watts_strogatz_graph( n, k, p[, seed])
-        weighting_matrix = nx.to_numpy_array(ws)
+
+        if self.network_structure == "small_world":
+            G = nx.watts_strogatz_graph(n=self.N, k=self.K, p=self.prob_rewire, seed=self.set_seed)  # Watts–Strogatz small-world graph,watts_strogatz_graph( n, k, p[, seed])
+        elif self.network_structure == "erdos_renyi_graph":
+            G = nx.erdos_renyi_graph(n = self.N, p = self.prob_edge, seed=self.set_seed)
+        elif self.network_structure == "barabasi_albert_graph":
+            G = nx.barabasi_albert_graph(n = self.N, m = self.k_new_node, seed=self.set_seed)
+
+        #nx.draw(G)
+
+        weighting_matrix = nx.to_numpy_array(G)
+
+        #print(self.network_structure, weighting_matrix)
+
         norm_weighting_matrix = self.normlize_matrix(weighting_matrix)
 
         return (
             weighting_matrix,
             norm_weighting_matrix,
-            ws,
+            G,
         )
 
     def produce_circular_list(self, list) -> list:
@@ -552,6 +570,7 @@ class Network:
             "carbon_emissions": self.carbon_emissions,
             "phi_array": self.phi_array,
             "compression_factor": self.compression_factor,
+            "action_observation_I": self.action_observation_I,
         }
 
         agent_list = [
@@ -599,7 +618,7 @@ class Network:
             for n in range(self.N)
         ]  # for each individual select a neighbour using the row of the alpha matrix as the probability
         neighbour_influence = np.array(
-            [((1-self.action_observation)*self.agent_list[k].attitudes  + self.action_observation*((self.agent_list[k].values + 1)/2) ) for k in k_list]
+            [((1-self.action_observation_S)*self.agent_list[k].attitudes  + self.action_observation_S*((self.agent_list[k].values + 1)/2) ) for k in k_list]
         )  # make a new NxM where each row is what agent n is going to learn from their selected agent k
         return neighbour_influence
 
@@ -618,7 +637,7 @@ class Network:
             behavioural attitude opinions, this influence is weighted by the weighting_matrix
         """
 
-        behavioural_attitude_matrix = np.array( [((1-self.action_observation)*n.attitudes  + self.action_observation*((n.values + 1)/2) ) for n in self.agent_list] )
+        behavioural_attitude_matrix = np.array( [((1-self.action_observation_S)*n.attitudes  + self.action_observation_S*((n.values + 1)/2) ) for n in self.agent_list] )
         neighbour_influence = np.matmul(
             self.weighting_matrix, behavioural_attitude_matrix
         )
@@ -699,13 +718,17 @@ class Network:
             non_diagonal_weighting_matrix
         )  # normalize the matrix row wise
 
+        #for total_identity_differences
+        difference_matrix_real_connections = abs(self.adjacency_matrix * difference_matrix)
+        total_identity_differences = difference_matrix_real_connections.sum(axis=1)
+
         if self.save_data:
             total_difference = self.calc_total_weighting_matrix_difference(
                 self.weighting_matrix, norm_weighting_matrix
             )
-            return norm_weighting_matrix, total_difference
+            return norm_weighting_matrix, total_identity_differences, total_difference 
         else:
-            return norm_weighting_matrix, 0  # BODGE! bodge for mypy
+            return norm_weighting_matrix, total_identity_differences, 0 # BODGE! bodge for mypy
 
     def calc_total_emissions(self) -> int:
         """
@@ -816,6 +839,7 @@ class Network:
         self.history_min_culture.append(self.min_culture)
         self.history_max_culture.append(self.max_culture)
         self.history_green_adoption.append(self.green_adoption)
+        self.history_total_identity_differences.append(self.total_identity_differences)
 
     def next_step(self):
         """
@@ -846,10 +870,11 @@ class Network:
             if self.save_data:
                 (
                     self.weighting_matrix,
+                    self.total_identity_differences,
                     self.weighting_matrix_convergence,
                 ) = self.update_weightings()
             else:
-                self.weighting_matrix, __ = self.update_weightings()
+                self.weighting_matrix, self.total_identity_differences,__ = self.update_weightings()
 
         self.social_component_matrix = self.calc_social_component_matrix()
 

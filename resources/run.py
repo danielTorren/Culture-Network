@@ -103,6 +103,7 @@ def parallel_run(params_dict: dict[dict]) -> list[Network]:
     """
 
     num_cores = multiprocessing.cpu_count()
+    #data_parallel = [generate_data(i) for i in params_dict]
     data_parallel = Parallel(n_jobs=num_cores, verbose=10)(
         delayed(generate_data)(i) for i in params_dict
     )

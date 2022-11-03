@@ -47,10 +47,12 @@ class Individual:
         list is generated using a linspace function using input parameters phi_array_lower and phi_array_upper. each element has domain = [0,1]
     values: npt.NDArray[float]
         array containing behavioural values, if greater than 0 then the green alternative behaviour is performed and emissions from that behaviour are 0. Domain =  [-1,1]
-    av_behaviour
+    av_behaviour_attitude
         mean attitude towards M behaviours at time t
+    av_behaviour_value
+        mean value towards M behaviours at time t
     av_behaviour_list: list[float]
-        time series of past average attitude values each given by av_behaviour, as far back as culture_momentum
+        time series of past average attitude combined with values depending on action_observation_I, as far back as culture_momentum
     culture: float
         identity of the individual, if > 0.5 it is considered green. Determines who individuals pay attention to. Domain = [0,1]
     total_carbon_emissions: float
@@ -125,10 +127,11 @@ class Individual:
         self.carbon_intensive_list = individual_params["carbon_emissions"]
         self.compression_factor = individual_params["compression_factor"]
         self.phi_array = individual_params["phi_array"]
+        self.action_observation_I = individual_params["action_observation_I"]
 
         self.values = self.attitudes - self.thresholds
 
-        self.av_behaviour = np.mean(self.attitudes)
+        self.av_behaviour = np.mean((1 - self.action_observation_I)*self.attitudes  + self.action_observation_I*((self.values + 1)/2))
 
         self.av_behaviour_list = [self.av_behaviour] * self.culture_momentum
         self.culture = self.calc_culture()
@@ -141,6 +144,9 @@ class Individual:
             self.history_av_behaviour = [self.av_behaviour]
             self.history_culture = [self.culture]
             self.history_carbon_emissions = [self.total_carbon_emissions]
+
+    def calc_av_behaviour(self):
+        self.av_behaviour = np.mean((1 - self.action_observation_I)*self.attitudes  + self.action_observation_I*((self.values + 1)/2))
 
     def update_av_behaviour_list(self):
         """
@@ -260,7 +266,8 @@ class Individual:
         self.update_values()
         self.update_attitudes(social_component)
 
-        self.av_behaviour = np.mean(self.attitudes)
+        self.calc_av_behaviour()
+
         self.update_av_behaviour_list()
 
         self.culture = self.calc_culture()
