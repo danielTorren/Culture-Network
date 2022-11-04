@@ -269,7 +269,7 @@ class Network:
 
         #how much are individuals influenced by what they see or hear, do opinions or actions more
         self.action_observation_I = parameters["action_observation_I"]
-        self.action_observation_S = parameters["action_observation_I"]#["action_observation_S"]
+        self.action_observation_S = parameters["action_observation_S"]#["action_observation_S"]
 
         # network homophily
         self.homophily = parameters["homophily"]  # 0-1
@@ -285,7 +285,7 @@ class Network:
             self.b_threshold,
         ) = (
             parameters["a_attitude"],
-            parameters["a_attitude"], # parameters["b_attitude"]
+            parameters["b_attitude"], # parameters["b_attitude"]
             parameters["a_threshold"],
             parameters["b_threshold"],
         )

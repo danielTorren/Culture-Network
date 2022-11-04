@@ -19,7 +19,7 @@ from matplotlib.colors import Normalize, LinearSegmentedColormap, SymLogNorm
 from matplotlib.collections import LineCollection
 from matplotlib.cm import get_cmap
 from typing import Union
-
+from pydlc import dense_lines
 from resources.network import Network
 
 
@@ -40,6 +40,68 @@ def plot_culture_timeseries(fileName, Data, dpi_save):
     plotName = fileName + "/Plots"
     f = plotName + "/plot_culture_timeseries.eps"
     fig.savefig(f, dpi=dpi_save, format="eps")
+
+def plot_culture_density_timeseries_single(fileName, Data, dpi_save):
+    fig, ax = plt.subplots()
+    
+    y_title = "Identity"
+
+    ys_array = np.asarray([v.history_culture for v in Data.agent_list])
+    x_array = np.asarray(Data.history_time)
+
+    im = dense_lines(ys=ys_array, x=x_array, ax=ax, cmap='magma')  # this is fast and clean
+    cbar = fig.colorbar(im)
+    cbar.set_label(r"Density")
+
+    ax.set_xlabel(r"Time")
+    ax.set_ylabel(r"%s" % y_title)
+    ax.set_ylim(0, 1)
+
+    #plt.tight_layout()
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/plot_culture_density_timeseries_single.eps"
+    fig.savefig(f, dpi=dpi_save, format="eps")
+
+def plot_culture_density_timeseries_multi(fileName, ys_array,x_array, dpi_save):
+    fig, ax = plt.subplots()
+    
+    y_title = "Identity"
+
+    im = dense_lines(ys=ys_array, x=x_array, ax=ax, cmap='magma')  # this is fast and clean
+    cbar = fig.colorbar(im)
+    cbar.set_label(r"Density")
+
+    ax.set_xlabel(r"Time")
+    ax.set_ylabel(r"%s" % y_title)
+    ax.set_ylim(0, 1)
+
+    #plt.tight_layout()
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/plot_culture_density_timeseries_multi.eps"
+    fig.savefig(f, dpi=dpi_save, format="eps")
+
+def print_culture_density_timeseries_multi(
+    fileName, ys_array_list, x_array, title_list, nrows, ncols, dpi_save, ny
+):
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
+    y_title = "Identity"
+
+    #print(ys_array_list[0].shape)
+    for i, ax in enumerate(axes.flat):
+        im = dense_lines(ys=ys_array_list[i], x=x_array, ax=ax, cmap='magma', ny = ny)  # this is fast and clean
+        cbar = fig.colorbar(im)
+        cbar.set_label(r"Density")
+        ax.set_xlabel(r"Time")
+        ax.set_ylabel(r"%s" % y_title)
+        ax.set_title(title_list[i])
+
+    plt.tight_layout()
+
+    plotName = fileName + "/Prints"
+    f = plotName + "/print_culture_density_timeseries_multi.png"
+    fig.savefig(f, dpi=dpi_save, format="png")
 
 
 def plot_network_timeseries(
@@ -141,6 +203,8 @@ def plot_individual_timeseries(
     plotName = fileName + "/Plots"
     f = plotName + "/plot_%s_timeseries.eps" % property
     fig.savefig(f, dpi=dpi_save, format="eps")
+
+
 
 
 def plot_value_timeseries(FILENAME: str, Data: DataFrame, dpi_save: int):

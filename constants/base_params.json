@@ -1,5 +1,5 @@
 {
-    "total_time": 2000,
+    "total_time": 100,
     "delta_t": 1.0,
     "compression_factor": 10,
     "save_data": 1, 
@@ -13,7 +13,7 @@
     "K": 20,
     "prob_rewire": 0.1,
     "set_seed": 1,
-    "seed_list": [1,2,3,4,5],
+    "seed_list": [1,2],
     "culture_momentum_real": 100,
     "learning_error_scale": 0.02,
     "discount_factor": 0.95,
