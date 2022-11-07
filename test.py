@@ -16,9 +16,11 @@ from resources.utility import (
     save_object, 
     load_object,
 )
+"""
 from resources.plot import (
     print_culture_density_timeseries_multi
 )
+"""
 from resources.run import parallel_run
 
 # FOR FILENAME
@@ -167,7 +169,7 @@ if __name__ == "__main__":
         
 
     ny = 500 
-    print_culture_density_timeseries_multi(fileName, ys_array_list, x_list, title_list, len(confirmation_bias_list), len(polarisation_list), dpi_save, ny)
+    #print_culture_density_timeseries_multi(fileName, ys_array_list, x_list, title_list, len(confirmation_bias_list), len(polarisation_list), dpi_save, ny)
 
 
     plt.show()

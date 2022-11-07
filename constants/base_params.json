@@ -8,7 +8,7 @@
     "averaging_method": "Arithmetic",
     "phi_lower": 0.005,
     "phi_upper": 0.01,
-    "N": 20,
+    "N": 200,
     "M": 3,
     "K": 2,
     "prob_rewire": 0.1,
