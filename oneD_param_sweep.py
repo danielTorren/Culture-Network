@@ -44,6 +44,7 @@ from resources.plot import (
     live_compare_animate_weighting_matrix,
     live_compare_animate_behaviour_matrix,
     live_compare_plot_animate_behaviour_scatter,
+    live_varaince_timeseries,
 )
 from resources.multi_run_single_param import (
     produce_param_list,
@@ -81,20 +82,21 @@ SINGLE = 1
 
 if __name__ == "__main__":
     """The number of rows and cols set the number of experiments ie 4 rows and 3 cols gives 12 experiments"""
-    nrows = 2
-    ncols = 4  # due to screen ratio want more cols than rows usually
+    nrows = 1
+    ncols = 3  # due to screen ratio want more cols than rows usually
     reps = nrows * ncols  # make multiples of the number of cores for efficieny
 
-    property_varied = "action_observation_I"  # "alpha_change"#"culture_momentum"#"confirmation_bias"#"inverse_homophily" #MAKE SURE ITS TYPES CORRECTLY
-    property_varied_title = "AO"
-    param_min = 0
-    param_max = 1  # 50.0
+    property_varied = "a_attitude"  # "alpha_change"#"culture_momentum"#"confirmation_bias"#"inverse_homophily" #MAKE SURE ITS TYPES CORRECTLY
+    property_varied_title = "a,b Attitude"
+    param_min = 0.05
+    param_max = 2  # 50.0
     #
     # title_list = [r"Static uniform $\alpha_{n,k}$", r"Static culturally determined $\alpha_{n,k}$", r"Dynamic culturally determined $\alpha_{n,k}$"]
 
 
-    property_values_list = np.linspace(param_min,param_max, reps) #np.asarray([0.0, 0.5, 1.0])#np.linspace(param_min,param_max, reps)
-    #property_values_list = np.asarray([1, 5, 10, 25, 40 , 50 , 60 , 70])
+    #property_values_list = np.linspace(param_min,param_max, reps) #np.asarray([0.0, 0.5, 1.0])#np.linspace(param_min,param_max, reps)
+    property_values_list = np.asarray([0.05, 0.5, 2])
+    
     title_list = ["%s = %s" % (property_varied_title,str(i)) for i in property_values_list]
     #property_values_list = np.logspace(param_min, param_max, reps)
     #log_norm = LogNorm()  # cant take log of negative numbers, unlike log s
@@ -127,15 +129,25 @@ if __name__ == "__main__":
         """Comment out those plots that you dont want to produce"""
         live_print_culture_timeseries(fileName, data, property_varied, title_list, nrows, ncols, dpi_save)
         # plot_average_culture_comparison(fileName, data, dpi_save,property_values_list, property_varied,round_dec)
-        plot_carbon_emissions_total_comparison(
-            fileName, data, dpi_save, property_values_list, property_varied, round_dec
-        )
+        #plot_carbon_emissions_total_comparison(
+        #    fileName, data, dpi_save, property_values_list, property_varied, round_dec
+        #)
         # plot_weighting_matrix_convergence_comparison(fileName, data, dpi_save,property_values_list, property_varied,round_dec)
         # plot_average_culture_no_range_comparison(fileName, data, dpi_save,property_values_list, property_varied,round_dec)
         # plot_live_link_change_comparison(fileName, data, dpi_save,property_values_list, property_varied,round_dec)
         # plot_live_cum_link_change_comparison(fileName, data, dpi_save,property_values_list, property_varied,round_dec)
         # plot_live_link_change_per_agent_comparison(fileName, data, dpi_save,property_values_list, property_varied,round_dec)
-        plot_live_cum_link_change_per_agent_comparison(fileName, data, dpi_save,property_values_list, property_varied,round_dec)
+        #plot_live_cum_link_change_per_agent_comparison(fileName, data, dpi_save,property_values_list, property_varied,round_dec)
+
+        live_varaince_timeseries(
+            fileName,
+            data,
+            property_varied,
+            property_varied_title,
+            property_values_list,
+            dpi_save,
+        )
+
         #live_multirun_diagram_mean_coefficient_variance(
         #    fileName,
         #    data,
@@ -146,7 +158,6 @@ if __name__ == "__main__":
         #    dpi_save,
         #    norm_zero_one,
         #)
-
         # print_live_intial_culture_networks(fileName, data, dpi_save, property_values_list, property_varied, nrows, ncols , layout, norm_zero_one, cmap, node_size,round_dec)
         # prints_init_weighting_matrix(fileName, data, dpi_save,nrows, ncols, cmap_weighting,property_values_list, property_varied,round_dec)
         # prints_final_weighting_matrix(fileName, data, dpi_save,nrows, ncols, cmap_weighting,property_values_list, property_varied,round_dec)

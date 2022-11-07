@@ -8,6 +8,7 @@ Created: 10/10/2022
 """
 
 # imports
+import string
 from matplotlib import image
 import networkx as nx
 from networkx import Graph
@@ -247,6 +248,8 @@ def live_print_culture_timeseries(
             ax.plot(
                 np.asarray(Data_list[i].history_time), np.asarray(v.history_culture)
             )
+        ax.text(0, 1.03, string.ascii_uppercase[i], transform=ax.transAxes, 
+            size=20, weight='bold')
 
         ax.set_xlabel(r"Time")
         ax.set_ylabel(r"%s" % y_title)
@@ -388,6 +391,35 @@ def live_multirun_diagram_mean_coefficient_variance(
 
     plotName = fileName + "/Plots"
     f = plotName + "/live_plot_diagram_mean_coefficient_variance_%s_and_%s.eps" % (
+        property_varied,
+        len(property_varied_values),
+    )
+    fig.savefig(f, dpi=dpi_save, format="eps")
+
+def live_varaince_timeseries(
+    fileName,
+    Data_list,
+    property_varied,
+    property_varied_title,
+    property_varied_values,
+    dpi_save,
+):
+
+    fig, ax = plt.subplots(figsize=(14, 7), constrained_layout=True
+    )
+
+    time_data = Data_list[0].history_time
+
+    for i in range(len(Data_list)):
+        y_data =  Data_list[i].history_var_culture
+        ax.plot(time_data,y_data, label= property_varied_title + " = " + str(property_varied_values[i]))
+    
+    ax.set_xlabel(r"Time")
+    ax.set_ylabel(r"Variance, $\sigma^2$")
+    ax.legend()
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/live_varaince_timeseries_%s_and_%s.eps" % (
         property_varied,
         len(property_varied_values),
     )
@@ -768,8 +800,8 @@ def double_matrix_plot(
     col_dict = variable_parameters_dict["col"]
     row_dict = variable_parameters_dict["row"]
 
-    select_val_x = 1
-    select_val_y = 10
+    select_val_x = 2
+    select_val_y = 2
 
     x_ticks_pos = [x for x in range(len(col_dict["vals"]))  if x % select_val_x == 0]
     y_ticks_pos  = [y for y in range(len(row_dict["vals"]))  if y % select_val_y == 0]
