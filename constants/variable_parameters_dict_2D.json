@@ -1,4 +1,4 @@
 {
-    "row":{"property":"a_attitude","min":-1, "max": 1, "title": "a_attitude","divisions": "log", "reps": 64}, 
-    "col":{"property":"action_observation_I","min":0, "max":1 , "title": "AO_I","divisions": "linear", "reps": 64}  
+    "row":{"property":"a_attitude","min":0.05, "max": 1, "title": "a,b Attitude","divisions": "linear", "reps": 24}, 
+    "col":{"property":"confirmation_bias","min":-10, "max":60 , "title": "Confirmation bias, \\theta","divisions": "linear", "reps": 24}  
 }

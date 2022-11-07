@@ -285,7 +285,7 @@ class Network:
             self.b_threshold,
         ) = (
             parameters["a_attitude"],
-            parameters["b_attitude"], # parameters["b_attitude"]
+            parameters["a_attitude"], # parameters["b_attitude"]
             parameters["a_threshold"],
             parameters["b_threshold"],
         )

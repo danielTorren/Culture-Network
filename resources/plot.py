@@ -19,7 +19,7 @@ from matplotlib.colors import Normalize, LinearSegmentedColormap, SymLogNorm
 from matplotlib.collections import LineCollection
 from matplotlib.cm import get_cmap
 from typing import Union
-#from pydlc import dense_lines
+from pydlc import dense_lines
 from resources.network import Network
 
 
@@ -41,7 +41,7 @@ def plot_culture_timeseries(fileName, Data, dpi_save):
     f = plotName + "/plot_culture_timeseries.eps"
     fig.savefig(f, dpi=dpi_save, format="eps")
 
-"""
+
 def plot_culture_density_timeseries_single(fileName, Data, dpi_save):
     fig, ax = plt.subplots()
     
@@ -103,7 +103,7 @@ def print_culture_density_timeseries_multi(
     plotName = fileName + "/Prints"
     f = plotName + "/print_culture_density_timeseries_multi.png"
     fig.savefig(f, dpi=dpi_save, format="png")
-"""
+
 
 def plot_network_timeseries(
     FILENAME: str, Data: Network, y_title: str, property: str, dpi_save: int

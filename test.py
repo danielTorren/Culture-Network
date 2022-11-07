@@ -14,10 +14,11 @@ import numpy as np
 from resources.utility import (
     createFolder, 
     save_object, 
+    load_object,
 )
-#from resources.plot import (
-#    print_culture_density_timeseries_multi
-#)
+from resources.plot import (
+    print_culture_density_timeseries_multi
+)
 from resources.run import parallel_run
 
 # FOR FILENAME
@@ -115,7 +116,9 @@ if __name__ == "__main__":
     params["time_steps_max"] = int(params["total_time"] / params["delta_t"])
 
     fileName = "results/test_density"
-    createFolder(fileName)
+    createFolder(fileName)#
+
+    RUN = 0
 
     confirmation_bias_list = [-10,0.0,10,20,40]
     polarisation_list = [10,5,1,0.5,0.1]
@@ -132,29 +135,39 @@ if __name__ == "__main__":
                 params["set_seed"] = v
                 params_list.append(params.copy())
             title_list.append(r"$theta=%s$, a,b=%s" % (str(i), str(j)))
-    
-    
 
-    #i think i can use this everywhere
-    Data_list = parallel_run(params_list)
-    ys_array_list = []
-    row_len = len(confirmation_bias_list)
-    for i in range(len(confirmation_bias_list)):
-        for j in range(len(polarisation_list)):
-            pos = i*(row_len) + j    
-            ys_list = []
-            for v in  params["seed_list"]:
-                ys = [n.history_culture for n in Data_list[pos].agent_list]
-                ys_list = ys_list + ys
-            ys_array_list.append(np.asarray(ys_list))
+    ##print(len(params_list))
+    ##quit()
+        
+        
+    if RUN:
+        
+        #i think i can use this everywhere
+        Data_list = parallel_run(params_list)
+        ys_array_list = []
+        row_len = len(confirmation_bias_list)
+        for i in range(len(confirmation_bias_list)):
+            for j in range(len(polarisation_list)):
+                pos = i*(row_len) + j    
+                ys_list = []
+                for v in  params["seed_list"]:
+                    ys = [n.history_culture for n in Data_list[pos].agent_list]
+                    ys_list = ys_list + ys
+                ys_array_list.append(np.asarray(ys_list))
 
-    x_list = np.asarray(Data_list[0].history_time)
+        x_list = np.asarray(Data_list[0].history_time)
 
-    save_object(Data_list, fileName + "/Data", "Data_list")
-    save_object(ys_array_list, fileName + "/Data", "ys_array_list")
+        save_object(Data_list, fileName + "/Data", "Data_list")
+        save_object(ys_array_list, fileName + "/Data", "ys_array_list")
+        
+    else:
+
+        x_list = np.arange(0,params["total_time"] + params["compression_factor"], params["compression_factor"])
+        ys_array_list = load_object(fileName + "/Data", "ys_array_list")
+        
 
     ny = 500 
-    #print_culture_density_timeseries_multi(fileName, ys_array_list, x_list, title_list, len(confirmation_bias_list), len(polarisation_list), dpi_save, ny)
+    print_culture_density_timeseries_multi(fileName, ys_array_list, x_list, title_list, len(confirmation_bias_list), len(polarisation_list), dpi_save, ny)
 
 
     plt.show()
