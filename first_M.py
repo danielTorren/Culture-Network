@@ -53,7 +53,7 @@ from resources.multi_run_2D_param import (
 )
 
 # run bools
-RUN = 1 # run or load in previously saved data
+RUN = 0 # run or load in previously saved data
 SINGLE = 0 # determine if you runs single shots or study the averages over multiple runs for each experiment
 fileName = "results/twoD_Average_confirmation_bias_a_attitude_200_2000_20_24_24_5"
 #"results/twoD_Average_action_observation_I_a_attitude_200_2000_20_64_64_5"
@@ -236,7 +236,7 @@ if __name__ == "__main__":
         #when using discrete or interger variables ie, K,N,M
         #double_matrix_plot(fileName, matrix_emissions, r"Total normalised emissions $E/NM$", "emissions",variable_parameters_dict, get_cmap("Reds"),dpi_save)
         #double_matrix_plot(fileName, matrix_mu, r"Average identity, $\mu$", "mu",variable_parameters_dict, get_cmap("Blues"),dpi_save)
-        double_matrix_plot(fileName, matrix_var, r"First beahviour variance, $\sigma^2$", "variance",variable_parameters_dict, get_cmap("Oranges"),dpi_save)
+        double_matrix_plot(fileName, matrix_var, r"First behaviour variance, $\sigma^2$", "variance",variable_parameters_dict, get_cmap("Oranges"),dpi_save)
         #double_matrix_plot(fileName, matrix_coefficient_of_variance, r"Identity coefficient of variance, $\sigma/\mu$", "coefficient_of_variance",variable_parameters_dict, get_cmap("Oranges"),dpi_save)
         
         #only for the a or b beta parameters
