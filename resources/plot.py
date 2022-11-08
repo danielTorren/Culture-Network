@@ -792,7 +792,7 @@ def double_phase_diagram_using_meanandvariance(
     fig.savefig(f + ".png", dpi=dpi_save, format="png")
 
 def double_matrix_plot(
-    fileName, Z, Y_title, Y_param, variable_parameters_dict, cmap, dpi_save
+    fileName, Z, Y_title, Y_param, variable_parameters_dict, cmap, dpi_save,x_ticks_pos,y_ticks_pos,x_ticks_label,y_ticks_label
 ):
 
     fig, ax = plt.subplots(figsize=(14, 7), constrained_layout=True)
@@ -800,23 +800,16 @@ def double_matrix_plot(
     col_dict = variable_parameters_dict["col"]
     row_dict = variable_parameters_dict["row"]
 
-    select_val_x = 2
-    select_val_y = 2
-
-    x_ticks_pos = [x for x in range(len(col_dict["vals"]))  if x % select_val_x == 0]
-    y_ticks_pos  = [y for y in range(len(row_dict["vals"]))  if y % select_val_y == 0]
-
-    x_ticks_label = [col_dict["vals"][x] for x in range(len(col_dict["vals"]))  if x % select_val_x == 0]
-    y_ticks_label  = [row_dict["vals"][y] for y in range(len(row_dict["vals"]))  if y % select_val_y == 0]
-
     plt.xticks(x_ticks_pos, x_ticks_label)
     plt.yticks(y_ticks_pos, y_ticks_label)
 
     #ax.set_xticklabels(x_ticks)
     #ax.set_yticklabels(y_ticks)
 
-    ax.set_xlabel(r"%s" % col_dict["title"])
-    ax.set_ylabel(r"%s" % row_dict["title"])
+    #ax.set_xlabel(r"%s" % col_dict["title"])
+    ax.set_ylabel(r"Confirmation bias, $\theta$")
+    ax.set_xlabel(r"Number of behaviours per agent, M")
+    #ax.set_ylabel(r"%s" % row_dict["title"])
 
     if col_dict["divisions"] == "log":
         ax.set_xscale("log")
@@ -839,6 +832,101 @@ def double_matrix_plot(
     f = plotName + "/live_average_double_matrix_plot_%s" % (Y_param)
     #fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
     fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
+def multiline(xs, ys, c, ax=None, **kwargs):
+    """Plot lines with different colorings
+
+    Parameters
+    ----------
+
+    xs : iterable container of x coordinates
+    ys : iterable container of y coordinates
+    c : iterable container of numbers mapped to colormap
+    ax (optional): Axes to plot on.
+    kwargs (optional): passed to LineCollection
+
+    Notes:
+        len(xs) == len(ys) == len(c) is the number of line segments
+        len(xs[i]) == len(ys[i]) is the number of points for each line (indexed by i)
+
+    Returns
+    -------
+    lc : LineCollection instance.
+    """
+
+    # find axes
+    ax = plt.gca() if ax is None else ax
+
+    # create LineCollection
+    segments = [np.column_stack([x, y]) for x, y in zip(xs, ys)]
+    lc = LineCollection(segments, **kwargs)
+
+    # set coloring of line segments
+    #    Note: I get an error if I pass c as a list here... not sure why.
+    lc.set_array(np.asarray(c))
+
+    # add lines to axes and rescale 
+    #    Note: adding a collection doesn't autoscalee xlim/ylim
+    ax.add_collection(lc)
+    ax.autoscale()
+    return lc
+
+
+def multi_line_matrix_plot(
+    fileName, Z, x_vals,y_vals,  Y_param, cmap, dpi_save, x_ticks_pos,x_ticks_label
+    ):
+
+    fig, ax = plt.subplots(figsize=(14, 7), constrained_layout=True)
+
+    xs = np.tile(x_vals, (len(y_vals), 1))
+    ys = np.transpose(Z)
+    c = y_vals
+
+    ax.set_ylabel(r"First behaviour attitude variance, $\sigma^2$")
+    ax.set_xlabel(r"Number of behaviours per agent, M")
+    
+    plt.xticks(x_ticks_pos, x_ticks_label)
+
+    lc = multiline(xs, ys, c, cmap=cmap, lw=2)
+    axcb = fig.colorbar(lc)
+    axcb.set_label(r'Confirmation bias, $\theta$')
+
+    ax.set_xlim(2,20)
+    ax.set_ylim(bottom=0)
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/multi_line_matrix_plot_%s" % (Y_param)
+    fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    #fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
+def multi_line_matrix_plot_divide_through(
+    fileName, Z, x_vals,y_vals,  Y_param, cmap, dpi_save, x_ticks_pos,x_ticks_label
+    ):
+
+    fig, ax = plt.subplots(figsize=(14, 7), constrained_layout=True)
+
+    xs = np.tile(x_vals, (len(y_vals), 1))
+    ys = np.transpose(Z)
+    c = y_vals
+
+    print(xs.shape,ys.shape,c.shape)
+
+    ax.set_ylabel(r"Normalised first behaviour attitude variance")
+    ax.set_xlabel(r"Number of behaviours per agent, M")
+    
+    plt.xticks(x_ticks_pos, x_ticks_label)
+
+    ax.set_xlim(2,20)
+    ax.set_ylim(bottom=0)
+
+    lc = multiline(xs, ys, c, cmap=cmap, lw=2)
+    axcb = fig.colorbar(lc)
+    axcb.set_label(r'Confirmation bias, $\theta$')
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/multi_line_matrix_plot_divide_through_%s" % (Y_param)
+    fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    #fig.savefig(f + ".png", dpi=dpi_save, format="png")
 
 
 def print_culture_timeseries_vary_array(
