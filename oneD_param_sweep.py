@@ -52,7 +52,7 @@ from resources.multi_run_single_param import (
 
 # constants
 ###PLOT STUFF
-node_size = 50
+node_size = 100
 cmap = LinearSegmentedColormap.from_list(
     "BrownGreen", ["sienna", "whitesmoke", "olivedrab"], gamma=1
 )
@@ -86,18 +86,20 @@ if __name__ == "__main__":
     ncols = 3  # due to screen ratio want more cols than rows usually
     reps = nrows * ncols  # make multiples of the number of cores for efficieny
 
-    property_varied = "alpha_change"  # "alpha_change"#"culture_momentum"#"confirmation_bias"#"inverse_homophily" #MAKE SURE ITS TYPES CORRECTLY
-    property_varied_title = "alpha_change"
-    param_min = 0.05
-    param_max = 2  # 50.0
+    property_varied = "homophily"#"alpha_change"  # "alpha_change"#"culture_momentum"#"confirmation_bias"#"inverse_homophily" #MAKE SURE ITS TYPES CORRECTLY
+    property_varied_title = "Attribute homophily, h"#"alpha_change"
+    param_min = 0
+    param_max = 1  # 50.0
     #
 
     title_list = [r"Static uniform $\alpha_{n,k}$", r"Static culturally determined $\alpha_{n,k}$", r"Dynamic culturally determined $\alpha_{n,k}$"]
-
+    title_list = [r"Homophily, h = 0.0", r"Homophily, h = 0.5", r"Homophily, h = 1.0"]
 
     #property_values_list = np.linspace(param_min,param_max, reps) #np.asarray([0.0, 0.5, 1.0])#np.linspace(param_min,param_max, reps)
 
-    property_values_list = np.asarray([0.0, 0.5, 1.0])
+    #property_values_list = np.asarray([0.0, 0.5, 1.0])# FOR ALPHA
+    property_values_list = np.asarray([0.2, 0.6, 1.0])# For homohily
+
     
     #title_list = ["%s = %s" % (property_varied_title,str(i)) for i in property_values_list]
     #property_values_list = np.logspace(param_min, param_max, reps)
@@ -165,8 +167,8 @@ if __name__ == "__main__":
         # print_live_intial_culture_networks(fileName, data, dpi_save, property_values_list, property_varied, nrows, ncols , layout, norm_zero_one, cmap, node_size,round_dec)
         # prints_init_weighting_matrix(fileName, data, dpi_save,nrows, ncols, cmap_weighting,property_values_list, property_varied,round_dec)
         # prints_final_weighting_matrix(fileName, data, dpi_save,nrows, ncols, cmap_weighting,property_values_list, property_varied,round_dec)
-        live_print_culture_timeseries_with_weighting(fileName, data, property_varied, title_list, nrows, ncols, dpi_save, cmap_weighting)
-        # print_live_intial_culture_networks_and_culture_timeseries(fileName, data, dpi_save, property_values_list, property_varied_title, ncols, layout, norm_zero_one, cmap, node_size,round_dec)
+        #live_print_culture_timeseries_with_weighting(fileName, data, property_varied, title_list, nrows, ncols, dpi_save, cmap_weighting)
+        print_live_intial_culture_networks_and_culture_timeseries(fileName, data, dpi_save, property_values_list, property_varied_title, ncols, layout, norm_zero_one, cmap, node_size,round_dec)
 
         # ani_a =  multi_animation_weighting(fileName,data, cmap_weighting,  interval, fps, round_dec, nrows, ncols)
         # ani_b = live_compare_animate_culture_network_and_weighting(fileName,data,layout,cmap,node_size,interval,fps,norm_zero_one,round_dec,cmap_edge, ncols, nrows,property_varied_title,property_values_list)

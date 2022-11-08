@@ -28,7 +28,7 @@ from resources.network import Network
 #####RUNPLOT PLOTS - SINGLE NETWORK
 def plot_culture_timeseries(fileName, Data, dpi_save):
     fig, ax = plt.subplots()
-    y_title = "Identity"
+    y_title = r"Identity, $I_{t,n}$"
 
     for v in Data.agent_list:
         ax.plot(np.asarray(Data.history_time), np.asarray(v.history_culture))
@@ -47,7 +47,7 @@ def plot_culture_timeseries(fileName, Data, dpi_save):
 def plot_culture_density_timeseries_single(fileName, Data, dpi_save):
     fig, ax = plt.subplots()
     
-    y_title = "Identity"
+    y_title = r"Identity, $I_{t,n}$"
 
     ys_array = np.asarray([v.history_culture for v in Data.agent_list])
     x_array = np.asarray(Data.history_time)
@@ -69,7 +69,7 @@ def plot_culture_density_timeseries_single(fileName, Data, dpi_save):
 def plot_culture_density_timeseries_multi(fileName, ys_array,x_array, dpi_save):
     fig, ax = plt.subplots()
     
-    y_title = "Identity"
+    y_title = r"Identity, $I_{t,n}$"
 
     im = dense_lines(ys=ys_array, x=x_array, ax=ax, cmap='magma')  # this is fast and clean
     cbar = fig.colorbar(im)
@@ -89,7 +89,7 @@ def print_culture_density_timeseries_multi(
     fileName, ys_array_list, x_array, title_list, nrows, ncols, dpi_save, ny
 ):
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
-    y_title = "Identity"
+    y_title = r"Identity, $I_{t,n}$"
 
     #print(ys_array_list[0].shape)
     for i, ax in enumerate(axes.flat):
@@ -241,7 +241,7 @@ def live_print_culture_timeseries(
     fileName, Data_list, property_varied, title_list, nrows, ncols, dpi_save
 ):
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
-    y_title = "Identity"
+    y_title = r"Identity, $I_{t,n}$"
 
     for i, ax in enumerate(axes.flat):
         for v in Data_list[i].agent_list:
@@ -272,8 +272,8 @@ def live_print_culture_timeseries_with_weighting(
     fig, axes = plt.subplots(
         nrows=nrows, ncols=ncols, figsize=(14, 7), constrained_layout=True
     )
-    print("axes", axes)
-    y_title = "Identity"
+    #print("axes", axes)
+    y_title = r"Identity, $I_{t,n}$"
 
     for i in range(ncols):
         for v in Data_list[i].agent_list:
@@ -301,7 +301,7 @@ def live_print_culture_timeseries_with_weighting(
         plt.cm.ScalarMappable(cmap=cmap, norm=Normalize(vmin=0, vmax=1)),
         ax=axes[1]#axes.ravel().tolist(),
     )  # This does a mapabble on the fly i think, not sure
-    cbar.set_label(r"$\alpha_{n,k}$")
+    cbar.set_label(r"Social network weighting, $\alpha_{n,k}$")
 
     plotName = fileName + "/Prints"
     f = (
@@ -328,7 +328,7 @@ def live_print_culture_timeseries_vary(
         nrows=nrows, ncols=ncols, figsize=(14, 7), constrained_layout=True
     )
 
-    y_title = "Identity"
+    y_title = r"Identity, $I_{t,n}$"
 
     for i, ax in enumerate(axes.flat):
         for v in Data_list[i].agent_list:
@@ -800,15 +800,18 @@ def double_matrix_plot(
     col_dict = variable_parameters_dict["col"]
     row_dict = variable_parameters_dict["row"]
 
-    plt.xticks(x_ticks_pos, x_ticks_label)
-    plt.yticks(y_ticks_pos, y_ticks_label)
+    #plt.xticks(x_ticks_pos, x_ticks_label)
+    #plt.yticks(y_ticks_pos, y_ticks_label)
 
     #ax.set_xticklabels(x_ticks)
     #ax.set_yticklabels(y_ticks)
 
     #ax.set_xlabel(r"%s" % col_dict["title"])
-    ax.set_ylabel(r"Confirmation bias, $\theta$")
-    ax.set_xlabel(r"Number of behaviours per agent, M")
+    ax.set_xlabel(r"Confirmation bias, $\theta$")
+    ax.set_ylabel(r"Attitude Beta parameters, $(a,b)$")
+
+    ax.set_xticks([-10,30,70,100])
+    ax.set_yticks([0.05, 0.5, 1.0, 1.5, 2.0])
     #ax.set_ylabel(r"%s" % row_dict["title"])
 
     if col_dict["divisions"] == "log":
@@ -943,7 +946,7 @@ def print_culture_timeseries_vary_array(
     dpi_save: int,
 ):
 
-    y_title = "Identity"
+    y_title = r"Identity, $I_{t,n}$"
 
     fig = plt.figure(constrained_layout=True)
 
@@ -1348,7 +1351,7 @@ def print_live_intial_culture_networks(
     cbar = fig.colorbar(
         plt.cm.ScalarMappable(cmap=cmap, norm=norm_zero_one), ax=axes.ravel().tolist()
     )
-    cbar.set_label("Identity")
+    cbar.set_label(r"Identity, $I_{t,n}$")
 
     plotName = fileName + "/Prints"
     f = plotName + "/%s_print_intial_culture_networks.eps" % (property)
@@ -1368,7 +1371,7 @@ def print_live_intial_culture_networks_and_culture_timeseries(
     node_size,
     round_dec,
 ):
-    y_title = "Identity"
+    y_title = r"Identity, $I_{t,n}$"
     fig, axes = plt.subplots(
         nrows=2, ncols=ncols, figsize=(14, 7), constrained_layout=True
     )
@@ -1408,9 +1411,9 @@ def print_live_intial_culture_networks_and_culture_timeseries(
 
     # colour bar axes
     cbar = fig.colorbar(
-        plt.cm.ScalarMappable(cmap=cmap, norm=norm_zero_one), ax=axes.ravel().tolist()
+        plt.cm.ScalarMappable(cmap=cmap, norm=norm_zero_one), ax=axes[1]
     )
-    cbar.set_label("Identity")
+    cbar.set_label(r"Initial identity, $I_{0,n}$")
 
     plotName = fileName + "/Prints"
     f = (
@@ -1575,7 +1578,7 @@ def live_compare_animate_culture_network_and_weighting(
         ax=axes.ravel().tolist(),
         location="right",
     )  # This does a mapabble on the fly i think, not sure
-    cbar_culture.set_label("Identity")
+    cbar_culture.set_label(r"Identity, $I_{t,n}$")
 
     cbar_weight = fig.colorbar(
         plt.cm.ScalarMappable(cmap=cmap_edge),
@@ -1816,7 +1819,7 @@ def live_compare_plot_animate_behaviour_scatter(
         ax=axes.ravel().tolist(),
         location="right",
     )  # This does a mapabble on the fly i think, not sure
-    cbar.set_label("Identity")
+    cbar.set_label(r"Identity, $I_{t,n}$")
 
     ani = animation.FuncAnimation(
         fig,
@@ -2287,7 +2290,7 @@ def animate_culture_network_and_weighting(
     cbar_culture = fig.colorbar(
         plt.cm.ScalarMappable(cmap=cmap_culture), ax=ax
     )  # This does a mapabble on the fly i think, not sure
-    cbar_culture.set_label("Identity")
+    cbar_culture.set_label(r"Identity, $I_{t,n}$")
 
     cbar_weight = fig.colorbar(
         plt.cm.ScalarMappable(cmap=cmap_edge), ax=ax, location='left',
@@ -2337,7 +2340,7 @@ def animate_behaviour_scatter(fileName,Data,property,norm_zero_one, cmap_culture
     cbar = fig.colorbar(
         plt.cm.ScalarMappable(cmap=cmap_culture), ax=ax
     )  # This does a mapabble on the fly i think, not sure
-    cbar.set_label("Identity")
+    cbar.set_label(r"Identity, $I_{t,n}$")
 
     #print(Data[property][0].T,Data[property][0].T.shape )
     ax.scatter(Data[property][0].T[0], Data[property][0].T[1], s= 60)
@@ -2371,7 +2374,7 @@ def print_culture_histogram(
     for i, ax in enumerate(axes.flat):
         #print(Data[property][frames_list[i]])
         ax.hist(Data[property][frames_list[i]], density=True, bins = bin_num)  # density=False would make counts
-        ax.set_xlabel(r"Identity")
+        ax.set_xlabel(rr"Identity, $I_{t,n}$")
         ax.set_ylabel(r"%s" % y_title)
         ax.set_title("Time= {}".format(round(Data["network_time"][frames_list[i]], round_dec)))  # avoid 0 in the title
     plt.tight_layout()
@@ -2485,7 +2488,7 @@ def animate_culture_network(
     cbar = fig.colorbar(
         plt.cm.ScalarMappable(cmap=cmap_culture), ax=ax
     )  # This does a mapabble on the fly i think, not sure
-    cbar.set_label("Identity")
+    cbar.set_label(r"Identity, $I_{t,n}$")
 
     # need to generate the network from the matrix
     G = nx.from_numpy_matrix(Data["network_weighting_matrix"][0])
@@ -2673,7 +2676,7 @@ def prints_culture_network(
 
     # colour bar axes
     cbar = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap_culture, norm=norm_zero_one),ax=axes.ravel().tolist())
-    cbar.set_label("Identity")
+    cbar.set_label(r"Identity, $I_{t,n}$")
 
     f = FILENAME + "/Prints/prints_culture_network.eps"
     fig.savefig(f, dpi=dpi_save,format='eps')
@@ -2704,7 +2707,7 @@ def plot_culture_timeseries(FILENAME: str, Data: DataFrame, dpi_save:int):
     ##plot cultural evolution of agents
     fig, ax = plt.subplots()
     ax.set_xlabel("Time")
-    ax.set_ylabel("Identity")
+    ax.set_ylabel(r"Identity, $I_{t,n}$")
 
     data = np.asarray(Data["individual_culture"])  # bodge
 
@@ -2850,7 +2853,7 @@ def prints_behaviour_timeseries_plot_colour_culture(
     cbar_culture = fig.colorbar(
         plt.cm.ScalarMappable(cmap=culture_cmap), ax=axes.ravel().tolist(), location='right',
     )
-    cbar_culture.set_label(r"Identity")
+    cbar_culture.set_label(rr"Identity, $I_{t,n}$")
 
     plotName = FILENAME + "/Plots"
     f = plotName + "/" + property + "_prints_behaviour_timeseries_plot_colour_culture.eps"

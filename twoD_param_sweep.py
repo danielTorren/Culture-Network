@@ -58,7 +58,7 @@ import numpy as np
 # run bools
 RUN = 0 # run or load in previously saved data
 SINGLE = 0 # determine if you runs single shots or study the averages over multiple runs for each experiment
-fileName = "results/twoD_Average_confirmation_bias_M_200_3000_20_70_20_5"
+fileName = "results/twoD_Average_confirmation_bias_a_attitude_200_3000_20_64_64_5"
 #"results/twoD_Average_confirmation_bias_a_attitude_200_3000_20_64_64_5"
 #"results/twoD_Average_action_observation_I_a_attitude_200_2000_20_64_64_5"
 #twoD_Average_M_confirmation_bias_200_2000_20_40_64_5
@@ -246,28 +246,29 @@ if __name__ == "__main__":
         #select_val_x = 2
         #select_val_y = 2
 
-        x_ticks_pos = [0,10,20,30,40,50,60,70]#[x for x in range(len(col_dict["vals"]))  if x % select_val_x == 0]
-        x_ticks_label = [-10,0,10,20,30,40,50,60]#[col_dict["vals"][x] for x in range(len(col_dict["vals"]))  if x % select_val_x == 0]
+        x_ticks_pos = [0,30,70,100]#[0,10,20,30,40,50,60,70]#[x for x in range(len(col_dict["vals"]))  if x % select_val_x == 0]
+        x_ticks_label = [-10,30,70,100]#[-10,0,10,20,30,40,50,60]#[col_dict["vals"][x] for x in range(len(col_dict["vals"]))  if x % select_val_x == 0]
         
-        y_ticks_pos  = np.arange(2,21)#for some reason the pos starts at 1, so its not the limit???? #[y for y in range(len(row_dict["vals"]))  if y % select_val_y == 0]
-        y_ticks_label  = np.arange(2,21)#[row_dict["vals"][y] for y in range(len(row_dict["vals"]))  if y % select_val_y == 0]
+        y_ticks_pos = [0.05, 0.5, 1.0, 1.5, 2.0] #for some reason the pos starts at 1, so its not the limit???? #[y for y in range(len(row_dict["vals"]))  if y % select_val_y == 0]
+        y_ticks_label = [0.05, 0.5, 1.0, 1.5, 2.0] #[row_dict["vals"][y] for y in range(len(row_dict["vals"]))  if y % select_val_y == 0]
 
         #double_matrix_plot(fileName, matrix_emissions, r"Total normalised emissions $E/NM$", "emissions",variable_parameters_dict, get_cmap("Reds"),dpi_save)
         #double_matrix_plot(fileName, matrix_mu, r"Average identity, $\mu$", "mu",variable_parameters_dict, get_cmap("Blues"),dpi_save)
         #double_matrix_plot(fileName,matrix_var_edit, r"First beahviour variance, $\sigma^2$", "variance",variable_parameters_dict, get_cmap("Oranges"),dpi_save,x_ticks_pos,y_ticks_pos,x_ticks_label,y_ticks_label)
+        double_matrix_plot(fileName,matrix_var, r"Identity variance, $\sigma^2$", "variance",variable_parameters_dict, get_cmap("Oranges"),dpi_save,x_ticks_pos,y_ticks_pos,x_ticks_label,y_ticks_label)
         #double_matrix_plot(fileName, matrix_coefficient_of_variance, r"Identity coefficient of variance, $\sigma/\mu$", "coefficient_of_variance",variable_parameters_dict, get_cmap("Oranges"),dpi_save)
         
         #multi_line_matrix_plot(fileName,matrix_var, np.arange(1,21), np.arange(-10,60),"variance", get_cmap("Blues"),dpi_save,y_ticks_pos, y_ticks_label)
         
         #print("matrix_var[0]",matrix_var[0])
         #print("shape matrix", matrix_var.shape)
-        normalized_m = matrix_var/matrix_var[0]
+        #normalized_m = matrix_var/matrix_var[0]
         #print("normalized_m",normalized_m.shape)
-        matrix_norm_var_edit = normalized_m[1:]
+        #matrix_norm_var_edit = normalized_m[1:]
         #print()
 
 
-        multi_line_matrix_plot_divide_through(fileName,matrix_norm_var_edit, np.arange(2,21), np.arange(-10,60),"variance", get_cmap("plasma"),dpi_save,y_ticks_pos, y_ticks_label)
+        #multi_line_matrix_plot_divide_through(fileName,matrix_norm_var_edit, np.arange(2,21), np.arange(-10,60),"variance", get_cmap("plasma"),dpi_save,y_ticks_pos, y_ticks_label)
 
         #only for the a or b beta parameters
         #double_phase_diagram_using_meanandvariance(fileName, matrix_emissions, r"Total normalised emissions, $E/NM$", "emissions",variable_parameters_dict, get_cmap("Reds"),dpi_save)

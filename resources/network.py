@@ -308,6 +308,7 @@ class Network:
         ) = self.create_weighting_matrix()
 
         self.network_density = nx.density(self.network)
+        #print("self.network_density",self.network_density)
 
         self.social_component_matrix = self.calc_social_component_matrix()
 
