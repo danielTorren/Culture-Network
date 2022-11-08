@@ -1,4 +1,4 @@
 {
-    "row":{"property":"M","min":1, "max": 20, "title": "M","divisions": "linear", "reps": 20}, 
-    "col":{"property":"confirmation_bias","min":-10, "max":60 , "title": "Confirmation bias, \\theta","divisions": "linear", "reps": 70}  
+    "row":{"property":"a_attitude","min":0.05, "max": 2, "title": "a,b Attitude","divisions": "linear", "reps": 50}, 
+    "col":{"property":"confirmation_bias","min":-10, "max":90 , "title": "Confirmation bias, $\\theta$","divisions": "linear", "reps": 50}  
 }

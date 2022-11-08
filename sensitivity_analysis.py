@@ -30,10 +30,10 @@ from resources.SA_sobol import (
 )
 
 # constants
-RUN = 0  # False,True
+RUN = 1  # False,True
 fileName = "results\SA_AV_reps_5_samples_28672_D_vars_13_N_samples_1024"
-N_samples = 1024
-calc_second_order = True
+N_samples = 512
+calc_second_order = False
 
 ##########################################################################
 # plot dict properties

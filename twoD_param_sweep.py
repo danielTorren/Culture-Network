@@ -56,7 +56,7 @@ from resources.multi_run_2D_param import (
 import numpy as np
 
 # run bools
-RUN = 0 # run or load in previously saved data
+RUN = 1 # run or load in previously saved data
 SINGLE = 0 # determine if you runs single shots or study the averages over multiple runs for each experiment
 fileName = "results/twoD_Average_confirmation_bias_a_attitude_200_3000_20_64_64_5"
 #"results/twoD_Average_confirmation_bias_a_attitude_200_3000_20_64_64_5"
