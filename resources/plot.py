@@ -272,7 +272,7 @@ def live_print_culture_timeseries_with_weighting(
     fig, axes = plt.subplots(
         nrows=nrows, ncols=ncols, figsize=(14, 7), constrained_layout=True
     )
-
+    print("axes", axes)
     y_title = "Identity"
 
     for i in range(ncols):
@@ -299,7 +299,7 @@ def live_print_culture_timeseries_with_weighting(
     # colour bar axes
     cbar = fig.colorbar(
         plt.cm.ScalarMappable(cmap=cmap, norm=Normalize(vmin=0, vmax=1)),
-        ax=axes.ravel().tolist(),
+        ax=axes[1]#axes.ravel().tolist(),
     )  # This does a mapabble on the fly i think, not sure
     cbar.set_label(r"$\alpha_{n,k}$")
 

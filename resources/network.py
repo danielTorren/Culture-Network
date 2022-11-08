@@ -253,10 +253,10 @@ class Network:
         self.normalized_discount_array = self.calc_normalized_discount_array()
 
         # social learning and bias
-        # self.confirmation_bias = parameters["confirmation_bias"]
-        self.confirmation_bias = np.random.normal(
-            loc=parameters["confirmation_bias"], scale=20, size=(self.N, 1)
-        )
+        self.confirmation_bias = parameters["confirmation_bias"]
+        #self.confirmation_bias = np.random.normal(
+        #    loc=parameters["confirmation_bias"], scale=20, size=(self.N, 1)
+        #)
         self.learning_error_scale = parameters["learning_error_scale"]
 
         # social influence of behaviours
@@ -285,7 +285,7 @@ class Network:
             self.b_threshold,
         ) = (
             parameters["a_attitude"],
-            parameters["a_attitude"], # parameters["b_attitude"]
+            parameters["b_attitude"], # parameters["b_attitude"]
             parameters["a_threshold"],
             parameters["b_threshold"],
         )
@@ -341,7 +341,8 @@ class Network:
             self.history_min_culture = [self.min_culture]
             self.history_max_culture = [self.max_culture]
             self.history_green_adoption = [self.green_adoption]
-            self.history_total_identity_differences = [self.total_identity_differences]
+            if self.alpha_change != 0.0:
+                self.history_total_identity_differences = [self.total_identity_differences]
 
     def normlize_matrix(self, matrix: npt.NDArray) -> npt.NDArray:
         """
@@ -839,7 +840,8 @@ class Network:
         self.history_min_culture.append(self.min_culture)
         self.history_max_culture.append(self.max_culture)
         self.history_green_adoption.append(self.green_adoption)
-        self.history_total_identity_differences.append(self.total_identity_differences)
+        if self.alpha_change != 0.0:
+            self.history_total_identity_differences.append(self.total_identity_differences)
 
     def next_step(self):
         """

@@ -82,22 +82,24 @@ SINGLE = 1
 
 if __name__ == "__main__":
     """The number of rows and cols set the number of experiments ie 4 rows and 3 cols gives 12 experiments"""
-    nrows = 1
+    nrows = 2 #change for plots like time series alpha
     ncols = 3  # due to screen ratio want more cols than rows usually
     reps = nrows * ncols  # make multiples of the number of cores for efficieny
 
-    property_varied = "a_attitude"  # "alpha_change"#"culture_momentum"#"confirmation_bias"#"inverse_homophily" #MAKE SURE ITS TYPES CORRECTLY
-    property_varied_title = "a,b Attitude"
+    property_varied = "alpha_change"  # "alpha_change"#"culture_momentum"#"confirmation_bias"#"inverse_homophily" #MAKE SURE ITS TYPES CORRECTLY
+    property_varied_title = "alpha_change"
     param_min = 0.05
     param_max = 2  # 50.0
     #
-    # title_list = [r"Static uniform $\alpha_{n,k}$", r"Static culturally determined $\alpha_{n,k}$", r"Dynamic culturally determined $\alpha_{n,k}$"]
+
+    title_list = [r"Static uniform $\alpha_{n,k}$", r"Static culturally determined $\alpha_{n,k}$", r"Dynamic culturally determined $\alpha_{n,k}$"]
 
 
     #property_values_list = np.linspace(param_min,param_max, reps) #np.asarray([0.0, 0.5, 1.0])#np.linspace(param_min,param_max, reps)
-    property_values_list = np.asarray([0.05, 0.5, 2])
+
+    property_values_list = np.asarray([0.0, 0.5, 1.0])
     
-    title_list = ["%s = %s" % (property_varied_title,str(i)) for i in property_values_list]
+    #title_list = ["%s = %s" % (property_varied_title,str(i)) for i in property_values_list]
     #property_values_list = np.logspace(param_min, param_max, reps)
     #log_norm = LogNorm()  # cant take log of negative numbers, unlike log s
 
@@ -127,7 +129,7 @@ if __name__ == "__main__":
 
         ###WORKING
         """Comment out those plots that you dont want to produce"""
-        live_print_culture_timeseries(fileName, data, property_varied, title_list, nrows, ncols, dpi_save)
+        #live_print_culture_timeseries(fileName, data, property_varied, title_list, nrows, ncols, dpi_save)
         # plot_average_culture_comparison(fileName, data, dpi_save,property_values_list, property_varied,round_dec)
         #plot_carbon_emissions_total_comparison(
         #    fileName, data, dpi_save, property_values_list, property_varied, round_dec
@@ -139,6 +141,7 @@ if __name__ == "__main__":
         # plot_live_link_change_per_agent_comparison(fileName, data, dpi_save,property_values_list, property_varied,round_dec)
         #plot_live_cum_link_change_per_agent_comparison(fileName, data, dpi_save,property_values_list, property_varied,round_dec)
 
+        """
         live_varaince_timeseries(
             fileName,
             data,
@@ -147,6 +150,7 @@ if __name__ == "__main__":
             property_values_list,
             dpi_save,
         )
+        """
 
         #live_multirun_diagram_mean_coefficient_variance(
         #    fileName,
@@ -161,7 +165,7 @@ if __name__ == "__main__":
         # print_live_intial_culture_networks(fileName, data, dpi_save, property_values_list, property_varied, nrows, ncols , layout, norm_zero_one, cmap, node_size,round_dec)
         # prints_init_weighting_matrix(fileName, data, dpi_save,nrows, ncols, cmap_weighting,property_values_list, property_varied,round_dec)
         # prints_final_weighting_matrix(fileName, data, dpi_save,nrows, ncols, cmap_weighting,property_values_list, property_varied,round_dec)
-        # live_print_culture_timeseries_with_weighting(fileName, data, property_varied, title_list, nrows, ncols, dpi_save, cmap_weighting)
+        live_print_culture_timeseries_with_weighting(fileName, data, property_varied, title_list, nrows, ncols, dpi_save, cmap_weighting)
         # print_live_intial_culture_networks_and_culture_timeseries(fileName, data, dpi_save, property_values_list, property_varied_title, ncols, layout, norm_zero_one, cmap, node_size,round_dec)
 
         # ani_a =  multi_animation_weighting(fileName,data, cmap_weighting,  interval, fps, round_dec, nrows, ncols)
