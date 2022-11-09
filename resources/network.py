@@ -325,6 +325,9 @@ class Network:
                 self.min_culture,
                 self.max_culture,
             ) = self.calc_network_culture()
+
+            self.var_first_behaviour = self.calc_var_first_behaviour()
+
             self.weighting_matrix_convergence = 0  # there is no convergence in the first step, to deal with time issues when plotting
 
             self.green_adoption = self.calc_green_adoption()
@@ -816,6 +819,10 @@ class Network:
                 self.t, self.steps, self.social_component_matrix[i]
             )
 
+    def calc_var_first_behaviour(self):
+        first_m_attitude_list = [x.attitudes[0] for x in self.agent_list]
+        return np.var(first_m_attitude_list)
+
     def save_data_network(self):
         """
         Save time series data
@@ -890,5 +897,6 @@ class Network:
                 self.min_culture,
                 self.max_culture,
             ) = self.calc_network_culture()
+            self.var_first_behaviour = self.calc_var_first_behaviour()
             self.green_adoption = self.calc_green_adoption()
             self.save_data_network()

@@ -24,10 +24,29 @@ from typing import Union
 from resources.network import Network
 
 
+SMALL_SIZE = 14
+MEDIUM_SIZE = 18
+BIGGER_SIZE = 22
+
+plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
+plt.rc('axes', titlesize=SMALL_SIZE)     # fontsize of the axes title
+plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
+plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
+plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
+
+plt.rcParams.update({
+    "text.usetex": True,
+    "font.family": "Helvetica"
+})
+
+figsize=(10,6)
+
 # modules
 #####RUNPLOT PLOTS - SINGLE NETWORK
 def plot_culture_timeseries(fileName, Data, dpi_save):
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(10,6))
     y_title = r"Identity, $I_{t,n}$"
 
     for v in Data.agent_list:
@@ -45,7 +64,7 @@ def plot_culture_timeseries(fileName, Data, dpi_save):
 """
 
 def plot_culture_density_timeseries_single(fileName, Data, dpi_save):
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(10,6))
     
     y_title = r"Identity, $I_{t,n}$"
 
@@ -67,7 +86,7 @@ def plot_culture_density_timeseries_single(fileName, Data, dpi_save):
     fig.savefig(f, dpi=dpi_save, format="eps")
 
 def plot_culture_density_timeseries_multi(fileName, ys_array,x_array, dpi_save):
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(10,6))
     
     y_title = r"Identity, $I_{t,n}$"
 
@@ -111,7 +130,7 @@ def plot_network_timeseries(
     FILENAME: str, Data: Network, y_title: str, property: str, dpi_save: int
 ):
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(10,6))
     data = eval("Data.%s" % property)
 
     # bodge
@@ -162,7 +181,7 @@ def plot_average_culture_timeseries(FILENAME: str, Data: DataFrame, dpi_save: in
 
 def plot_cum_link_change_per_agent(fileName: str, Data: Network, dpi_save: int):
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(10,6))
     y_title = "Cumulative total link strength change per agent"
 
     cumulative_link_change = np.cumsum(
@@ -363,7 +382,7 @@ def live_multirun_diagram_mean_coefficient_variance(
     norm_zero_one,
 ):
 
-    fig, ax = plt.subplots(figsize=(14, 7))
+    fig, ax = plt.subplots(figsize=(10, 6))
 
     x_data = [i.average_culture for i in Data_list]
     y_data = [i.std_culture / i.average_culture for i in Data_list]
@@ -405,7 +424,7 @@ def live_varaince_timeseries(
     dpi_save,
 ):
 
-    fig, ax = plt.subplots(figsize=(14, 7), constrained_layout=True
+    fig, ax = plt.subplots(figsize=(10, 6), constrained_layout=True
     )
 
     time_data = Data_list[0].history_time
@@ -438,7 +457,7 @@ def live_average_multirun_diagram_mean_coefficient_variance(
     norm,
 ):
 
-    fig, ax = plt.subplots(figsize=(14, 7))
+    fig, ax = plt.subplots(figsize=(10, 6))
     ax.set_xlabel(r"$\mu$")
     ax.set_ylabel(r"$\sigma /\mu$")
 
@@ -479,7 +498,7 @@ def live_average_multirun_n_diagram_mean_coefficient_variance(
     dpi_save,
 ):
 
-    fig, ax = plt.subplots(figsize=(14, 7), constrained_layout=True)  #
+    fig, ax = plt.subplots(figsize=(10, 6), constrained_layout=True)  #
     ax.set_xlabel(r"$\mu$")
     ax.set_ylabel(r"$\sigma /\mu$")
 
@@ -584,7 +603,7 @@ def live_average_multirun_double_phase_diagram_mean(
     round_dec,
 ):
 
-    fig, ax = plt.subplots(figsize=(14, 7), constrained_layout=True)
+    fig, ax = plt.subplots(figsize=(10, 6), constrained_layout=True)
 
     ax.set_xlabel(r"%s" % property_varied_col)
     ax.set_ylabel(r"%s" % property_varied_row)
@@ -612,7 +631,7 @@ def live_average_multirun_double_phase_diagram_mean_alt(
     fileName, Z, variable_parameters_dict, cmap, dpi_save
 ):
 
-    fig, ax = plt.subplots(figsize=(14, 7), constrained_layout=True)
+    fig, ax = plt.subplots(figsize=(10, 6), constrained_layout=True)
 
     col_dict = variable_parameters_dict["col"]
     row_dict = variable_parameters_dict["row"]
@@ -654,7 +673,7 @@ def live_average_multirun_double_phase_diagram_C_of_V(
     round_dec,
 ):
 
-    fig, ax = plt.subplots(figsize=(14, 7), constrained_layout=True)
+    fig, ax = plt.subplots(figsize=(10, 6), constrained_layout=True)
 
     ax.set_xlabel(r"%s" % property_varied_col)
     ax.set_ylabel(r"%s" % property_varied_row)
@@ -680,7 +699,7 @@ def live_average_multirun_double_phase_diagram_C_of_V_alt(
     fileName, Z, variable_parameters_dict, cmap, dpi_save
 ):
 
-    fig, ax = plt.subplots(figsize=(14, 7), constrained_layout=True)
+    fig, ax = plt.subplots(figsize=(10, 6), constrained_layout=True)
 
     col_dict = variable_parameters_dict["col"]
     row_dict = variable_parameters_dict["row"]
@@ -714,7 +733,7 @@ def double_phase_diagram(
     fileName, Z, Y_title, Y_param, variable_parameters_dict, cmap, dpi_save
 ):
 
-    fig, ax = plt.subplots(figsize=(14, 7), constrained_layout=True)
+    fig, ax = plt.subplots(figsize=(10, 6), constrained_layout=True)
 
     col_dict = variable_parameters_dict["col"]
     row_dict = variable_parameters_dict["row"]
@@ -748,7 +767,7 @@ def double_phase_diagram_using_meanandvariance(
     fileName, Z, Y_title, Y_param, variable_parameters_dict, cmap, dpi_save
 ):
 
-    fig, ax = plt.subplots(figsize=(14, 7), constrained_layout=True)
+    fig, ax = plt.subplots(figsize=(10, 6), constrained_layout=True)
 
     col_dict = variable_parameters_dict["col"]
     row_dict = variable_parameters_dict["row"]
@@ -795,24 +814,15 @@ def double_matrix_plot(
     fileName, Z, Y_title, Y_param, variable_parameters_dict, cmap, dpi_save,x_ticks_pos,y_ticks_pos,x_ticks_label,y_ticks_label
 ):
 
-    fig, ax = plt.subplots(figsize=(14, 7), constrained_layout=True)
+    fig, ax = plt.subplots(figsize=(10, 7))
 
     col_dict = variable_parameters_dict["col"]
     row_dict = variable_parameters_dict["row"]
 
-    #plt.xticks(x_ticks_pos, x_ticks_label)
-    #plt.yticks(y_ticks_pos, y_ticks_label)
 
-    #ax.set_xticklabels(x_ticks)
-    #ax.set_yticklabels(y_ticks)
 
-    #ax.set_xlabel(r"%s" % col_dict["title"])
     ax.set_xlabel(r"Confirmation bias, $\theta$")
     ax.set_ylabel(r"Attitude Beta parameters, $(a,b)$")
-
-    ax.set_xticks([-10,30,70,100])
-    ax.set_yticks([0.05, 0.5, 1.0, 1.5, 2.0])
-    #ax.set_ylabel(r"%s" % row_dict["title"])
 
     if col_dict["divisions"] == "log":
         ax.set_xscale("log")
@@ -830,6 +840,14 @@ def double_matrix_plot(
         ax=ax,
     )
     cbar.set_label(Y_title)
+
+    # HAS TO BE AFTER PUTTING INT THE MATRIX 
+    ax.set_xticks(x_ticks_pos)
+    ax.set_xticklabels(x_ticks_label)  
+    ax.xaxis.set_ticks_position('bottom')
+
+    ax.set_yticks(y_ticks_pos)
+    ax.set_yticklabels(y_ticks_label)  
 
     plotName = fileName + "/Plots"
     f = plotName + "/live_average_double_matrix_plot_%s" % (Y_param)
@@ -879,7 +897,7 @@ def multi_line_matrix_plot(
     fileName, Z, x_vals,y_vals,  Y_param, cmap, dpi_save, x_ticks_pos,x_ticks_label
     ):
 
-    fig, ax = plt.subplots(figsize=(14, 7), constrained_layout=True)
+    fig, ax = plt.subplots(figsize=(10, 6), constrained_layout=True)
 
     xs = np.tile(x_vals, (len(y_vals), 1))
     ys = np.transpose(Z)
@@ -906,7 +924,7 @@ def multi_line_matrix_plot_divide_through(
     fileName, Z, x_vals,y_vals,  Y_param, cmap, dpi_save, x_ticks_pos,x_ticks_label
     ):
 
-    fig, ax = plt.subplots(figsize=(14, 7), constrained_layout=True)
+    fig, ax = plt.subplots(figsize=(10, 6), constrained_layout=True)
 
     xs = np.tile(x_vals, (len(y_vals), 1))
     ys = np.transpose(Z)
@@ -1044,7 +1062,7 @@ def plot_average_culture_no_range_comparison(
 ):
     y_title = "Average Culture"
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(10,6))
     ax.set_ylabel(r"%s" % y_title)
     for i in range(len(Data_list)):
 
@@ -1073,7 +1091,7 @@ def plot_average_culture_comparison(
 ):
     y_title = "Average Culture"
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(10,6))
     ax.set_ylabel(r"%s" % y_title)
     for i in range(len(Data_list)):
         # print(np.asarray(Data_list[i].history_average_culture))
@@ -1113,7 +1131,7 @@ def plot_carbon_emissions_total_comparison(
 ):
     y_title = "Total Emissions"
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(10,6))
     ax.set_ylabel(r"%s" % y_title)
     for i in range(len(Data_list)):
         ax.plot(
@@ -1140,7 +1158,7 @@ def plot_weighting_matrix_convergence_comparison(
 ):
     y_title = "Weighting matrix convergence"
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(10,6))
     ax.set_ylabel(r"%s" % y_title)
     for i in range(len(Data_list)):
 
@@ -1168,7 +1186,7 @@ def plot_cum_weighting_matrix_convergence_comparison(
 ):
     y_title = "Cumulative weighting matrix convergence"
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(10,6))
     ax.set_ylabel(r"%s" % y_title)
     for i in range(len(Data_list)):
         cumulative_link_change = np.cumsum(
@@ -1196,7 +1214,7 @@ def plot_live_link_change_comparison(
     round_dec,
 ):
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(10,6))
     y_title = "Total link strength change"
 
     for i in range(len(Data_list)):
@@ -1224,7 +1242,7 @@ def plot_live_cum_link_change_comparison(
     round_dec,
 ):
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(10,6))
     y_title = "Cumulative total link strength change"
 
     for i in range(len(Data_list)):
@@ -1256,7 +1274,7 @@ def plot_live_link_change_per_agent_comparison(
     round_dec,
 ):
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(10,6))
     y_title = "Total link strength change per agent"
 
     for i in range(len(Data_list)):
@@ -1285,7 +1303,7 @@ def plot_live_cum_link_change_per_agent_comparison(
     round_dec,
 ):
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(10,6))
     y_title = "Cumulative total link strength change per agent"
 
     for i in range(len(Data_list)):
@@ -1845,7 +1863,7 @@ def bar_sensitivity_analysis_plot(FILENAME, data, names, yerr, dpi_save, N_sampl
     Create bar chart of results.
     """
 
-    fig, ax = plt.subplots(figsize=(14, 7))
+    fig, ax = plt.subplots(figsize=(10, 6))
     data.plot(kind="barh", xerr=yerr, ax=ax)  # Pandas data frame plot
     ax.set_yticks(
         ticks=range(len(names)), labels=names
@@ -1869,7 +1887,7 @@ def scatter_total_sensitivity_analysis_plot(
     Create scatter chart of results.
     """
 
-    fig, ax = plt.subplots(figsize=(14, 7))
+    fig, ax = plt.subplots(figsize=(10, 6))
 
     ax.errorbar(
         data["ST"].tolist(), names, xerr=xerr["ST"].tolist(), fmt="o", ecolor="k"
@@ -1896,7 +1914,7 @@ def multi_scatter_total_sensitivity_analysis_plot(
     Create scatter chart of results.
     """
 
-    fig, ax = plt.subplots(figsize=(14, 7))
+    fig, ax = plt.subplots(figsize=(10, 6))
 
     if order == "First":
         for i in data_dict.values():
@@ -2003,7 +2021,7 @@ def multi_scatter_sidebyside_total_sensitivity_analysis_plot(
     Create scatter chart of results.
     """
 
-    fig, ax = plt.subplots(figsize=(14, 7))
+    fig, ax = plt.subplots(figsize=(10, 6))
 
     padding = 0.15
     width_max = 1
@@ -2146,7 +2164,7 @@ def live_plot_attitude_scatter(fileName, Data, dpi_save):
         )
         attitudes_list.append(attitudes.T)
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(10,6))
     ax.scatter(attitudes_list[0][-1], attitudes_list[1][-1])
     ax.set_xlabel(r"Attitude")
     ax.set_ylabel(r"Attitude")
@@ -2163,7 +2181,7 @@ def plot_alpha_variation(FILENAME, num_counts, phi_list, dpi_save):
     def alpha_diff_calc(phi, x):
         return -phi * np.exp(-phi * np.abs(x))
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(10,6))
 
     x = np.linspace(0, 1, num_counts)
 
@@ -2221,7 +2239,7 @@ def frame_distribution(
 def plot_behaviour_scatter(fileName,Data,property,dpi_save):
     PropertyData = Data[property].transpose()
     
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(10,6))
 
     for j in range(int(Data["N"])):
         ax.scatter(PropertyData[0][j][-1], PropertyData[1][j][-1])
@@ -2235,7 +2253,7 @@ def plot_behaviour_scatter(fileName,Data,property,dpi_save):
 
 def plot_weighting_link_timeseries(FILENAME: str, Data: DataFrame, y_title:str, dpi_save:int, min_val):
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(10,6))
 
     for i in range(int(Data["N"])):
         for v in range(int(Data["N"])):
@@ -2285,7 +2303,7 @@ def animate_culture_network_and_weighting(
         ax.set_title("Time= {}".format(round(Data["network_time"][i], round_dec)))
 
     # Build plot
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(10,6))
     # cbar = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap_culture), ax=ax)#This does a mapabble on the fly i think, not sure
     cbar_culture = fig.colorbar(
         plt.cm.ScalarMappable(cmap=cmap_culture), ax=ax
@@ -2336,7 +2354,7 @@ def animate_behaviour_scatter(fileName,Data,property,norm_zero_one, cmap_culture
         ax.set_ylim(0,1)
         ax.set_title("Time= {}".format(round(Data["network_time"][i], round_dec)))
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(10,6))
     cbar = fig.colorbar(
         plt.cm.ScalarMappable(cmap=cmap_culture), ax=ax
     )  # This does a mapabble on the fly i think, not sure
@@ -2396,7 +2414,7 @@ def animate_weighting_matrix(FILENAME: str, Data: DataFrame, interval:int, fps:i
             )
         return matrice
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(10,6))
     ax.set_xlabel("Agent")
     ax.set_ylabel("Agent")
     matrice = ax.matshow(Data["network_weighting_matrix"][0], cmap=cmap_weighting)
@@ -2433,7 +2451,7 @@ def animate_behavioural_matrix(
 
         return matrice
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(10,6))
     ax.set_xlabel("Behaviour")
     ax.set_ylabel("Agent")
 
@@ -2483,7 +2501,7 @@ def animate_culture_network(
         ax.set_title("Time= {}".format(round(Data["network_time"][i], round_dec)))
 
     # Build plot
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(10,6))
     # cbar = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap_culture), ax=ax)#This does a mapabble on the fly i think, not sure
     cbar = fig.colorbar(
         plt.cm.ScalarMappable(cmap=cmap_culture), ax=ax
@@ -2685,7 +2703,7 @@ def plot_average_culture_timeseries(FILENAME: str, Data: DataFrame, dpi_save:int
     y_title = "Average Culture"
     property = "network_average_culture"
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(10,6))
     data = np.asarray(Data[property])[0]  # bodge
     culture_min = np.asarray(Data["network_min_culture"])[0]  # bodge
     culture_max = np.asarray(Data["network_max_culture"])[0]  # bodge
@@ -2705,7 +2723,7 @@ def plot_average_culture_timeseries(FILENAME: str, Data: DataFrame, dpi_save:int
 def plot_culture_timeseries(FILENAME: str, Data: DataFrame, dpi_save:int):
 
     ##plot cultural evolution of agents
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(10,6))
     ax.set_xlabel("Time")
     ax.set_ylabel(r"Identity, $I_{t,n}$")
 
@@ -2733,7 +2751,7 @@ def animate_network_social_component_matrix(FILENAME: str, Data: DataFrame, inte
             )
         return matrice
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(10,6))
 
     matrice = ax.matshow(Data["network_social_component_matrix"][0], cmap=cmap, aspect="auto")
     ax.set_xlabel("Agent")
@@ -2774,7 +2792,7 @@ def animate_network_information_provision(FILENAME: str, Data: DataFrame, interv
             )
         return matrice
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(10,6))
 
     matrice = ax.matshow(Data["behaviour_information_provision"][0], cmap=cmap, aspect="auto")
     ax.set_xlabel("Behaviour")
@@ -2863,7 +2881,7 @@ def prints_behaviour_timeseries_plot_colour_culture(
 def standard_behaviour_timeseries_plot(FILENAME: str, Data: DataFrame, property:str, y_title:str, dpi_save:int):
     PropertyData = Data[property].transpose()
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(10,6))
     for i in range(int(Data["N"])):
         for v in range(int(Data["M"])):
             ax.plot(Data["network_time"], PropertyData[i][v])
@@ -2902,7 +2920,7 @@ def plot_av_carbon_emissions_timeseries(FILENAME: str, Data: DataFrame, dpi_save
     y_title = "Carbon Emissions Per Individual"
     property = "individual_carbon_emissions"
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(10,6))
     av_network_total_carbon_emissions = [
         x / Data["N"] for x in np.asarray(Data["network_total_carbon_emissions"])[0]
     ]
