@@ -13,37 +13,58 @@ from resources.run import (generate_data)
 from resources.utility import (
     createFolder,
 )
+from resources.plot import prod_pos
 import numpy as np
 import networkx as nx
 import collections
 
+SMALL_SIZE = 14
+MEDIUM_SIZE = 18
+BIGGER_SIZE = 22
+
+plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
+plt.rc('axes', titlesize=SMALL_SIZE)     # fontsize of the axes title
+plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
+plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
+plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
+
+plt.rcParams.update({
+    "text.usetex": True,
+    "font.family": "Helvetica"
+})
 
 params = {
-    "total_time": 2000,
+    "total_time": 3000,
     "delta_t": 1.0,
     "compression_factor": 10,
     "save_data": 1, 
     "alpha_change" : 1.0,
     "degroot_aggregation": 1,
     "averaging_method": "Arithmetic",
-    "phi_lower": 0.005,
-    "phi_upper": 0.01,
+    "phi_lower": 0.01,
+    "phi_upper": 0.05,
     "N": 200,
-    "M": 5,
+    "M": 3,
+    "K": 5,
+    "prob_rewire": 0.1,
     "set_seed": 1,
     "seed_list": [1,2,3,4,5],
-    "culture_momentum_real": 10,
+    "culture_momentum_real": 100,
     "learning_error_scale": 0.02,
     "discount_factor": 0.95,
-    "homophily": 0,
+    "homophily": 1,
     "homophilly_rate" : 1,
-    "confirmation_bias": 30,
-    "a_attitude": 1,
-    "b_attitude": 1,
+    "confirmation_bias": 10,
+    "a_attitude": 0.5,
+    "b_attitude": 0.5,
     "a_threshold": 1,
     "b_threshold": 1,
-    "action_observation": 0.0,
-    "green_N": 0
+    "action_observation_I": 0.0,
+    "action_observation_S": 0.0,
+    "green_N": 0,
+    "network_structure": "small_world"
 }
 
 def live_print_culture_timeseries_varynetwork_structure(
@@ -58,11 +79,13 @@ def live_print_culture_timeseries_varynetwork_structure(
         nrows=nrows, ncols=ncols, figsize=(14, 7), constrained_layout=True
     )
 
-    y_title = "Identity"
+    y_title = r"Identity, $I_{t,n}$"
 
     structure_list = list(Data_dict.keys())
     structure_data = list(Data_dict.values())
-
+    
+    structure_list_title = ["Watts-Strogatz small world", "Barabasi-Albert scale free"]
+    
     for i, ax in enumerate(axes.flat):
         for v in structure_data[i].agent_list:
             ax.plot(
@@ -71,7 +94,7 @@ def live_print_culture_timeseries_varynetwork_structure(
 
         ax.set_xlabel(r"Time")
         ax.set_ylabel(r"%s" % y_title)
-        ax.set_title(structure_list[i])
+        ax.set_title(structure_list_title[i])
         #ax.set_ylim(0, 1)
 
     plotName = fileName + "/Prints"
@@ -95,11 +118,11 @@ def draw_networks(
         nrows=nrows, ncols=ncols, figsize=(14, 7), constrained_layout=True
     )
 
-    y_title = "Identity"
-
     structure_list = list(Data_dict.keys())
     structure_data = list(Data_dict.values())
 
+    layout_list = ["circular", "spring"]
+    structure_list_title = ["Watts-Strogatz small world", "Barabasi-Albert scale free"]
     for i, ax in enumerate(axes.flat):
         G = structure_data[i].network
         individual_culture = [x.history_culture[0] for x in structure_data[i].agent_list]#get intial culture
@@ -112,11 +135,12 @@ def draw_networks(
             node_color=ani_step_colours,
             node_size=50,
             edgecolors="black",
+            pos=prod_pos(layout_list[i], G),
         )
 
-        ax.set_xlabel(r"Time")
-        ax.set_ylabel(r"%s" % y_title)
-        ax.set_title(structure_list[i])
+        #ax.set_xlabel(r"Time")
+        #ax.set_ylabel(r"%s" % y_title)
+        ax.set_title(structure_list_title[i])
         #ax.set_ylim(0, 1)
 
     plotName = fileName + "/Prints"
@@ -256,7 +280,7 @@ if __name__ == "__main__":
     Data_dict = {}
     #small_world
     params["network_structure"] = "small_world" # https://networkx.org/documentation/stable/reference/generated/networkx.generators.random_graphs.watts_strogatz_graph.html#networkx.generators.random_graphs.watts_strogatz_graph
-    params["K"] = 20
+    params["K"] = 5
     params["prob_rewire"] = 0.1
     Data_dict["small_world"] = generate_data(params)  # run the simulation
     
@@ -269,18 +293,17 @@ if __name__ == "__main__":
 
     #barabasi_albert_graph - I believe this is scale free or power law graph
     params["network_structure"] = "barabasi_albert_graph" # https://networkx.org/documentation/stable/reference/generated/networkx.generators.random_graphs.barabasi_albert_graph.html#networkx.generators.random_graphs.barabasi_albert_graph
-    params["k_new_node"] = 11#Number of edges to attach from a new node to existing nodes
+    params["k_new_node"] = 3#Number of edges to attach from a new node to existing nodes
     Data_dict["barabasi_albert_graph"] = generate_data(params)
 
     for key,value in Data_dict.items():
         print("Density: ",key,value.network_density)
         #print("history_std_culture", key, value.history_std_culture)
 
-    
     live_print_culture_timeseries_varynetwork_structure(fileName,Data_dict,nrows,ncols,dpi_save)
     draw_networks(fileName,Data_dict,nrows,ncols,dpi_save,norm_zero_one,cmap)
-    degree_distribution(fileName,Data_dict,nrows,ncols,dpi_save)
+    #degree_distribution(fileName,Data_dict,nrows,ncols,dpi_save)
     #plot_average_culture_timeseries_std(fileName,Data_dict,nrows,ncols,dpi_save)
-    identity_overlap(fileName,Data_dict,nrows,ncols,dpi_save)
+    #identity_overlap(fileName,Data_dict,nrows,ncols,dpi_save)
 
     plt.show()

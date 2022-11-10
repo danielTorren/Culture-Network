@@ -41,10 +41,94 @@ plt.rcParams.update({
     "font.family": "Helvetica"
 })
 
-figsize=(10,6)
-
 # modules
 #####RUNPLOT PLOTS - SINGLE NETWORK
+def live_print_culture_timeseries_varynetwork_structure(
+    fileName,
+    Data_dict,
+    nrows,
+    ncols,
+    dpi_save,
+):
+
+    fig, axes = plt.subplots(
+        nrows=nrows, ncols=ncols, figsize=(14, 7), constrained_layout=True
+    )
+
+    y_title = r"Identity, $I_{t,n}$"
+
+    structure_list = list(Data_dict.keys())
+    structure_data = list(Data_dict.values())
+    
+    structure_list_title = ["Watts-Strogatz small world", "Barabasi-Albert scale free"]
+    
+    for i, ax in enumerate(axes.flat):
+        for v in structure_data[i].agent_list:
+            ax.plot(
+                np.asarray(structure_data[i].history_time), np.asarray(v.history_culture)
+            )
+
+        ax.set_xlabel(r"Time")
+        ax.set_ylabel(r"%s" % y_title)
+        ax.set_title(structure_list_title[i])
+        #ax.set_ylim(0, 1)
+
+    plotName = fileName + "/Prints"
+    f = plotName + "/live_print_culture_timeseries_varynetwork_structure_%s" % (
+        len(structure_list),
+    )
+    #fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
+def draw_networks(
+    fileName,
+    Data_dict,
+    nrows,
+    ncols,
+    dpi_save,
+    norm_zero_one,
+    cmap,
+):
+
+    fig, axes = plt.subplots(
+        nrows=nrows, ncols=ncols, figsize=(14, 7), constrained_layout=True
+    )
+
+    structure_list = list(Data_dict.keys())
+    structure_data = list(Data_dict.values())
+
+    layout_list = ["circular", "spring"]
+    structure_list_title = ["Watts-Strogatz small world", "Barabasi-Albert scale free"]
+    for i, ax in enumerate(axes.flat):
+        G = structure_data[i].network
+        individual_culture = [x.history_culture[0] for x in structure_data[i].agent_list]#get intial culture
+        colour_adjust = norm_zero_one(individual_culture)
+        ani_step_colours = cmap(colour_adjust)
+
+        nx.draw(
+            G,
+            ax=ax,
+            node_color=ani_step_colours,
+            node_size=50,
+            edgecolors="black",
+            pos=prod_pos(layout_list[i], G),
+        )
+
+        #ax.set_xlabel(r"Time")
+        #ax.set_ylabel(r"%s" % y_title)
+        ax.set_title(structure_list_title[i])
+        #ax.set_ylim(0, 1)
+
+    plotName = fileName + "/Prints"
+    f = plotName + "/draw_networks_network_structure_%s" % (
+        len(structure_list),
+    )
+    #fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
+
+
+
 def plot_culture_timeseries(fileName, Data, dpi_save):
     fig, ax = plt.subplots(figsize=(10,6))
     y_title = r"Identity, $I_{t,n}$"
@@ -267,12 +351,12 @@ def live_print_culture_timeseries(
             ax.plot(
                 np.asarray(Data_list[i].history_time), np.asarray(v.history_culture)
             )
-        ax.text(0, 1.03, string.ascii_uppercase[i], transform=ax.transAxes, 
+        ax.text(0.5, 1.03, string.ascii_uppercase[i], transform=ax.transAxes, 
             size=20, weight='bold')
 
         ax.set_xlabel(r"Time")
         ax.set_ylabel(r"%s" % y_title)
-        ax.set_title(title_list[i])
+        #ax.set_title(title_list[i])
         # ax.set_xlim(0,1)
         ax.set_ylim(0, 1)
         # ax.axvline(culture_momentum, color='r',linestyle = "--")
@@ -289,7 +373,7 @@ def live_print_culture_timeseries_with_weighting(
 ):
 
     fig, axes = plt.subplots(
-        nrows=nrows, ncols=ncols, figsize=(14, 7), constrained_layout=True
+        nrows=2, ncols=ncols, figsize=(14, 7), constrained_layout=True
     )
     #print("axes", axes)
     y_title = r"Identity, $I_{t,n}$"
@@ -302,7 +386,7 @@ def live_print_culture_timeseries_with_weighting(
 
         axes[0][i].set_xlabel(r"Time")
         axes[0][i].set_ylabel(r"%s" % y_title)
-        axes[0][i].set_title(title_list[i])
+        axes[0][i].set_title(title_list[i], pad=5)
         axes[0][i].set_ylim(0, 1)
 
         axes[1][i].matshow(
@@ -311,8 +395,8 @@ def live_print_culture_timeseries_with_weighting(
             norm=Normalize(vmin=0, vmax=1),
             aspect="auto",
         )
-        axes[1][i].set_xlabel(r"n")
-        axes[1][i].set_ylabel(r"k")
+        axes[1][i].set_xlabel(r"Individual $k$")
+        axes[1][i].set_ylabel(r"Individual $n$")
         # print("matrix", Data_list[i].history_weighting_matrix[-1])
         # print("alpha_change",Data_list[i].alpha_change)
     # colour bar axes
@@ -320,7 +404,7 @@ def live_print_culture_timeseries_with_weighting(
         plt.cm.ScalarMappable(cmap=cmap, norm=Normalize(vmin=0, vmax=1)),
         ax=axes[1]#axes.ravel().tolist(),
     )  # This does a mapabble on the fly i think, not sure
-    cbar.set_label(r"Social network weighting, $\alpha_{n,k}$")
+    cbar.set_label(r"Social network weighting, $\alpha_{n,k}$", labelpad= 5)
 
     plotName = fileName + "/Prints"
     f = (
@@ -814,7 +898,7 @@ def double_matrix_plot(
     fileName, Z, Y_title, Y_param, variable_parameters_dict, cmap, dpi_save,x_ticks_pos,y_ticks_pos,x_ticks_label,y_ticks_label
 ):
 
-    fig, ax = plt.subplots(figsize=(10, 7))
+    fig, ax = plt.subplots(figsize=(10, 6))
 
     col_dict = variable_parameters_dict["col"]
     row_dict = variable_parameters_dict["row"]
@@ -894,10 +978,10 @@ def multiline(xs, ys, c, ax=None, **kwargs):
 
 
 def multi_line_matrix_plot(
-    fileName, Z, x_vals,y_vals,  Y_param, cmap, dpi_save, x_ticks_pos,x_ticks_label
+    fileName, Z, x_vals,y_vals,  Y_param, cmap, dpi_save, x_ticks_pos, x_ticks_label, y_ticks_pos, y_ticks_label
     ):
 
-    fig, ax = plt.subplots(figsize=(10, 6), constrained_layout=True)
+    fig, ax = plt.subplots( constrained_layout=True)#figsize=(14, 7)
 
     xs = np.tile(x_vals, (len(y_vals), 1))
     ys = np.transpose(Z)
@@ -906,14 +990,22 @@ def multi_line_matrix_plot(
     ax.set_ylabel(r"First behaviour attitude variance, $\sigma^2$")
     ax.set_xlabel(r"Number of behaviours per agent, M")
     
-    plt.xticks(x_ticks_pos, x_ticks_label)
+    #plt.xticks(x_ticks_pos, x_ticks_label)
 
     lc = multiline(xs, ys, c, cmap=cmap, lw=2)
     axcb = fig.colorbar(lc)
     axcb.set_label(r'Confirmation bias, $\theta$')
 
-    ax.set_xlim(2,20)
-    ax.set_ylim(bottom=0)
+    # HAS TO BE AFTER PUTTING INT THE MATRIX 
+    ax.set_xticks(x_ticks_pos)
+    ax.set_xticklabels(x_ticks_label)  
+    ax.xaxis.set_ticks_position('bottom')
+
+    ax.set_yticks(y_ticks_pos)
+    ax.set_yticklabels(y_ticks_label) 
+
+    #ax.set_xlim(2,20)
+    #ax.set_ylim(bottom=0)
 
     plotName = fileName + "/Plots"
     f = plotName + "/multi_line_matrix_plot_%s" % (Y_param)
@@ -1397,7 +1489,8 @@ def print_live_intial_culture_networks_and_culture_timeseries(
     for i in range(ncols):
         #####NETWORK
         G = nx.from_numpy_matrix(Data_list[i].history_weighting_matrix[0])
-        pos_culture_network = prod_pos(layout, G)
+        
+        pos_culture_network = prod_pos(layout[i], G)
         # print(i,ax)
         axes[0][i].set_title(
             r"{} = {}".format(property, round(property_list[i], round_dec))
@@ -1424,7 +1517,7 @@ def print_live_intial_culture_networks_and_culture_timeseries(
             )
 
         axes[0][i].set_xlabel(r"Time")
-        axes[0][i].set_ylabel(r"%s" % y_title)
+        axes[0][i].set_ylabel(r"%s" % y_title, labelpad=5)
         axes[0][i].set_ylim(0, 1)
 
     # colour bar axes

@@ -45,6 +45,8 @@ from resources.plot import (
     live_compare_animate_behaviour_matrix,
     live_compare_plot_animate_behaviour_scatter,
     live_varaince_timeseries,
+    draw_networks,
+    live_print_culture_timeseries_varynetwork_structure,
 )
 from resources.multi_run_single_param import (
     produce_param_list,
@@ -79,42 +81,58 @@ alpha_val = 0.25
 size_points = 5
 
 SINGLE = 1
+GRAPH_TYPE = 3
 
 if __name__ == "__main__":
     """The number of rows and cols set the number of experiments ie 4 rows and 3 cols gives 12 experiments"""
-    nrows = 2 #change for plots like time series alpha
-    ncols = 3  # due to screen ratio want more cols than rows usually
+    nrows = 1 #leave as 1 for alpha and homophily plots, but change for network!
+    ncols = 6  # due to screen ratio want more cols than rows usually
     reps = nrows * ncols  # make multiples of the number of cores for efficieny
 
-    property_varied = "homophily"#"alpha_change"  # "alpha_change"#"culture_momentum"#"confirmation_bias"#"inverse_homophily" #MAKE SURE ITS TYPES CORRECTLY
-    property_varied_title = "Attribute homophily, h"#"alpha_change"
-    param_min = 0
-    param_max = 1  # 50.0
-    #
-
-    title_list = [r"Static uniform $\alpha_{n,k}$", r"Static culturally determined $\alpha_{n,k}$", r"Dynamic culturally determined $\alpha_{n,k}$"]
-    title_list = [r"Homophily, h = 0.0", r"Homophily, h = 0.5", r"Homophily, h = 1.0"]
-
-    #property_values_list = np.linspace(param_min,param_max, reps) #np.asarray([0.0, 0.5, 1.0])#np.linspace(param_min,param_max, reps)
-
-    #property_values_list = np.asarray([0.0, 0.5, 1.0])# FOR ALPHA
-    property_values_list = np.asarray([0.2, 0.6, 1.0])# For homohily
-
-    
-    #title_list = ["%s = %s" % (property_varied_title,str(i)) for i in property_values_list]
-    #property_values_list = np.logspace(param_min, param_max, reps)
-    #log_norm = LogNorm()  # cant take log of negative numbers, unlike log s
-
-    print("property_values_list", property_values_list)
-    # property_values_list = SymLogNorm(linthresh=0.15, linscale=1, vmin=param_min, vmax=1.0, base=10)  # this works at least its correct
-
+    ############################
+    if GRAPH_TYPE == 0:
+        #FOR POLARISATION A,B PLOT - NEED TO SET self.b_attitude = parameters["a_attitude"] in NETWORK
+        property_varied = "a_attitude"
+        property_varied_title = "Attitude Beta parameters, (a,b)"
+        param_min = 0.05
+        param_max = 2.0  # 50.0
+        property_values_list = np.asarray([0.05, 0.5, 2.0])# FOR ALPHA
+        title_list = [r"Attitude Beta parameters, (a,b) = 0.05, Confirmation bias, $\theta$ = 40", r"Attitude Beta parameters, (a,b) = 0.5, Confirmation bias, $\theta$ = 20", r"Attitude Beta parameters, (a,b) = 2, Confirmation bias, $\theta$ = 10"]
+    elif GRAPH_TYPE == 1:
+        ################
+        #FOR ALPHA CHANGE PLOT
+        property_varied = "alpha_change"
+        property_varied_title = "alpha_change"
+        param_min = 0.0
+        param_max = 1.0  # 50.0
+        title_list = [r"Static uniform $\alpha_{n,k}$", r"Static culturally determined $\alpha_{n,k}$", r"Dynamic culturally determined $\alpha_{n,k}$"]
+        property_values_list = np.asarray([0.0, 0.5, 1.0])# FOR ALPHA
+    elif GRAPH_TYPE == 2:
+        ###############################
+        #FOR HOMOPHILY PLOT
+        property_varied = "homophily"
+        property_varied_title = "Attribute homophily, $h$"
+        param_min = 0.0
+        param_max = 1.0  # 50.0
+        title_list = [r"Homophily, h = 0.0", r"Homophily, h = 0.5", r"Homophily, h = 1.0"]
+        property_values_list = np.asarray([0.2, 0.6, 1.0])
+    elif GRAPH_TYPE == 3:
+        ###############################
+        #FOR NETOWRK STRUCTURE HOMOPHILY PLOT
+        property_varied = "homophily"
+        property_varied_title = "Attribute homophily, $h$"
+        param_min = 0.0
+        param_max = 1.0  # 50.0
+        title_list = [r"Small world, Homophily, h = 0.0", r"Small world, Homophily, h = 0.5", r"Small world, Homophily, h = 1.0",r"Scale free, Homophily, h = 0.0", r"Scale free, Homophily, h = 0.5", r"Scale free, Homophily, h = 1.0"]
+        property_values_list = np.asarray([0.2, 0.6, 1.0, 0.2, 0.6, 1.0])
+        
     f = open("constants/base_params.json")
     params = json.load(f)
     params["time_steps_max"] = int(params["total_time"] / params["delta_t"])
 
     if SINGLE:
         # SINGLE SHOT RUNS NO AVERAGING OVER STOCHASTIC EFFECTS
-        fileName = "results/%s_variation_%s_%s_%s_%s_%s_%s" % (
+        fileName = "results/network_struct_%s_variation_%s_%s_%s_%s_%s_%s" % (#CHANGE THIS BACK!!!!
             property_varied,
             str(params["N"]),
             str(params["time_steps_max"]),
@@ -126,50 +144,88 @@ if __name__ == "__main__":
         print("fileName: ", fileName)
         createFolder(fileName)
 
-        params_list = produce_param_list(params, property_values_list, property_varied)
+        if GRAPH_TYPE == 0:
+            case_1 = params.copy()
+            case_2 = params.copy()
+            case_3 = params.copy()
+
+            case_1["a_attitude"] = 1.5 #0.05
+            case_1["confirmation_bias"] = 30#40
+
+            case_2["a_attitude"] = 1.4 #0.5
+            case_2["confirmation_bias"] = 30#30# THIS IS NEEDS TO SPLIT PARALLEL
+
+            case_3["a_attitude"] = 1.3 #2.0
+            case_3["confirmation_bias"] = 30#10
+
+            params_list = [case_1, case_2, case_3]
+        elif GRAPH_TYPE == 3:
+            params["network_structure"] = "small_world" #0.05
+            params["K"] = 5
+            params["prob_rewire"] = 0.1
+
+            case_1 = params.copy()
+            case_2 = params.copy()
+            case_3 = params.copy()
+
+            # np.asarray([0.2, 0.6, 1.0])
+            case_1["homophily"] = 0.2#40
+            case_2["homophily"] = 0.6#40
+            case_3["homophily"] = 1.0#40
+
+            params["network_structure"] = "barabasi_albert_graph" #0.05
+            params["k_new_node"] = 3#Number of edges to attach from a new node to existing nodes
+            case_4 = params.copy()
+            case_5 = params.copy()
+            case_6 = params.copy()
+
+            # np.asarray([0.2, 0.6, 1.0])
+            case_4["homophily"] = 0.2#40
+            case_5["homophily"] = 0.6#40
+            case_6["homophily"] = 1.0#40
+
+            params_list = [case_1, case_2, case_3, case_4,case_5, case_6]
+        else:
+            params_list = produce_param_list(params, property_values_list, property_varied)
         data = parallel_run(params_list)  # better if a Multiple of 4
 
         ###WORKING
+
+        if GRAPH_TYPE == 0:
+            #FOR POLARISATION A,B PLOT - NEED TO SET self.b_attitude = parameters["a_attitude"] in NETWORK
+            live_print_culture_timeseries(fileName, data, property_varied, title_list, nrows, ncols, dpi_save)
+        elif GRAPH_TYPE == 1:
+            ################
+            #FOR ALPHA CHANGE PLOT
+            live_print_culture_timeseries_with_weighting(fileName, data, property_varied, title_list, nrows, ncols, dpi_save, cmap_weighting)
+        elif GRAPH_TYPE == 2:
+            ###############################
+            #FOR HOMOPHILY PLOT
+            print_live_intial_culture_networks_and_culture_timeseries(fileName, data, dpi_save, property_values_list, property_varied_title, ncols, layout, norm_zero_one, cmap, node_size,round_dec)
+        elif GRAPH_TYPE == 3:
+            #Data_dict = {"small_world": data[:3], "barabasi_albert_graph": data[3:]}
+            #live_print_culture_timeseries(fileName, data, property_varied, title_list, nrows, ncols, dpi_save)
+            layout = ["circular","circular", "circular", "spring", "spring", "spring"]
+            print_live_intial_culture_networks_and_culture_timeseries(fileName, data, dpi_save, property_values_list, property_varied_title, ncols, layout, norm_zero_one, cmap, node_size,round_dec)
+
+        
         """Comment out those plots that you dont want to produce"""
         #live_print_culture_timeseries(fileName, data, property_varied, title_list, nrows, ncols, dpi_save)
         # plot_average_culture_comparison(fileName, data, dpi_save,property_values_list, property_varied,round_dec)
-        #plot_carbon_emissions_total_comparison(
-        #    fileName, data, dpi_save, property_values_list, property_varied, round_dec
-        #)
+        #plot_carbon_emissions_total_comparison(fileName, data, dpi_save, property_values_list, property_varied, round_dec)
         # plot_weighting_matrix_convergence_comparison(fileName, data, dpi_save,property_values_list, property_varied,round_dec)
         # plot_average_culture_no_range_comparison(fileName, data, dpi_save,property_values_list, property_varied,round_dec)
         # plot_live_link_change_comparison(fileName, data, dpi_save,property_values_list, property_varied,round_dec)
         # plot_live_cum_link_change_comparison(fileName, data, dpi_save,property_values_list, property_varied,round_dec)
         # plot_live_link_change_per_agent_comparison(fileName, data, dpi_save,property_values_list, property_varied,round_dec)
         #plot_live_cum_link_change_per_agent_comparison(fileName, data, dpi_save,property_values_list, property_varied,round_dec)
-
-        """
-        live_varaince_timeseries(
-            fileName,
-            data,
-            property_varied,
-            property_varied_title,
-            property_values_list,
-            dpi_save,
-        )
-        """
-
-        #live_multirun_diagram_mean_coefficient_variance(
-        #    fileName,
-        #    data,
-        #    property_varied,
-        #    property_values_list,
-        #    property_varied_title,
-        #    cmap,
-        #    dpi_save,
-        #    norm_zero_one,
-        #)
+        #live_varaince_timeseries( fileName,data,property_varied,property_varied_title,property_values_list,dpi_save,)
+        #live_multirun_diagram_mean_coefficient_variance(fileName,data,property_varied,property_values_list,property_varied_title,cmap,dpi_save,norm_zero_one,)
         # print_live_intial_culture_networks(fileName, data, dpi_save, property_values_list, property_varied, nrows, ncols , layout, norm_zero_one, cmap, node_size,round_dec)
         # prints_init_weighting_matrix(fileName, data, dpi_save,nrows, ncols, cmap_weighting,property_values_list, property_varied,round_dec)
         # prints_final_weighting_matrix(fileName, data, dpi_save,nrows, ncols, cmap_weighting,property_values_list, property_varied,round_dec)
         #live_print_culture_timeseries_with_weighting(fileName, data, property_varied, title_list, nrows, ncols, dpi_save, cmap_weighting)
-        print_live_intial_culture_networks_and_culture_timeseries(fileName, data, dpi_save, property_values_list, property_varied_title, ncols, layout, norm_zero_one, cmap, node_size,round_dec)
-
+        #print_live_intial_culture_networks_and_culture_timeseries(fileName, data, dpi_save, property_values_list, property_varied_title, ncols, layout, norm_zero_one, cmap, node_size,round_dec)
         # ani_a =  multi_animation_weighting(fileName,data, cmap_weighting,  interval, fps, round_dec, nrows, ncols)
         # ani_b = live_compare_animate_culture_network_and_weighting(fileName,data,layout,cmap,node_size,interval,fps,norm_zero_one,round_dec,cmap_edge, ncols, nrows,property_varied_title,property_values_list)
         # ani_c = live_compare_animate_weighting_matrix(fileName, data,  cmap_weighting, interval, fps, round_dec, cmap_edge, nrows, ncols,property_varied_title,property_values_list)

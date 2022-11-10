@@ -278,6 +278,17 @@ class Network:
             round((self.N**self.homophilly_rate) * (1 - self.homophily))
         )
 
+        # create network
+        (
+            self.adjacency_matrix,
+            self.weighting_matrix,
+            self.network,
+        ) = self.create_weighting_matrix()
+
+        self.network_density = nx.density(self.network)
+        #print("self.network_density",self.network_density)
+
+        #Associate people with attitude values
         (
             self.a_attitude,
             self.b_attitude,
@@ -293,22 +304,12 @@ class Network:
         (
             self.attitude_matrix_init,
             self.threshold_matrix_init,
-        ) = self.generate_init_data_behaviours()
+        ) = self.generate_init_data_behaviours()#self.generate_init_data_behaviours_two_types()#
         
         self.agent_list = self.create_agent_list()
 
         if self.green_N > 0:
             self.mix_in_green_individuals()
-
-        # create network
-        (
-            self.adjacency_matrix,
-            self.weighting_matrix,
-            self.network,
-        ) = self.create_weighting_matrix()
-
-        self.network_density = nx.density(self.network)
-        #print("self.network_density",self.network_density)
 
         self.social_component_matrix = self.calc_social_component_matrix()
 
@@ -552,6 +553,96 @@ class Network:
         ]
 
         return np.asarray(attitude_list_sorted_shuffle), threshold_matrix
+
+    def generate_init_data_behaviours_two_types(self) -> tuple[npt.NDArray, npt.NDArray]:
+        """
+        Generate the initial values for agent behavioural attitudes and thresholds using Beta distribution
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        attitude_list_sorted_shuffle: npt.NDArray
+            NxM array which is sorted to the correct degree of homophily. used to create Individual objects, one from each row of the array.
+            Entries represent how positive a persons attitudes towards a green alternative behaviour are
+        threshold_matrix: npt.NDArray
+            NxM array of behavioural thresholds, represents the barriers to entry to performing a behaviour e.g the distance of a
+            commute or disposable income of an individual
+        """
+
+        green_vals = [0.9]*self.M
+        brown_vals = [0.1]*self.M
+        N_green = self.N/2
+
+        threshold_list = [
+            np.random.beta(self.a_threshold, self.b_threshold, size=self.M)
+            for n in range(self.N)
+        ]
+
+        #start: select 2 random persons
+        index_init_green, index_init_brown = np.random.choice(range(self.N), 2)
+        
+        green_list = [index_init_green]
+        brown_list = [index_init_brown]
+        green_candidate_list = list(np.where(self.adjacency_matrix[index_init_green] == 1)[0])#get index of row
+        brown_candidate_list = list(np.where(self.adjacency_matrix[index_init_brown] == 1)[0])#get index of row
+        #print("init green candidates", green_candidate_list)
+
+        while len(green_list) < N_green:
+            
+            #next step
+            new_green_candidate = np.random.choice(green_candidate_list, 1)[0]
+            new_brown_candidate = np.random.choice(brown_candidate_list, 1)[0]
+            if new_green_candidate == new_brown_candidate:
+                new_brown_candidate = np.random.choice(brown_candidate_list, 1)[0]#just dp it once for now?
+            #print("new_green_candidate",new_green_candidate)
+            green_list.append(new_green_candidate)
+            brown_list.append(new_brown_candidate)
+
+            green_candidate_list.remove(new_green_candidate)
+            brown_candidate_list.remove(new_brown_candidate)
+
+            if new_brown_candidate in green_candidate_list:
+                green_candidate_list.remove(new_brown_candidate)
+
+            if new_green_candidate in brown_candidate_list:
+                brown_candidate_list.remove(new_green_candidate)
+
+            new_green_neighbours = list(np.where((self.adjacency_matrix[new_green_candidate] == 1))[0])
+            #print("new_neighbours", new_neighbours)
+            unique_green_neighbours = [x for x in new_green_neighbours if ((x not in green_candidate_list) and (x not in brown_list))]#throw out stuff thats aleardy in
+            
+            new_brown_neighbours = list(np.where((self.adjacency_matrix[new_brown_candidate] == 1))[0])
+            unique_brown_neighbours = [x for x in new_brown_neighbours if ((x not in brown_candidate_list) and (x not in green_list))]#throw out stuff thats aleardy in
+
+            #print("unique neighbours", unique_neighbours)
+            green_candidate_list = green_candidate_list + unique_green_neighbours
+            brown_candidate_list = brown_candidate_list + unique_brown_neighbours
+
+            #print(len(green_list), len(brown_list))
+            if not green_candidate_list:#check if list empty
+                other_list = [x for x in range(self.N) if ((x not in green_list) and (x not in brown_list))]
+                green_candidate_list = list(np.random.choice(other_list, 1)[0])
+                #print("empty no longer",green_candidate_list)
+            if not brown_candidate_list:
+                other_list = [x for x in range(self.N) if ((x not in green_list) and (x not in brown_list))]
+                brown_candidate_list = list(np.random.choice(other_list, 1)[0])
+            else:
+                pass
+
+        
+        attitude_list = [green_vals if x in green_list else brown_vals for x in range(self.N)]
+
+        attitude_list_shuffled = self.partial_shuffle(
+            attitude_list, self.shuffle_reps
+        )
+        #print("attitude_list", attitude_list)
+        #print("attitude_list_shufledd", attitude_list_shuffled)
+            
+
+        return np.asarray(attitude_list_shuffled), np.asarray(threshold_list)
 
     def create_agent_list(self) -> list[Individual]:
         """

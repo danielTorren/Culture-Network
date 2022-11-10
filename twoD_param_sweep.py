@@ -56,9 +56,9 @@ from resources.multi_run_2D_param import (
 import numpy as np
 
 # run bools
-RUN = 0 # run or load in previously saved data
+RUN = 1 # run or load in previously saved data
 SINGLE = 0 # determine if you runs single shots or study the averages over multiple runs for each experiment
-fileName = "results/twoD_Average_confirmation_bias_a_attitude_100_3000_6_50_50_5"
+fileName = "results/twoD_Average_confirmation_bias_M_200_3000_20_50_20_5"
 #"results/twoD_Average_confirmation_bias_a_attitude_200_3000_20_64_64_5"
 #"results/twoD_Average_action_observation_I_a_attitude_200_2000_20_64_64_5"
 #twoD_Average_M_confirmation_bias_200_2000_20_40_64_5
@@ -79,6 +79,14 @@ cmap = LinearSegmentedColormap.from_list(
     "BrownGreen", ["sienna", "whitesmoke", "olivedrab"], gamma=1
 )
 norm_zero_one = Normalize(vmin=0, vmax=1)
+
+"""
+{
+    "row":{"property":"M","min":1, "max": 20, "title": "M","divisions": "linear", "reps": 20}, 
+    "col":{"property":"confirmation_bias","min":0, "max":90 , "title": "Confirmation bias, \\theta","divisions": "linear", "reps": 50}  
+}
+
+"""
 
 if __name__ == "__main__":
     if SINGLE:
@@ -238,28 +246,46 @@ if __name__ == "__main__":
         #double_phase_diagram(fileName, matrix_coefficient_of_variance, r"Identity coefficient of variance, $\sigma/\mu$", "coefficient_of_variance",variable_parameters_dict, get_cmap("Oranges"),dpi_save)
         
         #when using discrete or interger variables ie, K,N,M
-        index_len_x_matrix = 49
-        max_x_val = 90
-        min_x_val = -10
-        x_ticks_label = [-10,0,10,20,30,40,50,60,70,80,90]#[-10,0,10,20,30,40,50,60]#[col_dict["vals"][x] for x in range(len(col_dict["vals"]))  if x % select_val_x == 0]
-        x_ticks_pos = [int(round(index_len_x_matrix*((x - min_x_val)/(max_x_val- min_x_val)))) for x in x_ticks_label]#[0,30,70,50]#[0,10,20,30,40,50,60,70]#[x for x in range(len(col_dict["vals"]))  if x % select_val_x == 0]
-        #print("x_ticks_pos",x_ticks_pos)
+        plot_double_matrix = 0
+        if plot_double_matrix :
+            #### FOR confimation bias vs attitude polarisation
+            index_len_x_matrix = 49
+            max_x_val = 90
+            min_x_val = -10
+            x_ticks_label = [-10,0,10,20,30,40,50,60,70,80,90]#[-10,0,10,20,30,40,50,60]#[col_dict["vals"][x] for x in range(len(col_dict["vals"]))  if x % select_val_x == 0]
+            x_ticks_pos = [int(round(index_len_x_matrix*((x - min_x_val)/(max_x_val- min_x_val)))) for x in x_ticks_label]#[0,30,70,50]#[0,10,20,30,40,50,60,70]#[x for x in range(len(col_dict["vals"]))  if x % select_val_x == 0]
+            #print("x_ticks_pos",x_ticks_pos)
 
-                
-        index_len_y_matrix = 49
-        max_y_val = 2
-        min_y_val =  0.05
-        y_ticks_label = [0.05,0.25,0.50,0.75,1.00,1.25,1.50,1.75,2.00]#[-10,0,10,20,30,40,50,60]#[col_dict["vals"][x] for x in range(len(col_dict["vals"]))  if x % select_val_x == 0]
-        y_ticks_pos = [int(round(index_len_y_matrix*((y - min_y_val)/(max_y_val- min_y_val)))) for y in y_ticks_label]#[0,30,70,50]#[0,10,20,30,40,50,60,70]#[x for x in range(len(col_dict["vals"]))  if x % select_val_x == 0]
-        #print("y_ticks_pos",y_ticks_pos)
+                    
+            index_len_y_matrix = 49
+            max_y_val = 2
+            min_y_val =  0.05
+            y_ticks_label = [0.05,0.25,0.50,0.75,1.00,1.25,1.50,1.75,2.00]#[-10,0,10,20,30,40,50,60]#[col_dict["vals"][x] for x in range(len(col_dict["vals"]))  if x % select_val_x == 0]
+            y_ticks_pos = [int(round(index_len_y_matrix*((y - min_y_val)/(max_y_val- min_y_val)))) for y in y_ticks_label]#[0,30,70,50]#[0,10,20,30,40,50,60,70]#[x for x in range(len(col_dict["vals"]))  if x % select_val_x == 0]
+            #print("y_ticks_pos",y_ticks_pos)
 
-        #double_matrix_plot(fileName, matrix_emissions, r"Total normalised emissions $E/NM$", "emissions",variable_parameters_dict, get_cmap("Reds"),dpi_save)
-        #double_matrix_plot(fileName, matrix_mu, r"Average identity, $\mu$", "mu",variable_parameters_dict, get_cmap("Blues"),dpi_save)
-        #double_matrix_plot(fileName,matrix_var_edit, r"First beahviour variance, $\sigma^2$", "variance",variable_parameters_dict, get_cmap("Oranges"),dpi_save,x_ticks_pos,y_ticks_pos,x_ticks_label,y_ticks_label)
-        double_matrix_plot(fileName,matrix_var, r"Identity variance, $\sigma^2$", "variance",variable_parameters_dict, get_cmap("Oranges"),dpi_save,x_ticks_pos,y_ticks_pos,x_ticks_label,y_ticks_label)
-        #double_matrix_plot(fileName, matrix_coefficient_of_variance, r"Identity coefficient of variance, $\sigma/\mu$", "coefficient_of_variance",variable_parameters_dict, get_cmap("Oranges"),dpi_save)
+            #double_matrix_plot(fileName, matrix_emissions, r"Total normalised emissions $E/NM$", "emissions",variable_parameters_dict, get_cmap("Reds"),dpi_save)
+            #double_matrix_plot(fileName, matrix_mu, r"Average identity, $\mu$", "mu",variable_parameters_dict, get_cmap("Blues"),dpi_save)
+            #double_matrix_plot(fileName,matrix_var_edit, r"First beahviour variance, $\sigma^2$", "variance",variable_parameters_dict, get_cmap("Oranges"),dpi_save,x_ticks_pos,y_ticks_pos,x_ticks_label,y_ticks_label)
+            #double_matrix_plot(fileName,matrix_var, r"Identity variance, $\sigma^2$", "variance",variable_parameters_dict, get_cmap("Oranges"),dpi_save,x_ticks_pos,y_ticks_pos,x_ticks_label,y_ticks_label)
+            #double_matrix_plot(fileName, matrix_coefficient_of_variance, r"Identity coefficient of variance, $\sigma/\mu$", "coefficient_of_variance",variable_parameters_dict, get_cmap("Oranges"),dpi_save)
+        plot_multi_line = 1
+        if plot_multi_line:
+            col_dict = variable_parameters_dict["col"]
+            row_dict = variable_parameters_dict["row"]
+            select_val_x = 1
+            select_val_y = 2
+
+            x_ticks_pos = [x for x in range(len(col_dict["vals"]))  if x % select_val_x == 0]
+            x_ticks_label = [col_dict["vals"][x] for x in range(len(col_dict["vals"]))  if x % select_val_x == 0]
         
-        #multi_line_matrix_plot(fileName,matrix_var, np.arange(1,21), np.arange(-10,60),"variance", get_cmap("Blues"),dpi_save,y_ticks_pos, y_ticks_label)
+            y_ticks_pos  = [y for y in range(len(row_dict["vals"]))  if y % select_val_y == 0]
+            y_ticks_label  = [row_dict["vals"][y] for y in range(len(row_dict["vals"]))  if y % select_val_y == 0]
+
+            print("x",x_ticks_pos,x_ticks_label)
+            print("y",y_ticks_pos,y_ticks_label)
+
+            multi_line_matrix_plot(fileName,matrix_var, np.arange(1,21), np.arange(0,90),"variance", get_cmap("Blues"),dpi_save,x_ticks_pos, x_ticks_label, y_ticks_pos, y_ticks_label)#y_ticks_pos, y_ticks_label
         
         #print("matrix_var[0]",matrix_var[0])
         #print("shape matrix", matrix_var.shape)
