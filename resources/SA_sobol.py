@@ -262,6 +262,7 @@ def analyze_results(
     """
     Perform sobol analysis on simulation results
     """
+    
     Si_emissions = sobol.analyze(
         problem,
         Y_emissions,
@@ -459,7 +460,12 @@ def Merge_dict_SA(data_sa_dict: dict, plot_dict: dict) -> dict:
         the joined dictionary of dictionaries
 
     """
+    #print("data_sa_dict",data_sa_dict)
+    #print("plot_dict",plot_dict)
     for i in data_sa_dict.keys():
         for v in plot_dict[i].keys():
+            #if v in data_sa_dict:
             data_sa_dict[i][v] = plot_dict[i][v]
+            #else:
+            #    pass
     return data_sa_dict

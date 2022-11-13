@@ -343,7 +343,7 @@ def plot_threshold_timeseries(FILENAME: str, Data: DataFrame, dpi_save: int):
 def live_print_culture_timeseries(
     fileName, Data_list, property_varied, title_list, nrows, ncols, dpi_save
 ):
-    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols,figsize=(10, 6))#, ,figsize=(14, 7)
     y_title = r"Identity, $I_{t,n}$"
 
     for i, ax in enumerate(axes.flat):
@@ -351,15 +351,14 @@ def live_print_culture_timeseries(
             ax.plot(
                 np.asarray(Data_list[i].history_time), np.asarray(v.history_culture)
             )
-        ax.text(0.5, 1.03, string.ascii_uppercase[i], transform=ax.transAxes, 
-            size=20, weight='bold')
+            #print("v.history_culture",v.history_culture)
+        
+        ax.text(0.5, 1.03, string.ascii_uppercase[i], transform=ax.transAxes, size=20, weight='bold')
 
         ax.set_xlabel(r"Time")
         ax.set_ylabel(r"%s" % y_title)
-        #ax.set_title(title_list[i])
-        # ax.set_xlim(0,1)
+    
         ax.set_ylim(0, 1)
-        # ax.axvline(culture_momentum, color='r',linestyle = "--")
 
     plt.tight_layout()
 
@@ -710,6 +709,37 @@ def live_average_multirun_double_phase_diagram_mean(
     fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
     fig.savefig(f + ".png", dpi=dpi_save, format="png")
 
+def homophily_contour(
+    f,total_difference_init_matrix,prob_rewire_list_pos,prob_rewire_list_label,homophily_list_pos,homophily_list_label,cmap, dpi_save, col_label, row_label, y_label,homophily_list,prob_rewire_list
+):
+    fig, ax = plt.subplots(figsize=(10, 6))#
+    
+    X, Y = np.meshgrid(prob_rewire_list,homophily_list)
+    contours = ax.contour(X, Y, total_difference_init_matrix, colors="black")
+    ax.clabel(contours, inline=True, fontsize=8)
+
+    cp = ax.contourf(X, Y, total_difference_init_matrix, cmap=cmap, alpha=0.5)
+    cbar = fig.colorbar(
+        cp,
+        ax=ax,
+    )
+    cbar.set_label(y_label)
+
+    #ax.set_xticks(prob_rewire_list_pos) 
+    #ax.set_xticklabels(prob_rewire_list_label, fontsize=12)
+    #ax.xaxis.set_ticks_position('bottom')
+
+    #ax.set_yticks(homophily_list_pos) 
+    #ax.set_yticklabels(homophily_list_label, fontsize=12)
+
+    ax.set_xlabel(col_label)
+    ax.set_ylabel(row_label)
+
+    plotName = f + "/Plots"
+    f = plotName + "/Total_difference_between_neighbours_per_agent"
+    fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    #fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
 
 def live_average_multirun_double_phase_diagram_mean_alt(
     fileName, Z, variable_parameters_dict, cmap, dpi_save
@@ -938,6 +968,48 @@ def double_matrix_plot(
     #fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
     fig.savefig(f + ".png", dpi=dpi_save, format="png")
 
+def double_matrix_plot_ab(fileName, Z, Y_title, Y_param, variable_parameters_dict, cmap, dpi_save,col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label
+):
+
+    fig, ax = plt.subplots()#figsize=(10, 6)
+
+    col_dict = variable_parameters_dict["col"]
+    row_dict = variable_parameters_dict["row"]
+
+    mat = ax.matshow(
+        Z,
+        cmap=cmap,
+        aspect="auto",
+    )
+    cbar = fig.colorbar(
+        mat,
+        #plt.cm.ScalarMappable(cmap=cmap, norm=Normalize(vmin=Z.min(), vmax=Z.max())),
+        ax=ax,
+    )
+    cbar.set_label(Y_title)
+    ax.xaxis.set_ticks_position('bottom')
+    
+    ax.set_xlabel(r"Attitude Beta parameter, $a$")
+    ax.set_ylabel(r"Attitude Beta parameter, $b$")
+
+
+    #if col_dict["divisions"] == "log":
+    #    ax.set_xscale("log")
+    #if row_dict["divisions"] == "log":
+    #    ax.set_yscale("log")
+
+    ax.set_xticks(col_ticks_pos)
+    ax.set_xticklabels(col_ticks_label)  
+    ax.xaxis.set_ticks_position('bottom')
+
+    ax.set_yticks(row_ticks_pos)
+    ax.set_yticklabels(row_ticks_label)  
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/live_average_double_matrix_plot_%s" % (Y_param)
+    #fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    #fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
 def multiline(xs, ys, c, ax=None, **kwargs):
     """Plot lines with different colorings
 
@@ -977,69 +1049,120 @@ def multiline(xs, ys, c, ax=None, **kwargs):
     return lc
 
 
+def homophily_matrix(f,total_difference_init_matrix,prob_rewire_list_pos,prob_rewire_list_label,homophily_list_pos,homophily_list_label,cmap, dpi_save, col_label, row_label, y_label):
+    fig, ax = plt.subplots(figsize=(10, 6))
+    
+    mat = ax.matshow(
+        total_difference_init_matrix,
+        aspect="auto",
+        cmap=cmap,
+    )
+    cbar = fig.colorbar(
+        mat,
+        #plt.cm.ScalarMappable(cmap=cmap, norm=Normalize(vmin=Z.min(), vmax=Z.max())),
+        ax=ax,
+    )
+    cbar.set_label(y_label)
+
+    ax.set_xticks(prob_rewire_list_pos) 
+    ax.set_xticklabels(prob_rewire_list_label, fontsize=12)
+    ax.xaxis.set_ticks_position('bottom')
+
+    ax.set_yticks(homophily_list_pos) 
+    ax.set_yticklabels(homophily_list_label, fontsize=12)
+
+    ax.set_xlabel(col_label)
+    ax.set_ylabel(row_label)
+
+    plotName = f + "/Plots"
+    f = plotName + "/Total_difference_between_neighbours_per_agent"
+    fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    #fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
 def multi_line_matrix_plot(
-    fileName, Z, x_vals,y_vals,  Y_param, cmap, dpi_save, x_ticks_pos, x_ticks_label, y_ticks_pos, y_ticks_label
+    fileName, Z, col_vals, row_vals,  Y_param, cmap, dpi_save, col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label,col_axis_x, col_label, row_label, y_label
     ):
 
     fig, ax = plt.subplots( constrained_layout=True)#figsize=(14, 7)
 
-    xs = np.tile(x_vals, (len(y_vals), 1))
-    ys = np.transpose(Z)
-    c = y_vals
+    if col_axis_x:
+        xs = np.tile(col_vals, (len(row_vals), 1))
+        ys = Z
+        c = row_vals
 
-    ax.set_ylabel(r"First behaviour attitude variance, $\sigma^2$")
-    ax.set_xlabel(r"Number of behaviours per agent, M")
+    else:
+        xs = np.tile(row_vals, (len(col_vals), 1))
+        ys = np.transpose(Z)
+        c = col_vals
+    
+    #print("after",xs.shape, ys.shape, c.shape)
+
+    ax.set_ylabel(y_label)#(r"First behaviour attitude variance, $\sigma^2$")
     
     #plt.xticks(x_ticks_pos, x_ticks_label)
 
     lc = multiline(xs, ys, c, cmap=cmap, lw=2)
     axcb = fig.colorbar(lc)
-    axcb.set_label(r'Confirmation bias, $\theta$')
 
-    # HAS TO BE AFTER PUTTING INT THE MATRIX 
-    ax.set_xticks(x_ticks_pos)
-    ax.set_xticklabels(x_ticks_label)  
-    ax.xaxis.set_ticks_position('bottom')
+    if col_axis_x:
+        axcb.set_label(row_label)#(r"Number of behaviours per agent, M")
+        ax.set_xlabel(col_label)#(r'Confirmation bias, $\theta$')
+        ax.set_xticks(col_ticks_pos)
+        ax.set_xticklabels(col_ticks_label)
+        #ax.set_xlim(left = 0.0, right = 60)
+        #ax.set_xlim(left = -10.0, right = 90)
 
-    ax.set_yticks(y_ticks_pos)
-    ax.set_yticklabels(y_ticks_label) 
-
-    #ax.set_xlim(2,20)
-    #ax.set_ylim(bottom=0)
+    else:
+        axcb.set_label(col_label)#)(r'Confirmation bias, $\theta$')
+        ax.set_xlabel(row_label)#(r"Number of behaviours per agent, M")
+        ax.set_xticks(row_ticks_pos)
+        ax.set_xticklabels(row_ticks_label)
+        #ax.set_xlim(left = 1.0)
+        #ax.set_xlim(left = 0.0, right = 2.0)
 
     plotName = fileName + "/Plots"
-    f = plotName + "/multi_line_matrix_plot_%s" % (Y_param)
+    f = plotName + "/multi_line_matrix_plot_%s_%s" % (Y_param, col_axis_x)
     fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
     #fig.savefig(f + ".png", dpi=dpi_save, format="png")
 
 def multi_line_matrix_plot_divide_through(
-    fileName, Z, x_vals,y_vals,  Y_param, cmap, dpi_save, x_ticks_pos,x_ticks_label
+    fileName, Z, col_vals, row_vals,  Y_param, cmap, dpi_save, col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label,col_axis_x
     ):
 
-    fig, ax = plt.subplots(figsize=(10, 6), constrained_layout=True)
+    fig, ax = plt.subplots( figsize=(14, 7),constrained_layout=True)#figsize=(14, 7)
 
-    xs = np.tile(x_vals, (len(y_vals), 1))
-    ys = np.transpose(Z)
-    c = y_vals
+    if col_axis_x:
+        xs = np.tile(col_vals, (len(row_vals), 1))
+        ys = Z
+        c = row_vals
+    else:
+        xs = np.tile(row_vals, (len(col_vals), 1))
+        ys = np.transpose(Z)
+        c = col_vals
 
-    print(xs.shape,ys.shape,c.shape)
-
-    ax.set_ylabel(r"Normalised first behaviour attitude variance")
-    ax.set_xlabel(r"Number of behaviours per agent, M")
-    
-    plt.xticks(x_ticks_pos, x_ticks_label)
-
-    ax.set_xlim(2,20)
-    ax.set_ylim(bottom=0)
-
-    lc = multiline(xs, ys, c, cmap=cmap, lw=2)
+    lc = multiline(xs, ys, c, cmap=cmap, lw=2)#returns lien collection
     axcb = fig.colorbar(lc)
-    axcb.set_label(r'Confirmation bias, $\theta$')
+
+    ax.set_ylim(bottom = 0.0)
+    ax.set_ylabel(r"Normalised behavioural attitude variance, $\sigma^{2}_{2}/\sigma^{2}_{1}$")
+
+    if col_axis_x:
+        axcb.set_label(r"Number of behaviours per agent, $M$")
+        ax.set_xlabel(r'Confirmation bias, $\theta$')
+        ax.set_xticks(col_ticks_pos)
+        ax.set_xticklabels(col_ticks_label)
+        ax.set_xlim(left = 0.0, right = 60)
+    else:
+        axcb.set_label(r'Confirmation bias, $\theta$')
+        ax.set_xlabel(r"Number of behaviours per agent, $M$")
+        ax.set_xticks(row_ticks_pos)
+        ax.set_xticklabels(row_ticks_label)
+        ax.set_xlim(left = 1.0)
 
     plotName = fileName + "/Plots"
-    f = plotName + "/multi_line_matrix_plot_divide_through_%s" % (Y_param)
+    f = plotName + "/multi_line_matrix_plot_divide_through_%s_%s" % (Y_param, col_axis_x)
     fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
-    #fig.savefig(f + ".png", dpi=dpi_save, format="png")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
 
 
 def print_culture_timeseries_vary_array(
@@ -2057,10 +2180,13 @@ def multi_scatter_seperate_total_sensitivity_analysis_plot(
     Create scatter chart of results.
     """
 
-    fig, axes = plt.subplots(
-        figsize=(14, 7), ncols=len(list(data_dict.keys())), nrows=1
-    )
-    dict_list = list(data_dict.keys())
+    dict_list = ['var','emissions']#list(data_dict.keys())
+
+
+    fig, axes = plt.subplots(ncols=len(dict_list), nrows=1, constrained_layout=True , sharey=True,figsize=(12, 6))#sharex=True# figsize=(14, 7) # len(list(data_dict.keys())))
+    
+
+    plt.rc('ytick', labelsize=4) 
 
     for i, ax in enumerate(axes.flat):
         if order == "First":
@@ -2086,7 +2212,9 @@ def multi_scatter_seperate_total_sensitivity_analysis_plot(
         ax.legend()
         ax.set_xlim(left=0)
         ax.set_xlabel(r"%s Sobol sensitivity" % (order))
-        ax.set_ylabel(r"Exogenous parameters")
+        #ax.set_ylabel(r"Exogenous parameters")
+            
+        #ax.set_yticklabels(names, rotation = 45)
 
     plt.tight_layout()
 
@@ -2101,6 +2229,71 @@ def multi_scatter_seperate_total_sensitivity_analysis_plot(
         plotName
         + "/"
         + "%s_%s_%s_multi_scatter_seperate_sensitivity_analysis_plot.png"
+        % (len(names), N_samples, order)
+    )
+    fig.savefig(f, dpi=dpi_save, format="eps")
+    #fig.savefig(f_png, dpi=dpi_save, format="png")
+
+def multi_scatter_parallel_total_sensitivity_analysis_plot(
+    FILENAME, data_dict, names, dpi_save, N_samples, order
+):
+    """
+    Create scatter chart of results.
+    """
+
+    dict_list = ['var','emissions']#list(data_dict.keys())
+
+    fig, ax = plt.subplots(figsize=(13, 6))#sharex=True# figsize=(14, 7) # len(list(data_dict.keys())))
+
+    plt.rc('ytick', labelsize=4) 
+
+    name_pos = np.arange(len(names))
+    separation = 0.15
+    name_pos_list = [name_pos - separation, name_pos + separation]
+
+    for i in range(len(dict_list)):
+        if order == "First":
+            ax.errorbar(
+                x=data_dict[dict_list[i]]["data"]["S1"].tolist(),
+                y = name_pos_list[i],
+                xerr=data_dict[dict_list[i]]["yerr"]["S1"].tolist(),
+                fmt="o",
+                ecolor="k",
+                color=data_dict[dict_list[i]]["colour"],
+                label=data_dict[dict_list[i]]["title"],
+            )
+        else:
+            ax.errorbar(
+                x=data_dict[dict_list[i]]["data"]["ST"].tolist(),
+                y = name_pos_list[i],
+                xerr=data_dict[dict_list[i]]["yerr"]["ST"].tolist(),
+                fmt="o",
+                ecolor="k",
+                color=data_dict[dict_list[i]]["colour"],
+                label=data_dict[dict_list[i]]["title"],
+            )
+
+    ax.legend()
+    ax.set_xlim(left=0)
+    ax.set_xlabel(r"%s order Sobol sensitivity" % (order))
+    ax.set_yticks(ticks=name_pos, labels=names) 
+        #ax.set_ylabel(r"Exogenous parameters")
+            
+        #ax.set_yticklabels(names, rotation = 45)
+
+    plt.tight_layout()
+
+    plotName = FILENAME + "/Prints"
+    f = (
+        plotName
+        + "/"
+        + "%s_%s_%s_multi_scatter_parallel_sensitivity_analysis_plot.eps"
+        % (len(names), N_samples, order)
+    )
+    f_png = (
+        plotName
+        + "/"
+        + "%s_%s_%s_multi_scatter_parallel_sensitivity_analysis_plot.png"
         % (len(names), N_samples, order)
     )
     fig.savefig(f, dpi=dpi_save, format="eps")

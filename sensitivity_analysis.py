@@ -21,6 +21,7 @@ from resources.plot import (
     multi_scatter_total_sensitivity_analysis_plot,
     multi_scatter_sidebyside_total_sensitivity_analysis_plot,
     multi_scatter_seperate_total_sensitivity_analysis_plot,
+    multi_scatter_parallel_total_sensitivity_analysis_plot,
 )
 from resources.SA_sobol import (
     sa_run,
@@ -30,20 +31,69 @@ from resources.SA_sobol import (
 )
 
 # constants
-RUN = 1  # False,True
+RUN = 0  # False,True
 fileName = "results\SA_AV_reps_5_samples_28672_D_vars_13_N_samples_1024"
-N_samples = 512
-calc_second_order = False
+N_samples = 1024#512
+calc_second_order = True
 
 ##########################################################################
 # plot dict properties
 plot_dict = {
     "emissions": {"title": r"$E/NM$", "colour": "red", "linestyle": "--"},
-    "mu": {"title": r"$\mu$", "colour": "green", "linestyle": "-"},
-    "var": {"title": r"$\sigma^{2}$", "colour": "blue", "linestyle": "*"},
+    "mu": {"title": r"$\mu$", "colour": "blue", "linestyle": "-"},
+    "var": {"title": r"$\sigma^{2}$", "colour": "green", "linestyle": "*"},
     "coefficient_of_variance": {"title": r"$\sigma/\mu$","colour": "orange","linestyle": "-.",},
 }
 
+{
+    "N":{"property": "N","min":100,"max":500, "title": "$N$"},
+    "M":{"property":"M","min":1,"max": 40, "title": "$M$"},
+    "K":{"property":"K","min":2,"max":80 , "title": "$K$"},
+    "prob_rewire": {"property": "prob_rewire","min": 0.0,"max": 1.0,"title": "$p_r$"},
+    "culture_momentum_real":{"property":"culture_momentum_real","min":1,"max": 3000, "title": "$T_{\\rho}$"},
+    "learning_error_scale":{"property":"learning_error_scale","min":0.0,"max":1 , "title": "$\\epsilon$" },
+    "a_attitude":{"property":"a_attitude","min":0.05, "max": 8, "title": "$a$ Attitude"},
+    "b_attitude":{"property":"b_attitude","min":0.05, "max":8 , "title": "$b$ Attitude"},
+    "a_threshold":{"property":"a_threshold","min":0.05, "max": 8, "title": "$a$ Threshold"},
+    "b_threshold":{"property":"b_threshold","min":0.05, "max": 8, "title": "$b$ Threshold"},
+    "discount_factor":{"property":"discount_factor","min":0.0, "max":1.0 , "title": "$\\delta$"},
+    "homophily": {"property": "homophily","min": 0.0,"max": 1.0,"title": "$h$"},
+    "confirmation_bias":{"property":"confirmation_bias","min":-10.0, "max":100 , "title": "$\\theta$"}
+}
+
+titles = [
+    r"Number of individuals, $N$", 
+    r"Number of behaviours, $M$", 
+    r"Mean neighbours, $K$",
+    r"Probability of re-wiring, $p_r$",
+    r"Cultural momentum, $\rho$",
+    r"Social learning error, $\varepsilon$",
+    r"Attitude Beta $a$",
+    r"Attitude Beta $b$",
+    r"Threshold Beta $a$",
+    r"Threshold Beta $b$",
+    r"Discount factor, $\delta$",
+    r"Attribute homophily, $h$",
+    r"Confirmation bias, $\theta$"
+]
+
+"""
+label_dict = {
+    "N":r"Number of individuals, $N$", 
+    "M":r"Number of behaviours, $M$", 
+    "K":r"Mean neighbours, $K$",
+    "prob_rewire":r"Probability of re-wiring, $p_r$",
+    "culture_momentum_real":r"Cultural momentum, $\rho$",
+    "learning_error_scale":r"Social learning error, $\varepsilon$",
+    "a_attitude":r"Attitude Beta $a$",
+    "b_attitude":r"Attitude Beta $b$",
+    "a_threshold":r"Threshold Beta $a$",
+    "b_threshold":r"Threshold Beta $b$",
+    "discount_factor":r"Discount factor, $\delta$",
+    "homophily":r"Attribute homophily, $h$",
+    "confirmation_bias":r"Confirmation bias, $\theta$"
+}
+"""
 ############################################################################
 
 # Visualize
@@ -86,23 +136,27 @@ if __name__ == "__main__":
         )
 
     data_sa_dict_total, data_sa_dict_first = get_plot_data(
-        problem, Y_emissions, Y_var, Y_mu, Y_coefficient_of_variance, calc_second_order
-    )
+        problem, Y_emissions, Y_mu, Y_var, Y_coefficient_of_variance, calc_second_order
+    )#here is where mu and var were the worng way round!
 
-    titles = [x["title"] for x in variable_parameters_dict.values()]
+    #print([x["title"] for x in variable_parameters_dict.values()])
+    #print("titles check order",titles)
+    #quit()
 
-    data_sa_dict_total = Merge_dict_SA(data_sa_dict_total, plot_dict)
+    #data_sa_dict_total = Merge_dict_SA(data_sa_dict_total, plot_dict)
     data_sa_dict_first = Merge_dict_SA(data_sa_dict_first, plot_dict)
 
     ######
     # PLOTS - COMMENT OUT THE ONES YOU DONT WANT
 
+    #data_sa_dict_first[""]
     # multi_scatter_total_sensitivity_analysis_plot(fileName, data_sa_dict_total,titles, dpi_save,N_samples, "Total")
     # multi_scatter_total_sensitivity_analysis_plot(fileName, data_sa_dict_first, titles, dpi_save,N_samples, "First")
     #multi_scatter_sidebyside_total_sensitivity_analysis_plot(fileName, data_sa_dict_total, titles, dpi_save,N_samples, "Total")
     #multi_scatter_sidebyside_total_sensitivity_analysis_plot(fileName, data_sa_dict_first, titles, dpi_save,N_samples, "First")
-    multi_scatter_seperate_total_sensitivity_analysis_plot(fileName, data_sa_dict_first, titles, dpi_save, N_samples, "First")
-    multi_scatter_seperate_total_sensitivity_analysis_plot(fileName, data_sa_dict_total, titles, dpi_save, N_samples, "Total")
+    #multi_scatter_seperate_total_sensitivity_analysis_plot(fileName, data_sa_dict_first, titles, dpi_save, N_samples, "First")
+    multi_scatter_parallel_total_sensitivity_analysis_plot(fileName, data_sa_dict_first, titles, dpi_save, N_samples, "First")
+    #multi_scatter_seperate_total_sensitivity_analysis_plot(fileName, data_sa_dict_total, titles, dpi_save, N_samples, "Total")
 
     SECOND_ORDER = 0
     if SECOND_ORDER:

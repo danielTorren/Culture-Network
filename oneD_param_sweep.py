@@ -81,12 +81,12 @@ alpha_val = 0.25
 size_points = 5
 
 SINGLE = 1
-GRAPH_TYPE = 3
+GRAPH_TYPE = 0
 
 if __name__ == "__main__":
     """The number of rows and cols set the number of experiments ie 4 rows and 3 cols gives 12 experiments"""
     nrows = 1 #leave as 1 for alpha and homophily plots, but change for network!
-    ncols = 6  # due to screen ratio want more cols than rows usually
+    ncols = 3  # due to screen ratio want more cols than rows usually
     reps = nrows * ncols  # make multiples of the number of cores for efficieny
 
     ############################
@@ -149,16 +149,21 @@ if __name__ == "__main__":
             case_2 = params.copy()
             case_3 = params.copy()
 
-            case_1["a_attitude"] = 1.5 #0.05
-            case_1["confirmation_bias"] = 30#40
+            case_1["a_attitude"] = 0.05
+            case_1["b_attitude"] = 0.05
+            case_1["confirmation_bias"] = 40
 
-            case_2["a_attitude"] = 1.4 #0.5
-            case_2["confirmation_bias"] = 30#30# THIS IS NEEDS TO SPLIT PARALLEL
+            case_2["a_attitude"] = 0.3
+            case_2["b_attitude"] = 0.3  
+            case_2["confirmation_bias"] = 18#THIS IS NEEDS TO SPLIT PARALLEL
 
-            case_3["a_attitude"] = 1.3 #2.0
-            case_3["confirmation_bias"] = 30#10
+            case_3["a_attitude"] = 2.0
+            case_3["b_attitude"] = 2.0
+            case_3["confirmation_bias"] = 10
 
             params_list = [case_1, case_2, case_3]
+            print(params_list)
+
         elif GRAPH_TYPE == 3:
             params["network_structure"] = "small_world" #0.05
             params["K"] = 5
@@ -185,8 +190,10 @@ if __name__ == "__main__":
             case_6["homophily"] = 1.0#40
 
             params_list = [case_1, case_2, case_3, case_4,case_5, case_6]
+
         else:
             params_list = produce_param_list(params, property_values_list, property_varied)
+
         data = parallel_run(params_list)  # better if a Multiple of 4
 
         ###WORKING
@@ -207,7 +214,8 @@ if __name__ == "__main__":
             #live_print_culture_timeseries(fileName, data, property_varied, title_list, nrows, ncols, dpi_save)
             layout = ["circular","circular", "circular", "spring", "spring", "spring"]
             print_live_intial_culture_networks_and_culture_timeseries(fileName, data, dpi_save, property_values_list, property_varied_title, ncols, layout, norm_zero_one, cmap, node_size,round_dec)
-
+        else:
+            pass
         
         """Comment out those plots that you dont want to produce"""
         #live_print_culture_timeseries(fileName, data, property_varied, title_list, nrows, ncols, dpi_save)
