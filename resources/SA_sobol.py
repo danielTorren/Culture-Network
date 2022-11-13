@@ -113,7 +113,7 @@ def sa_run(
         param_values, base_params, variable_parameters_dict
     )
 
-    Y_emissions, Y_mu, Y_var, Y_coefficient_of_variance = parallel_run_sa(
+    Y_emissions, Y_mu, Y_var, Y_coefficient_of_variance, Y_emissions_change = parallel_run_sa(
         params_list_sa
     )
     
@@ -123,6 +123,7 @@ def sa_run(
     save_object(Y_mu, fileName + "/Data", "Y_mu")
     save_object(Y_var, fileName + "/Data", "Y_var")
     save_object(Y_coefficient_of_variance, fileName + "/Data", "Y_coefficient_of_variance")
+    save_object(Y_emissions_change, fileName + "/Data", "Y_emissions_change")
 
     return (
         AV_reps,
@@ -133,6 +134,7 @@ def sa_run(
         Y_mu,
         Y_var,
         Y_coefficient_of_variance,
+        Y_emissions_change
     )
 
 
@@ -257,6 +259,7 @@ def analyze_results(
     Y_mu: npt.NDArray,
     Y_var: npt.NDArray,
     Y_coefficient_of_variance: npt.NDArray,
+    Y_emissions_change: npt.NDArray,
     calc_second_order: bool,
 ) -> tuple:
     """
@@ -282,8 +285,14 @@ def analyze_results(
         calc_second_order=calc_second_order,
         print_to_console=False,
     )
+    Si_emissions_change = sobol.analyze(
+        problem,
+        Y_emissions_change,
+        calc_second_order=calc_second_order,
+        print_to_console=False,
+    )
 
-    return Si_emissions , Si_mu , Si_var , Si_coefficient_of_variance
+    return Si_emissions , Si_mu , Si_var , Si_coefficient_of_variance,Si_emissions_change
 
 def get_plot_data(
     problem: dict,
@@ -291,6 +300,7 @@ def get_plot_data(
     Y_mu: npt.NDArray,
     Y_var: npt.NDArray,
     Y_coefficient_of_variance: npt.NDArray,
+    Y_emissions_change: npt.NDArray,
     calc_second_order: bool,
 ) -> tuple[dict, dict]:
     """
@@ -327,7 +337,7 @@ def get_plot_data(
         dictionary containing dictionaries each with data regarding the first order sobol analysis results for each output measure
     """
 
-    Si_emissions , Si_mu , Si_var , Si_coefficient_of_variance = analyze_results(problem,Y_emissions,Y_mu,Y_var,Y_coefficient_of_variance,calc_second_order) 
+    Si_emissions , Si_mu , Si_var , Si_coefficient_of_variance, Si_emissions_change = analyze_results(problem,Y_emissions,Y_mu,Y_var,Y_coefficient_of_variance,Y_emissions_change,calc_second_order) 
 
     #### Bar chart
     if calc_second_order:
@@ -339,6 +349,7 @@ def get_plot_data(
             first_coefficient_of_variance,
             second_coefficient_of_variance,
         ) = Si_coefficient_of_variance.to_df()
+        total_emissions_change, first_emissions_change, second_emissions_change =  Si_emissions_change.to_df()
     else:
         total_emissions, first_emissions = Si_emissions.to_df()
         total_mu, first_mu = Si_mu.to_df()
@@ -347,6 +358,7 @@ def get_plot_data(
             total_coefficient_of_variance,
             first_coefficient_of_variance,
         ) = Si_coefficient_of_variance.to_df()
+        total_emissions_change, first_emissions_change = Si_emissions_change.to_df()
 
     total_data_sa_emissions, total_yerr_emissions = get_data_bar_chart(total_emissions)
     total_data_sa_mu, total_yerr_mu = get_data_bar_chart(total_mu)
@@ -355,6 +367,7 @@ def get_plot_data(
         total_data_sa_coefficient_of_variance,
         total_yerr_coefficient_of_variance,
     ) = get_data_bar_chart(total_coefficient_of_variance)
+    total_data_sa_emissions_change, total_yerr_emissions_change = get_data_bar_chart(total_emissions_change)
 
     first_data_sa_emissions, first_yerr_emissions = get_data_bar_chart(first_emissions)
     first_data_sa_mu, first_yerr_mu = get_data_bar_chart(first_mu)
@@ -363,6 +376,7 @@ def get_plot_data(
         first_data_sa_coefficient_of_variance,
         first_yerr_coefficient_of_variance,
     ) = get_data_bar_chart(first_coefficient_of_variance)
+    first_data_sa_emissions_change, first_yerr_emissions_change = get_data_bar_chart(first_emissions_change)
 
     data_sa_dict_total = {
         "emissions": {
@@ -381,6 +395,10 @@ def get_plot_data(
             "data": total_data_sa_coefficient_of_variance,
             "yerr": total_yerr_coefficient_of_variance,
         },
+        "emissions_change": {
+            "data": total_data_sa_emissions_change,
+            "yerr": total_yerr_emissions_change,
+        },
     }
     data_sa_dict_first = {
         "emissions": {
@@ -398,6 +416,10 @@ def get_plot_data(
         "coefficient_of_variance": {
             "data": first_data_sa_coefficient_of_variance,
             "yerr": first_yerr_coefficient_of_variance,
+        },
+        "emissions_change": {
+            "data": first_data_sa_emissions_change,
+            "yerr": first_yerr_emissions_change,
         },
     }
 

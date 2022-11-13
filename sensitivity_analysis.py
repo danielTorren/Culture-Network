@@ -31,9 +31,9 @@ from resources.SA_sobol import (
 )
 
 # constants
-RUN = 0  # False,True
+RUN = 1  # False,True
 fileName = "results\SA_AV_reps_5_samples_28672_D_vars_13_N_samples_1024"
-N_samples = 1024#512
+N_samples = 4#1024#512
 calc_second_order = True
 
 ##########################################################################
@@ -43,8 +43,10 @@ plot_dict = {
     "mu": {"title": r"$\mu$", "colour": "blue", "linestyle": "-"},
     "var": {"title": r"$\sigma^{2}$", "colour": "green", "linestyle": "*"},
     "coefficient_of_variance": {"title": r"$\sigma/\mu$","colour": "orange","linestyle": "-.",},
+    "emissions_change": {"title": r"$\Delta E/NM$", "colour": "red", "linestyle": "-*"},
 }
 
+"""
 {
     "N":{"property": "N","min":100,"max":500, "title": "$N$"},
     "M":{"property":"M","min":1,"max": 40, "title": "$M$"},
@@ -60,6 +62,7 @@ plot_dict = {
     "homophily": {"property": "homophily","min": 0.0,"max": 1.0,"title": "$h$"},
     "confirmation_bias":{"property":"confirmation_bias","min":-10.0, "max":100 , "title": "$\\theta$"}
 }
+"""
 
 titles = [
     r"Number of individuals, $N$", 
@@ -124,6 +127,7 @@ if __name__ == "__main__":
             Y_var,
             Y_mu,
             Y_coefficient_of_variance,
+            Y_emissions_change,
         ) = sa_run(N_samples, base_params, variable_parameters_dict, calc_second_order)
     else:
         variable_parameters_dict = load_object(fileName + "/Data", "variable_parameters_dict")
@@ -134,9 +138,10 @@ if __name__ == "__main__":
         Y_coefficient_of_variance = load_object(
             fileName + "/Data", "Y_coefficient_of_variance"
         )
+        Y_emissions_change = load_object(fileName + "/Data", "Y_emissions_change")
 
     data_sa_dict_total, data_sa_dict_first = get_plot_data(
-        problem, Y_emissions, Y_mu, Y_var, Y_coefficient_of_variance, calc_second_order
+        problem, Y_emissions, Y_mu, Y_var, Y_coefficient_of_variance,Y_emissions_change, calc_second_order
     )#here is where mu and var were the worng way round!
 
     #print([x["title"] for x in variable_parameters_dict.values()])

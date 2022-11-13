@@ -138,6 +138,7 @@ def generate_sensitivity_output(params: dict):
     mean_list = []
     var_list = []
     coefficient_variance_list = []
+    emissions_change_list = []
 
     norm_factor = params["N"] * params["M"]
 
@@ -150,17 +151,20 @@ def generate_sensitivity_output(params: dict):
         mean_list.append(data.average_culture)
         var_list.append(data.var_culture)#data.var_first_behaviour# BOTCH
         coefficient_variance_list.append(data.std_culture / (data.average_culture))
+        emissions_change_list.append(np.abs(data.history_total_carbon_emissions[-1] - data.history_total_carbon_emissions[0])/norm_factor)
 
     stochastic_norm_emissions = np.mean(emissions_list)
     stochastic_norm_mean = np.mean(mean_list)
     stochastic_norm_var = np.mean(var_list)
     stochastic_norm_coefficient_variance = np.mean(coefficient_variance_list)
+    stochastic_norm_emissions_change = np.mean(emissions_change_list)
 
     return (
         stochastic_norm_emissions,
         stochastic_norm_mean,
         stochastic_norm_var,
         stochastic_norm_coefficient_variance,
+        stochastic_norm_emissions_change
     )
 
 
@@ -195,7 +199,7 @@ def parallel_run_sa(
     res = Parallel(n_jobs=num_cores, verbose=10)(
         delayed(generate_sensitivity_output)(i) for i in params_dict
     )
-    results_emissions, results_mean, results_var, results_coefficient_variance = zip(
+    results_emissions, results_mean, results_var, results_coefficient_variance, results_emissions_change = zip(
         *res
     )
 
@@ -204,6 +208,7 @@ def parallel_run_sa(
         np.asarray(results_mean),
         np.asarray(results_var),
         np.asarray(results_coefficient_variance),
+        np.asarray(results_emissions_change)
     )
 
 
