@@ -31,10 +31,10 @@ from resources.SA_sobol import (
 )
 
 # constants
-RUN = 1  # False,True
-fileName = "results\SA_AV_reps_5_samples_28672_D_vars_13_N_samples_1024"
-N_samples = 4#1024#512
-calc_second_order = True
+RUN = 0  # False,True
+fileName = "results\SA_AV_reps_5_samples_960_D_vars_13_N_samples_64"
+N_samples = 64#1024#512
+calc_second_order = False
 
 ##########################################################################
 # plot dict properties
@@ -43,7 +43,7 @@ plot_dict = {
     "mu": {"title": r"$\mu$", "colour": "blue", "linestyle": "-"},
     "var": {"title": r"$\sigma^{2}$", "colour": "green", "linestyle": "*"},
     "coefficient_of_variance": {"title": r"$\sigma/\mu$","colour": "orange","linestyle": "-.",},
-    "emissions_change": {"title": r"$\Delta E/NM$", "colour": "red", "linestyle": "-*"},
+    "emissions_change": {"title": r"$\Delta E/NM$", "colour": "brown", "linestyle": "-*"},
 }
 
 """
@@ -148,7 +148,7 @@ if __name__ == "__main__":
     #print("titles check order",titles)
     #quit()
 
-    #data_sa_dict_total = Merge_dict_SA(data_sa_dict_total, plot_dict)
+    data_sa_dict_total = Merge_dict_SA(data_sa_dict_total, plot_dict)
     data_sa_dict_first = Merge_dict_SA(data_sa_dict_first, plot_dict)
 
     ######
@@ -159,8 +159,8 @@ if __name__ == "__main__":
     # multi_scatter_total_sensitivity_analysis_plot(fileName, data_sa_dict_first, titles, dpi_save,N_samples, "First")
     #multi_scatter_sidebyside_total_sensitivity_analysis_plot(fileName, data_sa_dict_total, titles, dpi_save,N_samples, "Total")
     #multi_scatter_sidebyside_total_sensitivity_analysis_plot(fileName, data_sa_dict_first, titles, dpi_save,N_samples, "First")
-    #multi_scatter_seperate_total_sensitivity_analysis_plot(fileName, data_sa_dict_first, titles, dpi_save, N_samples, "First")
-    multi_scatter_parallel_total_sensitivity_analysis_plot(fileName, data_sa_dict_first, titles, dpi_save, N_samples, "First")
+    multi_scatter_seperate_total_sensitivity_analysis_plot(fileName, data_sa_dict_first, titles, dpi_save, N_samples, "First")
+    #multi_scatter_parallel_total_sensitivity_analysis_plot(fileName, data_sa_dict_first, titles, dpi_save, N_samples, "First")
     #multi_scatter_seperate_total_sensitivity_analysis_plot(fileName, data_sa_dict_total, titles, dpi_save, N_samples, "Total")
 
     SECOND_ORDER = 0

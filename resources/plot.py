@@ -343,7 +343,7 @@ def plot_threshold_timeseries(FILENAME: str, Data: DataFrame, dpi_save: int):
 def live_print_culture_timeseries(
     fileName, Data_list, property_varied, title_list, nrows, ncols, dpi_save
 ):
-    fig, axes = plt.subplots(nrows=nrows, ncols=ncols,figsize=(10, 6))#, ,figsize=(14, 7)
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols,figsize=(10, 6), sharey=True)#, ,figsize=(14, 7)
     y_title = r"Identity, $I_{t,n}$"
 
     for i, ax in enumerate(axes.flat):
@@ -2180,12 +2180,11 @@ def multi_scatter_seperate_total_sensitivity_analysis_plot(
     Create scatter chart of results.
     """
 
-    dict_list = ['var','emissions']#list(data_dict.keys())
+    #dict_list = ['var','emissions']#list(data_dict.keys())
+    dict_list = ['var','emissions',"emissions_change"]#list(data_dict.keys())
 
-
-    fig, axes = plt.subplots(ncols=len(dict_list), nrows=1, constrained_layout=True , sharey=True,figsize=(12, 6))#sharex=True# figsize=(14, 7) # len(list(data_dict.keys())))
+    fig, axes = plt.subplots(ncols=len(dict_list), nrows=1, constrained_layout=True , sharey=True,figsize=(12, 6))#,#sharex=True# figsize=(14, 7) # len(list(data_dict.keys())))
     
-
     plt.rc('ytick', labelsize=4) 
 
     for i, ax in enumerate(axes.flat):
@@ -2240,8 +2239,8 @@ def multi_scatter_parallel_total_sensitivity_analysis_plot(
     """
     Create scatter chart of results.
     """
-
-    dict_list = ['var','emissions']#list(data_dict.keys())
+    #print("data",data_dict)
+    dict_list = ['var','emissions',"emissions_change"]#list(data_dict.keys())
 
     fig, ax = plt.subplots(figsize=(13, 6))#sharex=True# figsize=(14, 7) # len(list(data_dict.keys())))
 
@@ -2249,7 +2248,7 @@ def multi_scatter_parallel_total_sensitivity_analysis_plot(
 
     name_pos = np.arange(len(names))
     separation = 0.15
-    name_pos_list = [name_pos - separation, name_pos + separation]
+    name_pos_list = [name_pos - separation, name_pos,name_pos + separation]#dependant o the nuber of things FIX
 
     for i in range(len(dict_list)):
         if order == "First":

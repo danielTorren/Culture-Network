@@ -83,6 +83,7 @@ size_points = 5
 SINGLE = 1
 GRAPH_TYPE = 0
 
+
 if __name__ == "__main__":
     """The number of rows and cols set the number of experiments ie 4 rows and 3 cols gives 12 experiments"""
     nrows = 1 #leave as 1 for alpha and homophily plots, but change for network!
@@ -149,17 +150,17 @@ if __name__ == "__main__":
             case_2 = params.copy()
             case_3 = params.copy()
 
-            case_1["a_attitude"] = 0.05
-            case_1["b_attitude"] = 0.05
-            case_1["confirmation_bias"] = 40
+            case_3["a_attitude"] = 0.05
+            case_3["b_attitude"] = 0.05
+            case_3["confirmation_bias"] = 40
 
             case_2["a_attitude"] = 0.3
             case_2["b_attitude"] = 0.3  
             case_2["confirmation_bias"] = 18#THIS IS NEEDS TO SPLIT PARALLEL
 
-            case_3["a_attitude"] = 2.0
-            case_3["b_attitude"] = 2.0
-            case_3["confirmation_bias"] = 10
+            case_1["a_attitude"] = 2.0
+            case_1["b_attitude"] = 2.0
+            case_1["confirmation_bias"] = 10
 
             params_list = [case_1, case_2, case_3]
             print(params_list)
