@@ -31,9 +31,9 @@ from resources.SA_sobol import (
 )
 
 # constants
-RUN = 0  # False,True
+RUN = 1  # False,True
 fileName = "results\SA_AV_reps_5_samples_960_D_vars_13_N_samples_64"
-N_samples = 64#1024#512
+N_samples = 512#64#1024#512
 calc_second_order = False
 
 ##########################################################################
