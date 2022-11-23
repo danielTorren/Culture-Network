@@ -59,7 +59,7 @@ import numpy as np
 # run bools
 RUN = 0 # run or load in previously saved data
 SINGLE = 0 # determine if you runs single shots or study the averages over multiple runs for each experiment
-fileName = "results/average_b_attitude_a_attitude_200_2000_20_64_64_5"
+fileName = "results/twoD_Average_M_confirmation_bias_200_2000_20_10_402_5"
 #"results/twoD_Average_confirmation_bias_M_200_3000_20_70_20_5"#"results/twoD_Average_confirmation_bias_a_attitude_200_3000_20_64_64_5"#"
 #"results/twoD_Average_confirmation_bias_a_attitude_200_3000_20_64_64_5"
 #"results/twoD_Average_action_observation_I_a_attitude_200_2000_20_64_64_5"
@@ -246,7 +246,7 @@ if __name__ == "__main__":
         #double_phase_diagram(fileName, matrix_mu, r"Average identity, $\mu$", "mu",variable_parameters_dict, get_cmap("Blues"),dpi_save)
         #double_phase_diagram(fileName, matrix_var, r"Identity variance, $\sigma^2$", "variance",variable_parameters_dict, get_cmap("Greens"),dpi_save)
         #double_phase_diagram(fileName, matrix_coefficient_of_variance, r"Identity coefficient of variance, $\sigma/\mu$", "coefficient_of_variance",variable_parameters_dict, get_cmap("Oranges"),dpi_save)
-        ab_plot = 1
+        ab_plot = 0
         if ab_plot:
             ############################
             #PLOT THE AB MATRIX TO SHOW CORRESPONDANCE WITH OUTPUT
@@ -339,7 +339,7 @@ if __name__ == "__main__":
 
             multi_line_matrix_plot(fileName,Z, col_vals, row_dict["vals"],"variance", get_cmap("plasma"),dpi_save,col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label,col_axis_x)#y_ticks_pos, y_ticks_label
         
-        plot_multi_line_divide = 0
+        plot_multi_line_divide = 1
         if plot_multi_line_divide:
             col_dict = variable_parameters_dict["col"]#confirmation bias
             row_dict = variable_parameters_dict["row"]#m

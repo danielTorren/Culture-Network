@@ -55,6 +55,9 @@ from resources.plot import (
     # live_plot_heterogenous_culture_momentum,
     # plot_behaviour_scatter,
     # animate_behaviour_scatter,
+    weighting_histogram,
+    live_animate_weighting_matrix,
+    weighting_histogram_time
 )
 
 # FOR FILENAME
@@ -111,13 +114,15 @@ alpha_val = 0.25
 size_points = 5
 min_culture_distance = 0.5
 
-RUN = 1
+bin_num = 20
+
+RUN = 0
 PLOT = 1
 SHOW_PLOT = 1
 
 if __name__ == "__main__":
     if RUN == False:
-        FILENAME = "results/_delta_t_1.0_N_20_M_5_K_10_prob_rewire_0.2_set_seed_1_culture_momentum_real_100_learning_error_scale_0.02_time_steps_max_200"
+        FILENAME = "results/_delta_t_1.0_N_200_M_3_K_20_prob_rewire_0.1_set_seed_1_culture_momentum_real_500_learning_error_scale_0.02_time_steps_max_3000"
     else:
         f = open("constants/base_params.json")
         params = json.load(f)
@@ -140,7 +145,9 @@ if __name__ == "__main__":
         Data = load_object(dataName, "social_network")
 
         ###PLOTS
-        plot_culture_timeseries(FILENAME, Data, dpi_save)
+        #plot_culture_timeseries(FILENAME, Data, dpi_save)
+        #weighting_histogram(FILENAME, Data, dpi_save,bin_num)
+        weighting_histogram_time(FILENAME, Data, dpi_save,bin_num,300)
         #plot_green_adoption_timeseries(FILENAME, Data, dpi_save)
         #plot_total_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
         #plot_weighting_matrix_convergence_timeseries(FILENAME, Data, dpi_save)
@@ -151,6 +158,8 @@ if __name__ == "__main__":
         # plot_value_timeseries(FILENAME,Data,dpi_save)
         # plot_threshold_timeseries(FILENAME,Data,dpi_save)
         #plot_attitude_timeseries(FILENAME,Data,dpi_save)
+
+        #live_animate_weighting_matrix(FILENAME, Data,  cmap_weighting, interval, fps, round_dec)
 
         """
         #####BROKEN ATM

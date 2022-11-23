@@ -22,6 +22,7 @@ from matplotlib.cm import get_cmap
 from typing import Union
 #from pydlc import dense_lines
 from resources.network import Network
+import joypy
 
 
 SMALL_SIZE = 14
@@ -413,6 +414,72 @@ def live_print_culture_timeseries_with_weighting(
     )
     fig.savefig(f, dpi=dpi_save, format="png")
     # fig.savefig(f, dpi=dpi_save,format='eps')
+
+def weighting_histogram(
+    FILENAME: str, Data: DataFrame, dpi_save,bin_num
+):
+    fig, ax = plt.subplots()
+    # print("property = ", property)
+
+    triu_weighting = np.triu(Data.history_weighting_matrix[-1])
+    flat_data = (triu_weighting).flatten()
+
+    ax.hist(flat_data, density=True, bins = bin_num)  # density=False would make counts
+    ax.set_xlabel(r"Social network weighting $\alpha_{n,k}$")
+    ax.set_ylabel(r"Count")
+    plt.tight_layout()
+
+    plotName = FILENAME + "/Plots"
+    f = plotName + "/weighting_histogram.eps"
+    fig.savefig(f, dpi=dpi_save,format='eps')
+
+def weighting_histogram_time(
+    FILENAME: str, Data: DataFrame, dpi_save,bin_num, skip_val
+):
+
+    arraytime = np.asarray(Data.history_time)
+    #print("arraytime",arraytime)
+    mask = arraytime%skip_val==0
+
+    #print("mask", mask)
+
+    masked_time = arraytime[mask]
+    #print("masked_time",masked_time)
+
+    weighting_array = np.asarray(Data.history_weighting_matrix)
+    #print("weighting_array",weighting_array)
+    masked_weighting = weighting_array[mask]
+    #print("masked_weighting",masked_weighting)
+
+    flat_data_list = []
+    for i in masked_weighting :
+        triu_weighting = np.triu(i)    
+        flat_data = (triu_weighting).flatten()
+        flat_data_list.append(list(flat_data))
+
+    #print("flat_data_list",flat_data_list)
+    #print("lens", len(flat_data_list), len(flat_data_list[0]))
+    #print("masked time", masked_time)
+    list_string  = [str(round(x)) for x in masked_time]
+
+    d = {l:v for l,v in zip(list_string,flat_data_list)}
+    #list_string = map(str, masked_time)
+    #print("list_string",list_string)
+    
+    fig, ax = joypy.joyplot(d)
+
+
+    #ax.hist(flat_data, density=True, bins = bin_num)  # density=False would make counts
+    #ax.set_xlabel(r"Social network weighting $\alpha_{n,k}$")
+    #ax.set_ylabel(r"Count")
+    #plt.tight_layout()
+
+    #plotName = FILENAME + "/Plots"
+    #f = plotName + "/weighting_histogram_time.eps"
+    #fig.savefig(f, dpi=dpi_save,format='eps')
+
+
+
 
 
 def live_print_culture_timeseries_vary(
@@ -1842,6 +1909,66 @@ def live_compare_animate_culture_network_and_weighting(
 
     return ani
 
+# animation of changing culture
+def live_animate_weighting_matrix(
+    FILENAME: str,
+    Data: list,
+    cmap_weighting: Union[LinearSegmentedColormap, str],
+    interval: int,
+    fps: int,
+    round_dec: int,
+):
+    def update(i, Data, ax, title):
+
+        ax.clear()
+
+        ax.matshow(
+            Data.history_weighting_matrix[i],
+            cmap=cmap_weighting,
+            norm=Normalize(vmin=0, vmax=1),
+            aspect="auto",
+        )
+
+        ax.set_xlabel("Individual $k$")
+        ax.set_ylabel("Individual $n$")
+
+        title.set_text(
+            "Time= {}".format(round(Data.history_time[i], round_dec))
+        )
+
+    fig, ax = plt.subplots()
+
+    # plt.tight_layout()
+
+    title = plt.suptitle(t="", fontsize=20)
+
+    cbar_weight = fig.colorbar(
+        plt.cm.ScalarMappable(cmap=cmap_weighting),
+        ax=ax,
+        location="right",
+    )  # This does a mapabble on the fly i think, not sure
+    cbar_weight.set_label(r"Social network weighting, $\alpha_{n,k}$")
+
+    # need to generate the network from the matrix
+    # G = nx.from_numpy_matrix(Data_list[0].history_weighting_matrix[0])
+
+    ani = animation.FuncAnimation(
+        fig,
+        update,
+        frames=int(len(Data.history_time)),
+        fargs=(Data, ax, title),
+        repeat_delay=500,
+        interval=interval,
+    )
+
+    # save the video
+    animateName = FILENAME + "/Animations"
+    f = animateName + "/live_animate_weighting_matrix.mp4"
+    writervideo = animation.FFMpegWriter(fps=fps)
+    ani.save(f, writer=writervideo)
+
+    return ani
+
 
 # animation of changing culture
 def live_compare_animate_weighting_matrix(
@@ -2180,8 +2307,10 @@ def multi_scatter_seperate_total_sensitivity_analysis_plot(
     Create scatter chart of results.
     """
 
-    #dict_list = ['var','emissions']#list(data_dict.keys())
-    dict_list = ['var','emissions',"emissions_change"]#list(data_dict.keys())
+    #dict_list = ['var','emissions']#
+    #dict_list = ['var','emissions',"emissions_change"]#list(data_dict.keys())
+    #dict_list = list(data_dict.keys())
+    dict_list = ['var',"coefficient_of_variance",'emissions',"emissions_change"]
 
     fig, axes = plt.subplots(ncols=len(dict_list), nrows=1, constrained_layout=True , sharey=True,figsize=(12, 6))#,#sharex=True# figsize=(14, 7) # len(list(data_dict.keys())))
     
@@ -2210,7 +2339,10 @@ def multi_scatter_seperate_total_sensitivity_analysis_plot(
             )
         ax.legend()
         ax.set_xlim(left=0)
-        ax.set_xlabel(r"%s Sobol sensitivity" % (order))
+        #ax.set_xlabel(r"%s Sobol sensitivity" % (order))
+    #fig.text(0.5, 0.04, r"%s Sobol sensitivity" % (order), ha='center')
+    fig.supxlabel(r"%s Sobol sensitivity" % (order))
+    #plt.xlabel(r"%s Sobol sensitivity" % (order))
         #ax.set_ylabel(r"Exogenous parameters")
             
         #ax.set_yticklabels(names, rotation = 45)
@@ -2814,38 +2946,6 @@ def animate_culture_network(
     writervideo = animation.FFMpegWriter(fps=fps)
     ani.save(f, writer=writervideo)
     return ani
-
-def prints_weighting_matrix(
-    FILENAME: str, Data: DataFrame, cmap_behaviour: Union[LinearSegmentedColormap,str], nrows:int, ncols:int, frames_list:list[int], round_dec:int, dpi_save:int
-):
-
-    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
-    # print(frames_list,Data["network_time"],Data["network_weighting_matrix"][20])
-    #print( len(Data["network_weighting_matrix"]),frames_list)
-    for i, ax in enumerate(axes.flat):
-        # print(i)
-        ax.matshow(
-            Data["network_weighting_matrix"][frames_list[i]],
-            cmap=cmap_behaviour,
-            norm=Normalize(vmin=0, vmax=1),
-            aspect="auto",
-        )
-        # Set the title
-        # print("Time= {}".format(round(Data["network_time"][frames_list[i]],round_dec)))
-        ax.set_title(
-            "Time= {}".format(round(Data["network_time"][frames_list[i]], round_dec))
-        )
-        ax.set_xlabel("Agent Link Strength")
-        ax.set_ylabel("Agent Link Strength")
-    plt.tight_layout()
-
-    # colour bar axes
-    cbar = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap_behaviour, norm=Normalize(vmin=0, vmax=1)),ax=axes.ravel().tolist())  # This does a mapabble on the fly i think, not sure
-    cbar.set_label("Weighting matrix")
-
-    plotName = FILENAME + "/Prints"
-    f = plotName + "/" + "prints_weighting_matrix.eps"
-    fig.savefig(f, dpi=dpi_save,format='eps')
 
 
 def prints_behavioural_matrix(
