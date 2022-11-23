@@ -116,7 +116,7 @@ min_culture_distance = 0.5
 
 bin_num = 20
 
-RUN = 0
+RUN = 1
 PLOT = 1
 SHOW_PLOT = 1
 
@@ -145,19 +145,19 @@ if __name__ == "__main__":
         Data = load_object(dataName, "social_network")
 
         ###PLOTS
-        #plot_culture_timeseries(FILENAME, Data, dpi_save)
+        plot_culture_timeseries(FILENAME, Data, dpi_save)
         #weighting_histogram(FILENAME, Data, dpi_save,bin_num)
-        weighting_histogram_time(FILENAME, Data, dpi_save,bin_num,300)
+        #weighting_histogram_time(FILENAME, Data, dpi_save,bin_num,300)
         #plot_green_adoption_timeseries(FILENAME, Data, dpi_save)
-        #plot_total_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
+        plot_total_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
         #plot_weighting_matrix_convergence_timeseries(FILENAME, Data, dpi_save)
         # plot_cultural_range_timeseries(FILENAME, Data, dpi_save)
         # plot_average_culture_timeseries(FILENAME,Data,dpi_save)
         # plot_cum_link_change_per_agent(FILENAME,Data,dpi_save)
 
-        # plot_value_timeseries(FILENAME,Data,dpi_save)
-        # plot_threshold_timeseries(FILENAME,Data,dpi_save)
-        #plot_attitude_timeseries(FILENAME,Data,dpi_save)
+        #plot_value_timeseries(FILENAME,Data,dpi_save)
+        #plot_threshold_timeseries(FILENAME,Data,dpi_save)
+        plot_attitude_timeseries(FILENAME,Data,dpi_save)
 
         #live_animate_weighting_matrix(FILENAME, Data,  cmap_weighting, interval, fps, round_dec)
 

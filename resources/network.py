@@ -311,10 +311,17 @@ class Network:
         if self.green_N > 0:
             self.mix_in_green_individuals()
 
+        if self.alpha_change == 2.0:#independant behaviours
+            self.weighting_matrix_list = [self.weighting_matrix]*self.M
+
         self.social_component_matrix = self.calc_social_component_matrix()
 
-        if self.alpha_change != 0.0:
+        if self.alpha_change != (0.0 or 2.0):
+            #print("1 or 1.5")
             self.weighting_matrix, self.total_identity_differences,__ = self.update_weightings()
+        elif self.alpha_change == 2.0:#independaent behaviours
+            #print("2")
+            self.weighting_matrix_list = self.update_weightings_list()
 
         if self.save_data:
             self.total_carbon_emissions = self.calc_total_emissions()
@@ -346,7 +353,7 @@ class Network:
             self.history_min_culture = [self.min_culture]
             self.history_max_culture = [self.max_culture]
             self.history_green_adoption = [self.green_adoption]
-            if self.alpha_change != 0.0:
+            if self.alpha_change != (0.0 or 2.0):
                 self.history_total_identity_differences = [self.total_identity_differences]
 
     def normlize_matrix(self, matrix: npt.NDArray) -> npt.NDArray:
@@ -528,6 +535,9 @@ class Network:
             np.random.beta(self.a_attitude, self.b_attitude, size=self.M)
             for n in range(self.N)
         ]
+
+        #print("init values beahviorus", [np.mean(np.asarray(attitude_list)[:,m]) for m in range(self.M)])
+
         threshold_list = [
             np.random.beta(self.a_threshold, self.b_threshold, size=self.M)
             for n in range(self.N)
@@ -737,9 +747,40 @@ class Network:
         """
 
         behavioural_attitude_matrix = np.array( [((1-self.action_observation_S)*n.attitudes  + self.action_observation_S*((n.values + 1)/2) ) for n in self.agent_list] )
-        neighbour_influence = np.matmul(
-            self.weighting_matrix, behavioural_attitude_matrix
-        )
+
+        neighbour_influence = np.matmul(self.weighting_matrix, behavioural_attitude_matrix)
+        
+        return neighbour_influence
+
+    def calc_ego_influence_degroot_independent(self) -> npt.NDArray:
+        """
+        Calculate the influence of neighbours using the Degroot model of weighted aggregation, BEHAVIOURS INDEPENDANT
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        neighbour_influence: npt.NDArray
+            NxM array where each row represents the influence of an Individual listening to its neighbours regarding their
+            behavioural attitude opinions, this influence is weighted by the weighting_matrix
+        """
+
+        behavioural_attitude_matrix = np.array( [((1-self.action_observation_S)*n.attitudes  + self.action_observation_S*((n.values + 1)/2) ) for n in self.agent_list] )
+        #print("behavioural_attitude_matrix",behavioural_attitude_matrix)
+
+        #print("init values beahviorus", [np.mean(behavioural_attitude_matrix[:,m]) for m in range(self.M)])
+
+        neighbour_influence = np.zeros((self.N, self.M))
+
+        for m in range(self.M):
+            #print("np.matmul(self.weighting_matrix_list[m], behavioural_attitude_matrix[:,m])",np.matmul(self.weighting_matrix_list[m], behavioural_attitude_matrix[:,m]))
+            #print("weightign matrixs",len(self.weighting_matrix_list),self.weighting_matrix_list[m].shape )
+            neighbour_influence[:, m] = np.matmul(self.weighting_matrix_list[m], behavioural_attitude_matrix[:,m])
+
+        #print("neighbour_influence",neighbour_influence)
+        #quit()
         return neighbour_influence
 
     def calc_social_component_matrix(self) -> npt.NDArray:
@@ -755,10 +796,18 @@ class Network:
         social_influence: npt.NDArray
             NxM array giving the influence of social learning from neighbours for that time step
         """
-        if self.degroot_aggregation:
-            ego_influence = self.calc_ego_influence_degroot()
+
+        if self.alpha_change == 2.0:
+            if self.degroot_aggregation:
+                ego_influence = self.calc_ego_influence_degroot_independent()
+            else:
+                ego_influence = self.calc_ego_influence_degroot_independent()#self.calc_ego_influence_voter_independent()
         else:
-            ego_influence = self.calc_ego_influence_voter()
+            if self.degroot_aggregation:
+                ego_influence = self.calc_ego_influence_degroot()
+            else:
+                ego_influence = self.calc_ego_influence_voter()            
+
         social_influence = ego_influence + np.random.normal(
             loc=0, scale=self.learning_error_scale, size=(self.N, self.M)
         )
@@ -828,6 +877,48 @@ class Network:
             return norm_weighting_matrix, total_identity_differences, total_difference 
         else:
             return norm_weighting_matrix, total_identity_differences, 0 # BODGE! bodge for mypy
+    
+    def update_weightings_list(self):
+        """
+        Update the link strength array according to the agent ATTITUDES NOT IDENTITIES, RETURN LIST OF MATRICIES
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        norm_weighting_matrix: npt.NDArray
+            Row normalized weighting array giving the strength of inter-Individual connections due to similarity in identity
+        total_difference: float
+            total element wise difference between the previous weighting arrays
+        """
+        weighting_matrix_list = []
+
+        for m in range(self.M):
+            attitude_list = np.array([x.attitudes[m] for x in self.agent_list])
+
+            difference_matrix = np.subtract.outer(attitude_list, attitude_list)
+            #print("difference_matrix",difference_matrix)
+
+            alpha_numerator = np.exp(
+                -np.multiply(self.confirmation_bias, np.abs(difference_matrix))
+            )
+
+            non_diagonal_weighting_matrix = (
+                self.adjacency_matrix * alpha_numerator
+            )  # We want only those values that have network connections
+
+            norm_weighting_matrix = self.normlize_matrix(
+                non_diagonal_weighting_matrix
+            )  # normalize the matrix row wise
+
+            weighting_matrix_list.append(norm_weighting_matrix)
+
+        #print("weighting_matrix_list", weighting_matrix_list[0], weighting_matrix_list[2])
+
+        return weighting_matrix_list
+
 
     def calc_total_emissions(self) -> int:
         """
@@ -942,7 +1033,7 @@ class Network:
         self.history_min_culture.append(self.min_culture)
         self.history_max_culture.append(self.max_culture)
         self.history_green_adoption.append(self.green_adoption)
-        if self.alpha_change != 0.0:
+        if self.alpha_change != (0.0 or 2.0):
             self.history_total_identity_differences.append(self.total_identity_differences)
 
     def next_step(self):
@@ -971,6 +1062,7 @@ class Network:
 
         # update network parameters for next step
         if self.alpha_change == 1.0:
+            #print("1.0")
             if self.save_data:
                 (
                     self.weighting_matrix,
@@ -979,9 +1071,12 @@ class Network:
                 ) = self.update_weightings()
             else:
                 self.weighting_matrix, self.total_identity_differences,__ = self.update_weightings()
+        elif self.alpha_change == 2.0:#independaent behaviours
+            #print("2.0 update")
+            self.weighting_matrix_list = self.update_weightings_list()
 
         self.social_component_matrix = self.calc_social_component_matrix()
-
+        
         if self.steps % self.compression_factor == 0 and self.save_data:
             self.total_carbon_emissions = self.calc_total_emissions()
             (
