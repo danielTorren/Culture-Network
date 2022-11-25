@@ -50,6 +50,10 @@ class Network:
         size of time step in the simulation, default should be 1 and if this is changed then time dependant parameters
         such as phi(the degree of conspicuous consumption or social suseptability of a behaviour) also needs to be
         adjusted i.e. a larger delta_t requires a smaller phi to produce the same resolution of results
+    guilty_individuals: bool
+        Do individuals strive to be green?
+    guilty_individual_power: float
+        How much does identity drive the strive to be green
     M: int
         number of behaviours per individual. These behaviours are meant to represent action decisions that operate under the
         same identity such as the decision to cycle to work or take the car.
@@ -155,6 +159,7 @@ class Network:
         time series of green_adoption
     prop_green: float
         proportion of network that are green emitters
+    
 
 
     Methods
@@ -229,6 +234,10 @@ class Network:
         self.save_data = parameters["save_data"]
         self.compression_factor = parameters["compression_factor"]
         self.degroot_aggregation = parameters["degroot_aggregation"]
+
+        self.guilty_individuals = parameters["guilty_individuals"]
+        self.guilty_individual_power = parameters["guilty_individual_power"]
+        self.moral_licensing = parameters["moral_licensing"]
 
         # time
         self.t = 0
@@ -680,6 +689,9 @@ class Network:
             "phi_array": self.phi_array,
             "compression_factor": self.compression_factor,
             "action_observation_I": self.action_observation_I,
+            "guilty_individuals":self.guilty_individuals,
+            "guilty_individual_power":self.guilty_individual_power,
+            "moral_licensing": self.moral_licensing,
         }
 
         agent_list = [

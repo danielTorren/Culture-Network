@@ -1411,7 +1411,7 @@ def plot_carbon_emissions_total_comparison(
     property,
     round_dec,
 ):
-    y_title = "Total Emissions"
+    y_title = "Step total emissions, r$E_{t}$"
 
     fig, ax = plt.subplots(figsize=(10,6))
     ax.set_ylabel(r"%s" % y_title)

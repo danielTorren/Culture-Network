@@ -128,6 +128,9 @@ class Individual:
         self.compression_factor = individual_params["compression_factor"]
         self.phi_array = individual_params["phi_array"]
         self.action_observation_I = individual_params["action_observation_I"]
+        self.guilty_individual_bool = individual_params["guilty_individuals"]
+        self.guilty_individual_power = individual_params["guilty_individual_power"]
+        self.moral_licensing = individual_params["moral_licensing"]
 
         self.values = self.attitudes - self.thresholds
 
@@ -206,9 +209,17 @@ class Individual:
         -------
         None
         """
-        self.attitudes = self.attitudes * (
-            1 - self.phi_array * self.delta_t
-        ) + self.phi_array * self.delta_t * (social_component)
+        if self.guilty_individual_bool:# and self.culture > 0.6:#this is fake though i am creating an arbitrary line i
+            if self.moral_licensing: 
+            #total = self.attitudes * (1 - self.phi_array * self.delta_t) + (self.phi_array*self.delta_t)* (social_component) + (self.culture**self.guilty_individual_power)*(self.culture - self.attitudes)*(self.phi_array * self.delta_t)
+            #print("relative components", 100*self.attitudes * (1 - self.phi_array * self.delta_t)/total,  100*(self.phi_array*self.delta_t)* (social_component)/total, 100*(self.culture**self.guilty_individual_power)*(self.culture - self.attitudes)*(self.phi_array * self.delta_t)/total)
+                self.attitudes = self.attitudes * (1 - self.phi_array * self.delta_t) + (self.phi_array*self.delta_t)* (social_component) + (self.phi_array * self.delta_t)*(self.culture**self.guilty_individual_power)*(self.attitudes- 1)
+            #self.attitudes = self.attitudes * (1 - self.phi_array * self.delta_t) + (self.phi_array*self.delta_t)* (social_component) + (self.culture**self.guilty_individual_power)*(1 - self.attitudes)*(self.phi_array * self.delta_t)
+            else:
+                 self.attitudes = self.attitudes * (1 - self.phi_array * self.delta_t) + (self.phi_array*self.delta_t)* (social_component) + (self.phi_array * self.delta_t)*(self.culture**self.guilty_individual_power)*(1-self.attitudes)
+
+        else:
+            self.attitudes = self.attitudes * (1 - self.phi_array * self.delta_t) + (self.phi_array*self.delta_t)*(social_component)
 
     def calc_total_emissions(self):
         """

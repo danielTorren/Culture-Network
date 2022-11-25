@@ -117,6 +117,7 @@ def sa_run(
         params_list_sa
     )
     
+    save_object(params_list_sa, fileName + "/Data", "params_list_sa")
     save_object(variable_parameters_dict, fileName + "/Data", "variable_parameters_dict")
     save_object(problem, fileName + "/Data", "problem")
     save_object(Y_emissions, fileName + "/Data", "Y_emissions")

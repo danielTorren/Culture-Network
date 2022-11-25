@@ -3,7 +3,7 @@
     "delta_t": 1.0,
     "compression_factor": 10,
     "save_data": 1, 
-    "alpha_change" : 2.0,
+    "alpha_change" : 1.0,
     "degroot_aggregation": 1,
     "averaging_method": "Arithmetic",
     "phi_lower": 0.01,
@@ -17,9 +17,9 @@
     "culture_momentum_real": 500,
     "learning_error_scale": 0.02,
     "discount_factor": 0.95,
-    "homophily": 0.2,
+    "homophily": 0.95,
     "homophilly_rate" : 1,
-    "confirmation_bias": 2,
+    "confirmation_bias": 30,
     "a_attitude": 1,
     "b_attitude": 1,
     "a_threshold": 1,
@@ -27,5 +27,8 @@
     "action_observation_I": 0.0,
     "action_observation_S": 0.0,
     "green_N": 0,
-    "network_structure": "small_world"
+    "network_structure": "small_world",
+    "guilty_individuals": 1,
+    "guilty_individual_power": 5,
+    "moral_licensing": 1
 }

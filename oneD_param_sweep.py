@@ -81,13 +81,13 @@ alpha_val = 0.25
 size_points = 5
 
 SINGLE = 1
-GRAPH_TYPE = 0
+GRAPH_TYPE = 4
 
 
 if __name__ == "__main__":
     """The number of rows and cols set the number of experiments ie 4 rows and 3 cols gives 12 experiments"""
-    nrows = 1 #leave as 1 for alpha and homophily plots, but change for network!
-    ncols = 3  # due to screen ratio want more cols than rows usually
+    nrows = 2 #leave as 1 for alpha and homophily plots, but change for network!
+    ncols = 2  # due to screen ratio want more cols than rows usually
     reps = nrows * ncols  # make multiples of the number of cores for efficieny
 
     ############################
@@ -126,6 +126,13 @@ if __name__ == "__main__":
         param_max = 1.0  # 50.0
         title_list = [r"Small world, Homophily, h = 0.0", r"Small world, Homophily, h = 0.5", r"Small world, Homophily, h = 1.0",r"Scale free, Homophily, h = 0.0", r"Scale free, Homophily, h = 0.5", r"Scale free, Homophily, h = 1.0"]
         property_values_list = np.asarray([0.2, 0.6, 1.0, 0.2, 0.6, 1.0])
+    elif GRAPH_TYPE == 4:
+        property_varied = "guilty_individual_power"
+        property_varied_title = "Identity power"
+        param_min = 1.0
+        param_max = 20.0  # 50.0
+        title_list = [r"Identity power = 1.0", r"Identity power = 5.0", r"Identity power = 10.0", r"Identity power = 20.0"]
+        property_values_list = np.asarray([1.0, 5.0, 10.0, 20.0])
         
     f = open("constants/base_params.json")
     params = json.load(f)
@@ -191,7 +198,6 @@ if __name__ == "__main__":
             case_6["homophily"] = 1.0#40
 
             params_list = [case_1, case_2, case_3, case_4,case_5, case_6]
-
         else:
             params_list = produce_param_list(params, property_values_list, property_varied)
 
@@ -215,6 +221,9 @@ if __name__ == "__main__":
             #live_print_culture_timeseries(fileName, data, property_varied, title_list, nrows, ncols, dpi_save)
             layout = ["circular","circular", "circular", "spring", "spring", "spring"]
             print_live_intial_culture_networks_and_culture_timeseries(fileName, data, dpi_save, property_values_list, property_varied_title, ncols, layout, norm_zero_one, cmap, node_size,round_dec)
+        elif GRAPH_TYPE ==4:
+            live_print_culture_timeseries(fileName, data, property_varied, title_list, nrows, ncols, dpi_save)
+            plot_carbon_emissions_total_comparison(fileName, data, dpi_save, property_values_list, property_varied_title, round_dec)
         else:
             pass
         
