@@ -1,0 +1,4 @@
+{
+    "row":{"property":"M","min":1, "max": 20, "title": "M","divisions": "linear", "reps": 20}, 
+    "col":{"property":"confirmation_bias","min":0, "max":90 , "title": "Confirmation bias, $\\theta$","divisions": "linear", "reps": 50}  
+}
