@@ -559,8 +559,11 @@ class Network:
         culture_list = self.quick_calc_culture(attitude_matrix)  # ,threshold_matrix
 
         # shuffle the indexes!
-        #print("culture_list",culture_list)
-        #print("attitude_list",attitude_list)
+        
+        print("culture_list",culture_list)
+        print("attitude_list",attitude_list)
+        print("zip(culture_list, attitude_list)",zip(culture_list, attitude_list))
+        print("sorted",sorted(zip(culture_list, attitude_list)))
         attitude_list_sorted = [x for _, x in sorted(zip(culture_list, attitude_list))]
 
         attitude_array_circular = self.produce_circular_list(attitude_list_sorted)
