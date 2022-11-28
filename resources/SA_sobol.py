@@ -9,6 +9,7 @@ Created: 10/10/2022
 """
 
 # imports
+import numpy as np
 from SALib.sample import saltelli
 from SALib.analyze import sobol
 import numpy.typing as npt
@@ -187,6 +188,7 @@ def generate_problem(
 
     names_list = [x["property"] for x in variable_parameters_dict.values()]
     bounds_list = [[x["min"], x["max"]] for x in variable_parameters_dict.values()]
+    round_variable_list = [x["property"] for x in variable_parameters_dict.values() if x["round"]]
 
     problem = {
         "num_vars": D_vars,
@@ -209,6 +211,11 @@ def generate_problem(
     param_values = saltelli.sample(
         problem, N_samples, calc_second_order=calc_second_order
     )  # NumPy matrix. #N(2D +2) samples where N is 1024 and D is the number of parameters
+
+    print("round_variable_list:",round_variable_list)
+    for i in round_variable_list:
+        index_round = problem["names"].index(i)
+        param_values[:,index_round] = np.round(param_values[:,index_round])
 
     return problem, fileName, param_values
 
