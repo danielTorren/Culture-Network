@@ -262,7 +262,24 @@ titles = [
     r"Confirmation bias, $\theta$"
 ]
 
-
+"""
+THIS WAS USE FOR THE LOADED RUN, JUST USEFUL AS A REFERENCEgit 
+{
+    "N":{"property": "N","min":100,"max":300, "title": "$N$"},
+    "M":{"property":"M","min":1,"max": 30, "title": "$M$"},
+    "K":{"property":"K","min":5,"max":80 , "title": "$K$"},
+    "prob_rewire": {"property": "prob_rewire","min": 0.0,"max": 1.0,"title": "$p_r$"},
+    "culture_momentum_real":{"property":"culture_momentum_real","min":1,"max": 2500, "title": "$T_{\\rho}$"},
+    "learning_error_scale":{"property":"learning_error_scale","min":0.0,"max":0.8 , "title": "$\\epsilon$" },
+    "a_attitude":{"property":"a_attitude","min":0.05, "max": 8, "title": "$a$ Attitude"},
+    "b_attitude":{"property":"b_attitude","min":0.05, "max":8 , "title": "$b$ Attitude"},
+    "a_threshold":{"property":"a_threshold","min":0.05, "max": 8, "title": "$a$ Threshold"},
+    "b_threshold":{"property":"b_threshold","min":0.05, "max": 8, "title": "$b$ Threshold"},
+    "discount_factor":{"property":"discount_factor","min":0.0, "max":1.0 , "title": "$\\delta$"},
+    "homophily": {"property": "homophily","min": 0.0,"max": 1.0,"title": "$h$"},
+    "confirmation_bias":{"property":"confirmation_bias","min":-10.0, "max":100 , "title": "$\\theta$"}
+}
+"""
 
 #THIS IS FOR CREATING THE ANN MODEL FROM SENSITVITY ANALYSIS DATA
 generate_model = 0
