@@ -93,6 +93,7 @@ def load_object(fileName, objectName) -> dict:
     data: object
         the pickle file loaded
     """
+
     with open(fileName + "/" + objectName + ".pkl", "rb") as f:
         data = pickle.load(f)
     return data
