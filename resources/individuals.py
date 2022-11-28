@@ -139,8 +139,9 @@ class Individual:
         self.av_behaviour_list = [self.av_behaviour] * self.culture_momentum
         self.culture = self.calc_culture()
 
+        self.total_carbon_emissions = self.calc_total_emissions()
+
         if self.save_data:
-            self.total_carbon_emissions = self.calc_total_emissions()
             self.history_behaviour_values = [list(self.values)]
             self.history_behaviour_attitudes = [list(self.attitudes)]
             self.history_behaviour_thresholds = [list(self.thresholds)]
@@ -283,7 +284,7 @@ class Individual:
 
         self.culture = self.calc_culture()
 
-        if self.save_data:
-            self.total_carbon_emissions = self.calc_total_emissions()
-            if self.steps % self.compression_factor == 0:
-                self.save_data_individual()
+        self.total_carbon_emissions = self.calc_total_emissions()
+
+        if (self.save_data) and (self.steps % self.compression_factor == 0):
+            self.save_data_individual()

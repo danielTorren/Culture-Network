@@ -332,17 +332,18 @@ class Network:
             #print("2")
             self.weighting_matrix_list = self.update_weightings_list()
 
+        self.total_carbon_emissions = self.calc_total_emissions()
+        self.history_total_carbon_emissions = [self.total_carbon_emissions]
+        (
+            self.average_culture,
+            self.std_culture,
+            self.var_culture,
+            self.min_culture,
+            self.max_culture,
+        ) = self.calc_network_culture()
+
+
         if self.save_data:
-            self.total_carbon_emissions = self.calc_total_emissions()
-
-            (
-                self.average_culture,
-                self.std_culture,
-                self.var_culture,
-                self.min_culture,
-                self.max_culture,
-            ) = self.calc_network_culture()
-
             self.var_first_behaviour = self.calc_var_first_behaviour()
 
             self.weighting_matrix_convergence = 0  # there is no convergence in the first step, to deal with time issues when plotting
@@ -352,7 +353,7 @@ class Network:
             self.history_weighting_matrix = [self.weighting_matrix]
             self.history_social_component_matrix = [self.social_component_matrix]
             self.history_time = [self.t]
-            self.history_total_carbon_emissions = [self.total_carbon_emissions]
+            
             self.history_weighting_matrix_convergence = [
                 self.weighting_matrix_convergence
             ]
@@ -1035,7 +1036,6 @@ class Network:
         self.history_time.append(self.t)
         self.history_weighting_matrix.append(self.weighting_matrix)
         self.history_social_component_matrix.append(self.social_component_matrix)
-        self.history_total_carbon_emissions.append(self.total_carbon_emissions)
         self.history_weighting_matrix_convergence.append(
             self.weighting_matrix_convergence
         )
@@ -1088,16 +1088,19 @@ class Network:
             self.weighting_matrix_list = self.update_weightings_list()
 
         self.social_component_matrix = self.calc_social_component_matrix()
+
+        self.total_carbon_emissions = self.calc_total_emissions()
+        self.history_total_carbon_emissions.append(self.total_carbon_emissions)
+
+        (
+            self.average_culture,
+            self.std_culture,
+            self.var_culture,
+            self.min_culture,
+            self.max_culture,
+        ) = self.calc_network_culture()
         
-        if self.steps % self.compression_factor == 0 and self.save_data:
-            self.total_carbon_emissions = self.calc_total_emissions()
-            (
-                self.average_culture,
-                self.std_culture,
-                self.var_culture,
-                self.min_culture,
-                self.max_culture,
-            ) = self.calc_network_culture()
+        if (self.steps % self.compression_factor == 0) and (self.save_data):
             self.var_first_behaviour = self.calc_var_first_behaviour()
             self.green_adoption = self.calc_green_adoption()
             self.save_data_network()

@@ -183,6 +183,7 @@ def generate_problem(
         samples = N_samples * (D_vars + 2)
 
     print("samples: ", samples)
+    print("Total runs: ",samples*AV_reps)
 
     names_list = [x["property"] for x in variable_parameters_dict.values()]
     bounds_list = [[x["min"], x["max"]] for x in variable_parameters_dict.values()]
