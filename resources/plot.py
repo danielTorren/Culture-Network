@@ -1337,7 +1337,7 @@ def double_matrix_plot_cluster(
     row_dict = variable_parameters_dict["row"]
 
     ax.set_xlabel(r"Confirmation bias, $\theta$")
-    ax.set_ylabel(r"Attitude Beta parameter polarisation, $a/b$")
+    ax.set_ylabel(r"Attitude Beta parameter $a$")
 
     if col_dict["divisions"] == "log":
         ax.set_xscale("log")

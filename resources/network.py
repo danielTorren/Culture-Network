@@ -297,18 +297,14 @@ class Network:
         self.network_density = nx.density(self.network)
         #print("self.network_density",self.network_density)
 
-        #Associate people with attitude values
-        (
-            self.a_attitude,
-            self.b_attitude,
-            self.a_threshold,
-            self.b_threshold,
-        ) = (
-            parameters["a_attitude"],
-            parameters["b_attitude"], # parameters["b_attitude"]
-            parameters["a_threshold"],
-            parameters["b_threshold"],
-        )
+        #############################################################################################################################
+        #Associate people with attitude values CHANGE THIS BACK
+        self.a_attitude = parameters["a_attitude"]
+        self.b_attitude = 2 - self.a_attitude 
+        #self.b_attitude = parameters["b_attitude"]
+        self.a_threshold = parameters["a_threshold"]
+        self.b_threshold = parameters["b_threshold"]
+        #################################################################################################################################
 
         (
             self.attitude_matrix_init,

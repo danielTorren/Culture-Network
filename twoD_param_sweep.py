@@ -222,6 +222,7 @@ if __name__ == "__main__":
             print("fileName: ", fileName)
 
             if cluster_count_run:
+                
                     createFolder(fileName)
                     s = np.linspace(0,1,50)
                     params_list = produce_param_list_n_double(params, variable_parameters_dict)
