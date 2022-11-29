@@ -215,7 +215,7 @@ def cluster_data_run(
     num_cores = multiprocessing.cpu_count()
     #res = [generate_sensitivity_output(i) for i in params_dict]
     res = Parallel(n_jobs=num_cores, verbose=10)(
-        delayed(generate_sensitivity_output)(i,s) for i in params_dict
+        delayed(generate_cluster_output)(i,s) for i in params_dict
     )
     results_emissions, results_mean, results_var, results_coefficient_variance, results_emissions_change, results_clusters_count = zip(
         *res

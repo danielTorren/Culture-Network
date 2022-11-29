@@ -329,7 +329,7 @@ class Network:
             self.weighting_matrix_list = self.update_weightings_list()
 
         self.init_total_carbon_emissions  = self.calc_total_emissions()
-        self.total_carbon_emissions = self.init_carbon_emissions
+        self.total_carbon_emissions = self.init_total_carbon_emissions
 
         (
                 self.culture_list,

@@ -231,7 +231,9 @@ if __name__ == "__main__":
                         results_mu,
                         results_var,
                         results_coefficient_of_variance,
+                        results_emissions_change,
                         results_clusters_count,
+                        
                     ) = cluster_data_run(params_list,s)
 
                     # save the data and params_list
@@ -242,13 +244,16 @@ if __name__ == "__main__":
                     save_object(results_mu, fileName + "/Data", "results_mu")
                     save_object(results_var, fileName + "/Data", "results_var")
                     save_object(results_coefficient_of_variance,fileName + "/Data","results_coefficient_of_variance")
+                    save_object(results_emissions_change,fileName + "/Data","results_emissions_change")
                     save_object(results_clusters_count,fileName + "/Data","results_clusters_count")
             else:
+                ######FIX THIS TOO INCLUDE EMISSIONS CHANGE
                 (
                     results_emissions,
                     results_mu,
                     results_var,
                     results_coefficient_of_variance,
+                    results_emissions_change,
                 ) = av_two_dimensional_param_run(fileName, variable_parameters_dict, params)
 
 

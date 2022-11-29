@@ -22,7 +22,7 @@ from typing import Union
 #from pydlc import dense_lines
 from resources.network import Network
 import joypy
-from resources.utility import calc_num_clusters_specify_bandwidth,calc_num_clusters_auto_bandwidth
+from resources.utility import calc_num_clusters_auto_bandwidth
 
 
 SMALL_SIZE = 14
