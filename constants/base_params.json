@@ -5,7 +5,7 @@
     "phi_upper": 0.05,
     "compression_factor": 10,
     "seed_list": [1,2,3,4,5],
-    "save_data": 0, 
+    "save_data": 1, 
     "alpha_change" : 1.0,
     "degroot_aggregation": 1,
     "averaging_method": "Arithmetic",

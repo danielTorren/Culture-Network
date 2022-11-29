@@ -12,6 +12,9 @@ import os
 import numpy as np
 from logging import raiseExceptions
 from matplotlib.colors import Normalize, LogNorm
+from sklearn.neighbors import KernelDensity
+from scipy.stats import gaussian_kde
+from scipy.signal import argrelextrema
 
 # modules
 def createFolder(fileName: str) -> str:
@@ -149,3 +152,16 @@ def generate_vals_variable_parameters_and_norms(variable_parameters_dict):
         else:
             raiseExceptions("Invalid divisions, try linear or log")
     return variable_parameters_dict
+"""
+def calc_num_clusters_specify_bandwidth(culture_data, s, bandwith):
+    kde = KernelDensity(kernel='gaussian', bandwidth=bandwith).fit(culture_data)
+    e = kde.score_samples(s.reshape(-1,1))
+    ma = argrelextrema(e, np.greater)[0]
+    return len(ma)
+"""
+
+def calc_num_clusters_auto_bandwidth(culture_data, s):
+    kde = gaussian_kde(culture_data)
+    probs = kde.evaluate(s)
+    ma_scipy = argrelextrema(probs, np.greater)[0]
+    return len(ma_scipy)

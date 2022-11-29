@@ -332,23 +332,25 @@ class Network:
             #print("2")
             self.weighting_matrix_list = self.update_weightings_list()
 
-        self.total_carbon_emissions = self.calc_total_emissions()
-        self.history_total_carbon_emissions = [self.total_carbon_emissions]
-        (
-            self.average_culture,
-            self.std_culture,
-            self.var_culture,
-            self.min_culture,
-            self.max_culture,
-        ) = self.calc_network_culture()
+        self.init_total_carbon_emissions  = self.calc_total_emissions()
+        self.total_carbon_emissions = self.init_carbon_emissions
 
+        (
+                self.culture_list,
+                self.average_culture,
+                self.std_culture,
+                self.var_culture,
+                self.min_culture,
+                self.max_culture,
+        ) = self.calc_network_culture()
+        self.green_adoption = self.calc_green_adoption()
 
         if self.save_data:
             self.var_first_behaviour = self.calc_var_first_behaviour()
 
             self.weighting_matrix_convergence = 0  # there is no convergence in the first step, to deal with time issues when plotting
 
-            self.green_adoption = self.calc_green_adoption()
+            
 
             self.history_weighting_matrix = [self.weighting_matrix]
             self.history_social_component_matrix = [self.social_component_matrix]
@@ -363,6 +365,7 @@ class Network:
             self.history_min_culture = [self.min_culture]
             self.history_max_culture = [self.max_culture]
             self.history_green_adoption = [self.green_adoption]
+            self.history_total_carbon_emissions = [self.total_carbon_emissions]
             if self.alpha_change != (0.0 or 2.0):
                 self.history_total_identity_differences = [self.total_identity_differences]
 
@@ -979,7 +982,7 @@ class Network:
         culture_variance = np.var(culture_list)
         culture_max = max(culture_list)
         culture_min = min(culture_list)
-        return (culture_mean, culture_std, culture_variance, culture_max, culture_min)
+        return (culture_list,culture_mean, culture_std, culture_variance, culture_max, culture_min)
 
     def calc_green_adoption(self) -> float:
         """
@@ -1048,6 +1051,7 @@ class Network:
         self.history_min_culture.append(self.min_culture)
         self.history_max_culture.append(self.max_culture)
         self.history_green_adoption.append(self.green_adoption)
+        self.history_total_carbon_emissions.append(self.total_carbon_emissions)
         if self.alpha_change != (0.0 or 2.0):
             self.history_total_identity_differences.append(self.total_identity_differences)
 
@@ -1091,19 +1095,18 @@ class Network:
             self.weighting_matrix_list = self.update_weightings_list()
 
         self.social_component_matrix = self.calc_social_component_matrix()
-
         self.total_carbon_emissions = self.calc_total_emissions()
-        self.history_total_carbon_emissions.append(self.total_carbon_emissions)
-
         (
-            self.average_culture,
-            self.std_culture,
-            self.var_culture,
-            self.min_culture,
-            self.max_culture,
+                self.culture_list,
+                self.average_culture,
+                self.std_culture,
+                self.var_culture,
+                self.min_culture,
+                self.max_culture,
         ) = self.calc_network_culture()
         
         if (self.steps % self.compression_factor == 0) and (self.save_data):
+
             self.var_first_behaviour = self.calc_var_first_behaviour()
             self.green_adoption = self.calc_green_adoption()
             self.save_data_network()

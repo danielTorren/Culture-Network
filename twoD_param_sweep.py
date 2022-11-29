@@ -38,13 +38,16 @@ from resources.plot import (
     double_matrix_plot,
     multi_line_matrix_plot,
     multi_line_matrix_plot_divide_through,
-    double_matrix_plot_ab
+    double_matrix_plot_ab,
+    double_matrix_plot_cluster
 )
 
 
 from resources.utility import (
     createFolder,
     generate_vals_variable_parameters_and_norms,
+    save_object,
+    load_object
 )
 from resources.multi_run_2D_param import (
     generate_title_list,
@@ -53,12 +56,20 @@ from resources.multi_run_2D_param import (
     av_two_dimensional_param_run,
     load_data_av,
     reshape_results_matricies,
+    produce_param_list_n_double,
 )
+from resources.run import cluster_data_run
 import numpy as np
 
 # run bools
-RUN = 0 # run or load in previously saved data
+RUN = 1 # run or load in previously saved data
 SINGLE = 0 # determine if you runs single shots or study the averages over multiple runs for each experiment
+cluster_count_run = 1
+ab_plot = 0
+plot_conf_attiude = 0
+plot_multi_line_divide = 1
+plot_multi_line = 0
+
 fileName = "results/twoD_Average_M_confirmation_bias_200_2000_20_10_402_5"
 #"results/twoD_Average_confirmation_bias_M_200_3000_20_70_20_5"#"results/twoD_Average_confirmation_bias_a_attitude_200_3000_20_64_64_5"#"
 #"results/twoD_Average_confirmation_bias_a_attitude_200_3000_20_64_64_5"
@@ -210,43 +221,88 @@ if __name__ == "__main__":
             )
             print("fileName: ", fileName)
 
-            (
-                results_emissions,
-                results_mu,
-                results_var,
-                results_coefficient_of_variance,
-            ) = av_two_dimensional_param_run(fileName, variable_parameters_dict, params)
+            if cluster_count_run:
+                    createFolder(fileName)
+                    s = np.linspace(0,1,50)
+                    params_list = produce_param_list_n_double(params, variable_parameters_dict)
+                    (
+                        results_emissions,
+                        results_mu,
+                        results_var,
+                        results_coefficient_of_variance,
+                        results_clusters_count,
+                    ) = cluster_data_run(params_list,s)
+
+                    # save the data and params_list
+                    save_object(
+                        variable_parameters_dict, fileName + "/Data", "variable_parameters_dict"
+                    )
+                    save_object(results_emissions, fileName + "/Data", "results_emissions")
+                    save_object(results_mu, fileName + "/Data", "results_mu")
+                    save_object(results_var, fileName + "/Data", "results_var")
+                    save_object(results_coefficient_of_variance,fileName + "/Data","results_coefficient_of_variance")
+                    save_object(results_clusters_count,fileName + "/Data","results_clusters_count")
+            else:
+                (
+                    results_emissions,
+                    results_mu,
+                    results_var,
+                    results_coefficient_of_variance,
+                ) = av_two_dimensional_param_run(fileName, variable_parameters_dict, params)
+
+
+            
         else:
             createFolder(fileName)
 
-            (
-                variable_parameters_dict,
-                results_emissions,
-                results_mu,
-                results_var,
-                results_coefficient_of_variance,
-            ) = load_data_av(fileName)
+            if cluster_count_run:
+                variable_parameters_dict = load_object(
+                    fileName + "/Data", "variable_parameters_dict"
+                )
+                results_emissions = load_object(fileName + "/Data", "results_emissions")
+                results_mu = load_object(fileName + "/Data", "results_mu")
+                results_var = load_object(fileName + "/Data", "results_var")
+                results_coefficient_of_variance = load_object(
+                    fileName + "/Data", "results_coefficient_of_variance"
+                )
 
-        ###PLOTS FOR STOCHASTICALLY AVERAGED RUNS
-        (
-            matrix_emissions,
-            matrix_mu,
-            matrix_var,
-            matrix_coefficient_of_variance,
-        ) = reshape_results_matricies(
-            results_emissions,
-            results_mu,
-            results_var,
-            results_coefficient_of_variance,
-            variable_parameters_dict["row"]["reps"],
-            variable_parameters_dict["col"]["reps"],
-        )
+                results_clusters_count = load_object(fileName + "/Data","results_clusters_count")
+
+                reps_row, reps_col = variable_parameters_dict["row"]["reps"],variable_parameters_dict["col"]["reps"]
+                matrix_emissions = results_emissions.reshape((reps_row, reps_col))
+                matrix_mu = results_mu.reshape((reps_row, reps_col))
+                matrix_var = results_var.reshape((reps_row, reps_col))
+                matrix_coefficient_of_variance = results_coefficient_of_variance.reshape((reps_row, reps_col))
+                matrix_clusters_count = results_clusters_count.reshape((reps_row, reps_col))
+            else:    
+                (
+                    variable_parameters_dict,
+                    results_emissions,
+                    results_mu,
+                    results_var,
+                    results_coefficient_of_variance,
+                ) = load_data_av(fileName)
+
+                ###PLOTS FOR STOCHASTICALLY AVERAGED RUNS
+                (
+                    matrix_emissions,
+                    matrix_mu,
+                    matrix_var,
+                    matrix_coefficient_of_variance,
+                ) = reshape_results_matricies(
+                    results_emissions,
+                    results_mu,
+                    results_var,
+                    results_coefficient_of_variance,
+                    variable_parameters_dict["row"]["reps"],
+                    variable_parameters_dict["col"]["reps"],
+            )
 
         #double_phase_diagram(fileName, matrix_emissions, r"Total normalised emissions $E/NM$", "emissions",variable_parameters_dict, get_cmap("Reds"),dpi_save)
         #double_phase_diagram(fileName, matrix_mu, r"Average identity, $\mu$", "mu",variable_parameters_dict, get_cmap("Blues"),dpi_save)
         #double_phase_diagram(fileName, matrix_var, r"Identity variance, $\sigma^2$", "variance",variable_parameters_dict, get_cmap("Greens"),dpi_save)
         #double_phase_diagram(fileName, matrix_coefficient_of_variance, r"Identity coefficient of variance, $\sigma/\mu$", "coefficient_of_variance",variable_parameters_dict, get_cmap("Oranges"),dpi_save)
-        ab_plot = 0
+
         if ab_plot:
             ############################
             #PLOT THE AB MATRIX TO SHOW CORRESPONDANCE WITH OUTPUT
@@ -277,7 +333,6 @@ if __name__ == "__main__":
 
 
         #when using discrete or interger variables ie, K,N,M
-        plot_conf_attiude = 0
         if plot_conf_attiude:
             col_dict = variable_parameters_dict["col"]
             row_dict = variable_parameters_dict["row"]
@@ -306,7 +361,7 @@ if __name__ == "__main__":
             multi_line_matrix_plot(fileName,matrix_var, col_dict["vals"], row_dict["vals"],"variance", get_cmap("plasma"),dpi_save,col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label, 1, col_label, row_label, y_label)#y_ticks_pos, y_ticks_label
             multi_line_matrix_plot(fileName,matrix_var, col_dict["vals"], row_dict["vals"],"variance", get_cmap("plasma"),dpi_save,col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label, 0, col_label, row_label, y_label)#y_ticks_pos, y_ticks_label
 
-        plot_multi_line = 0
+
         if plot_multi_line:
             col_dict = variable_parameters_dict["col"]
             row_dict = variable_parameters_dict["row"]
@@ -339,7 +394,7 @@ if __name__ == "__main__":
 
             multi_line_matrix_plot(fileName,Z, col_vals, row_dict["vals"],"variance", get_cmap("plasma"),dpi_save,col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label,col_axis_x)#y_ticks_pos, y_ticks_label
         
-        plot_multi_line_divide = 1
+
         if plot_multi_line_divide:
             col_dict = variable_parameters_dict["col"]#confirmation bias
             row_dict = variable_parameters_dict["row"]#m
@@ -388,6 +443,9 @@ if __name__ == "__main__":
 
             #multi_line_matrix_plot_divide_through(fileName,matrix_norm_var_edit, col_vals, row_vals,"variance", get_cmap("plasma"),dpi_save,col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label,0)#y_ticks_pos, y_ticks_label
             multi_line_matrix_plot_divide_through(fileName,matrix_norm_var_edit, col_vals, row_vals,"variance", get_cmap("plasma"),dpi_save,col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label,1)#y_ticks_pos, y_ticks_label
+
+        if cluster_count_run:
+            double_matrix_plot_cluster(fileName,matrix_clusters_count,variable_parameters_dict, get_cmap("Purples"),dpi_save)
 
         #only for the a or b beta parameters
         #double_phase_diagram_using_meanandvariance(fileName, matrix_emissions, r"Total normalised emissions, $E/NM$", "emissions",variable_parameters_dict, get_cmap("Reds"),dpi_save)

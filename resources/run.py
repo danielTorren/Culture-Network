@@ -14,6 +14,7 @@ import numpy.typing as npt
 from joblib import Parallel, delayed
 import multiprocessing
 from resources.network import Network
+from resources.utility import calc_num_clusters_auto_bandwidth
 
 # modules
 ####SINGLE SHOT RUN
@@ -167,6 +168,67 @@ def generate_sensitivity_output(params: dict):
         stochastic_norm_emissions_change
     )
 
+def generate_cluster_output(params: dict,s):
+
+    emissions_list = []
+    mean_list = []
+    var_list = []
+    coefficient_variance_list = []
+    emissions_change_list = []
+    clusters_count_list = []
+
+    norm_factor = params["N"] * params["M"]
+
+    for v in params["seed_list"]:
+        params["set_seed"] = v
+        data = generate_data(params)
+
+        # Insert more measures below that want to be used for evaluating the
+        emissions_list.append(data.total_carbon_emissions / norm_factor)
+        mean_list.append(data.average_culture)
+        var_list.append(data.var_culture)#data.var_first_behaviour# BOTCH
+        coefficient_variance_list.append(data.std_culture / (data.average_culture))
+        emissions_change_list.append(np.abs(data.total_carbon_emissions - data.init_total_carbon_emissions)/norm_factor)
+        clusters_count_list.append(calc_num_clusters_auto_bandwidth(data.culture_list, s))
+
+    stochastic_norm_emissions = np.mean(emissions_list)
+    stochastic_norm_mean = np.mean(mean_list)
+    stochastic_norm_var = np.mean(var_list)
+    stochastic_norm_coefficient_variance = np.mean(coefficient_variance_list)
+    stochastic_norm_emissions_change = np.mean(emissions_change_list)
+    stochastic_norm_clusters_count = np.mean(clusters_count_list)
+
+    return (
+        stochastic_norm_emissions,
+        stochastic_norm_mean,
+        stochastic_norm_var,
+        stochastic_norm_coefficient_variance,
+        stochastic_norm_emissions_change,
+        stochastic_norm_clusters_count,
+    )
+
+def cluster_data_run(
+        params_dict: dict[dict],s
+) -> tuple[npt.NDArray, npt.NDArray, npt.NDArray, npt.NDArray]:
+
+    #print("params_dict", params_dict)
+    num_cores = multiprocessing.cpu_count()
+    #res = [generate_sensitivity_output(i) for i in params_dict]
+    res = Parallel(n_jobs=num_cores, verbose=10)(
+        delayed(generate_sensitivity_output)(i,s) for i in params_dict
+    )
+    results_emissions, results_mean, results_var, results_coefficient_variance, results_emissions_change, results_clusters_count = zip(
+        *res
+    )
+
+    return (
+        np.asarray(results_emissions),
+        np.asarray(results_mean),
+        np.asarray(results_var),
+        np.asarray(results_coefficient_variance),
+        np.asarray(results_emissions_change),
+        np.asarray(results_clusters_count)
+    )
 
 def parallel_run_sa(
     params_dict: dict[dict],

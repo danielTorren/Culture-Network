@@ -12,12 +12,15 @@ from matplotlib.colors import LinearSegmentedColormap, Normalize, SymLogNorm
 from matplotlib.cm import get_cmap
 import time
 import json
+import numpy as np
 from resources.run import generate_data
 from resources.utility import (
     createFolder, 
     save_object, 
     load_object,
     produceName,
+    calc_num_clusters_specify_bandwidth,
+    calc_num_clusters_auto_bandwidth,
 )
 from resources.plot import (
     plot_culture_timeseries,
@@ -57,7 +60,8 @@ from resources.plot import (
     # animate_behaviour_scatter,
     weighting_histogram,
     live_animate_weighting_matrix,
-    weighting_histogram_time
+    weighting_histogram_time,
+    cluster_estimation
 )
 
 # FOR FILENAME
@@ -116,7 +120,7 @@ min_culture_distance = 0.5
 
 bin_num = 20
 
-RUN = 1
+RUN = 0
 PLOT = 1
 SHOW_PLOT = 1
 
@@ -139,17 +143,25 @@ if __name__ == "__main__":
     if PLOT:
         start_time = time.time()
         print("start_time =", time.ctime(time.time()))
-
         dataName = FILENAME + "/Data"
-
         Data = load_object(dataName, "social_network")
 
+        no_samples = 50
+        X = np.asarray([Data.agent_list[n].culture for n in range(Data.N)])
+        s = np.linspace(0, 1,no_samples)
+        X_reshape = X.reshape(-1, 1)
+
+        
+    
         ###PLOTS
-        plot_culture_timeseries(FILENAME, Data, dpi_save)
+        #bandwidth_list = [0.05]
+        #cluster_estimation(Data,bandwidth_list)
+
+        #plot_culture_timeseries(FILENAME, Data, dpi_save)
         #weighting_histogram(FILENAME, Data, dpi_save,bin_num)
         #weighting_histogram_time(FILENAME, Data, dpi_save,bin_num,300)
         #plot_green_adoption_timeseries(FILENAME, Data, dpi_save)
-        plot_total_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
+        #plot_total_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
         #plot_weighting_matrix_convergence_timeseries(FILENAME, Data, dpi_save)
         # plot_cultural_range_timeseries(FILENAME, Data, dpi_save)
         # plot_average_culture_timeseries(FILENAME,Data,dpi_save)
@@ -157,7 +169,7 @@ if __name__ == "__main__":
 
         #plot_value_timeseries(FILENAME,Data,dpi_save)
         #plot_threshold_timeseries(FILENAME,Data,dpi_save)
-        plot_attitude_timeseries(FILENAME,Data,dpi_save)
+        #plot_attitude_timeseries(FILENAME,Data,dpi_save)
 
         #live_animate_weighting_matrix(FILENAME, Data,  cmap_weighting, interval, fps, round_dec)
 

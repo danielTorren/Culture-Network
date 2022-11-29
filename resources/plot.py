@@ -9,7 +9,6 @@ Created: 10/10/2022
 
 # imports
 import string
-from matplotlib import image
 import networkx as nx
 from networkx import Graph
 import numpy as np
@@ -23,6 +22,7 @@ from typing import Union
 #from pydlc import dense_lines
 from resources.network import Network
 import joypy
+from resources.utility import calc_num_clusters_specify_bandwidth,calc_num_clusters_auto_bandwidth
 
 
 SMALL_SIZE = 14
@@ -43,6 +43,51 @@ plt.rcParams.update({
 })
 
 # modules
+###### estimating number of clusters
+
+def estimate_maxima(data,samples):
+    kde = gaussian_kde(data)
+    probs = kde.evaluate(samples)
+
+    maxima_index = probs.argmax()
+    maxima = samples[maxima_index]
+    
+    return maxima,probs
+
+def cluster_estimation(Data,bandwidth_list):
+
+    fig2, ax2 = plt.subplots()
+
+    no_samples = 50
+    X = np.asarray([Data.agent_list[n].culture for n in range(Data.N)])
+
+    s = np.linspace(0, 1,no_samples)
+    
+    scipy_kde_maxima, probs = estimate_maxima(X,s)
+    ma_scipy  =  argrelextrema(probs, np.greater)[0]
+    print("probs, ",probs)
+    print("mi_scipy, ma_scipy",mi_scipy, ma_scipy)
+    ax2.plot(s, probs)
+    
+    #calc_num_clusters_auto_bandwidth(X, s)
+    
+    fig, ax = plt.subplots()
+    X_reshape = X.reshape(-1, 1)
+
+    #calc_num_clusters_specify_bandwidth(X_reshape, s, 0.05)
+
+
+    for i in bandwidth_list:
+        kde = KernelDensity(kernel='gaussian', bandwidth=i).fit(X_reshape)
+        e = kde.score_samples(s.reshape(-1,1))
+        #print("e",e)
+        ax.plot(s, e, label = i)
+
+        mi, ma = argrelextrema(e, np.less)[0], argrelextrema(e, np.greater)[0]
+        print(i,"Minima:", s[mi])
+        print(i,"Maxima:", s[ma])
+    ax.legend()
+
 #####RUNPLOT PLOTS - SINGLE NETWORK
 def live_print_culture_timeseries_varynetwork_structure(
     fileName,
@@ -210,6 +255,253 @@ def print_culture_density_timeseries_multi(
     f = plotName + "/print_culture_density_timeseries_multi.png"
     fig.savefig(f, dpi=dpi_save, format="png")
 """
+
+def plot_compare_av_culture_seed(
+    fileName, 
+    data_no_culture,
+    data_culture, 
+    nrows, 
+    ncols, 
+    dpi_save,
+    property_values_list_no_culture, 
+    property_varied_no_culture, 
+    property_values_list_culture, 
+    property_varied_culture
+    ):
+
+    y_title = r"Identity, $I_{t,n}$"
+
+    fig, axes = plt.subplots(nrows=nrows,ncols=ncols, sharey=True)
+
+    #print("axes",axes)
+    for i in range(len(data_no_culture)):
+        # print(np.asarray(Data_list[i].history_average_culture))
+        culture_min = np.asarray(data_no_culture[i].history_min_culture)  # bodge
+        culture_max = np.asarray(data_no_culture[i].history_max_culture)  # bodge
+
+        axes[0].plot(
+            np.asarray(data_no_culture[i].history_time),
+            np.asarray(data_no_culture[i].history_average_culture),
+            label="%s = %s" % (property_varied_no_culture, property_values_list_no_culture[i]),
+        )
+
+        axes[0].fill_between(
+            np.asarray(data_no_culture[i].history_time),
+            culture_min,
+            culture_max,
+            alpha=0.5,
+            linewidth=0,
+        )
+
+
+    
+    for i in range(len(data_culture)):
+        # print(np.asarray(Data_list[i].history_average_culture))
+        culture_min = np.asarray(data_culture[i].history_min_culture) 
+        culture_max = np.asarray(data_culture[i].history_max_culture)  
+
+        axes[1].plot(
+            np.asarray(data_culture[i].history_time),
+            np.asarray(data_culture[i].history_average_culture),
+            label="%s = %s" % (property_varied_culture, property_values_list_culture[i]),
+        )
+
+        axes[1].fill_between(
+            np.asarray(data_culture[i].history_time),
+            culture_min,
+            culture_max,
+            alpha=0.5,
+            linewidth=0,
+        )
+    
+    axes[0].set_ylabel(r"%s" % y_title)
+    axes[0].set_xlabel(r"Time")
+    axes[0].set_title(r"Behavioural independance")
+    axes[0].legend()
+
+    axes[1].set_xlabel(r"Time")
+    axes[1].set_title(r"Behavioural dependance")
+    axes[1].legend()
+
+
+    plotName = fileName + "/Prints"
+
+    f = plotName + "/plot_compare_av_culture_seed"
+    #fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
+
+def plot_compare_time_culture_seed(
+    fileName, 
+    data_no_culture,
+    data_culture, 
+    nrows, 
+    ncols, 
+    dpi_save,
+    property_values_list_no_culture, 
+    property_varied_no_culture, 
+    property_values_list_culture, 
+    property_varied_culture,
+    colour_list
+    ):
+
+    y_title = r"Identity, $I_{t,n}$"
+
+    fig, axes = plt.subplots(nrows=nrows,ncols=ncols, sharey=True)
+
+    for i in range(len(data_no_culture)):
+        for v in range(data_no_culture[i].N):
+            axes[0].plot(
+                np.asarray(data_no_culture[i].history_time),
+                np.asarray(data_no_culture[i].agent_list[v].history_culture),
+                color = colour_list[i]
+            )
+    
+    for i in range(len(data_culture)):
+        for v in range(data_culture[i].N):
+            axes[1].plot(
+                np.asarray(data_culture[i].history_time),
+                np.asarray(data_culture[i].agent_list[v].history_culture),
+                color = colour_list[i]
+            )
+
+    axes[0].set_ylabel(r"%s" % y_title)
+    axes[0].set_xlabel(r"Time")
+    axes[0].set_title(r"Behavioural independance")
+
+    axes[1].set_xlabel(r"Time")
+    axes[1].set_title(r"Behavioural dependance")
+
+    plotName = fileName + "/Prints"
+
+    f = plotName + "/plot_compare_time_culture_seed"
+    #fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
+def plot_compare_time_behaviour_culture_seed(
+    fileName, 
+    data_no_culture,
+    data_culture, 
+    nrows, 
+    ncols, 
+    dpi_save,
+    colour_list
+    ):
+
+    y_title = r"Behavioural Attitude, $A_{t,n,m}$"
+
+    fig, axes = plt.subplots(nrows=nrows,ncols=ncols, sharey=True)
+    #print(axes)
+    for i in range(len(data_no_culture)):
+        for v in range(data_no_culture[i].N):
+            data_indivdiual = np.asarray(data_no_culture[i].agent_list[v].history_behaviour_attitudes)
+            for j in range(ncols):
+                axes[0][j].plot(
+                    np.asarray(data_no_culture[i].history_time),
+                    data_indivdiual[:,j],
+                    color = colour_list[i]
+                )
+
+    
+    for i in range(len(data_culture)):
+        for v in range(data_culture[i].N):
+            data_indivdiual = np.asarray(data_culture[i].agent_list[v].history_behaviour_attitudes)
+            for j in range(ncols):
+                axes[1][j].plot(
+                    np.asarray(data_culture[i].history_time),
+                    data_indivdiual[:,j],
+                    color = colour_list[i]
+                )
+
+    fig.supxlabel(r"Time")
+    fig.supylabel(r"%s" % y_title)
+
+    plotName = fileName + "/Prints"
+
+    f = plotName + "/plot_compare_time_behaviour_culture_seed"
+    #fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
+def plot_network_emissions_timeseries_no_culture(
+    fileName, 
+    data_no_culture,
+    data_culture, 
+    dpi_save,
+    colour_list
+    ):
+
+    y_title = "Step total emissions, $E_{t}$"
+
+    fig, ax = plt.subplots()
+
+    for i in range(len(data_no_culture)):
+        ax.plot(
+            np.asarray(data_no_culture[i].history_time),
+            np.asarray(data_no_culture[i].history_total_carbon_emissions),
+            color = colour_list[i],
+            linestyle = "dashed"
+        )
+    
+    for i in range(len(data_culture)):
+        ax.plot(
+            np.asarray(data_culture[i].history_time),
+            np.asarray(data_culture[i].history_total_carbon_emissions),
+            color = colour_list[i],
+            linestyle = "solid"
+
+        )
+
+    ax.set_ylabel(r"%s" % y_title)
+    ax.set_xlabel(r"Time")
+
+    plotName = fileName + "/Prints"
+
+    f = plotName + "/plot_network_emissions_timeseries_no_culture"
+    #fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
+def plot_behaviorual_emissions_timeseries_no_culture(
+    fileName, 
+    data_no_culture,
+    data_culture, 
+    dpi_save,
+    colour_list
+    ):
+
+    y_title = "Step total behavioural emissions, $E_{t,m}$"
+
+    fig, ax = plt.subplots()
+
+    M = data_no_culture[0].M
+    for i in range(len(data_no_culture)):
+        data_matrix = np.asarray([[sum(data_no_culture[i].agent_list[v].history_behavioural_carbon_emissions[t][j] for v in range(data_no_culture[i].N)) for t in range(len(data_no_culture[i].history_time))] for j in range(M)])
+        for j in range(M):
+            ax.plot(
+                np.asarray(data_no_culture[i].history_time),
+                data_matrix[j],
+                color = colour_list[i],
+                linestyle = "dashed",
+            )
+    
+    for i in range(len(data_culture)):
+        data_matrix = np.asarray([[sum(data_culture[i].agent_list[v].history_behavioural_carbon_emissions[t][j] for v in range(data_culture[i].N)) for t in range(len(data_culture[i].history_time))] for j in range(M)])
+        for j in range(M):
+            ax.plot(
+                np.asarray(data_culture[i].history_time),
+                data_matrix[j],
+                color = colour_list[i],
+                linestyle = "solid",
+            )
+
+    ax.set_ylabel(r"%s" % y_title)
+    ax.set_xlabel(r"Time")
+
+    plotName = fileName + "/Prints"
+
+    f = plotName + "/plot_behaviorual_emissions_timeseries_no_culture"
+    #fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
 
 def plot_network_timeseries(
     FILENAME: str, Data: Network, y_title: str, property: str, dpi_save: int
@@ -1032,6 +1324,43 @@ def double_matrix_plot(
 
     plotName = fileName + "/Plots"
     f = plotName + "/live_average_double_matrix_plot_%s" % (Y_param)
+    #fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
+def double_matrix_plot_cluster(
+    fileName, Z, variable_parameters_dict, cmap, dpi_save
+):
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    col_dict = variable_parameters_dict["col"]
+    row_dict = variable_parameters_dict["row"]
+
+    ax.set_xlabel(r"Confirmation bias, $\theta$")
+    ax.set_ylabel(r"Attitude Beta parameter polarisation, $a/b$")
+
+    if col_dict["divisions"] == "log":
+        ax.set_xscale("log")
+    if row_dict["divisions"] == "log":
+        ax.set_yscale("log")
+
+    mat = ax.matshow(
+        Z,
+        cmap=cmap,
+        aspect="auto",
+    )
+    cbar = fig.colorbar(
+        mat,
+        #plt.cm.ScalarMappable(cmap=cmap, norm=Normalize(vmin=Z.min(), vmax=Z.max())),
+        ax=ax,
+    )
+    cbar.set_label(r"Number of identity bubbles")
+
+    # HAS TO BE AFTER PUTTING INT THE MATRIX 
+    ax.xaxis.set_ticks_position('bottom')
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/live_average_double_matrix_plot_cluster_count"
     #fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
     fig.savefig(f + ".png", dpi=dpi_save, format="png")
 

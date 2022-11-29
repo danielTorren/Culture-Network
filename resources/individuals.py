@@ -139,7 +139,7 @@ class Individual:
         self.av_behaviour_list = [self.av_behaviour] * self.culture_momentum
         self.culture = self.calc_culture()
 
-        self.total_carbon_emissions = self.calc_total_emissions()
+        self.total_carbon_emissions,self.behavioural_carbon_emissions = self.calc_total_emissions()
 
         if self.save_data:
             self.history_behaviour_values = [list(self.values)]
@@ -148,6 +148,7 @@ class Individual:
             self.history_av_behaviour = [self.av_behaviour]
             self.history_culture = [self.culture]
             self.history_carbon_emissions = [self.total_carbon_emissions]
+            self.history_behavioural_carbon_emissions = [self.behavioural_carbon_emissions]
 
     def calc_av_behaviour(self):
         self.av_behaviour = np.mean((1 - self.action_observation_I)*self.attitudes  + self.action_observation_I*((self.values + 1)/2))
@@ -234,7 +235,8 @@ class Individual:
         -------
         float
         """
-        return sum(((1-self.values[i])/2)*self.carbon_intensive_list[i] for i in range(self.M))# normalized Beta now used for emissions
+        behavioural_emissions = [((1-self.values[i])/2)*self.carbon_intensive_list[i] for i in range(self.M)]
+        return sum(behavioural_emissions),behavioural_emissions# normalized Beta now used for emissions
 
     def save_data_individual(self):
         """
@@ -254,6 +256,7 @@ class Individual:
         self.history_culture.append(self.culture)
         self.history_av_behaviour.append(self.av_behaviour)
         self.history_carbon_emissions.append(self.total_carbon_emissions)
+        self.history_behavioural_carbon_emissions.append(self.behavioural_carbon_emissions)
 
     def next_step(self, t: float, steps: int, social_component: npt.NDArray):
         """
@@ -284,7 +287,7 @@ class Individual:
 
         self.culture = self.calc_culture()
 
-        self.total_carbon_emissions = self.calc_total_emissions()
+        self.total_carbon_emissions, self.behavioural_carbon_emissions = self.calc_total_emissions()
 
         if (self.save_data) and (self.steps % self.compression_factor == 0):
             self.save_data_individual()
