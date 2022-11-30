@@ -39,7 +39,8 @@ from resources.plot import (
     multi_line_matrix_plot,
     multi_line_matrix_plot_divide_through,
     double_matrix_plot_ab,
-    double_matrix_plot_cluster
+    double_matrix_plot_cluster,
+    double_matrix_plot_cluster_ratio
 )
 
 
@@ -67,10 +68,11 @@ SINGLE = 0 # determine if you runs single shots or study the averages over multi
 cluster_count_run = 1
 ab_plot = 0
 plot_conf_attiude = 0
-plot_multi_line_divide = 1
+plot_multi_line_divide = 0
 plot_multi_line = 0
+cluster_ratio = 0
 
-fileName = "results/twoD_Average_M_confirmation_bias_200_2000_20_10_402_5"
+fileName = "results/twoD_Average_confirmation_bias_a_attitude_200_3000_20_20_20_5"
 #"results/twoD_Average_confirmation_bias_M_200_3000_20_70_20_5"#"results/twoD_Average_confirmation_bias_a_attitude_200_3000_20_64_64_5"#"
 #"results/twoD_Average_confirmation_bias_a_attitude_200_3000_20_64_64_5"
 #"results/twoD_Average_action_observation_I_a_attitude_200_2000_20_64_64_5"
@@ -183,11 +185,6 @@ if __name__ == "__main__":
             variable_parameters_dict["col"]["reps"],
             dpi_save,
         )
-        # BROKEN print_culture_timeseries_vary_array(fileName, data_array, param_col,property_col,property_varied_values_col,param_row, property_row,property_varied_values_row,  reps_row, reps_col , dpi_save)
-
-        # ani_b = live_compare_animate_culture_network_and_weighting(fileName,data_list,layout,cmap,node_size,interval,fps,norm_zero_one,round_dec,cmap_edge, reps_col, reps_row,property_col,property_varied_values_col)
-        # ani_c = live_compare_animate_weighting_matrix(fileName, data_list,  cmap_weighting, interval, fps, round_dec, cmap_edge, reps_row, reps_col,property_col,property_varied_values_col)
-        # ani_d = live_compare_animate_behaviour_matrix(fileName, data_list,  cmap, interval, fps, round_dec, reps_row, reps_col,property_col,property_varied_values_col)
 
     else:
         if RUN:
@@ -224,7 +221,7 @@ if __name__ == "__main__":
             if cluster_count_run:
                 
                     createFolder(fileName)
-                    s = np.linspace(0,1,50)
+                    s = np.linspace(0,1,200)
                     params_list = produce_param_list_n_double(params, variable_parameters_dict)
                     (
                         results_emissions,
@@ -246,6 +243,15 @@ if __name__ == "__main__":
                     save_object(results_coefficient_of_variance,fileName + "/Data","results_coefficient_of_variance")
                     save_object(results_emissions_change,fileName + "/Data","results_emissions_change")
                     save_object(results_clusters_count,fileName + "/Data","results_clusters_count")
+                    
+                    reps_row, reps_col = variable_parameters_dict["row"]["reps"],variable_parameters_dict["col"]["reps"]
+                    matrix_emissions = results_emissions.reshape((reps_row, reps_col))
+                    matrix_mu = results_mu.reshape((reps_row, reps_col))
+                    matrix_var = results_var.reshape((reps_row, reps_col))
+                    matrix_coefficient_of_variance = results_coefficient_of_variance.reshape((reps_row, reps_col))
+                    matrix_emissions_change = results_emissions_change.reshape((reps_row, reps_col))
+                    matrix_clusters_count = results_clusters_count.reshape((reps_row, reps_col))
+
             else:
                 ######FIX THIS TOO INCLUDE EMISSIONS CHANGE
                 (
@@ -255,12 +261,18 @@ if __name__ == "__main__":
                     results_coefficient_of_variance,
                     results_emissions_change,
                 ) = av_two_dimensional_param_run(fileName, variable_parameters_dict, params)
-
-
-            
+                
+                reps_row, reps_col = variable_parameters_dict["row"]["reps"],variable_parameters_dict["col"]["reps"]
+                matrix_emissions = results_emissions.reshape((reps_row, reps_col))
+                matrix_mu = results_mu.reshape((reps_row, reps_col))
+                matrix_var = results_var.reshape((reps_row, reps_col))
+                matrix_coefficient_of_variance = results_coefficient_of_variance.reshape((reps_row, reps_col))
+                matrix_emissions_change = results_emissions_change.reshape((reps_row, reps_col))            
         else:
+            ###############################################################################################
+            #LOAD STUFF IN
             createFolder(fileName)
-
+            
             if cluster_count_run:
                 variable_parameters_dict = load_object(
                     fileName + "/Data", "variable_parameters_dict"
@@ -271,7 +283,7 @@ if __name__ == "__main__":
                 results_coefficient_of_variance = load_object(
                     fileName + "/Data", "results_coefficient_of_variance"
                 )
-
+                results_emissions_change = load_object(fileName + "/Data","results_emissions_change")
                 results_clusters_count = load_object(fileName + "/Data","results_clusters_count")
 
                 reps_row, reps_col = variable_parameters_dict["row"]["reps"],variable_parameters_dict["col"]["reps"]
@@ -279,8 +291,11 @@ if __name__ == "__main__":
                 matrix_mu = results_mu.reshape((reps_row, reps_col))
                 matrix_var = results_var.reshape((reps_row, reps_col))
                 matrix_coefficient_of_variance = results_coefficient_of_variance.reshape((reps_row, reps_col))
+                matrix_emissions_change = results_emissions_change.reshape((reps_row, reps_col))
                 matrix_clusters_count = results_clusters_count.reshape((reps_row, reps_col))
-            else:    
+
+            else:
+                ######FIX THIS TOO INCLUDE EMISSIONS CHANGE    
                 (
                     variable_parameters_dict,
                     results_emissions,
@@ -288,7 +303,7 @@ if __name__ == "__main__":
                     results_var,
                     results_coefficient_of_variance,
                 ) = load_data_av(fileName)
-
+                ######FIX THIS TOO INCLUDE EMISSIONS CHANGE
                 ###PLOTS FOR STOCHASTICALLY AVERAGED RUNS
                 (
                     matrix_emissions,
@@ -303,7 +318,6 @@ if __name__ == "__main__":
                     variable_parameters_dict["row"]["reps"],
                     variable_parameters_dict["col"]["reps"],
             )
-
         #double_phase_diagram(fileName, matrix_emissions, r"Total normalised emissions $E/NM$", "emissions",variable_parameters_dict, get_cmap("Reds"),dpi_save)
         #double_phase_diagram(fileName, matrix_mu, r"Average identity, $\mu$", "mu",variable_parameters_dict, get_cmap("Blues"),dpi_save)
         #double_phase_diagram(fileName, matrix_var, r"Identity variance, $\sigma^2$", "variance",variable_parameters_dict, get_cmap("Greens"),dpi_save)
@@ -451,7 +465,56 @@ if __name__ == "__main__":
             multi_line_matrix_plot_divide_through(fileName,matrix_norm_var_edit, col_vals, row_vals,"variance", get_cmap("plasma"),dpi_save,col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label,1)#y_ticks_pos, y_ticks_label
 
         if cluster_count_run:
-            double_matrix_plot_cluster(fileName,matrix_clusters_count,variable_parameters_dict, get_cmap("Purples"),dpi_save)
+            col_dict = variable_parameters_dict["col"]#confirmation bias
+            row_dict = variable_parameters_dict["row"]#m
+
+
+            if cluster_ratio:
+                #a_vals = row_dict["vals"]
+                #b_vals = np.flip(a_vals)
+
+                #a_b_vals = a_vals/b_vals
+                #print(a_vals, b_vals, a_b_vals)
+
+
+                col_ticks_label = [0,50,100,150]#[-10,0,10,20,30,40,50,60]#[col_dict["vals"][x] for x in range(len(col_dict["vals"]))  if x % select_val_x == 0]
+                col_ticks_pos = [0,7,13,19]#[int(round(index_len_col_matrix*((x - min_col_val)/(max_col_val- min_col_val)))) for x in col_ticks_label]#[0,30,70,50]#[0,10,20,30,40,50,60,70]#[x for x in range(len(col_dict["vals"]))  if x % select_val_x == 0]
+
+                index_len_row_matrix = 20
+                max_row_val = 3.90000000e+01
+                min_row_val = 2.56410256e-02
+
+                #[row_dict["vals"][y] for y in range(len(row_dict["vals"]))  if y % select_val_row == 0]#[y for y in range(len(row_dict["vals"]))  if y % select_val_row == 0]
+                row_ticks_label  = [0.003, 0.6 ,7, 12, 39 ]
+                row_ticks_pos  = [int(round(index_len_row_matrix*((row - min_row_val)/(max_row_val- min_row_val)))) for row in row_ticks_label]
+                
+                print("row_ticks_pos",row_ticks_pos)
+                #[2.56410256e-02  6.00000000e-01 7.00000000e+00 1.23333333e+01 3.90000000e+01]
+                #ratio_matrix_clusters_count = matrix_clusters_count
+
+                double_matrix_plot_cluster_ratio(fileName,matrix_clusters_count,variable_parameters_dict, get_cmap("Purples"),dpi_save,col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label)
+            else:
+                print("INSIDE PRINT")
+
+                index_len_col_matrix = 19
+                max_col_val = 150
+                min_col_val = 0
+
+                col_ticks_label = [0,50,100, 150]#[-10,0,10,20,30,40,50,60]#[col_dict["vals"][x] for x in range(len(col_dict["vals"]))  if x % select_val_x == 0]
+                col_ticks_pos =[int(round(index_len_col_matrix*((col - min_col_val)/(max_col_val- min_col_val)))) for col in col_ticks_label]#[int(round(index_len_col_matrix*((x - min_col_val)/(max_col_val- min_col_val)))) for x in col_ticks_label]#[0,30,70,50]#[0,10,20,30,40,50,60,70]#[x for x in range(len(col_dict["vals"]))  if x % select_val_x == 0]
+            
+                #col_ticks_label = [col_dict["vals"][x] for x in range(len(col_dict["vals"]))  if x % select_val_col == 0]
+                #col_ticks_pos = [col_dict["vals"][x] for x in range(len(col_dict["vals"]))  if x % select_val_col == 0]
+
+                index_len_row_matrix = 19
+                max_row_val = 1.95
+                min_row_val = 0.05
+
+                #[row_dict["vals"][y] for y in range(len(row_dict["vals"]))  if y % select_val_row == 0]#[y for y in range(len(row_dict["vals"]))  if y % select_val_row == 0]
+                row_ticks_label  = [0.05,0.5,1.0,1.5,1.95]#[row_dict["vals"][y] for y in range(len(row_dict["vals"]))  if y % select_val_row == 0]
+                row_ticks_pos  = [int(round(index_len_row_matrix*((row - min_row_val)/(max_row_val- min_row_val)))) for row in row_ticks_label]
+                                                                                                                #x_ticks_pos,y_ticks_pos,x_ticks_label,y_ticks_label
+                double_matrix_plot_cluster(fileName,matrix_clusters_count,variable_parameters_dict, get_cmap("Purples"),dpi_save,col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label)
 
         #only for the a or b beta parameters
         #double_phase_diagram_using_meanandvariance(fileName, matrix_emissions, r"Total normalised emissions, $E/NM$", "emissions",variable_parameters_dict, get_cmap("Reds"),dpi_save)

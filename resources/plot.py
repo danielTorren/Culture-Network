@@ -45,49 +45,6 @@ plt.rcParams.update({
 # modules
 ###### estimating number of clusters
 
-def estimate_maxima(data,samples):
-    kde = gaussian_kde(data)
-    probs = kde.evaluate(samples)
-
-    maxima_index = probs.argmax()
-    maxima = samples[maxima_index]
-    
-    return maxima,probs
-
-def cluster_estimation(Data,bandwidth_list):
-
-    fig2, ax2 = plt.subplots()
-
-    no_samples = 50
-    X = np.asarray([Data.agent_list[n].culture for n in range(Data.N)])
-
-    s = np.linspace(0, 1,no_samples)
-    
-    scipy_kde_maxima, probs = estimate_maxima(X,s)
-    ma_scipy  =  argrelextrema(probs, np.greater)[0]
-    print("probs, ",probs)
-    print("mi_scipy, ma_scipy",mi_scipy, ma_scipy)
-    ax2.plot(s, probs)
-    
-    #calc_num_clusters_auto_bandwidth(X, s)
-    
-    fig, ax = plt.subplots()
-    X_reshape = X.reshape(-1, 1)
-
-    #calc_num_clusters_specify_bandwidth(X_reshape, s, 0.05)
-
-
-    for i in bandwidth_list:
-        kde = KernelDensity(kernel='gaussian', bandwidth=i).fit(X_reshape)
-        e = kde.score_samples(s.reshape(-1,1))
-        #print("e",e)
-        ax.plot(s, e, label = i)
-
-        mi, ma = argrelextrema(e, np.less)[0], argrelextrema(e, np.greater)[0]
-        print(i,"Minima:", s[mi])
-        print(i,"Maxima:", s[ma])
-    ax.legend()
-
 #####RUNPLOT PLOTS - SINGLE NETWORK
 def live_print_culture_timeseries_varynetwork_structure(
     fileName,
@@ -1292,8 +1249,6 @@ def double_matrix_plot(
     col_dict = variable_parameters_dict["col"]
     row_dict = variable_parameters_dict["row"]
 
-
-
     ax.set_xlabel(r"Confirmation bias, $\theta$")
     ax.set_ylabel(r"Attitude Beta parameters, $(a,b)$")
 
@@ -1328,7 +1283,7 @@ def double_matrix_plot(
     fig.savefig(f + ".png", dpi=dpi_save, format="png")
 
 def double_matrix_plot_cluster(
-    fileName, Z, variable_parameters_dict, cmap, dpi_save
+    fileName, Z, variable_parameters_dict, cmap, dpi_save, col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label
 ):
 
     fig, ax = plt.subplots(figsize=(10, 6))
@@ -1337,7 +1292,7 @@ def double_matrix_plot_cluster(
     row_dict = variable_parameters_dict["row"]
 
     ax.set_xlabel(r"Confirmation bias, $\theta$")
-    ax.set_ylabel(r"Attitude Beta parameter $a$")
+    ax.set_ylabel(r"Attitude Beta parameters $a, 2-b$")
 
     if col_dict["divisions"] == "log":
         ax.set_xscale("log")
@@ -1357,10 +1312,57 @@ def double_matrix_plot_cluster(
     cbar.set_label(r"Number of identity bubbles")
 
     # HAS TO BE AFTER PUTTING INT THE MATRIX 
+    ax.set_xticks(col_ticks_pos)
+    ax.set_xticklabels(col_ticks_label)  
     ax.xaxis.set_ticks_position('bottom')
+
+    ax.set_yticks(row_ticks_pos)
+    ax.set_yticklabels(row_ticks_label)  
 
     plotName = fileName + "/Plots"
     f = plotName + "/live_average_double_matrix_plot_cluster_count"
+    #fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
+def double_matrix_plot_cluster_ratio(
+        fileName, Z, variable_parameters_dict, cmap, dpi_save, col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label
+):
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    col_dict = variable_parameters_dict["col"]
+    row_dict = variable_parameters_dict["row"]
+
+    ax.set_xlabel(r"Confirmation bias, $\theta$")
+    ax.set_ylabel(r"Attitude Beta parameters $a/b$")
+
+    if col_dict["divisions"] == "log":
+        ax.set_xscale("log")
+    if row_dict["divisions"] == "log":
+        ax.set_yscale("log")
+
+    mat = ax.matshow(
+        Z,
+        cmap=cmap,
+        aspect="auto",
+    )
+    cbar = fig.colorbar(
+        mat,
+        #plt.cm.ScalarMappable(cmap=cmap, norm=Normalize(vmin=Z.min(), vmax=Z.max())),
+        ax=ax,
+    )
+    cbar.set_label(r"Number of identity bubbles")
+
+    # HAS TO BE AFTER PUTTING INT THE MATRIX 
+    ax.set_xticks(col_ticks_pos)
+    ax.set_xticklabels(col_ticks_label)  
+    ax.xaxis.set_ticks_position('bottom')
+
+    ax.set_yticks(row_ticks_pos)
+    ax.set_yticklabels(row_ticks_label)  
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/ratio_live_average_double_matrix_plot_cluster_count_ratio"
     #fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
     fig.savefig(f + ".png", dpi=dpi_save, format="png")
 
