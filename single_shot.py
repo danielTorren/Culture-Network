@@ -63,7 +63,7 @@ from resources.plot import (
     cluster_estimation_plot,
 )
 
-# FOR FILENAME
+# FOR fileName
 params_name = [  # THOSE USEd to create the save list?
     "time_steps_max",
     "M",
@@ -125,27 +125,27 @@ SHOW_PLOT = 1
 
 if __name__ == "__main__":
     if RUN == False:
-        FILENAME = "results/single_shot_10_48_40__02_12_2022"
+        fileName = "results/single_shot_10_48_40__02_12_2022"
     else:
         f = open("constants/base_params.json")
         base_params = json.load(f)
         base_params["time_steps_max"] = int(base_params["total_time"] / base_params["delta_t"])
 
-        #FILENAME = produceName(params, params_name)
+        #fileName = produceName(params, params_name)
         root = "single_shot"
-        FILENAME = produce_name_datetime(root)
-        print("FILENAME:", FILENAME)
+        fileName = produce_name_datetime(root)
+        print("fileName:", fileName)
 
         Data = generate_data(base_params)  # run the simulation
 
-        createFolder(FILENAME)
-        save_object(Data, FILENAME + "/Data", "social_network")
-        save_object(base_params, FILENAME + "/Data", "base_params")
+        createFolder(fileName)
+        save_object(Data, fileName + "/Data", "social_network")
+        save_object(base_params, fileName + "/Data", "base_params")
 
     if PLOT:
         start_time = time.time()
         print("start_time =", time.ctime(time.time()))
-        dataName = FILENAME + "/Data"
+        dataName = fileName + "/Data"
         Data = load_object(dataName, "social_network")
 
         no_samples = 10000
@@ -156,39 +156,39 @@ if __name__ == "__main__":
         #bandwidth_list = [0.05]
         #cluster_estimation(Data,bandwidth_list)
         cluster_estimation_plot(Data,s,bandwidth)
-        #plot_culture_timeseries(FILENAME, Data, dpi_save)
-        #weighting_histogram(FILENAME, Data, dpi_save,bin_num)
-        #weighting_histogram_time(FILENAME, Data, dpi_save,bin_num,300)
-        #plot_green_adoption_timeseries(FILENAME, Data, dpi_save)
-        #plot_total_carbon_emissions_timeseries(FILENAME, Data, dpi_save)
-        #plot_weighting_matrix_convergence_timeseries(FILENAME, Data, dpi_save)
-        # plot_cultural_range_timeseries(FILENAME, Data, dpi_save)
-        # plot_average_culture_timeseries(FILENAME,Data,dpi_save)
-        # plot_cum_link_change_per_agent(FILENAME,Data,dpi_save)
+        #plot_culture_timeseries(fileName, Data, dpi_save)
+        #weighting_histogram(fileName, Data, dpi_save,bin_num)
+        #weighting_histogram_time(fileName, Data, dpi_save,bin_num,300)
+        #plot_green_adoption_timeseries(fileName, Data, dpi_save)
+        #plot_total_carbon_emissions_timeseries(fileName, Data, dpi_save)
+        #plot_weighting_matrix_convergence_timeseries(fileName, Data, dpi_save)
+        # plot_cultural_range_timeseries(fileName, Data, dpi_save)
+        # plot_average_culture_timeseries(fileName,Data,dpi_save)
+        # plot_cum_link_change_per_agent(fileName,Data,dpi_save)
 
-        #plot_value_timeseries(FILENAME,Data,dpi_save)
-        #plot_threshold_timeseries(FILENAME,Data,dpi_save)
-        #plot_attitude_timeseries(FILENAME,Data,dpi_save)
+        #plot_value_timeseries(fileName,Data,dpi_save)
+        #plot_threshold_timeseries(fileName,Data,dpi_save)
+        #plot_attitude_timeseries(fileName,Data,dpi_save)
 
-        #live_animate_weighting_matrix(FILENAME, Data,  cmap_weighting, interval, fps, round_dec)
+        #live_animate_weighting_matrix(fileName, Data,  cmap_weighting, interval, fps, round_dec)
 
         """
         #####BROKEN ATM
         ###PRINTS
-        #prints_weighting_matrix(FILENAME,Data,cmap_weighting,nrows,ncols,frames_list,round_dec,dpi_save)
-        #prints_behavioural_matrix(FILENAME,Data,cmap,nrows,ncols,frames_list,round_dec,dpi_save)
-        #prints_culture_network(FILENAME,Data,layout,cmap,node_size,nrows,ncols,norm_zero_one,frames_list,round_dec,dpi_save)
-        #print_network_social_component_matrix(FILENAME,Data,cmap,nrows,ncols,frames_list,round_dec,dpi_save)
-        #print_culture_histogram(FILENAME, Data, "individual_culture", nrows, ncols, frames_list,round_dec,dpi_save, bin_num_agents)
-        #prints_behaviour_timeseries_plot_colour_culture(FILENAME, Data, "behaviour_attitude", "attitudeiveness", nrows_behave, ncols_behave, dpi_save,cmap,norm_zero_one)
+        #prints_weighting_matrix(fileName,Data,cmap_weighting,nrows,ncols,frames_list,round_dec,dpi_save)
+        #prints_behavioural_matrix(fileName,Data,cmap,nrows,ncols,frames_list,round_dec,dpi_save)
+        #prints_culture_network(fileName,Data,layout,cmap,node_size,nrows,ncols,norm_zero_one,frames_list,round_dec,dpi_save)
+        #print_network_social_component_matrix(fileName,Data,cmap,nrows,ncols,frames_list,round_dec,dpi_save)
+        #print_culture_histogram(fileName, Data, "individual_culture", nrows, ncols, frames_list,round_dec,dpi_save, bin_num_agents)
+        #prints_behaviour_timeseries_plot_colour_culture(fileName, Data, "behaviour_attitude", "attitudeiveness", nrows_behave, ncols_behave, dpi_save,cmap,norm_zero_one)
         ###ANIMATIONS
-        #ani_b = animate_network_social_component_matrix(FILENAME,Data,interval,fps,round_dec,cmap,norm_zero_one)
-        #ani_c = animate_weighting_matrix(FILENAME,Data,interval,fps,round_dec,cmap_weighting)
-        #ani_d = animate_behavioural_matrix(FILENAME,Data,interval,fps,cmap,round_dec)
-        #ani_e = animate_culture_network(FILENAME,Data,layout,cmap,node_size,interval,fps,norm_zero_one,round_dec)
-        #ani_f = animate_culture_network_and_weighting(FILENAME,Data,layout,cmap,node_size,interval,fps,norm_zero_one,round_dec,cmap_edge)
+        #ani_b = animate_network_social_component_matrix(fileName,Data,interval,fps,round_dec,cmap,norm_zero_one)
+        #ani_c = animate_weighting_matrix(fileName,Data,interval,fps,round_dec,cmap_weighting)
+        #ani_d = animate_behavioural_matrix(fileName,Data,interval,fps,cmap,round_dec)
+        #ani_e = animate_culture_network(fileName,Data,layout,cmap,node_size,interval,fps,norm_zero_one,round_dec)
+        #ani_f = animate_culture_network_and_weighting(fileName,Data,layout,cmap,node_size,interval,fps,norm_zero_one,round_dec,cmap_edge)
         #Shows the 2D movement of attitudes and their culture, equivalent to prints_behaviour_timeseries_plot_colour_culture
-        #ani_l = animate_behaviour_scatter(FILENAME,Data,"behaviour_attitude",norm_zero_one, cmap,interval,fps,round_dec)
+        #ani_l = animate_behaviour_scatter(fileName,Data,"behaviour_attitude",norm_zero_one, cmap,interval,fps,round_dec)
         """
         print(
             "PLOT time taken: %s minutes" % ((time.time() - start_time) / 60),

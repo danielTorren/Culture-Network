@@ -40,7 +40,9 @@ from resources.plot import (
     multi_line_matrix_plot_divide_through,
     double_matrix_plot_ab,
     double_matrix_plot_cluster,
-    double_matrix_plot_cluster_ratio
+    double_matrix_plot_cluster_ratio,
+    double_matrix_plot_cluster_multi,
+    double_matrix_plot_cluster_var_multi,
 )
 from resources.utility import (
     createFolder,
@@ -66,7 +68,7 @@ from resources.run import (
 import numpy as np
 
 # run bools
-RUN = 0 # run or load in previously saved data
+RUN = 1 # run or load in previously saved data
 SINGLE = 0 # determine if you runs single shots or study the averages over multiple runs for each experiment
 cluster_count_run = 0
 ab_plot = 0
@@ -77,7 +79,7 @@ cluster_ratio = 0
 culture_run = 1
 
 
-fileName = "results/twoD_Average_confirmation_bias_a_attitude_200_3000_20_64_64_5"
+fileName = "results/two_param_sweep_average_12_39_39__02_12_2022"
 #"results/twoD_Average_confirmation_bias_M_200_3000_20_70_20_5"#"results/twoD_Average_confirmation_bias_a_attitude_200_3000_20_64_64_5"#"
 #"results/twoD_Average_confirmation_bias_a_attitude_200_3000_20_64_64_5"
 #"results/twoD_Average_action_observation_I_a_attitude_200_2000_20_64_64_5"
@@ -143,8 +145,8 @@ if __name__ == "__main__":
             )
             """
             root = "two_param_sweep_single"
-            FILENAME = produce_name_datetime(root)
-            print("FILENAME:", FILENAME)
+            fileName = produce_name_datetime(root)
+            print("fileName:", fileName)
             #print("fileName: ", fileName)
 
             title_list = generate_title_list(
@@ -231,7 +233,7 @@ if __name__ == "__main__":
 
             root = "two_param_sweep_average"
             fileName = produce_name_datetime(root)
-            print("FILENAME:", fileName)
+            print("fileName:", fileName)
 
             createFolder(fileName)
 
@@ -551,41 +553,106 @@ if __name__ == "__main__":
                                                                                                                 #x_ticks_pos,y_ticks_pos,x_ticks_label,y_ticks_label
                 double_matrix_plot_cluster(fileName,matrix_clusters_count,variable_parameters_dict, get_cmap("Purples"),dpi_save,col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label)
         if culture_run:
-            print("RUNS DONE")
+            print("DATA ANALYSIS CLUSTER")
             variable_parameters_dict = load_object(fileName + "/Data", "variable_parameters_dict")
             base_params = load_object(fileName + "/Data", "base_params")
             results_culture_lists = load_object(fileName + "/Data","results_culture_lists")
 
-            #print(results_culture_lists, results_culture_lists.shape)
-            #(25,3,200), so it needs to run on (25,3) different occasions?
-            #  
+            col_dict = variable_parameters_dict["col"]
+            row_dict = variable_parameters_dict["row"]
 
-            params_num = results_culture_lists.shape[0]
-            av_num = results_culture_lists.shape[1]
 
-            bandwidth = 0.05
-            bandwidth_vector = np.full((params_num,av_num), bandwidth)
-
-            s = np.linspace(0,1,1000)
-            s_vector = np.full((params_num,av_num),s)
             
-            vfunc_clusters = np.vectorize(calc_num_clusters_set_bandwidth)
+            nrows, ncols = 2,2
 
-            #
-            cluster_count = vfunc_clusters(results_culture_lists,s_vector,bandwidth_vector)
+            bandwidth_list = [0.01, 0.05,0.5,2.5]
+            save_object(bandwidth_list, fileName + "/Data","bandwidth_list")
 
-            print(cluster_count)
+            data_analysis_culture_run = 1
+            if data_analysis_culture_run:
+                #print(results_culture_lists, results_culture_lists.shape)
+                #(25,3,200), so it needs to run on (25,3) different occasions?
+                #  
 
-            """
-            #calculate the clusters for each culture list for a given value of bandwidth
-            for i in range(len(results_culture_lists)):
-                #this is one param specification
-                for j in range(len(results_culture_lists[j])):
-                    #this is one of the stochastic runs
-                    cluster_count =  calc_num_clusters_set_bandwidth(results_culture_lists[i][j],s,bandwidth)
-            """
+                params_num = results_culture_lists.shape[0]
+                av_num = results_culture_lists.shape[1]
+
+                s_points = 10000
+                s = np.linspace(0,1,s_points)#.reshape(-1, 1)
+
+                Z_list = []
+                Z_var_list = []
+                for b in bandwidth_list:
+                    bandwidth = b
+
+                    cluster_count_list = []
+                    #calculate the clusters for each culture list for a given value of bandwidth
+                    cluster_count_var_row = []
+                    for i in range(len(results_culture_lists)):
+                        cluster_count_row = []
+                        #this is one param specification
+                        for j in range(len(results_culture_lists[i])):
+                            #this is one of the stochastic runs
+                            cluster_count =  calc_num_clusters_set_bandwidth(results_culture_lists[i][j],s,bandwidth)
+
+                            cluster_count_row.append(cluster_count)
+                        
+                        cluster_count_var_row.append(np.var(cluster_count_row))
+
+                        cluster_count_list.append(cluster_count_row)
+                    cluster_count_array = np.asarray(cluster_count_list)
+
+                    #print(cluster_count_array, cluster_count_array.shape)
+                    #print("np.mean(cluster_count_array, axis = 0)",np.mean(cluster_count_array, axis = 0), np.mean(cluster_count_array, axis = 1))
+                    av_cluster_count_array = np.mean(cluster_count_array, axis = 1)
+                    #print("av_cluster_count_array",av_cluster_count_array)
+
+                    av_cluster_count_array_reshape = av_cluster_count_array.reshape((row_dict["reps"],col_dict["reps"] ))
+                    #print("av_cluster_count_array_reshape",av_cluster_count_array_reshape," B = ", bandwidth)
+                    
+                    #print("cluster_count_var_row",cluster_count_var_row, len(cluster_count_var_row))
+                    cluster_count_var_row_reshape = np.asarray(cluster_count_var_row).reshape((row_dict["reps"],col_dict["reps"] ))
+                    #print("cluster_count_var_row_reshape", cluster_count_var_row_reshape, cluster_count_var_row_reshape.shape)
+
+                    
+                    Z_list.append(av_cluster_count_array_reshape )
+                    Z_var_list.append(cluster_count_var_row_reshape)
+                
+                save_object(Z_list, fileName + "/Data", "Z_list")
+                save_object(Z_var_list, fileName + "/Data", "Z_var_list")
+                save_object(bandwidth_list, fileName + "/Data","bandwidth_list")
+            else:
+                Z_list = load_object(fileName + "/Data", "Z_list")
+                Z_var_list = load_object(fileName + "/Data", "Z_var_list")
+                bandwidth_list = load_object(fileName + "/Data","bandwidth_list")
 
 
+            print("ONTO PLOTTING")
+            index_len_col_matrix = col_dict["reps"] - 1
+            max_col_val = col_dict["max"] 
+            min_col_val = col_dict["min"]
+
+            col_ticks_label = [-20, 0, 20, 40, 60 , 80, 100]#[-10,0,10,20,30,40,50,60]#[col_dict["vals"][x] for x in range(len(col_dict["vals"]))  if x % select_val_x == 0]
+            col_ticks_pos =[int(round(index_len_col_matrix*((col - min_col_val)/(max_col_val- min_col_val)))) for col in col_ticks_label]#[int(round(index_len_col_matrix*((x - min_col_val)/(max_col_val- min_col_val)))) for x in col_ticks_label]#[0,30,70,50]#[0,10,20,30,40,50,60,70]#[x for x in range(len(col_dict["vals"]))  if x % select_val_x == 0]
+        
+            #col_ticks_label = [col_dict["vals"][x] for x in range(len(col_dict["vals"]))  if x % select_val_col == 0]
+            #col_ticks_pos = [col_dict["vals"][x] for x in range(len(col_dict["vals"]))  if x % select_val_col == 0]
+
+            index_len_row_matrix = row_dict["reps"] - 1
+            max_row_val = row_dict["max"]
+            min_row_val = row_dict["min"]
+
+            #[row_dict["vals"][y] for y in range(len(row_dict["vals"]))  if y % select_val_row == 0]#[y for y in range(len(row_dict["vals"]))  if y % select_val_row == 0]
+            row_ticks_label  = [0.05,0.5,1.0,1.5,1.95]#[row_dict["vals"][y] for y in range(len(row_dict["vals"]))  if y % select_val_row == 0]
+            row_ticks_pos  = [int(round(index_len_row_matrix*((row - min_row_val)/(max_row_val- min_row_val)))) for row in row_ticks_label]
+                                                                                                           #x_ticks_pos,y_ticks_pos,x_ticks_label,y_ticks_label
+            #double_matrix_plot_cluster(fileName,av_cluster_count_array_reshape,variable_parameters_dict, get_cmap("Purples"),dpi_save,col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label)
+            
+            
+            
+            
+            double_matrix_plot_cluster_multi(fileName,Z_list,variable_parameters_dict, get_cmap("Purples"),dpi_save,col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label, nrows, ncols, bandwidth_list)
+            double_matrix_plot_cluster_var_multi(fileName,Z_var_list,variable_parameters_dict, get_cmap("Oranges"),dpi_save,col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label, nrows, ncols, bandwidth_list)
         #only for the a or b beta parameters
         #double_phase_diagram_using_meanandvariance(fileName, matrix_emissions, r"Total normalised emissions, $E/NM$", "emissions",variable_parameters_dict, get_cmap("Reds"),dpi_save)
         #double_phase_diagram_using_meanandvariance(fileName,matrix_mu,r"Average identity, $\mu$","mu",variable_parameters_dict,get_cmap("Blues"),dpi_save,)

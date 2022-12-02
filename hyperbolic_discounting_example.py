@@ -86,7 +86,7 @@ if __name__ == "__main__":
     culture_momentum = 101
     delta_vals = [0.99,0.97,0.95,0.9,0.8]
 
-    FILENAME = "results/plot_discount_factors_delta.eps"
+    fileName = "results/plot_discount_factors_delta.eps"
     dpi_save = 1200
     steps = int(culture_momentum / delta_t)
 
@@ -100,7 +100,7 @@ if __name__ == "__main__":
     time_list_plot = np.asarray([-delta_t * x for x in range(steps)])  # so time is negative, past influences less
     
     plot_discount_factors_delta(
-        FILENAME,
+        fileName,
         delta_discount_list,
         delta_vals,
         time_list_plot,

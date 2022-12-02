@@ -300,8 +300,8 @@ class Network:
         #############################################################################################################################
         #Associate people with attitude values CHANGE THIS BACK
         self.a_attitude = parameters["a_attitude"]
-        #self.b_attitude = 2 - self.a_attitude 
-        self.b_attitude = parameters["b_attitude"]
+        self.b_attitude = 2 - self.a_attitude 
+        #self.b_attitude = parameters["b_attitude"]
         self.a_threshold = parameters["a_threshold"]
         self.b_threshold = parameters["b_threshold"]
         #################################################################################################################################

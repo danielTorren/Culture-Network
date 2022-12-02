@@ -208,7 +208,7 @@ def generate_problem(
     """
     root = "senstivity_analysis"
     fileName = produce_name_datetime(root)
-    print("FILENAME:", fileName)
+    print("fileName:", fileName)
 
     createFolder(fileName)
 

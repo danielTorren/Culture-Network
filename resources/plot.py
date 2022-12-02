@@ -492,7 +492,7 @@ def plot_behaviorual_emissions_timeseries_no_culture(
 
 
 def plot_network_timeseries(
-    FILENAME: str, Data: Network, y_title: str, property: str, dpi_save: int
+    fileName: str, Data: Network, y_title: str, property: str, dpi_save: int
 ):
 
     fig, ax = plt.subplots(figsize=(10,6))
@@ -503,45 +503,45 @@ def plot_network_timeseries(
     ax.set_xlabel(r"Time")
     ax.set_ylabel(r"%s" % y_title)
 
-    plotName = FILENAME + "/Plots"
+    plotName = fileName + "/Plots"
     f = plotName + "/" + property + "_timeseries.eps"
     fig.savefig(f, dpi=dpi_save, format="eps")
 
 
-def plot_cultural_range_timeseries(FILENAME: str, Data: DataFrame, dpi_save: int):
+def plot_cultural_range_timeseries(fileName: str, Data: DataFrame, dpi_save: int):
     y_title = "Identity variance"
     property = "history_var_culture"
-    plot_network_timeseries(FILENAME, Data, y_title, property, dpi_save)
+    plot_network_timeseries(fileName, Data, y_title, property, dpi_save)
 
 
 def plot_weighting_matrix_convergence_timeseries(
-    FILENAME: str, Data: DataFrame, dpi_save: int
+    fileName: str, Data: DataFrame, dpi_save: int
 ):
     y_title = "Change in Agent Link Strength"
     property = "history_weighting_matrix_convergence"
-    plot_network_timeseries(FILENAME, Data, y_title, property, dpi_save)
+    plot_network_timeseries(fileName, Data, y_title, property, dpi_save)
 
 
 def plot_total_carbon_emissions_timeseries(
-    FILENAME: str, Data: DataFrame, dpi_save: int
+    fileName: str, Data: DataFrame, dpi_save: int
 ):
     y_title = "Carbon Emissions"
     property = "history_total_carbon_emissions"
-    plot_network_timeseries(FILENAME, Data, y_title, property, dpi_save)
+    plot_network_timeseries(fileName, Data, y_title, property, dpi_save)
 
 
-def plot_green_adoption_timeseries(FILENAME: str, Data: DataFrame, dpi_save: int):
+def plot_green_adoption_timeseries(fileName: str, Data: DataFrame, dpi_save: int):
     y_title = "Green adoption %"
     property = "history_green_adoption"
 
-    plot_network_timeseries(FILENAME, Data, y_title, property, dpi_save)
+    plot_network_timeseries(fileName, Data, y_title, property, dpi_save)
 
 
-def plot_average_culture_timeseries(FILENAME: str, Data: DataFrame, dpi_save: int):
+def plot_average_culture_timeseries(fileName: str, Data: DataFrame, dpi_save: int):
     y_title = "Average identity"
     property = "history_average_culture"
 
-    plot_network_timeseries(FILENAME, Data, y_title, property, dpi_save)
+    plot_network_timeseries(fileName, Data, y_title, property, dpi_save)
 
 
 def plot_cum_link_change_per_agent(fileName: str, Data: Network, dpi_save: int):
@@ -594,28 +594,28 @@ def plot_individual_timeseries(
 
 
 
-def plot_value_timeseries(FILENAME: str, Data: DataFrame, dpi_save: int):
+def plot_value_timeseries(fileName: str, Data: DataFrame, dpi_save: int):
     y_title = "Behavioural value, B"
     property = "history_behaviour_values"
     ylim_low = -1
 
-    plot_individual_timeseries(FILENAME, Data, y_title, property, dpi_save, ylim_low)
+    plot_individual_timeseries(fileName, Data, y_title, property, dpi_save, ylim_low)
 
 
-def plot_attitude_timeseries(FILENAME: str, Data: DataFrame, dpi_save: int):
+def plot_attitude_timeseries(fileName: str, Data: DataFrame, dpi_save: int):
     y_title = "Behavioural attiude, A"
     property = "history_behaviour_attitudes"
     ylim_low = 0
 
-    plot_individual_timeseries(FILENAME, Data, y_title, property, dpi_save, ylim_low)
+    plot_individual_timeseries(fileName, Data, y_title, property, dpi_save, ylim_low)
 
 
-def plot_threshold_timeseries(FILENAME: str, Data: DataFrame, dpi_save: int):
+def plot_threshold_timeseries(fileName: str, Data: DataFrame, dpi_save: int):
     y_title = "Behavioural threshold, T"
     property = "history_behaviour_thresholds"
     ylim_low = 0
 
-    plot_individual_timeseries(FILENAME, Data, y_title, property, dpi_save, ylim_low)
+    plot_individual_timeseries(fileName, Data, y_title, property, dpi_save, ylim_low)
 
 
 #################################################################################################################
@@ -696,7 +696,7 @@ def live_print_culture_timeseries_with_weighting(
     # fig.savefig(f, dpi=dpi_save,format='eps')
 
 def weighting_histogram(
-    FILENAME: str, Data: DataFrame, dpi_save,bin_num
+    fileName: str, Data: DataFrame, dpi_save,bin_num
 ):
     fig, ax = plt.subplots()
     # print("property = ", property)
@@ -709,12 +709,12 @@ def weighting_histogram(
     ax.set_ylabel(r"Count")
     plt.tight_layout()
 
-    plotName = FILENAME + "/Plots"
+    plotName = fileName + "/Plots"
     f = plotName + "/weighting_histogram.eps"
     fig.savefig(f, dpi=dpi_save,format='eps')
 
 def weighting_histogram_time(
-    FILENAME: str, Data: DataFrame, dpi_save,bin_num, skip_val
+    fileName: str, Data: DataFrame, dpi_save,bin_num, skip_val
 ):
 
     arraytime = np.asarray(Data.history_time)
@@ -754,7 +754,7 @@ def weighting_histogram_time(
     #ax.set_ylabel(r"Count")
     #plt.tight_layout()
 
-    #plotName = FILENAME + "/Plots"
+    #plotName = fileName + "/Plots"
     #f = plotName + "/weighting_histogram_time.eps"
     #fig.savefig(f, dpi=dpi_save,format='eps')
 
@@ -1355,6 +1355,127 @@ def double_matrix_plot_cluster(
     #fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
     fig.savefig(f + ".png", dpi=dpi_save, format="png")
 
+def double_matrix_plot_cluster_multi(
+    fileName, Z_list, variable_parameters_dict, cmap, dpi_save, col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label, nrows, ncols, bandwidth_list
+):
+
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols,figsize=(10, 6))
+
+    col_dict = variable_parameters_dict["col"]
+    row_dict = variable_parameters_dict["row"]
+
+    for i, ax in enumerate(axes.flat):
+
+        if col_dict["divisions"] == "log":
+            ax.set_xscale("log")
+        if row_dict["divisions"] == "log":
+            ax.set_yscale("log")
+
+        mat = ax.matshow(
+            Z_list[i],
+            cmap=cmap,
+            aspect="auto",
+        )
+
+
+        
+        #ax.set_xlabel(r"Confirmation bias, $\theta$")
+        #ax.set_ylabel(r"Attitude Beta parameters $a, 2-b$")
+
+        # HAS TO BE AFTER PUTTING INT THE MATRIX 
+        ax.set_xticks(col_ticks_pos)
+        ax.set_xticklabels(col_ticks_label)  
+        ax.xaxis.set_ticks_position('bottom')
+
+        ax.set_yticks(row_ticks_pos)
+        ax.set_yticklabels(row_ticks_label)  
+
+        ax.set_title(r"Bandwidth = %s" % bandwidth_list[i])
+
+    #print("mins", [np.min(Z) for Z in Z_list])
+    #print("mazx", [np.max(Z) for Z in Z_list])
+
+    Z_min = min([np.min(Z) for Z in Z_list])
+    Z_max = max([np.max(Z) for Z in Z_list])
+
+    #print("Z_min",Z_min)
+    #print("Z_max",Z_max)
+
+    cbar = fig.colorbar(
+        #plt.cm.ScalarMappable(cmap=cmap, norm=Normalize(vmin=0, vmax=1)),
+        plt.cm.ScalarMappable(cmap=cmap, norm=Normalize(vmin=Z_min, vmax=Z_max)),
+        ax=axes.ravel().tolist(),
+    )
+    cbar.set_label(r"Mean number of identity bubbles")
+
+    fig.supxlabel(r"Confirmation bias, $\theta$")
+    fig.supylabel(r"Attitude Beta parameters $a/b$")
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/double_matrix_plot_cluster_multi_%s" %(len(bandwidth_list))
+    #fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
+def double_matrix_plot_cluster_var_multi(
+    fileName, Z_list, variable_parameters_dict, cmap, dpi_save, col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label, nrows, ncols, bandwidth_list
+):
+
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols,figsize=(10, 6))
+
+    col_dict = variable_parameters_dict["col"]
+    row_dict = variable_parameters_dict["row"]
+
+    for i, ax in enumerate(axes.flat):
+
+        if col_dict["divisions"] == "log":
+            ax.set_xscale("log")
+        if row_dict["divisions"] == "log":
+            ax.set_yscale("log")
+
+        mat = ax.matshow(
+            Z_list[i],
+            cmap=cmap,
+            aspect="auto",
+        )
+
+
+        
+        #ax.set_xlabel(r"Confirmation bias, $\theta$")
+        #ax.set_ylabel(r"Attitude Beta parameters $a, 2-b$")
+
+        # HAS TO BE AFTER PUTTING INT THE MATRIX 
+        ax.set_xticks(col_ticks_pos)
+        ax.set_xticklabels(col_ticks_label)  
+        ax.xaxis.set_ticks_position('bottom')
+
+        ax.set_yticks(row_ticks_pos)
+        ax.set_yticklabels(row_ticks_label)
+        ax.set_title(r"Bandwidth = %s" % bandwidth_list[i])
+
+    #print("mins", [np.min(Z) for Z in Z_list])
+    #print("mazx", [np.max(Z) for Z in Z_list])
+
+    Z_min = min([np.min(Z) for Z in Z_list])
+    Z_max = max([np.max(Z) for Z in Z_list])
+
+    #print("Z_min",Z_min)
+    #print("Z_max",Z_max)
+
+    cbar = fig.colorbar(
+        #plt.cm.ScalarMappable(cmap=cmap, norm=Normalize(vmin=0, vmax=1)),
+        plt.cm.ScalarMappable(cmap=cmap, norm=Normalize(vmin=Z_min, vmax=Z_max)),
+        ax=axes.ravel().tolist(),
+    )
+    cbar.set_label(r"Variance in number of identity bubbles, $\sigma^2_{C}$")
+
+    fig.supxlabel(r"Confirmation bias, $\theta$")
+    fig.supylabel(r"Attitude Beta parameters $a/b$")
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/double_matrix_plot_cluster_multi_%s" %(len(bandwidth_list))
+    #fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
 def double_matrix_plot_cluster_ratio(
         fileName, Z, variable_parameters_dict, cmap, dpi_save, col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label
 ):
@@ -1640,7 +1761,7 @@ def print_culture_timeseries_vary_array(
 
 
 def print_culture_time_series_two_properties(
-    FILENAME: str,
+    fileName: str,
     Data_list: list,
     property_varied_values_row: list,
     property_varied_values_column: list,
@@ -1685,7 +1806,7 @@ def print_culture_time_series_two_properties(
     fig.supxlabel(r"Time")
     fig.supylabel(r"%s" % y_title)
 
-    plotName = FILENAME + "/Prints"
+    plotName = fileName + "/Prints"
     f = plotName + "/print_culture_time_series_two_properties_{}_{}.eps".format(
         property_varied_row, property_varied_column
     )
@@ -2179,7 +2300,7 @@ def prints_final_weighting_matrix(
 
 
 def live_compare_animate_culture_network_and_weighting(
-    FILENAME: str,
+    fileName: str,
     Data_list: list,
     layout: str,
     cmap_culture: Union[LinearSegmentedColormap, str],
@@ -2260,7 +2381,7 @@ def live_compare_animate_culture_network_and_weighting(
     )
 
     # save the video
-    animateName = FILENAME + "/Animations"
+    animateName = fileName + "/Animations"
     f = (
         animateName
         + "/live_multi_animate_culture_network_and_weighting_%s.mp4" % property_name
@@ -2273,7 +2394,7 @@ def live_compare_animate_culture_network_and_weighting(
 
 # animation of changing culture
 def live_animate_weighting_matrix(
-    FILENAME: str,
+    fileName: str,
     Data: list,
     cmap_weighting: Union[LinearSegmentedColormap, str],
     interval: int,
@@ -2324,7 +2445,7 @@ def live_animate_weighting_matrix(
     )
 
     # save the video
-    animateName = FILENAME + "/Animations"
+    animateName = fileName + "/Animations"
     f = animateName + "/live_animate_weighting_matrix.mp4"
     writervideo = animation.FFMpegWriter(fps=fps)
     ani.save(f, writer=writervideo)
@@ -2334,7 +2455,7 @@ def live_animate_weighting_matrix(
 
 # animation of changing culture
 def live_compare_animate_weighting_matrix(
-    FILENAME: str,
+    fileName: str,
     Data_list: list,
     cmap_weighting: Union[LinearSegmentedColormap, str],
     interval: int,
@@ -2397,7 +2518,7 @@ def live_compare_animate_weighting_matrix(
     )
 
     # save the video
-    animateName = FILENAME + "/Animations"
+    animateName = fileName + "/Animations"
     f = animateName + "/live_compare_animate_weighting_matrix_%s.mp4" % property_name
     writervideo = animation.FFMpegWriter(fps=fps)
     ani.save(f, writer=writervideo)
@@ -2407,7 +2528,7 @@ def live_compare_animate_weighting_matrix(
 
 # animation of changing culture
 def live_compare_animate_behaviour_matrix(
-    FILENAME: str,
+    fileName: str,
     Data_list: list,
     cmap_behaviour: Union[LinearSegmentedColormap, str],
     interval: int,
@@ -2475,7 +2596,7 @@ def live_compare_animate_behaviour_matrix(
     )
 
     # save the video
-    animateName = FILENAME + "/Animations"
+    animateName = fileName + "/Animations"
     f = animateName + "/live_compare_animate_behaviour_matrix_%s.mp4" % property_name
     writervideo = animation.FFMpegWriter(fps=fps)
     ani.save(f, writer=writervideo)
@@ -2563,7 +2684,7 @@ def live_compare_plot_animate_behaviour_scatter(
 """SA"""
 
 
-def bar_sensitivity_analysis_plot(FILENAME, data, names, yerr, dpi_save, N_samples):
+def bar_sensitivity_analysis_plot(fileName, data, names, yerr, dpi_save, N_samples):
     """
     Create bar chart of results.
     """
@@ -2576,7 +2697,7 @@ def bar_sensitivity_analysis_plot(FILENAME, data, names, yerr, dpi_save, N_sampl
     ax.set_xlim(left=0)
     plt.tight_layout()
 
-    plotName = FILENAME + "/Prints"
+    plotName = fileName + "/Prints"
     f = (
         plotName
         + "/"
@@ -2586,7 +2707,7 @@ def bar_sensitivity_analysis_plot(FILENAME, data, names, yerr, dpi_save, N_sampl
 
 
 def scatter_total_sensitivity_analysis_plot(
-    FILENAME, data, names, xerr, dpi_save, N_samples
+    fileName, data, names, xerr, dpi_save, N_samples
 ):
     """
     Create scatter chart of results.
@@ -2603,7 +2724,7 @@ def scatter_total_sensitivity_analysis_plot(
     ax.set_ylabel(r"Exogenous parameters")
     plt.tight_layout()
 
-    plotName = FILENAME + "/Prints"
+    plotName = fileName + "/Prints"
     f = (
         plotName
         + "/"
@@ -2613,7 +2734,7 @@ def scatter_total_sensitivity_analysis_plot(
 
 
 def multi_scatter_total_sensitivity_analysis_plot(
-    FILENAME, data_dict, names, dpi_save, N_samples, order
+    fileName, data_dict, names, dpi_save, N_samples, order
 ):
     """
     Create scatter chart of results.
@@ -2652,7 +2773,7 @@ def multi_scatter_total_sensitivity_analysis_plot(
     ax.set_ylabel(r"Exogenous parameters")
     plt.tight_layout()
 
-    plotName = FILENAME + "/Prints"
+    plotName = fileName + "/Prints"
     f = (
         plotName
         + "/"
@@ -2663,7 +2784,7 @@ def multi_scatter_total_sensitivity_analysis_plot(
 
 
 def multi_scatter_seperate_total_sensitivity_analysis_plot(
-    FILENAME, data_dict, names, dpi_save, N_samples, order
+    fileName, data_dict, names, dpi_save, N_samples, order
 ):
     """
     Create scatter chart of results.
@@ -2711,7 +2832,7 @@ def multi_scatter_seperate_total_sensitivity_analysis_plot(
 
     plt.tight_layout()
 
-    plotName = FILENAME + "/Prints"
+    plotName = fileName + "/Prints"
     f = (
         plotName
         + "/"
@@ -2728,7 +2849,7 @@ def multi_scatter_seperate_total_sensitivity_analysis_plot(
     #fig.savefig(f_png, dpi=dpi_save, format="png")
 
 def multi_scatter_parallel_total_sensitivity_analysis_plot(
-    FILENAME, data_dict, names, dpi_save, N_samples, order
+    fileName, data_dict, names, dpi_save, N_samples, order
 ):
     """
     Create scatter chart of results.
@@ -2776,7 +2897,7 @@ def multi_scatter_parallel_total_sensitivity_analysis_plot(
 
     plt.tight_layout()
 
-    plotName = FILENAME + "/Prints"
+    plotName = fileName + "/Prints"
     f = (
         plotName
         + "/"
@@ -2794,7 +2915,7 @@ def multi_scatter_parallel_total_sensitivity_analysis_plot(
 
 
 def multi_scatter_sidebyside_total_sensitivity_analysis_plot(
-    FILENAME, data_dict, names, dpi_save, N_samples, order
+    fileName, data_dict, names, dpi_save, N_samples, order
 ):
     """
     Create scatter chart of results.
@@ -2857,7 +2978,7 @@ def multi_scatter_sidebyside_total_sensitivity_analysis_plot(
     ax.set_ylabel(r"Exogenous parameters")
     plt.tight_layout()
 
-    plotName = FILENAME + "/Prints"
+    plotName = fileName + "/Prints"
     f = (
         plotName
         + "/"
@@ -2868,7 +2989,7 @@ def multi_scatter_sidebyside_total_sensitivity_analysis_plot(
 
 
 def prints_SA_matrix(
-    FILENAME, Data, title_list, cmap, nrows, ncols, dpi_save, labels, title_property, Y_property
+    fileName, Data, title_list, cmap, nrows, ncols, dpi_save, labels, title_property, Y_property
 ):
 
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
@@ -2893,7 +3014,7 @@ def prints_SA_matrix(
         # ax.xticks(rotation=45, ha='right')
     # plt.tight_layout()
 
-    plotName = FILENAME + "/Prints"
+    plotName = fileName + "/Prints"
     #f = plotName + "/" + "%s_prints_SA_matrix_property_%s.eps" % (len(labels), Y_property)
     f_png = plotName + "/" + "%s_prints_SA_matrix_property_%s.png" % (len(labels), Y_property)
     #fig.savefig(f, dpi=dpi_save, format="eps")
@@ -2953,7 +3074,7 @@ def live_plot_attitude_scatter(fileName, Data, dpi_save):
     fig.savefig(f, dpi=dpi_save, format="eps")
 
 
-def plot_alpha_variation(FILENAME, num_counts, phi_list, dpi_save):
+def plot_alpha_variation(fileName, num_counts, phi_list, dpi_save):
     def alpha_calc(phi, x):
         return np.exp(-phi * np.abs(x))
 
@@ -2973,7 +3094,7 @@ def plot_alpha_variation(FILENAME, num_counts, phi_list, dpi_save):
     ax.set_xlabel(r"$|I_n -I_k|$")
     ax.set_ylabel(r"$\alpha$")
     ax.legend()
-    plotName = FILENAME + "/Plots"
+    plotName = fileName + "/Plots"
     f = plotName + "/plot_alpha_variation.eps"
     fig.savefig(f, dpi=dpi_save, format="eps")
 
@@ -3030,7 +3151,7 @@ def plot_behaviour_scatter(fileName,Data,property,dpi_save):
     f = plotName + "/plot_attitude_scatter.eps"
     fig.savefig(f, dpi=dpi_save,format='eps')
 
-def plot_weighting_link_timeseries(FILENAME: str, Data: DataFrame, y_title:str, dpi_save:int, min_val):
+def plot_weighting_link_timeseries(fileName: str, Data: DataFrame, y_title:str, dpi_save:int, min_val):
 
     fig, ax = plt.subplots(figsize=(10,6))
 
@@ -3045,12 +3166,12 @@ def plot_weighting_link_timeseries(FILENAME: str, Data: DataFrame, y_title:str, 
     ax.set_xlabel(r"Time")
     ax.set_ylabel(r"%s" % y_title)
 
-    plotName = FILENAME + "/Plots"
+    plotName = fileName + "/Plots"
     f = plotName + "/plot_weighting_link_timeseries.eps"
     fig.savefig(f, dpi=dpi_save,format='eps')
 
 def animate_culture_network_and_weighting(
-    FILENAME: str, Data: DataFrame, layout:str, cmap_culture: Union[LinearSegmentedColormap,str], node_size:int, interval:int, fps:int, norm_zero_one: SymLogNorm, round_dec:int, cmap_edge
+    fileName: str, Data: DataFrame, layout:str, cmap_culture: Union[LinearSegmentedColormap,str], node_size:int, interval:int, fps:int, norm_zero_one: SymLogNorm, round_dec:int, cmap_edge
 ):
 
     def update(i, G, pos, ax, cmap_culture):
@@ -3110,7 +3231,7 @@ def animate_culture_network_and_weighting(
     )
 
     # save the video
-    animateName = FILENAME + "/Animations"
+    animateName = fileName + "/Animations"
     f = animateName + "/" + "animate_culture_network_and_weighting.mp4"
     writervideo = animation.FFMpegWriter(fps=fps)
     ani.save(f, writer=writervideo)
@@ -3160,7 +3281,7 @@ def animate_behaviour_scatter(fileName,Data,property,norm_zero_one, cmap_culture
     ani.save(f, writer=writervideo)
 
 def print_culture_histogram(
-    FILENAME: str, Data: DataFrame, property:str, nrows:int, ncols:int, frames_list, round_dec, dpi_save,bin_num
+    fileName: str, Data: DataFrame, property:str, nrows:int, ncols:int, frames_list, round_dec, dpi_save,bin_num
 ):
     y_title = "Probability"
     #print(Data[property], Data[property].shape)
@@ -3176,12 +3297,12 @@ def print_culture_histogram(
         ax.set_title("Time= {}".format(round(Data["network_time"][frames_list[i]], round_dec)))  # avoid 0 in the title
     plt.tight_layout()
 
-    plotName = FILENAME + "/Plots"
+    plotName = fileName + "/Plots"
     f = plotName + "/print_culture_histogram.eps"
     fig.savefig(f, dpi=dpi_save,format='eps')
 
     # make matrix animation
-def animate_weighting_matrix(FILENAME: str, Data: DataFrame, interval:int, fps:int, round_dec:int, cmap_weighting: Union[LinearSegmentedColormap,str]):
+def animate_weighting_matrix(fileName: str, Data: DataFrame, interval:int, fps:int, round_dec:int, cmap_weighting: Union[LinearSegmentedColormap,str]):
     def update(i):
         M = Data["network_weighting_matrix"][i]
         # print("next frame!",M)        
@@ -3208,7 +3329,7 @@ def animate_weighting_matrix(FILENAME: str, Data: DataFrame, interval:int, fps:i
     )
 
     # save the video
-    animateName = FILENAME + "/Animations"
+    animateName = fileName + "/Animations"
     f = animateName + "/" + "weighting_matrix_animation.mp4"
     writervideo = animation.FFMpegWriter(fps=fps)
     ani.save(f, writer=writervideo)
@@ -3216,7 +3337,7 @@ def animate_weighting_matrix(FILENAME: str, Data: DataFrame, interval:int, fps:i
 
 # make behaviour evolution plot
 def animate_behavioural_matrix(
-    FILENAME: str, Data: DataFrame, interval:int, fps:int, cmap_behaviour: Union[LinearSegmentedColormap,str], round_dec:int
+    fileName: str, Data: DataFrame, interval:int, fps:int, cmap_behaviour: Union[LinearSegmentedColormap,str], round_dec:int
 ):
     def update(i):
         M = Data["behaviour_value"][i]
@@ -3251,7 +3372,7 @@ def animate_behavioural_matrix(
     )
 
     # save the video
-    animateName = FILENAME + "/Animations"
+    animateName = fileName + "/Animations"
     f = animateName + "/" + "behavioural_matrix_animation.mp4"
     writervideo = animation.FFMpegWriter(fps=fps)
     ani.save(f, writer=writervideo)
@@ -3259,7 +3380,7 @@ def animate_behavioural_matrix(
 
 # animation of changing culture
 def animate_culture_network(
-    FILENAME: str, Data: DataFrame, layout:str, cmap_culture: Union[LinearSegmentedColormap,str], node_size:int, interval:int, fps:int, norm_zero_one: SymLogNorm, round_dec:int
+    fileName: str, Data: DataFrame, layout:str, cmap_culture: Union[LinearSegmentedColormap,str], node_size:int, interval:int, fps:int, norm_zero_one: SymLogNorm, round_dec:int
 ):
     def update(i, G, pos, ax, cmap_culture):
 
@@ -3303,7 +3424,7 @@ def animate_culture_network(
     )
 
     # save the video
-    animateName = FILENAME + "/Animations"
+    animateName = fileName + "/Animations"
     f = animateName + "/" + "cultural_animation.mp4"
     writervideo = animation.FFMpegWriter(fps=fps)
     ani.save(f, writer=writervideo)
@@ -3311,7 +3432,7 @@ def animate_culture_network(
 
 
 def prints_behavioural_matrix(
-    FILENAME: str, Data: DataFrame, cmap_behaviour: Union[LinearSegmentedColormap,str], nrows:int, ncols:int, frames_list:list[int], round_dec:int, dpi_save:int
+    fileName: str, Data: DataFrame, cmap_behaviour: Union[LinearSegmentedColormap,str], nrows:int, ncols:int, frames_list:list[int], round_dec:int, dpi_save:int
 ):
 
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
@@ -3333,12 +3454,12 @@ def prints_behavioural_matrix(
     cbar = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap_behaviour, norm=Normalize(vmin=0, vmax=1)),ax=axes.ravel().tolist())
     cbar.set_label("Behavioural Value")
 
-    plotName = FILENAME + "/Prints"
+    plotName = fileName + "/Prints"
     f = plotName + "/" + "prints_behavioural_matrix.eps"
     fig.savefig(f, dpi=dpi_save,format='eps')
 
 def print_network_social_component_matrix(
-    FILENAME: str, Data: DataFrame, cmap_behaviour: Union[LinearSegmentedColormap,str], nrows:int, ncols:int, frames_list:list[int], round_dec:int, dpi_save:int
+    fileName: str, Data: DataFrame, cmap_behaviour: Union[LinearSegmentedColormap,str], nrows:int, ncols:int, frames_list:list[int], round_dec:int, dpi_save:int
 ):
 
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
@@ -3364,12 +3485,12 @@ def print_network_social_component_matrix(
     cbar = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap_behaviour, norm=Normalize(vmin=-1, vmax=1)),ax=axes.ravel().tolist())
     cbar.set_label("Social Learning")
 
-    plotName = FILENAME + "/Prints"
+    plotName = fileName + "/Prints"
     f = plotName + "/" + "prints_network_social_component_matrix.eps"
     fig.savefig(f, dpi=dpi_save,format='eps')
 
 def print_network_information_provision(
-    FILENAME: str, Data: DataFrame, cmap_behaviour: Union[LinearSegmentedColormap,str], nrows:int, ncols:int, frames_list:list[int], round_dec:int, dpi_save:int
+    fileName: str, Data: DataFrame, cmap_behaviour: Union[LinearSegmentedColormap,str], nrows:int, ncols:int, frames_list:list[int], round_dec:int, dpi_save:int
 ):
 
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
@@ -3398,13 +3519,13 @@ def print_network_information_provision(
     cbar = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap_behaviour, norm=Normalize(vmin=0, vmax=1)),ax=axes.ravel().tolist())
     cbar.set_label("Information Provision")
 
-    plotName = FILENAME + "/Prints"
+    plotName = fileName + "/Prints"
     f = plotName + "/" + "prints_behaviour_information_provision_matrix.eps"
     fig.savefig(f, dpi=dpi_save,format='eps')
 
 
 def prints_culture_network(
-    FILENAME: str, Data: DataFrame,layout:str, cmap_culture: LinearSegmentedColormap,node_size:int, nrows:int, ncols:int, norm_zero_one: SymLogNorm, frames_list:list[int], round_dec:int, dpi_save:int
+    fileName: str, Data: DataFrame,layout:str, cmap_culture: LinearSegmentedColormap,node_size:int, nrows:int, ncols:int, norm_zero_one: SymLogNorm, frames_list:list[int], round_dec:int, dpi_save:int
 ):
 
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
@@ -3443,10 +3564,10 @@ def prints_culture_network(
     cbar = fig.colorbar(plt.cm.ScalarMappable(cmap=cmap_culture, norm=norm_zero_one),ax=axes.ravel().tolist())
     cbar.set_label(r"Identity, $I_{t,n}$")
 
-    f = FILENAME + "/Prints/prints_culture_network.eps"
+    f = fileName + "/Prints/prints_culture_network.eps"
     fig.savefig(f, dpi=dpi_save,format='eps')
 
-def plot_average_culture_timeseries(FILENAME: str, Data: DataFrame, dpi_save:int):
+def plot_average_culture_timeseries(fileName: str, Data: DataFrame, dpi_save:int):
     y_title = "Average Culture"
     property = "network_average_culture"
 
@@ -3462,12 +3583,12 @@ def plot_average_culture_timeseries(FILENAME: str, Data: DataFrame, dpi_save:int
         Data["network_time"], culture_min, culture_max, alpha=0.5, linewidth=0
     )
 
-    plotName = FILENAME + "/Plots"
+    plotName = fileName + "/Plots"
     f = plotName + "/" + property + "_timeseries.eps"
     fig.savefig(f, dpi=dpi_save,format='eps')
 
 
-def plot_culture_timeseries(FILENAME: str, Data: DataFrame, dpi_save:int):
+def plot_culture_timeseries(fileName: str, Data: DataFrame, dpi_save:int):
 
     ##plot cultural evolution of agents
     fig, ax = plt.subplots(figsize=(10,6))
@@ -3481,12 +3602,12 @@ def plot_culture_timeseries(FILENAME: str, Data: DataFrame, dpi_save:int):
         ax.plot(Data["network_time"], data[i])
     ax.axvline(Data["culture_momentum_real"], color='r',linestyle = "--")
 
-    plotName = FILENAME + "/Plots"
+    plotName = fileName + "/Plots"
     f = plotName + "/" + "cultural_evolution.eps"
     fig.savefig(f, dpi=dpi_save,format='eps')
 
 # make animate_network_social_component_matrix
-def animate_network_social_component_matrix(FILENAME: str, Data: DataFrame, interval:int, fps:int, round_dec:int, cmap: Union[LinearSegmentedColormap,str], norm_zero_one):
+def animate_network_social_component_matrix(fileName: str, Data: DataFrame, interval:int, fps:int, round_dec:int, cmap: Union[LinearSegmentedColormap,str], norm_zero_one):
     
     def update(i):
         M = Data["network_social_component_matrix"][i]
@@ -3519,14 +3640,14 @@ def animate_network_social_component_matrix(FILENAME: str, Data: DataFrame, inte
     )
 
     # save the video
-    animateName = FILENAME + "/Animations"
+    animateName = fileName + "/Animations"
     f = animateName + "/" + "network_social_component_matrix_animation.mp4"
     writervideo = animation.FFMpegWriter(fps=fps)
     ani.save(f, writer=writervideo)
 
     return ani
 
-def animate_network_information_provision(FILENAME: str, Data: DataFrame, interval:int, fps:int, round_dec:int, cmap: Union[LinearSegmentedColormap,str]):
+def animate_network_information_provision(fileName: str, Data: DataFrame, interval:int, fps:int, round_dec:int, cmap: Union[LinearSegmentedColormap,str]):
 
     def update(i):
         M = Data["behaviour_information_provision"][i]
@@ -3560,13 +3681,13 @@ def animate_network_information_provision(FILENAME: str, Data: DataFrame, interv
     )
 
     # save the video
-    animateName = FILENAME + "/Animations"
+    animateName = fileName + "/Animations"
     f = animateName + "/" + "behaviour_information_provision_animation.mp4"
     writervideo = animation.FFMpegWriter(fps=fps)
     ani.save(f, writer=writervideo)
     return ani
 
-def prints_behaviour_timeseries_plot(FILENAME: str, Data: DataFrame, property:str, y_title:str, nrows:int, ncols:int, dpi_save:int):
+def prints_behaviour_timeseries_plot(fileName: str, Data: DataFrame, property:str, y_title:str, nrows:int, ncols:int, dpi_save:int):
     PropertyData = Data[property].transpose()
 
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
@@ -3582,12 +3703,12 @@ def prints_behaviour_timeseries_plot(FILENAME: str, Data: DataFrame, property:st
         
     plt.tight_layout()
     
-    plotName = FILENAME + "/Plots"
+    plotName = fileName + "/Plots"
     f = plotName + "/" + property + "_prints_timeseries.eps"
     fig.savefig(f, dpi=dpi_save,format='eps')
 
 def prints_behaviour_timeseries_plot_colour_culture(
-    FILENAME: str, Data: DataFrame, property:str, y_title:str, nrows:int, ncols:int, dpi_save:int, culture_cmap, norm_zero_one
+    fileName: str, Data: DataFrame, property:str, y_title:str, nrows:int, ncols:int, dpi_save:int, culture_cmap, norm_zero_one
 ):
 
     PropertyData = Data[property].T
@@ -3620,12 +3741,12 @@ def prints_behaviour_timeseries_plot_colour_culture(
     )
     cbar_culture.set_label(rr"Identity, $I_{t,n}$")
 
-    plotName = FILENAME + "/Plots"
+    plotName = fileName + "/Plots"
     f = plotName + "/" + property + "_prints_behaviour_timeseries_plot_colour_culture.eps"
     fig.savefig(f, dpi=dpi_save,format='eps')
 
 
-def standard_behaviour_timeseries_plot(FILENAME: str, Data: DataFrame, property:str, y_title:str, dpi_save:int):
+def standard_behaviour_timeseries_plot(fileName: str, Data: DataFrame, property:str, y_title:str, dpi_save:int):
     PropertyData = Data[property].transpose()
 
     fig, ax = plt.subplots(figsize=(10,6))
@@ -3636,34 +3757,34 @@ def standard_behaviour_timeseries_plot(FILENAME: str, Data: DataFrame, property:
     ax.set_xlabel(r"Time")
     ax.set_ylabel(r"%s" % y_title)
 
-    plotName = FILENAME + "/Plots"
+    plotName = fileName + "/Plots"
     f = plotName + "/" + property + "_timeseries.eps"
     fig.savefig(f, dpi=dpi_save,format='eps')
 
 
-def plot_value_timeseries(FILENAME: str, Data: DataFrame, nrows:int, ncols:int, dpi_save:int,):
+def plot_value_timeseries(fileName: str, Data: DataFrame, nrows:int, ncols:int, dpi_save:int,):
     prints_behaviour_timeseries_plot(
-        FILENAME, Data, "behaviour_value", "Trait Value", nrows, ncols, dpi_save, 
+        fileName, Data, "behaviour_value", "Trait Value", nrows, ncols, dpi_save, 
     )
 
 
-def plot_threshold_timeseries(FILENAME: str, Data: DataFrame, nrows:int, ncols:int, dpi_save:int,):
+def plot_threshold_timeseries(fileName: str, Data: DataFrame, nrows:int, ncols:int, dpi_save:int,):
     prints_behaviour_timeseries_plot(
-        FILENAME, Data, "behaviour_threshold", "Threshold", nrows, ncols, dpi_save
+        fileName, Data, "behaviour_threshold", "Threshold", nrows, ncols, dpi_save
     )
 
 
-def plot_attitude_timeseries(FILENAME: str, Data: DataFrame, nrows:int, ncols:int, dpi_save:int):
+def plot_attitude_timeseries(fileName: str, Data: DataFrame, nrows:int, ncols:int, dpi_save:int):
     
     #print(Data["behaviour_attitude"],np.shape(Data["behaviour_attitude"]))
 
 
     prints_behaviour_timeseries_plot(
-        FILENAME, Data, "behaviour_attitude", "Attitude", nrows, ncols, dpi_save,
+        fileName, Data, "behaviour_attitude", "Attitude", nrows, ncols, dpi_save,
     )
 
 
-def plot_av_carbon_emissions_timeseries(FILENAME: str, Data: DataFrame, dpi_save:int):
+def plot_av_carbon_emissions_timeseries(fileName: str, Data: DataFrame, dpi_save:int):
     y_title = "Carbon Emissions Per Individual"
     property = "individual_carbon_emissions"
 
@@ -3681,7 +3802,7 @@ def plot_av_carbon_emissions_timeseries(FILENAME: str, Data: DataFrame, dpi_save
     ax.set_xlabel(r"Time")
     ax.set_ylabel(r"%s" % y_title)
 
-    plotName = FILENAME + "/Plots"
+    plotName = fileName + "/Plots"
     f = plotName + "/" + property + "_timeseries.eps"
     fig.savefig(f, dpi=dpi_save,format='eps')
 

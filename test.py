@@ -23,7 +23,7 @@ from resources.plot import (
 """
 from resources.run import parallel_run
 
-# FOR FILENAME
+# FOR fileName
 params_name = [  # THOSE USEd to create the save list?
     "time_steps_max",
     "M",
