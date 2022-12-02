@@ -234,18 +234,18 @@ if __name__ == "__main__":
             print("FILENAME:", FILENAME)
 
             if culture_run:
-                    params_list = produce_param_list_n_double(base_params, variable_parameters_dict)
-                    (
-                        results_culture_lists
-                        
-                    ) = culture_data_run(params_list)
-
-                    # save the data and params_list
-                    save_object(variable_parameters_dict, fileName + "/Data", "variable_parameters_dict")
-                    save_object(base_params, fileName + "/Data", "base_params")
-                    save_object(results_culture_lists,fileName + "/Data","results_culture_lists")
+                print("INSIDE")
+                params_list = produce_param_list_n_double(base_params, variable_parameters_dict)
+                (
+                    results_culture_lists
                     
-            if cluster_count_run:
+                ) = culture_data_run(params_list)
+
+                # save the data and params_list
+                save_object(variable_parameters_dict, fileName + "/Data", "variable_parameters_dict")
+                save_object(base_params, fileName + "/Data", "base_params")
+                save_object(results_culture_lists,fileName + "/Data","results_culture_lists") 
+            elif cluster_count_run:
                 
                     createFolder(fileName)
                     s = np.linspace(0,1,200)
@@ -279,7 +279,6 @@ if __name__ == "__main__":
                     matrix_coefficient_of_variance = results_coefficient_of_variance.reshape((reps_row, reps_col))
                     matrix_emissions_change = results_emissions_change.reshape((reps_row, reps_col))
                     matrix_clusters_count = results_clusters_count.reshape((reps_row, reps_col))
-
             else:
                 ######FIX THIS TOO INCLUDE EMISSIONS CHANGE
                 (
@@ -351,6 +350,9 @@ if __name__ == "__main__":
                     variable_parameters_dict["row"]["reps"],
                     variable_parameters_dict["col"]["reps"],
             )
+######################################################################################################################################################################
+        #PLOT STUFF
+
         #double_phase_diagram(fileName, matrix_emissions, r"Total normalised emissions $E/NM$", "emissions",variable_parameters_dict, get_cmap("Reds"),dpi_save)
         #double_phase_diagram(fileName, matrix_mu, r"Average identity, $\mu$", "mu",variable_parameters_dict, get_cmap("Blues"),dpi_save)
         #double_phase_diagram(fileName, matrix_var, r"Identity variance, $\sigma^2$", "variance",variable_parameters_dict, get_cmap("Greens"),dpi_save)
@@ -549,6 +551,7 @@ if __name__ == "__main__":
                                                                                                                 #x_ticks_pos,y_ticks_pos,x_ticks_label,y_ticks_label
                 double_matrix_plot_cluster(fileName,matrix_clusters_count,variable_parameters_dict, get_cmap("Purples"),dpi_save,col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label)
         if culture_run:
+            print("RUNS DONE")
             variable_parameters_dict = load_object(fileName + "/Data", "variable_parameters_dict")
             base_params = load_object(fileName + "/Data", "base_params")
             results_culture_lists = load_object(fileName + "/Data","results_culture_lists")
@@ -563,7 +566,7 @@ if __name__ == "__main__":
             cluster_count = vfunc_clusters(results_culture_lists,s,bandwidth)
 
             print(cluster_count)
-            
+
             """
             #calculate the clusters for each culture list for a given value of bandwidth
             for i in range(len(results_culture_lists)):
