@@ -230,8 +230,8 @@ if __name__ == "__main__":
             """
 
             root = "two_param_sweep_average"
-            FILENAME = produce_name_datetime(root)
-            print("FILENAME:", FILENAME)
+            fileName = produce_name_datetime(root)
+            print("FILENAME:", fileName)
 
             createFolder(fileName)
 
@@ -306,8 +306,7 @@ if __name__ == "__main__":
                 variable_parameters_dict = load_object(fileName + "/Data", "variable_parameters_dict")
                 base_params = load_object(fileName + "/Data", "base_params")
                 results_culture_lists = load_object(fileName + "/Data","results_culture_lists")
-
-            if cluster_count_run:
+            elif cluster_count_run:
                 variable_parameters_dict = load_object(
                     fileName + "/Data", "variable_parameters_dict"
                 )
@@ -327,7 +326,6 @@ if __name__ == "__main__":
                 matrix_coefficient_of_variance = results_coefficient_of_variance.reshape((reps_row, reps_col))
                 matrix_emissions_change = results_emissions_change.reshape((reps_row, reps_col))
                 matrix_clusters_count = results_clusters_count.reshape((reps_row, reps_col))
-
             else:
                 ######FIX THIS TOO INCLUDE EMISSIONS CHANGE    
                 (
@@ -558,7 +556,7 @@ if __name__ == "__main__":
             base_params = load_object(fileName + "/Data", "base_params")
             results_culture_lists = load_object(fileName + "/Data","results_culture_lists")
 
-            print(results_culture_lists, results_culture_lists.shape)
+            #print(results_culture_lists, results_culture_lists.shape)
             #(25,3,200), so it needs to run on (25,3) different occasions?
             #  
 
@@ -586,10 +584,6 @@ if __name__ == "__main__":
                     #this is one of the stochastic runs
                     cluster_count =  calc_num_clusters_set_bandwidth(results_culture_lists[i][j],s,bandwidth)
             """
-
-
-
-
 
 
         #only for the a or b beta parameters
