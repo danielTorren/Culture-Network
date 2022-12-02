@@ -136,7 +136,7 @@ def generate_title_list(
 
 def shot_two_dimensional_param_run(
     fileName: str,
-    params: dict,
+    base_params: dict,
     variable_parameters_dict: dict[dict],
     reps_row: int,
     reps_col: int,
@@ -148,7 +148,7 @@ def shot_two_dimensional_param_run(
     ----------
     fileName: str
         where to save it e.g in the results folder in data or plots folder
-    params: dict
+    base_params: dict
         dictionary of parameters used to generate attributes, dict used for readability instead of super long list of input parameters.
     variable_parameters_dict: dict[dict]
         dictionary of dictionaries containing details for range of parameters to vary. see produce_param_list_n_double for an example
@@ -166,18 +166,19 @@ def shot_two_dimensional_param_run(
         list of titles one for each experiment
     """
     createFolder(fileName)
-    params_dict_list = produce_param_list_n_double(params, variable_parameters_dict)
+    params_dict_list = produce_param_list_n_double(base_params, variable_parameters_dict)
 
     data_list = parallel_run(params_dict_list)
     data_array = np.reshape(data_list, (reps_row, reps_col))
-
+    
+    save_object(base_params, fileName + "/Data", "base_params")
     save_data_shot(fileName, variable_parameters_dict, data_list, data_array)
 
     return data_list, data_array
 
 
 def av_two_dimensional_param_run(
-    fileName: str, variable_parameters_dict: dict[dict], params: dict
+    fileName: str, variable_parameters_dict: dict[dict], base_params: dict
 ) -> tuple[npt.NDArray, npt.NDArray, npt.NDArray, npt.NDArray]:
     """Generate results for the case of varying two parameters in multiple stochastically averaged runs for each experiment, also create folder
     and titles for plots and save data
@@ -188,7 +189,7 @@ def av_two_dimensional_param_run(
         where to save it e.g in the results folder in data or plots folder
     variable_parameters_dict: dict[dict]
         dictionary of dictionaries containing details for range of parameters to vary. See produce_param_list_n_double for an example
-    params: dict
+    base_params: dict
         dictionary of parameters used to generate attributes, dict used for readability instead of super long list of input parameters. See produce_param_list_n_double for an example
 
     Returns
@@ -204,13 +205,15 @@ def av_two_dimensional_param_run(
     """
 
     createFolder(fileName)
-    params_list = produce_param_list_n_double(params, variable_parameters_dict)
+    params_list = produce_param_list_n_double(base_params, variable_parameters_dict)
     (
         results_emissions,
         results_mu,
         results_var,
         results_coefficient_of_variance,
     ) = parallel_run_sa(params_list)
+
+    save_object(base_params, fileName + "/Data", "base_params")
 
     # save the data and params_list
     save_data_av(

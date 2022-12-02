@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import LinearSegmentedColormap, Normalize, LogNorm
 from matplotlib.cm import get_cmap
-from resources.utility import createFolder
+from resources.utility import createFolder,produce_name_datetime
 from resources.run import parallel_run, parallel_run_sa
 from resources.plot import (
     live_multirun_diagram_mean_coefficient_variance,
@@ -140,6 +140,7 @@ if __name__ == "__main__":
 
     if SINGLE:
         # SINGLE SHOT RUNS NO AVERAGING OVER STOCHASTIC EFFECTS
+        """
         fileName = "results/network_struct_%s_variation_%s_%s_%s_%s_%s_%s" % (#CHANGE THIS BACK!!!!
             property_varied,
             str(params["N"]),
@@ -149,7 +150,11 @@ if __name__ == "__main__":
             str(param_max),
             str(reps),
         )
+        """
+        root = "one_param_sweep_single"
+        fileName = produce_name_datetime(root)
         print("fileName: ", fileName)
+
         createFolder(fileName)
 
         if GRAPH_TYPE == 0:
@@ -255,7 +260,8 @@ if __name__ == "__main__":
         seed_list = [1, 2, 3, 4, 5]  # ie 5 reps per run!
         params["seed_list"] = seed_list
         average_reps = len(seed_list)
-
+        
+        """
         fileName = "results/average_%s_variation_%s_%s_%s_%s_%s_%s_%s" % (
             property_varied,
             str(params["N"]),
@@ -266,7 +272,12 @@ if __name__ == "__main__":
             str(reps),
             str(average_reps),
         )
+        """
+
+        root = "one_param_sweep_average"
+        fileName = produce_name_datetime(root)
         print("fileName: ", fileName)
+
         createFolder(fileName)
 
         params_list = produce_param_list(params, property_values_list, property_varied)

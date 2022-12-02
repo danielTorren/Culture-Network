@@ -14,6 +14,7 @@ from resources.utility import (
     generate_vals_variable_parameters_and_norms,
     save_object,
     load_object,
+    produce_name_datetime,
 )
 from resources.run import parallel_run_multi_run_n
 from resources.plot import (
@@ -21,7 +22,6 @@ from resources.plot import (
     live_average_multirun_n_diagram_mean_coefficient_variance_cols,
 )
 from resources.multi_run_n_param import (
-    produceName_multi_run_n,
     produce_param_list_n,
 )
 
@@ -37,9 +37,9 @@ if __name__ == "__main__":
     if RUN:
         # load base params
         f_base_params = open("constants/base_params.json")
-        params = json.load(f_base_params)
+        base_params = json.load(f_base_params)
         f_base_params.close()
-        params["time_steps_max"] = int(params["total_time"] / params["delta_t"])
+        base_params["time_steps_max"] = int(base_params["total_time"] / base_params["delta_t"])
 
         # load variable params
         f_variable_parameters = open("constants/variable_parameters_dict_n.json")
@@ -50,14 +50,15 @@ if __name__ == "__main__":
 
         # AVERAGE OVER MULTIPLE RUNS
         fileName = "results/multi_run_n_%s_%s_%s_%s_%s" % (
-            str(params["N"]),
-            str(params["time_steps_max"]),
-            str(params["K"]),
-            str(len(params["seed_list"])),
+            str(base_params["N"]),
+            str(base_params["time_steps_max"]),
+            str(base_params["K"]),
+            str(len(base_params["seed_list"])),
             str(reps),
         )
 
-        produceName_multi_run_n(variable_parameters_dict, fileName)
+        root = "multi_n_independent"
+        fileName = produce_name_datetime(root)
         createFolder(fileName)
         print("fileName: ", fileName)
 
@@ -65,7 +66,7 @@ if __name__ == "__main__":
         variable_parameters_dict = generate_vals_variable_parameters_and_norms(
             variable_parameters_dict
         )
-        params_list = produce_param_list_n(params, variable_parameters_dict)
+        params_list = produce_param_list_n(base_params, variable_parameters_dict)
         ### GENERATE DATA
         combined_data = parallel_run_multi_run_n(params_list, variable_parameters_dict)
 
@@ -75,6 +76,7 @@ if __name__ == "__main__":
             variable_parameters_dict, fileName + "/Data", "variable_parameters_dict"
         )
         save_object(combined_data, fileName + "/Data", "combined_data")
+        save_object(base_params, fileName + "/Data", "base_params")
 
     else:
         createFolder(fileName)

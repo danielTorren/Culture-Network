@@ -33,7 +33,7 @@ class Network:
         stochastic seed of simulation for reproducibility
     alpha_change : float
         determines how  and how often agent's re-asses their connections strength in the social network
-    save_data : bool
+    save_timeseries_data : bool
         whether or not to save data. Set to 0 if only interested in end state of the simulation. If 1 will save
         data into timeseries (lists or lists of lists for arrays) which can then be either accessed directly in
         the social network object or saved into csv's
@@ -200,7 +200,7 @@ class Network:
         Calculate the percentage of green behaviours adopted
     update_individuals():
         Update Individual objects with new information
-    save_data_network():
+    save_timeseries_data_network():
         Save time series data
     next_step():
         Push the simulation forwards one time step
@@ -231,7 +231,7 @@ class Network:
 
 
         self.alpha_change = parameters["alpha_change"]
-        self.save_data = parameters["save_data"]
+        self.save_timeseries_data = parameters["save_timeseries_data"]
         self.compression_factor = parameters["compression_factor"]
         self.degroot_aggregation = parameters["degroot_aggregation"]
 
@@ -300,8 +300,8 @@ class Network:
         #############################################################################################################################
         #Associate people with attitude values CHANGE THIS BACK
         self.a_attitude = parameters["a_attitude"]
-        self.b_attitude = 2 - self.a_attitude 
-        #self.b_attitude = parameters["b_attitude"]
+        #self.b_attitude = 2 - self.a_attitude 
+        self.b_attitude = parameters["b_attitude"]
         self.a_threshold = parameters["a_threshold"]
         self.b_threshold = parameters["b_threshold"]
         #################################################################################################################################
@@ -341,7 +341,7 @@ class Network:
         ) = self.calc_network_culture()
         self.green_adoption = self.calc_green_adoption()
 
-        if self.save_data:
+        if self.save_timeseries_data:
             self.var_first_behaviour = self.calc_var_first_behaviour()
 
             self.weighting_matrix_convergence = 0  # there is no convergence in the first step, to deal with time issues when plotting
@@ -687,7 +687,7 @@ class Network:
             "delta_t": self.delta_t,
             "t": self.t,
             "M": self.M,
-            "save_data": self.save_data,
+            "save_timeseries_data": self.save_timeseries_data,
             "carbon_emissions": self.carbon_emissions,
             "phi_array": self.phi_array,
             "compression_factor": self.compression_factor,
@@ -713,7 +713,7 @@ class Network:
     def mix_in_green_individuals(self):
         individual_params = {
             "M": self.M,
-            "save_data": self.save_data,
+            "save_timeseries_data": self.save_timeseries_data,
             "carbon_emissions": self.carbon_emissions,
             "compression_factor": self.compression_factor,
         }
@@ -885,7 +885,7 @@ class Network:
         difference_matrix_real_connections = abs(self.adjacency_matrix * difference_matrix)
         total_identity_differences = difference_matrix_real_connections.sum(axis=1)
 
-        if self.save_data:
+        if self.save_timeseries_data:
             total_difference = self.calc_total_weighting_matrix_difference(
                 self.weighting_matrix, norm_weighting_matrix
             )
@@ -1023,7 +1023,7 @@ class Network:
         first_m_attitude_list = [x.attitudes[0] for x in self.agent_list]
         return np.var(first_m_attitude_list)
 
-    def save_data_network(self):
+    def save_timeseries_data_network(self):
         """
         Save time series data
 
@@ -1078,7 +1078,7 @@ class Network:
         # update network parameters for next step
         if self.alpha_change == 1.0:
             #print("1.0")
-            if self.save_data:
+            if self.save_timeseries_data:
                 (
                     self.weighting_matrix,
                     self.total_identity_differences,
@@ -1101,8 +1101,8 @@ class Network:
                 self.max_culture,
         ) = self.calc_network_culture()
         
-        if (self.steps % self.compression_factor == 0) and (self.save_data):
+        if (self.steps % self.compression_factor == 0) and (self.save_timeseries_data):
 
             self.var_first_behaviour = self.calc_var_first_behaviour()
             self.green_adoption = self.calc_green_adoption()
-            self.save_data_network()
+            self.save_timeseries_data_network()

@@ -12,6 +12,7 @@ from matplotlib.colors import (LinearSegmentedColormap, Normalize)
 from resources.run import (generate_data)
 from resources.utility import (
     createFolder,
+    produce_name_datetime,
 )
 from resources.plot import prod_pos
 import numpy as np
@@ -271,7 +272,9 @@ if __name__ == "__main__":
     nrows = 1
     ncols = 2
     dpi_save = 1200
-    fileName = "results/network_structure"
+    root = "network_structure"
+    fileName = produce_name_datetime(root)
+
     createFolder(fileName)
 
     params["time_steps_max"] = int(params["total_time"] / params["delta_t"])

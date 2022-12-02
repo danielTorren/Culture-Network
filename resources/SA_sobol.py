@@ -16,6 +16,7 @@ import numpy.typing as npt
 from resources.utility import (
     createFolder,
     save_object,
+    produce_name_datetime,
 )
 from resources.run import parallel_run_sa
 
@@ -117,7 +118,7 @@ def sa_run(
     Y_emissions, Y_mu, Y_var, Y_coefficient_of_variance, Y_emissions_change = parallel_run_sa(
         params_list_sa
     )
-    
+    save_object(base_params, fileName + "/Data", "base_params")
     save_object(params_list_sa, fileName + "/Data", "params_list_sa")
     save_object(variable_parameters_dict, fileName + "/Data", "variable_parameters_dict")
     save_object(problem, fileName + "/Data", "problem")
@@ -197,14 +198,18 @@ def generate_problem(
     }
 
     ########################################
-
+    """
     fileName = "results/SA_AV_reps_%s_samples_%s_D_vars_%s_N_samples_%s" % (
         str(AV_reps),
         str(samples),
         str(D_vars),
         str(N_samples),
     )
-    print("fileName: ", fileName)
+    """
+    root = "senstivity_analysis"
+    fileName = produce_name_datetime(root)
+    print("FILENAME:", fileName)
+
     createFolder(fileName)
 
     # GENERATE PARAMETER VALUES

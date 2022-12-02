@@ -42,13 +42,13 @@ from resources.plot import (
     double_matrix_plot_cluster,
     double_matrix_plot_cluster_ratio
 )
-
-
 from resources.utility import (
     createFolder,
     generate_vals_variable_parameters_and_norms,
     save_object,
-    load_object
+    load_object,
+    produce_name_datetime,
+    calc_num_clusters_set_bandwidth,
 )
 from resources.multi_run_2D_param import (
     generate_title_list,
@@ -59,20 +59,25 @@ from resources.multi_run_2D_param import (
     reshape_results_matricies,
     produce_param_list_n_double,
 )
-from resources.run import cluster_data_run
+from resources.run import (
+    cluster_data_run,
+    culture_data_run,
+)
 import numpy as np
 
 # run bools
 RUN = 1 # run or load in previously saved data
 SINGLE = 0 # determine if you runs single shots or study the averages over multiple runs for each experiment
-cluster_count_run = 1
+cluster_count_run = 0
 ab_plot = 0
 plot_conf_attiude = 0
 plot_multi_line_divide = 0
 plot_multi_line = 0
 cluster_ratio = 0
+culture_run = 1
 
-fileName = "results/twoD_Average_confirmation_bias_a_attitude_200_3000_20_20_20_5"
+
+fileName = "results/twoD_Average_confirmation_bias_a_attitude_200_3000_20_64_64_5"
 #"results/twoD_Average_confirmation_bias_M_200_3000_20_70_20_5"#"results/twoD_Average_confirmation_bias_a_attitude_200_3000_20_64_64_5"#"
 #"results/twoD_Average_confirmation_bias_a_attitude_200_3000_20_64_64_5"
 #"results/twoD_Average_action_observation_I_a_attitude_200_2000_20_64_64_5"
@@ -108,9 +113,9 @@ if __name__ == "__main__":
         if RUN:
             # load base params
             f_base_params = open("constants/base_params.json")
-            params = json.load(f_base_params)
+            base_params = json.load(f_base_params)
             f_base_params.close()
-            params["time_steps_max"] = int(params["total_time"] / params["delta_t"])
+            base_params["time_steps_max"] = int(base_params["total_time"] / base_params["delta_t"])
 
             # load variable params
             f_variable_parameters = open(
@@ -122,7 +127,7 @@ if __name__ == "__main__":
             variable_parameters_dict = generate_vals_variable_parameters_and_norms(
                 variable_parameters_dict
             )
-
+            """
             fileName = "results/%s_%s_%s_%s_%s_%s_%s_%s_%s_%s_%s" % (
                 variable_parameters_dict["col"]["property"],
                 variable_parameters_dict["row"]["property"],
@@ -136,7 +141,11 @@ if __name__ == "__main__":
                 variable_parameters_dict["col"]["reps"],
                 variable_parameters_dict["row"]["reps"],
             )
-            print("fileName: ", fileName)
+            """
+            root = "two_param_sweep_single"
+            FILENAME = produce_name_datetime(root)
+            print("FILENAME:", FILENAME)
+            #print("fileName: ", fileName)
 
             title_list = generate_title_list(
                 variable_parameters_dict["col"]["title"],
@@ -147,7 +156,7 @@ if __name__ == "__main__":
             )
             data_list, data_array = shot_two_dimensional_param_run(
                 fileName,
-                params,
+                base_params,
                 variable_parameters_dict,
                 variable_parameters_dict["row"]["reps"],
                 variable_parameters_dict["col"]["reps"],
@@ -190,9 +199,9 @@ if __name__ == "__main__":
         if RUN:
             # load base params
             f_base_params = open("constants/base_params.json")
-            params = json.load(f_base_params)
+            base_params = json.load(f_base_params)
             f_base_params.close()
-            params["time_steps_max"] = int(params["total_time"] / params["delta_t"])
+            base_params["time_steps_max"] = int(base_params["total_time"] / base_params["delta_t"])
 
             # load variable params
             f_variable_parameters = open(
@@ -205,7 +214,8 @@ if __name__ == "__main__":
             variable_parameters_dict = generate_vals_variable_parameters_and_norms(
                 variable_parameters_dict
             )
-
+            
+            """
             fileName = "results/twoD_Average_%s_%s_%s_%s_%s_%s_%s_%s" % (
                 variable_parameters_dict["col"]["property"],
                 variable_parameters_dict["row"]["property"],
@@ -217,12 +227,29 @@ if __name__ == "__main__":
                 len(params["seed_list"]),
             )
             print("fileName: ", fileName)
+            """
 
+            root = "two_param_sweep_average"
+            FILENAME = produce_name_datetime(root)
+            print("FILENAME:", FILENAME)
+
+            if culture_run:
+                    params_list = produce_param_list_n_double(base_params, variable_parameters_dict)
+                    (
+                        results_culture_lists
+                        
+                    ) = culture_data_run(params_list)
+
+                    # save the data and params_list
+                    save_object(variable_parameters_dict, fileName + "/Data", "variable_parameters_dict")
+                    save_object(base_params, fileName + "/Data", "base_params")
+                    save_object(results_culture_lists,fileName + "/Data","results_culture_lists")
+                    
             if cluster_count_run:
                 
                     createFolder(fileName)
                     s = np.linspace(0,1,200)
-                    params_list = produce_param_list_n_double(params, variable_parameters_dict)
+                    params_list = produce_param_list_n_double(base_params, variable_parameters_dict)
                     (
                         results_emissions,
                         results_mu,
@@ -243,6 +270,7 @@ if __name__ == "__main__":
                     save_object(results_coefficient_of_variance,fileName + "/Data","results_coefficient_of_variance")
                     save_object(results_emissions_change,fileName + "/Data","results_emissions_change")
                     save_object(results_clusters_count,fileName + "/Data","results_clusters_count")
+                    save_object(base_params, fileName + "/Data", "base_params")
                     
                     reps_row, reps_col = variable_parameters_dict["row"]["reps"],variable_parameters_dict["col"]["reps"]
                     matrix_emissions = results_emissions.reshape((reps_row, reps_col))
@@ -260,7 +288,7 @@ if __name__ == "__main__":
                     results_var,
                     results_coefficient_of_variance,
                     results_emissions_change,
-                ) = av_two_dimensional_param_run(fileName, variable_parameters_dict, params)
+                ) = av_two_dimensional_param_run(fileName, variable_parameters_dict, base_params)
                 
                 reps_row, reps_col = variable_parameters_dict["row"]["reps"],variable_parameters_dict["col"]["reps"]
                 matrix_emissions = results_emissions.reshape((reps_row, reps_col))
@@ -273,6 +301,11 @@ if __name__ == "__main__":
             #LOAD STUFF IN
             createFolder(fileName)
             
+            if culture_run:
+                variable_parameters_dict = load_object(fileName + "/Data", "variable_parameters_dict")
+                base_params = load_object(fileName + "/Data", "base_params")
+                results_culture_lists = load_object(fileName + "/Data","results_culture_lists")
+
             if cluster_count_run:
                 variable_parameters_dict = load_object(
                     fileName + "/Data", "variable_parameters_dict"
@@ -496,17 +529,17 @@ if __name__ == "__main__":
             else:
                 print("INSIDE PRINT")
 
-                index_len_col_matrix = 19
+                index_len_col_matrix = 63
                 max_col_val = 150
-                min_col_val = 0
+                min_col_val = -10
 
-                col_ticks_label = [0,50,100, 150]#[-10,0,10,20,30,40,50,60]#[col_dict["vals"][x] for x in range(len(col_dict["vals"]))  if x % select_val_x == 0]
+                col_ticks_label = [-20,0,50,100, 150]#[-10,0,10,20,30,40,50,60]#[col_dict["vals"][x] for x in range(len(col_dict["vals"]))  if x % select_val_x == 0]
                 col_ticks_pos =[int(round(index_len_col_matrix*((col - min_col_val)/(max_col_val- min_col_val)))) for col in col_ticks_label]#[int(round(index_len_col_matrix*((x - min_col_val)/(max_col_val- min_col_val)))) for x in col_ticks_label]#[0,30,70,50]#[0,10,20,30,40,50,60,70]#[x for x in range(len(col_dict["vals"]))  if x % select_val_x == 0]
             
                 #col_ticks_label = [col_dict["vals"][x] for x in range(len(col_dict["vals"]))  if x % select_val_col == 0]
                 #col_ticks_pos = [col_dict["vals"][x] for x in range(len(col_dict["vals"]))  if x % select_val_col == 0]
 
-                index_len_row_matrix = 19
+                index_len_row_matrix = 63
                 max_row_val = 1.95
                 min_row_val = 0.05
 
@@ -515,6 +548,35 @@ if __name__ == "__main__":
                 row_ticks_pos  = [int(round(index_len_row_matrix*((row - min_row_val)/(max_row_val- min_row_val)))) for row in row_ticks_label]
                                                                                                                 #x_ticks_pos,y_ticks_pos,x_ticks_label,y_ticks_label
                 double_matrix_plot_cluster(fileName,matrix_clusters_count,variable_parameters_dict, get_cmap("Purples"),dpi_save,col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label)
+        if culture_run:
+            variable_parameters_dict = load_object(fileName + "/Data", "variable_parameters_dict")
+            base_params = load_object(fileName + "/Data", "base_params")
+            results_culture_lists = load_object(fileName + "/Data","results_culture_lists")
+
+            print(results_culture_lists, results_culture_lists.shape)
+
+            bandwidth = 0.05
+            s = np.linspace(0,1,1000)
+
+            vfunc_clusters = np.vectorize(calc_num_clusters_set_bandwidth)
+
+            cluster_count = vfunc_clusters(results_culture_lists,s,bandwidth)
+
+            print(cluster_count)
+            
+            """
+            #calculate the clusters for each culture list for a given value of bandwidth
+            for i in range(len(results_culture_lists)):
+                #this is one param specification
+                for j in range(len(results_culture_lists[j])):
+                    #this is one of the stochastic runs
+                    cluster_count =  calc_num_clusters_set_bandwidth(results_culture_lists[i][j],s,bandwidth)
+            """
+
+
+
+
+
 
         #only for the a or b beta parameters
         #double_phase_diagram_using_meanandvariance(fileName, matrix_emissions, r"Total normalised emissions, $E/NM$", "emissions",variable_parameters_dict, get_cmap("Reds"),dpi_save)

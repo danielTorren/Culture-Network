@@ -12,9 +12,10 @@ import os
 import numpy as np
 from logging import raiseExceptions
 from matplotlib.colors import Normalize, LogNorm
-from sklearn.neighbors import KernelDensity
 from scipy.stats import gaussian_kde
 from scipy.signal import argrelextrema
+import datetime
+from sklearn.neighbors import KernelDensity
 
 # modules
 def createFolder(fileName: str) -> str:
@@ -165,3 +166,14 @@ def calc_num_clusters_auto_bandwidth(culture_data, s):
     probs = kde.evaluate(s)
     ma_scipy = argrelextrema(probs, np.greater)[0]
     return len(ma_scipy)
+
+def calc_num_clusters_set_bandwidth(culture_data,s,bandwidth):
+    X_reshape = culture_data.reshape(-1, 1)
+    kde = KernelDensity(kernel='gaussian', bandwidth=bandwidth).fit(X_reshape)
+    e = kde.score_samples(s.reshape(-1,1))
+    ma = argrelextrema(e, np.greater)[0]
+    return len(ma)
+
+def produce_name_datetime(root):
+    fileName = "results/" + root +  "_" + datetime.datetime.now().strftime("%H_%M_%S__%d_%m_%Y")
+    return fileName

@@ -19,8 +19,7 @@ from resources.utility import (
     save_object, 
     load_object,
     produceName,
-    calc_num_clusters_specify_bandwidth,
-    calc_num_clusters_auto_bandwidth,
+    produce_name_datetime
 )
 from resources.plot import (
     plot_culture_timeseries,
@@ -61,7 +60,7 @@ from resources.plot import (
     weighting_histogram,
     live_animate_weighting_matrix,
     weighting_histogram_time,
-    cluster_estimation
+    cluster_estimation_plot,
 )
 
 # FOR FILENAME
@@ -120,25 +119,28 @@ min_culture_distance = 0.5
 
 bin_num = 20
 
-RUN = 0
+RUN = 1
 PLOT = 1
 SHOW_PLOT = 1
 
 if __name__ == "__main__":
     if RUN == False:
-        FILENAME = "results/_delta_t_1.0_N_200_M_3_K_20_prob_rewire_0.1_set_seed_1_culture_momentum_real_500_learning_error_scale_0.02_time_steps_max_3000"
+        FILENAME = "results/single_shot_10_48_40__02_12_2022"
     else:
         f = open("constants/base_params.json")
-        params = json.load(f)
-        params["time_steps_max"] = int(params["total_time"] / params["delta_t"])
+        base_params = json.load(f)
+        base_params["time_steps_max"] = int(base_params["total_time"] / base_params["delta_t"])
 
-        FILENAME = produceName(params, params_name)
+        #FILENAME = produceName(params, params_name)
+        root = "single_shot"
+        FILENAME = produce_name_datetime(root)
         print("FILENAME:", FILENAME)
 
-        Data = generate_data(params)  # run the simulation
+        Data = generate_data(base_params)  # run the simulation
 
         createFolder(FILENAME)
         save_object(Data, FILENAME + "/Data", "social_network")
+        save_object(base_params, FILENAME + "/Data", "base_params")
 
     if PLOT:
         start_time = time.time()
@@ -146,17 +148,14 @@ if __name__ == "__main__":
         dataName = FILENAME + "/Data"
         Data = load_object(dataName, "social_network")
 
-        no_samples = 50
-        X = np.asarray([Data.agent_list[n].culture for n in range(Data.N)])
+        no_samples = 10000
         s = np.linspace(0, 1,no_samples)
-        X_reshape = X.reshape(-1, 1)
+        bandwidth = 0.001
 
-        
-    
         ###PLOTS
         #bandwidth_list = [0.05]
         #cluster_estimation(Data,bandwidth_list)
-
+        cluster_estimation_plot(Data,s,bandwidth)
         #plot_culture_timeseries(FILENAME, Data, dpi_save)
         #weighting_histogram(FILENAME, Data, dpi_save,bin_num)
         #weighting_histogram_time(FILENAME, Data, dpi_save,bin_num,300)

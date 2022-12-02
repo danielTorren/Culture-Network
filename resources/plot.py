@@ -22,7 +22,10 @@ from typing import Union
 #from pydlc import dense_lines
 from resources.network import Network
 import joypy
-from resources.utility import calc_num_clusters_auto_bandwidth
+#from resources.utility import calc_num_clusters_auto_bandwidth
+from scipy.stats import gaussian_kde
+from scipy.signal import argrelextrema
+from sklearn.neighbors import KernelDensity
 
 
 SMALL_SIZE = 14
@@ -44,6 +47,34 @@ plt.rcParams.update({
 
 # modules
 ###### estimating number of clusters
+def calc_num_clusters_auto_bandwidth_return(culture_data, s):
+    
+    kde = gaussian_kde(culture_data)
+    probs = kde.evaluate(s)
+    ma_scipy = argrelextrema(probs, np.greater)[0]
+    return len(ma_scipy), kde, probs, ma_scipy
+
+def calc_num_clusters_set_bandwidth(culture_data,s,bandwidth):
+    X_reshape = culture_data.reshape(-1, 1)
+    kde = KernelDensity(kernel='gaussian', bandwidth=bandwidth).fit(X_reshape)
+    e = kde.score_samples(s.reshape(-1,1))
+    return kde, e
+
+def cluster_estimation_plot(Data,s,bandwidth):
+    culture_data = np.asarray([Data.agent_list[n].culture for n in range(Data.N)])
+
+    cluster_count, kde, probs, ma_scipy = calc_num_clusters_auto_bandwidth_return(culture_data, s)
+    ma_scipy = argrelextrema(probs, np.greater)[0]
+    print("ma auto bandwidth", ma_scipy)
+
+    kde, e = calc_num_clusters_set_bandwidth(culture_data, s, bandwidth)
+    ma = argrelextrema(e, np.greater)[0]
+    print("ma set bandwidth", ma)
+
+    fig, ax = plt.subplots()
+    ax.plot(s, probs, label = "Auto bandwidth")
+    ax.plot(s, e, label = "Set bandwidth")
+    ax.legend()
 
 #####RUNPLOT PLOTS - SINGLE NETWORK
 def live_print_culture_timeseries_varynetwork_structure(

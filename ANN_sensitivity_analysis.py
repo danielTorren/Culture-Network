@@ -502,7 +502,7 @@ if __name__ == "__main__":
             Y_coefficient_of_variance,
             Y_emissions_change,
         ) = sa_run_ANN(N_samplesSA, variable_parameters_dict, calc_second_orderSA, emmulator)
-
+        
 
         data_sa_dict_total, data_sa_dict_first = get_plot_data(
             problem, Y_emissions, Y_mu, Y_var, Y_coefficient_of_variance,Y_emissions_change, calc_second_orderSA

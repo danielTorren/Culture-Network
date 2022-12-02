@@ -36,15 +36,15 @@ from resources.utility import (
 from resources.run import parallel_run
 import numpy as np
 
-def produce_param_list(params: dict, property_list: list, property: str) -> list[dict]: 
+def produce_param_list(base_params: dict, property_list: list, property: str) -> list[dict]: 
 
-    params_list = []
+    base_params_list = []
     for i in property_list:
-        params[property] = i
-        params_list.append(
-            params.copy()
-        )  # have to make a copy so that it actually appends a new dict and not just the location of the params dict
-    return params_list
+        base_params[property] = i
+        base_params_list.append(
+            base_params.copy()
+        )  # have to make a copy so that it actually appends a new dict and not just the location of the base_params dict
+    return base_params_list
 
 ###PLOT STUFF
 dpi_save = 1200
@@ -67,38 +67,38 @@ colour_list = ["red", "green", "blue"]
 
 if __name__ == "__main__":
     if RUN:
-        # load base params
+        # load base base_params
         f_base_params = open("constants/base_params.json")
-        params = json.load(f_base_params)
+        base_params = json.load(f_base_params)
         f_base_params.close()
-        params["time_steps_max"] = int(params["total_time"] / params["delta_t"])
+        base_params["time_steps_max"] = int(base_params["total_time"] / base_params["delta_t"])
 
         fileName = "results/culture_and_no_culture_%s_%s_%s" % (
-            str(params["N"]),
-            str(params["time_steps_max"]),
-            str(params["M"]),
+            str(base_params["N"]),
+            str(base_params["time_steps_max"]),
+            str(base_params["M"]),
         )
         print("fileName: ", fileName)
         createFolder(fileName)
         
         
         #No culture, behaviours are independant
-        params["alpha_change"] = 2.0
+        base_params["alpha_change"] = 2.0
         property_varied_no_culture = "set_seed"
         property_values_list_no_culture = [1,2,3]
-        params_list_no_culture = produce_param_list(params, property_values_list_no_culture, property_varied_no_culture)
+        params_list_no_culture = produce_param_list(base_params, property_values_list_no_culture, property_varied_no_culture)
         data_no_culture = parallel_run(params_list_no_culture)  # better if a Multiple of 4
 
         #culture, behaviours are dependant via identity
-        params["alpha_change"] = 1.0
+        base_params["alpha_change"] = 1.0
         property_varied_culture = "set_seed"
         property_values_list_culture = [1,2,3]
-        params_list_culture = produce_param_list(params, property_values_list_culture, property_varied_culture)
+        params_list_culture = produce_param_list(base_params, property_values_list_culture, property_varied_culture)
         data_culture = parallel_run(params_list_culture)  # better if a Multiple of 4
 
         #####
         #save stuff
-        save_object(params, fileName + "/Data", "params")
+        save_object(base_params, fileName + "/Data", "base_params")
         save_object(data_no_culture, fileName + "/Data", "data_no_culture")
         save_object(data_culture, fileName + "/Data", "data_culture")
         save_object(property_values_list_no_culture, fileName + "/Data", "property_values_list_no_culture")
@@ -108,7 +108,7 @@ if __name__ == "__main__":
     else:
         fileName = "results/culture_and_no_culture_200_300_3"
 
-        #params = load_object(fileName + "/Data", "params")
+        base_params = load_object(fileName + "/Data", "base_params")
         data_no_culture = load_object(fileName+ "/Data", "data_no_culture")
         data_culture = load_object( fileName  + "/Data", "data_culture")
         property_values_list_no_culture = load_object( fileName  + "/Data", "property_values_list_no_culture")

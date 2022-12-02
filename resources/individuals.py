@@ -22,7 +22,7 @@ class Individual:
     Attributes
     ----------
 
-    save_data : bool
+    save_timeseries_data : bool
         whether or not to save data. Set to 0 if only interested in end state of the simulation. If 1 will save
         data into timeseries (lists or lists of lists for arrays) which can then be either accessed directly in
         the social network object or saved into csv's
@@ -82,7 +82,7 @@ class Individual:
         Update behavioural attitudes with social influence of neighbours mediated by the social susceptabilty of each behaviour phi
     calc_total_emissions():
         return total emissions of individual based on behavioural values
-    save_data_individual():
+    save_timeseries_data_individual():
         Save time series data
     next_step(t:float, steps:int, social_component: npt.NDArray):
         Push the individual simulation forwards one time step
@@ -123,7 +123,7 @@ class Individual:
         self.M = individual_params["M"]
         self.t = individual_params["t"]
         self.delta_t = individual_params["delta_t"]
-        self.save_data = individual_params["save_data"]
+        self.save_timeseries_data = individual_params["save_timeseries_data"]
         self.carbon_intensive_list = individual_params["carbon_emissions"]
         self.compression_factor = individual_params["compression_factor"]
         self.phi_array = individual_params["phi_array"]
@@ -141,7 +141,7 @@ class Individual:
 
         self.total_carbon_emissions,self.behavioural_carbon_emissions = self.calc_total_emissions()
 
-        if self.save_data:
+        if self.save_timeseries_data:
             self.history_behaviour_values = [list(self.values)]
             self.history_behaviour_attitudes = [list(self.attitudes)]
             self.history_behaviour_thresholds = [list(self.thresholds)]
@@ -238,7 +238,7 @@ class Individual:
         behavioural_emissions = [((1-self.values[i])/2)*self.carbon_intensive_list[i] for i in range(self.M)]
         return sum(behavioural_emissions),behavioural_emissions# normalized Beta now used for emissions
 
-    def save_data_individual(self):
+    def save_timeseries_data_individual(self):
         """
         Save time series data
 
@@ -289,5 +289,5 @@ class Individual:
 
         self.total_carbon_emissions, self.behavioural_carbon_emissions = self.calc_total_emissions()
 
-        if (self.save_data) and (self.steps % self.compression_factor == 0):
-            self.save_data_individual()
+        if (self.save_timeseries_data) and (self.steps % self.compression_factor == 0):
+            self.save_timeseries_data_individual()
