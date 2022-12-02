@@ -66,7 +66,7 @@ from resources.run import (
 import numpy as np
 
 # run bools
-RUN = 1 # run or load in previously saved data
+RUN = 0 # run or load in previously saved data
 SINGLE = 0 # determine if you runs single shots or study the averages over multiple runs for each experiment
 cluster_count_run = 0
 ab_plot = 0
@@ -233,7 +233,10 @@ if __name__ == "__main__":
             FILENAME = produce_name_datetime(root)
             print("FILENAME:", FILENAME)
 
+            createFolder(fileName)
+
             if culture_run:
+
                 print("INSIDE")
                 params_list = produce_param_list_n_double(base_params, variable_parameters_dict)
                 (
@@ -247,7 +250,6 @@ if __name__ == "__main__":
                 save_object(results_culture_lists,fileName + "/Data","results_culture_lists") 
             elif cluster_count_run:
                 
-                    createFolder(fileName)
                     s = np.linspace(0,1,200)
                     params_list = produce_param_list_n_double(base_params, variable_parameters_dict)
                     (
@@ -557,13 +559,22 @@ if __name__ == "__main__":
             results_culture_lists = load_object(fileName + "/Data","results_culture_lists")
 
             print(results_culture_lists, results_culture_lists.shape)
+            #(25,3,200), so it needs to run on (25,3) different occasions?
+            #  
+
+            params_num = results_culture_lists.shape[0]
+            av_num = results_culture_lists.shape[1]
 
             bandwidth = 0.05
-            s = np.linspace(0,1,1000)
+            bandwidth_vector = np.full((params_num,av_num), bandwidth)
 
+            s = np.linspace(0,1,1000)
+            s_vector = np.full((params_num,av_num),s)
+            
             vfunc_clusters = np.vectorize(calc_num_clusters_set_bandwidth)
 
-            cluster_count = vfunc_clusters(results_culture_lists,s,bandwidth)
+            #
+            cluster_count = vfunc_clusters(results_culture_lists,s_vector,bandwidth_vector)
 
             print(cluster_count)
 
