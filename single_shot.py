@@ -61,6 +61,8 @@ from resources.plot import (
     live_animate_weighting_matrix,
     weighting_histogram_time,
     cluster_estimation_plot,
+    plot_alpha_group,
+    plot_cluster_culture_time_series,
 )
 
 # FOR fileName
@@ -92,10 +94,11 @@ log_norm = SymLogNorm(
 # log_norm = SymLogNorm(linthresh=0.15, linscale=1, vmin=-1.0, vmax=1.0, base=10)  # this works at least its correct
 cmap_weighting = "Reds"
 cmap_edge = get_cmap("Greys")
+cmap_multi = get_cmap("plasma")
 fps = 5
 interval = 50
 layout = "circular"
-round_dec = 2
+round_dec = 3
 
 nrows = 2
 ncols = 3
@@ -119,13 +122,13 @@ min_culture_distance = 0.5
 
 bin_num = 20
 
-RUN = 1
+RUN = 0
 PLOT = 1
 SHOW_PLOT = 1
 
 if __name__ == "__main__":
     if RUN == False:
-        fileName = "results/single_shot_10_48_40__02_12_2022"
+        fileName = "results/single_shot_17_52_51__14_12_2022"
     else:
         f = open("constants/base_params.json")
         base_params = json.load(f)
@@ -150,13 +153,14 @@ if __name__ == "__main__":
 
         no_samples = 10000
         s = np.linspace(0, 1,no_samples)
-        bandwidth = 0.001
+        bandwidth = 0.01
 
         ###PLOTS
         #bandwidth_list = [0.05]
         #cluster_estimation(Data,bandwidth_list)
         #cluster_estimation_plot(Data,s,bandwidth)
-        plot_culture_timeseries(fileName, Data, dpi_save)
+        #plot_culture_timeseries(fileName, Data, dpi_save)
+        #plot_alpha_group(fileName, Data, dpi_save,s, 1, bandwidth,cmap_multi, round_dec,norm_zero_one )#autoset bandwidth
         #weighting_histogram(fileName, Data, dpi_save,bin_num)
         #weighting_histogram_time(fileName, Data, dpi_save,bin_num,300)
         #plot_green_adoption_timeseries(fileName, Data, dpi_save)
@@ -171,6 +175,18 @@ if __name__ == "__main__":
         #plot_attitude_timeseries(fileName,Data,dpi_save)
 
         #live_animate_weighting_matrix(fileName, Data,  cmap_weighting, interval, fps, round_dec)
+
+        #########clustering 
+        auto_bandwidth = True
+        clusters_index_lists, cluster_example_identity_list = plot_alpha_group(fileName, Data, dpi_save,s, auto_bandwidth, bandwidth,cmap_multi, round_dec,norm_zero_one )#set it using input value
+        save_object(clusters_index_lists, fileName + "/Data", "clusters_index_lists")
+        save_object(cluster_example_identity_list, fileName + "/Data", "cluster_example_identity_list")
+
+        clusters_index_lists = load_object(dataName,"clusters_index_lists")
+        cluster_example_identity_list = load_object(dataName,"cluster_example_identity_list")
+        shuffle_colours = True
+        plot_cluster_culture_time_series(fileName, Data, dpi_save,clusters_index_lists, cluster_example_identity_list, cmap_multi,norm_zero_one, shuffle_colours)#haS TO BE RUN TOGETHER
+
 
         """
         #####BROKEN ATM

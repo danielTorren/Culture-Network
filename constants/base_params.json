@@ -22,13 +22,13 @@
     "discount_factor": 0.95,
     "homophily": 0.95,
     "homophilly_rate" : 1,
-    "confirmation_bias": 30,
-    "a_attitude": 2.0,
-    "b_attitude": 2.0,
+    "confirmation_bias": 24,
+    "a_attitude": 0.3,
+    "b_attitude": 0.3,
     "a_threshold": 1,
     "b_threshold": 1,
     "action_observation_I": 0.0,
     "action_observation_S": 0.0,
-    "green_N": 20,
+    "green_N": 0,
     "guilty_individual_power": 0
 }

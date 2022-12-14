@@ -26,6 +26,7 @@ import joypy
 from scipy.stats import gaussian_kde
 from scipy.signal import argrelextrema
 from sklearn.neighbors import KernelDensity
+from sklearn.cluster import MeanShift
 
 
 SMALL_SIZE = 14
@@ -50,9 +51,9 @@ plt.rcParams.update({
 def calc_num_clusters_auto_bandwidth_return(culture_data, s):
     
     kde = gaussian_kde(culture_data)
-    probs = kde.evaluate(s)
-    ma_scipy = argrelextrema(probs, np.greater)[0]
-    return len(ma_scipy), kde, probs, ma_scipy
+    probs = kde.evaluate(s)#UsES scott's rule
+    #ma_scipy = argrelextrema(probs, np.greater)[0]
+    return  kde, probs #ma_scipylen(ma_scipy),
 
 def calc_num_clusters_set_bandwidth(culture_data,s,bandwidth):
     X_reshape = culture_data.reshape(-1, 1)
@@ -75,6 +76,310 @@ def cluster_estimation_plot(Data,s,bandwidth):
     ax.plot(s, probs, label = "Auto bandwidth")
     ax.plot(s, e, label = "Set bandwidth")
     ax.legend()
+
+def MeanShift_clusters(X,bandwidth):
+    ms = MeanShift(bandwidth=bandwidth, bin_seeding=True)
+    ms.fit(X)
+    labels = ms.labels_
+    cluster_centers = ms.cluster_centers_
+
+    labels_unique = np.unique(labels)
+    n_clusters = len(labels_unique)
+
+    #print("number of estimated clusters : %d" % n_clusters)
+    return ms, labels, cluster_centers, labels_unique, n_clusters
+
+def get_cluster_list(culture_data,s, N, mi):
+
+    index_list = np.arange(N)
+    #print("index_list",index_list)
+    #clusters_index_lists = []
+
+    #left edge
+    #print("test left mask",(culture_data < s[mi][0]))
+    left_mask = (culture_data < s[mi][0])#maybe i can rearranfe one of o the inputs
+    #print("left_mask",left_mask)
+    #print("index_list[left_mask]",index_list[left_mask])
+    clusters_index_lists = [list(index_list[left_mask])]
+    #print("first ne", clusters_index_lists)
+    #print(a[a < s[mi][0]])  # print most left cluster, the values of those clusters but i want the indexs!
+
+    # print all middle cluster
+    for i_cluster in range(len(mi)-1):
+        center_mask = ((culture_data >= s[mi][i_cluster])*(culture_data <= s[mi][i_cluster+1]))# make sure its true for both, i think u can multiply both! WHy doenst it work with and?
+        clusters_index_lists.append(list(index_list[center_mask]))
+        #print(a[(a >= s[mi][i_cluster]) * (a <= s[mi][i_cluster+1])])
+
+    # print most right cluster
+
+    right_mask = (culture_data >= s[mi][-1])
+    clusters_index_lists.append(list(index_list[right_mask]))
+
+    return clusters_index_lists
+
+def plot_alpha_group(fileName, Data, dpi_save,s, auto_bandwidth, bandwidth,cmap,  round_dec, norm_zero_one):
+
+    culture_data = np.asarray([Data.agent_list[n].culture for n in range(Data.N)])
+
+    if auto_bandwidth:
+        kde, e = calc_num_clusters_auto_bandwidth_return(culture_data, s)
+        bandwidth = kde.factor
+    else:
+        kde, e = calc_num_clusters_set_bandwidth(culture_data,s,bandwidth)
+    
+    print("bandwidth used:",bandwidth)
+
+    mi = argrelextrema(e, np.less)[0]#list of minimum values in the kde
+    ma = argrelextrema(e, np.greater)[0]#list of minimum values in the kde
+
+    clusters_index_lists = get_cluster_list(culture_data,s, Data.N, mi)
+    #print(a[a >= s[mi][-1]])  
+
+    print("clusters_index_lists",clusters_index_lists)
+
+    ########################################################
+    #NOW plot the convergence
+    fig, ax = plt.subplots()
+    
+    #get a list of values that i think it shoudl vonverge too 1/N_G
+
+    inverse_N_g_list = [1/len(i) for i in clusters_index_lists]
+    #print("inverse_N_g_list",inverse_N_g_list)
+
+    #quit()
+    time_vals_data = []
+    for t in range(len(Data.history_time)):
+        time_vals_data_row = []
+        for i in range(len(clusters_index_lists)):
+            #print("clusters_index_lists[i]",clusters_index_lists[i],len(clusters_index_lists[i]))
+            sub_weighting_matrix = Data.history_weighting_matrix[t][clusters_index_lists[i]]
+            #print("sub_weighting_matrix", sub_weighting_matrix, sub_weighting_matrix.shape)
+            #i want a matrix that excludes all the values that arent from the indes in the clusters_index_lists[i]
+            sub_sub_weighting_matrix = sub_weighting_matrix[:,clusters_index_lists[i]]
+            #print("sub_sub_weighting_matrix", sub_sub_weighting_matrix, sub_sub_weighting_matrix.shape)
+
+            mean_weighting_val = np.mean(sub_sub_weighting_matrix)
+            #print("mean_value",mean_weighting_val)
+
+            time_vals_data_row.append(mean_weighting_val)
+            #quit()
+        time_vals_data.append(time_vals_data_row)
+    
+    time_vals_data_array = np.asarray(time_vals_data)
+    #print("time_vals_data_array", time_vals_data_array.shape)
+    vals_time_data = time_vals_data_array.T
+    #print("vals_time_data ",vals_time_data.shape)
+    
+    cluster_example_identity_list = s[ma]
+    colour_adjust = norm_zero_one(cluster_example_identity_list)
+    ani_step_colours = cmap(colour_adjust)
+    #print(ani_step_colours)
+
+    for i in range(len(clusters_index_lists)): 
+        ax.plot(Data.history_time, vals_time_data[i], color = ani_step_colours[i])#label = "Cluster %s" % (i)
+        ax.axhline(y= inverse_N_g_list[i], color = ani_step_colours[i], linestyle = "--")
+
+    ax.set_title("Bandwidth = %s" % round(bandwidth, round_dec) )
+    #ax.legend()
+
+    cbar = fig.colorbar(
+        plt.cm.ScalarMappable(cmap=cmap, norm=norm_zero_one), ax=ax
+    )
+    cbar.set_label(r"Identity, $I_{t,n}$")
+
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/plot_alpha_group_auto_bandwidth_bool_%s_%s" % (auto_bandwidth, bandwidth)
+    fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
+    return clusters_index_lists,cluster_example_identity_list
+
+def plot_alpha_group_multi(fileName, Data_list, dpi_save,s, auto_bandwidth, bandwidth,cmap, norm_zero_one, nrows, ncols,title_list):
+
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols)
+
+    clusters_index_lists_list = []
+    cluster_example_identity_list_list = []
+
+    for z, ax in enumerate(axes.flat):
+        culture_data = np.asarray([Data_list[z].agent_list[n].culture for n in range(Data_list[z].N)])
+
+        if auto_bandwidth:
+            kde, e = calc_num_clusters_auto_bandwidth_return(culture_data, s)
+            bandwidth = kde.factor
+        else:
+            kde, e = calc_num_clusters_set_bandwidth(culture_data,s,bandwidth)
+        
+        print("bandwidth used:",bandwidth)
+
+        mi = argrelextrema(e, np.less)[0]#list of minimum values in the kde
+        ma = argrelextrema(e, np.greater)[0]#list of minimum values in the kde
+        
+        if len(s[mi]) == 0:
+            print("NO PEAKS?", s[mi])
+            clusters_index_lists_list.append([])
+            cluster_example_identity_list_list.append([])
+        else:
+            clusters_index_lists = get_cluster_list(culture_data,s, Data_list[z].N, mi)
+            clusters_index_lists_list.append(clusters_index_lists)
+            #print(a[a >= s[mi][-1]])  
+
+            #print("clusters_index_lists",clusters_index_lists)
+            
+            #get a list of values that i think it shoudl vonverge too 1/N_G
+
+            inverse_N_g_list = [1/len(i) for i in clusters_index_lists]
+            #print("inverse_N_g_list",inverse_N_g_list)
+
+            #quit()
+            time_vals_data = []
+            for t in range(len(Data_list[z].history_time)):
+                time_vals_data_row = []
+                for i in range(len(clusters_index_lists)):
+                    #print("clusters_index_lists[i]",clusters_index_lists[i],len(clusters_index_lists[i]))
+                    sub_weighting_matrix = Data_list[z].history_weighting_matrix[t][clusters_index_lists[i]]
+                    #print("sub_weighting_matrix", sub_weighting_matrix, sub_weighting_matrix.shape)
+                    #i want a matrix that excludes all the values that arent from the indes in the clusters_index_lists[i]
+                    sub_sub_weighting_matrix = sub_weighting_matrix[:,clusters_index_lists[i]]
+                    #print("sub_sub_weighting_matrix", sub_sub_weighting_matrix, sub_sub_weighting_matrix.shape)
+
+                    mean_weighting_val = np.mean(sub_sub_weighting_matrix)
+                    #print("mean_value",mean_weighting_val)
+
+                    time_vals_data_row.append(mean_weighting_val)
+                    #quit()
+                time_vals_data.append(time_vals_data_row)
+            
+            time_vals_data_array = np.asarray(time_vals_data)
+            #print("time_vals_data_array", time_vals_data_array.shape)
+            vals_time_data = time_vals_data_array.T
+            #print("vals_time_data ",vals_time_data.shape)
+        
+            ########################################################
+            #NOW plot the convergence
+        
+
+            cluster_example_identity_list = s[ma]
+            cluster_example_identity_list_list.append(cluster_example_identity_list)
+            colour_adjust = norm_zero_one(cluster_example_identity_list)
+            ani_step_colours = cmap(colour_adjust)
+            #print(ani_step_colours)
+
+            for i in range(len(clusters_index_lists)): 
+                ax.plot(Data_list[z].history_time, vals_time_data[i], color = ani_step_colours[i])#label = "Cluster %s" % (i)
+                ax.axhline(y= inverse_N_g_list[i], color = ani_step_colours[i], linestyle = "--")
+
+            ax.set_title(title_list[z])
+            #ax.legend()
+
+    cbar = fig.colorbar(
+        plt.cm.ScalarMappable(cmap=cmap, norm=norm_zero_one), ax=axes.ravel().tolist()
+    )
+    cbar.set_label(r"Identity, $I_{t,n}$")
+
+    plotName = fileName + "/Prints"
+    f = plotName + "/ plot_alpha_group_multi_%s_%s" % (auto_bandwidth, bandwidth)
+    fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
+    return clusters_index_lists_list,cluster_example_identity_list_list
+
+def plot_cluster_culture_time_series(fileName, Data, dpi_save,clusters_index_lists,cluster_example_identity_list, cmap,norm_zero_one, shuffle_colours):
+    fig, ax = plt.subplots(figsize=(10,6))
+    y_title = r"Identity, $I_{t,n}$"
+    
+    #colour_adjust = norm_zero_one(cluster_example_identity_list)
+    #ani_step_colours = cmap(colour_adjust)
+
+    cmap = get_cmap(name='hsv', lut = len(cluster_example_identity_list))
+    ani_step_colours = [cmap(i) for i in range(len(cluster_example_identity_list))] 
+    if shuffle_colours:
+        np.random.shuffle(ani_step_colours)
+    else:
+        cbar = fig.colorbar(
+            plt.cm.ScalarMappable(cmap=cmap, norm=norm_zero_one), ax=ax
+        )
+        cbar.set_label(r"Cluster center Identity, $I_{t,n}$")
+    #print("ani_step_colours",ani_step_colours)
+
+    colours_dict = {}#It cant be a list as you need to do it out of order
+    for i in range(len(clusters_index_lists)):#i is the list of index in that cluster
+        for j in clusters_index_lists[i]:#j is an index in that cluster
+            #print(i,j)
+            colours_dict["%s" % (j)] = ani_step_colours[i]
+        
+    #print("colours_dict",colours_dict)
+
+    for v in range(len(Data.agent_list)):
+        ax.plot(np.asarray(Data.history_time), np.asarray(Data.agent_list[v].history_culture), color = colours_dict["%s" % (v)])
+        ax.set_xlabel(r"Time")
+        ax.set_ylabel(r"%s" % y_title)
+        ax.set_ylim(0, 1)
+
+    #plt.tight_layout()
+
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/plot_cluster_culture_time_series_suffel_bool-%s" % (shuffle_colours)
+    fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
+def plot_cluster_culture_time_series_multi(fileName, Data_list, dpi_save,clusters_index_lists_list,cluster_example_identity_list_list, cmap,norm_zero_one, shuffle_colours, nrows, ncols,title_list):
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, constrained_layout=True)
+
+    print("clusters_index_lists_list",len(clusters_index_lists_list))
+    print("cluster_example_identity_list_list",len(cluster_example_identity_list_list))
+
+    for z, ax in enumerate(axes.flat):
+        y_title = r"Identity, $I_{t,n}$"
+        
+        #colour_adjust = norm_zero_one(cluster_example_identity_list)
+        #ani_step_colours = cmap(colour_adjust)
+        if len(cluster_example_identity_list_list[z]) == 0:
+            print("No cluster")
+            for v in range(len(Data_list[z].agent_list)):
+                ax.plot(np.asarray(Data_list[z].history_time), np.asarray(Data_list[z].agent_list[v].history_culture))
+                ax.set_xlabel(r"Time")
+                ax.set_ylabel(r"%s" % y_title)
+                ax.set_ylim(0, 1)
+
+                ax.set_title("No Cluster, " + title_list[z])
+        else:
+            cmap = get_cmap(name='hsv', lut = len(cluster_example_identity_list_list[z]))
+            ani_step_colours = [cmap(i) for i in range(len(cluster_example_identity_list_list[z]))] 
+
+            if shuffle_colours:
+                np.random.shuffle(ani_step_colours)
+            else:
+                cbar = fig.colorbar(
+                    plt.cm.ScalarMappable(cmap=cmap, norm=norm_zero_one), ax=ax
+                )
+                cbar.set_label(r"Cluster center Identity, $I_{t,n}$")
+            #print("ani_step_colours",ani_step_colours)
+
+            colours_dict = {}#It cant be a list as you need to do it out of order
+            for i in range(len(clusters_index_lists_list[z])):#i is the list of index in that cluster
+                for j in clusters_index_lists_list[z][i]:#j is an index in that cluster
+                    #print(i,j)
+                    colours_dict["%s" % (j)] = ani_step_colours[i]
+                
+            #print("colours_dict",colours_dict)
+
+            for v in range(len(Data_list[z].agent_list)):
+                ax.plot(np.asarray(Data_list[z].history_time), np.asarray(Data_list[z].agent_list[v].history_culture), color = colours_dict["%s" % (v)])
+                ax.set_xlabel(r"Time")
+                ax.set_ylabel(r"%s" % y_title)
+                ax.set_ylim(0, 1)
+
+            ax.set_title(title_list[z])
+
+            #plt.tight_layout()
+
+    plotName = fileName + "/Prints"
+    f = plotName + "/plot_cluster_culture_time_series_multi_suffel_bool-%s" % (shuffle_colours)
+    fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
 
 #####RUNPLOT PLOTS - SINGLE NETWORK
 def live_print_culture_timeseries_varynetwork_structure(
@@ -176,8 +481,9 @@ def plot_culture_timeseries(fileName, Data, dpi_save):
     plt.tight_layout()
 
     plotName = fileName + "/Plots"
-    f = plotName + "/plot_culture_timeseries.eps"
-    fig.savefig(f, dpi=dpi_save, format="eps")
+    f = plotName + "/plot_culture_timeseries"
+    fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
 
 """
 
