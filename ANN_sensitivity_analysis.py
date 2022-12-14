@@ -35,6 +35,7 @@ from SALib.sample import saltelli
 from sklearn.model_selection import train_test_split,GridSearchCV,cross_validate
 from sklearn.preprocessing import StandardScaler, MinMaxScaler  
 from sklearn.neural_network import MLPRegressor
+from sklearn.linear_model import LinearRegression
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.metrics import mean_absolute_error,r2_score,mean_squared_error
 from sklearn.decomposition import PCA
@@ -288,15 +289,15 @@ THIS WAS USE FOR THE LOADED RUN, JUST USEFUL AS A REFERENCEgit
 """
 
 #THIS IS FOR CREATING THE ANN MODEL FROM SENSITVITY ANALYSIS DATA
-generate_model = 0
+generate_model = 1
 #where to get the data to train the model on
 fileNameModel = "results\SA_AV_reps_5_samples_3840_D_vars_13_N_samples_256"#\SA_AV_reps_5_samples_28672_D_vars_13_N_samples_1024"#
 N_samplesModel = 256#512#64#1024#512
 calc_second_orderModel = False
-hyper_parameters_fit = 1
+hyper_parameters_fit = 0
 
 #THIS IS FOR GENERATING THE DATA FROM THE ANN TO RUN SENSITIVITY ANALYSIS
-RUN_sensitvity = 1
+RUN_sensitvity = 0
 N_samplesSA = 2048#512#64#1024#512
 calc_second_orderSA = False
 
@@ -315,11 +316,13 @@ if __name__ == "__main__":
             problem, N_samplesModel, calc_second_order=calc_second_orderModel
         )  # NumPy matrix. #N(2D +2) samples where N is 1024 and D is the number of parameters
 
+        """
         round_variable_list = [x["property"] for x in variable_parameters_dict.values() if x["round"]]
         print("round_variable_list:",round_variable_list)
         for i in round_variable_list:
             index_round = problem["names"].index(i)
             X[:,index_round] = np.round(X[:,index_round])
+        """
         ######################################################################################################
 
         Y_emissions = load_object(fileNameModel+ "/Data", "Y_emissions")
@@ -359,7 +362,7 @@ if __name__ == "__main__":
 
         if hyper_parameters_fit:
             #need to fine tune the hyper parameters
-            estimator=MLPRegressor()
+            estimator=MLPRegressor()#LinearRegression()
 
             """NO IDEA IF THESE ARE GOOD PARAMS TO TEST"""
             param_grid = {
@@ -386,6 +389,8 @@ if __name__ == "__main__":
             ax3.set_ylabel('Objective function value')
             """
         else:
+            mlp_reg = LinearRegression()
+            """
             mlp_reg = MLPRegressor(
                 hidden_layer_sizes = 500,
                 activation = 'relu',
@@ -394,6 +399,7 @@ if __name__ == "__main__":
                 solver = 'adam',
                 max_iter = 300
             )
+            """
 
         ###best_params {'activation': 'relu', 'alpha': 0.05, 'hidden_layer_sizes': 500, 'learning_rate': 'adaptive', 'max_iter': 400, 'solver': 'adam'}
         print("mlp ready")
@@ -431,14 +437,16 @@ if __name__ == "__main__":
 
         
         #Loss Curve
+        """
         fig1, ax1 = plt.subplots()
         ax1.plot(mlp_reg.loss_curve_)
         ax1.set_title("Loss Curve")
         ax1.set_xlabel('Iterations')
         ax1.set_ylabel('Cost')
+        """
 
         #############################################################################################
-        PCA_plots = 1
+        PCA_plots = 0
         if PCA_plots:
             #run the PCA, NEED TO GENERATE NEW X DATA AND INTERPOLATE USING THE MODEL!
             X_PCA = scaler.transform(X)#X_test_scaled

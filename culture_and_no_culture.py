@@ -26,12 +26,12 @@ from resources.plot import (
     plot_network_emissions_timeseries_no_culture,
     plot_compare_time_behaviour_culture_seed,
     plot_behaviorual_emissions_timeseries_no_culture,
-    cluster_estimation,
 )
 from resources.utility import (
     createFolder,
     save_object,
-    load_object
+    load_object,
+    produce_name_datetime,
 )
 from resources.run import parallel_run
 import numpy as np
@@ -73,14 +73,9 @@ if __name__ == "__main__":
         f_base_params.close()
         base_params["time_steps_max"] = int(base_params["total_time"] / base_params["delta_t"])
 
-        fileName = "results/culture_and_no_culture_%s_%s_%s" % (
-            str(base_params["N"]),
-            str(base_params["time_steps_max"]),
-            str(base_params["M"]),
-        )
-        print("fileName: ", fileName)
-        createFolder(fileName)
-        
+        root = "culture_and_no_culture"
+        fileName = produce_name_datetime(root)
+        print("fileName:", fileName)
         
         #No culture, behaviours are independant
         base_params["alpha_change"] = 2.0
@@ -95,6 +90,8 @@ if __name__ == "__main__":
         property_values_list_culture = [1,2,3]
         params_list_culture = produce_param_list(base_params, property_values_list_culture, property_varied_culture)
         data_culture = parallel_run(params_list_culture)  # better if a Multiple of 4
+
+        createFolder(fileName)
 
         #####
         #save stuff

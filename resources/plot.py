@@ -967,6 +967,62 @@ def live_average_multirun_n_diagram_mean_coefficient_variance(
     fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
     fig.savefig(f + ".png", dpi=dpi_save, format="png")
 
+def linear_Y(
+    fileName, combined_data, variable_parameters_dict, dpi_save, y_param, y_title
+):
+    print("UNFINISHED")
+    fig, axes = plt.subplots(
+        figsize=(14, 7),
+        constrained_layout=True,
+        nrows=1,
+        ncols=len(variable_parameters_dict.keys()),
+    )  #
+
+    key_list = list(variable_parameters_dict.keys())
+
+    for i, ax in enumerate(axes.flat):
+        ax.set_xlabel("Normalised parameter")
+        ax.set_ylabel(y_title)
+
+        norm_vals = variable_parameters_dict[key_list[i]]["vals"]
+
+
+        colour_adjust = variable_parameters_dict[key_list[i]]["norm"](
+            variable_parameters_dict[key_list[i]]["vals"]
+        )
+        scatter_colours = get_cmap(variable_parameters_dict[key_list[i]]["cmap"])(
+            colour_adjust
+        )
+
+        ax.scatter(
+            combined_data[key_list[i]]["mean_data"],
+            combined_data[key_list[i]]["coefficient_variance_data"],
+            marker=variable_parameters_dict[key_list[i]]["marker"],
+            s=60,
+            c=scatter_colours,
+            edgecolors="black",
+            linewidths=1,
+        )
+
+        cbar = fig.colorbar(
+            plt.cm.ScalarMappable(
+                cmap=variable_parameters_dict[key_list[i]]["cmap"],
+                norm=variable_parameters_dict[key_list[i]]["norm"],
+            ),
+            ax=ax,
+            location=variable_parameters_dict[key_list[i]]["cbar_loc"],
+            aspect=60,
+            pad=0.05,
+        )
+        cbar.set_label(r"%s" % (variable_parameters_dict[key_list[i]]["title"]))
+
+    # plt.tight_layout()
+    # plt.subplots_adjust(wspace=0.1, hspace=0.1)
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/live_plot_diagram_mean_coefficient_variance_cols"
+    fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
 
 def live_average_multirun_n_diagram_mean_coefficient_variance_cols(
     fileName, combined_data, variable_parameters_dict, dpi_save
@@ -1340,7 +1396,7 @@ def double_matrix_plot_cluster(
         #plt.cm.ScalarMappable(cmap=cmap, norm=Normalize(vmin=Z.min(), vmax=Z.max())),
         ax=ax,
     )
-    cbar.set_label(r"Number of identity bubbles")
+    cbar.set_label(r"Mean number of identity bubbles")
 
     # HAS TO BE AFTER PUTTING INT THE MATRIX 
     ax.set_xticks(col_ticks_pos)
@@ -1352,6 +1408,50 @@ def double_matrix_plot_cluster(
 
     plotName = fileName + "/Plots"
     f = plotName + "/live_average_double_matrix_plot_cluster_count"
+    #fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
+
+def double_contour_plot_cluster(
+    fileName, Z, variable_parameters_dict, cmap, dpi_save, col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label,property_varied_values_col, property_varied_values_row
+):
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    col_dict = variable_parameters_dict["col"]
+    row_dict = variable_parameters_dict["row"]
+
+    ax.set_xlabel(r"Confirmation bias, $\theta$")
+    ax.set_ylabel(r"Attitude Beta parameters $a, 2-b$")
+
+    if col_dict["divisions"] == "log":
+        ax.set_xscale("log")
+    if row_dict["divisions"] == "log":
+        ax.set_yscale("log")
+
+    X, Y = np.meshgrid(property_varied_values_col, property_varied_values_row)
+    contours = ax.contour(X, Y, Z, colors="black")
+    #ax.clabel(contours, inline=True, fontsize=8)
+
+    cp = ax.contourf(X, Y, Z, cmap=cmap, alpha=0.5)
+
+    cbar = fig.colorbar(
+        cp,
+        #plt.cm.ScalarMappable(cmap=cmap, norm=Normalize(vmin=Z.min(), vmax=Z.max())),
+        ax=ax,
+    )
+    cbar.set_label(r"Mean number of identity bubbles")
+
+    # HAS TO BE AFTER PUTTING INT THE MATRIX 
+    #ax.set_xticks(col_ticks_pos)
+    #ax.set_xticklabels(col_ticks_label)  
+    ax.xaxis.set_ticks_position('bottom')
+
+    #ax.set_yticks(row_ticks_pos)
+    #ax.set_yticklabels(row_ticks_label)  
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/double_contour_plot_cluster"
     #fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
     fig.savefig(f + ".png", dpi=dpi_save, format="png")
 

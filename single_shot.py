@@ -155,8 +155,8 @@ if __name__ == "__main__":
         ###PLOTS
         #bandwidth_list = [0.05]
         #cluster_estimation(Data,bandwidth_list)
-        cluster_estimation_plot(Data,s,bandwidth)
-        #plot_culture_timeseries(fileName, Data, dpi_save)
+        #cluster_estimation_plot(Data,s,bandwidth)
+        plot_culture_timeseries(fileName, Data, dpi_save)
         #weighting_histogram(fileName, Data, dpi_save,bin_num)
         #weighting_histogram_time(fileName, Data, dpi_save,bin_num,300)
         #plot_green_adoption_timeseries(fileName, Data, dpi_save)

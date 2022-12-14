@@ -43,6 +43,7 @@ from resources.plot import (
     double_matrix_plot_cluster_ratio,
     double_matrix_plot_cluster_multi,
     double_matrix_plot_cluster_var_multi,
+    double_contour_plot_cluster,
 )
 from resources.utility import (
     createFolder,
@@ -68,18 +69,21 @@ from resources.run import (
 import numpy as np
 
 # run bools
-RUN = 1 # run or load in previously saved data
+RUN = 0 # run or load in previously saved data
 SINGLE = 0 # determine if you runs single shots or study the averages over multiple runs for each experiment
-cluster_count_run = 0
+
 ab_plot = 0
 plot_conf_attiude = 0
 plot_multi_line_divide = 0
 plot_multi_line = 0
+cluster_count_run = 0
 cluster_ratio = 0
 culture_run = 1
+data_analysis_culture_run = 0
+single_from_multi = 0
 
 
-fileName = "results/two_param_sweep_average_12_39_39__02_12_2022"
+fileName = "results/two_param_sweep_average_18_22_51__04_12_2022"
 #"results/twoD_Average_confirmation_bias_M_200_3000_20_70_20_5"#"results/twoD_Average_confirmation_bias_a_attitude_200_3000_20_64_64_5"#"
 #"results/twoD_Average_confirmation_bias_a_attitude_200_3000_20_64_64_5"
 #"results/twoD_Average_action_observation_I_a_attitude_200_2000_20_64_64_5"
@@ -537,7 +541,7 @@ if __name__ == "__main__":
                 max_col_val = 150
                 min_col_val = -10
 
-                col_ticks_label = [-20,0,50,100, 150]#[-10,0,10,20,30,40,50,60]#[col_dict["vals"][x] for x in range(len(col_dict["vals"]))  if x % select_val_x == 0]
+                col_ticks_label = [-20,0,50,100]#[-10,0,10,20,30,40,50,60]#[col_dict["vals"][x] for x in range(len(col_dict["vals"]))  if x % select_val_x == 0]
                 col_ticks_pos =[int(round(index_len_col_matrix*((col - min_col_val)/(max_col_val- min_col_val)))) for col in col_ticks_label]#[int(round(index_len_col_matrix*((x - min_col_val)/(max_col_val- min_col_val)))) for x in col_ticks_label]#[0,30,70,50]#[0,10,20,30,40,50,60,70]#[x for x in range(len(col_dict["vals"]))  if x % select_val_x == 0]
             
                 #col_ticks_label = [col_dict["vals"][x] for x in range(len(col_dict["vals"]))  if x % select_val_col == 0]
@@ -560,15 +564,12 @@ if __name__ == "__main__":
 
             col_dict = variable_parameters_dict["col"]
             row_dict = variable_parameters_dict["row"]
-
-
             
             nrows, ncols = 2,2
 
             bandwidth_list = [0.01, 0.05,0.5,2.5]
             save_object(bandwidth_list, fileName + "/Data","bandwidth_list")
 
-            data_analysis_culture_run = 1
             if data_analysis_culture_run:
                 #print(results_culture_lists, results_culture_lists.shape)
                 #(25,3,200), so it needs to run on (25,3) different occasions?
@@ -650,9 +651,13 @@ if __name__ == "__main__":
             
             
             
-            
-            double_matrix_plot_cluster_multi(fileName,Z_list,variable_parameters_dict, get_cmap("Purples"),dpi_save,col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label, nrows, ncols, bandwidth_list)
-            double_matrix_plot_cluster_var_multi(fileName,Z_var_list,variable_parameters_dict, get_cmap("Oranges"),dpi_save,col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label, nrows, ncols, bandwidth_list)
+            if single_from_multi:
+                #plot only one but the matrix save 
+                double_contour_plot_cluster(fileName,Z_list[0],variable_parameters_dict, get_cmap("Purples"),dpi_save,col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label,col_dict["vals"], row_dict["vals"])
+                double_matrix_plot_cluster(fileName,Z_list[0],variable_parameters_dict, get_cmap("Purples"),dpi_save,col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label)
+            else:
+                double_matrix_plot_cluster_multi(fileName,Z_list,variable_parameters_dict, get_cmap("Purples"),dpi_save,col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label, nrows, ncols, bandwidth_list)
+                double_matrix_plot_cluster_var_multi(fileName,Z_var_list,variable_parameters_dict, get_cmap("Oranges"),dpi_save,col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label, nrows, ncols, bandwidth_list)
         #only for the a or b beta parameters
         #double_phase_diagram_using_meanandvariance(fileName, matrix_emissions, r"Total normalised emissions, $E/NM$", "emissions",variable_parameters_dict, get_cmap("Reds"),dpi_save)
         #double_phase_diagram_using_meanandvariance(fileName,matrix_mu,r"Average identity, $\mu$","mu",variable_parameters_dict,get_cmap("Blues"),dpi_save,)

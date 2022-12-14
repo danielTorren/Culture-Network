@@ -14,6 +14,7 @@ import networkx as nx
 import numpy.typing as npt
 from resources.individuals import Individual
 from resources.green_individuals import Green_individual
+from resources.green_fountains import Green_fountain
 
 # modules
 class Network:
@@ -234,6 +235,7 @@ class Network:
         self.save_timeseries_data = parameters["save_timeseries_data"]
         self.compression_factor = parameters["compression_factor"]
         self.degroot_aggregation = parameters["degroot_aggregation"]
+        self.immutable_green_fountains = parameters["immutable_green_fountains"]
 
         self.guilty_individuals = parameters["guilty_individuals"]
         self.guilty_individual_power = parameters["guilty_individual_power"]
@@ -314,7 +316,10 @@ class Network:
         self.agent_list = self.create_agent_list()
 
         if self.green_N > 0:
-            self.mix_in_green_individuals()
+            if self.immutable_green_fountains:
+                self.mix_in_green_fountains()
+            else:
+                self.mix_in_green_individuals()
 
         if self.alpha_change == 2.0:#independant behaviours
             self.weighting_matrix_list = [self.weighting_matrix]*self.M
@@ -570,12 +575,7 @@ class Network:
         attitude_array_circular_indexes_shuffled = self.partial_shuffle(
             attitude_array_circular_indexes, self.shuffle_reps
         )
-        attitude_list_sorted_shuffle = [
-            x
-            for _, x in sorted(
-                zip(attitude_array_circular_indexes_shuffled, attitude_array_circular)
-            )
-        ]
+        attitude_list_sorted_shuffle = [x for _, x in sorted(zip(attitude_array_circular_indexes_shuffled, attitude_array_circular), key=lambda x: x[0])]
 
         return np.asarray(attitude_list_sorted_shuffle), threshold_matrix
 
@@ -712,6 +712,28 @@ class Network:
 
     def mix_in_green_individuals(self):
         individual_params = {
+            "delta_t": self.delta_t,
+            "t": self.t,
+            "M": self.M,
+            "save_timeseries_data": self.save_timeseries_data,
+            "carbon_emissions": self.carbon_emissions,
+            "phi_array": self.phi_array,
+            "compression_factor": self.compression_factor,
+            "action_observation_I": self.action_observation_I,
+            "guilty_individuals":self.guilty_individuals,
+            "guilty_individual_power":self.guilty_individual_power,
+            "moral_licensing": self.moral_licensing,
+        }
+        #randomly mix in the greens 
+        n_list_green = np.random.choice(self.N, self.green_N,  replace=False)
+        for i in n_list_green:
+            self.agent_list[i] = Green_individual(
+                individual_params,
+                self.normalized_discount_array[i],
+                self.culture_momentum_list[i],)
+
+    def mix_in_green_fountains(self):
+        individual_params = {
             "M": self.M,
             "save_timeseries_data": self.save_timeseries_data,
             "carbon_emissions": self.carbon_emissions,
@@ -721,7 +743,7 @@ class Network:
         #randomly mix in the greens 
         n_list_green = np.random.choice(self.N, self.green_N,  replace=False)
         for i in n_list_green:
-            self.agent_list[i] = Green_individual(individual_params)
+            self.agent_list[i] = Green_fountain(individual_params)
 
 
     def calc_ego_influence_voter(self) -> npt.NDArray:

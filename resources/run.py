@@ -336,6 +336,7 @@ def parallel_run_multi_run_n(params_dict: dict, variable_parameters_dict: dict):
             results_mean,
             results_var,
             results_coefficient_variance,
+            results_emissions_change
         ) = parallel_run_sa(
             params_dict[counter : counter + variable_parameters_dict[v]["reps"]]
         )
@@ -345,6 +346,7 @@ def parallel_run_multi_run_n(params_dict: dict, variable_parameters_dict: dict):
             "mean_data": results_mean,
             "variance_data": results_var,
             "coefficient_variance_data": results_coefficient_variance,
+            "results_emissions_change": results_emissions_change,
         }
 
     return combined_data

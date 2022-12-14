@@ -1,9 +1,9 @@
-"""Define Green_individual agent class
-A module that defines "individuals" that have vectors of attitudes towards behaviours which dont evolve and are always green.
+"""Define geen individual agent class
+Individuals who start as being green but can change to less green
 
 Author: Daniel Torren Peraire Daniel.Torren@uab.cat dtorrenp@hotmail.com
 
-Created: 26/10/2022
+Created: 10/10/2022
 """
 
 # imports
@@ -14,15 +14,14 @@ import numpy.typing as npt
 class Green_individual:
 
     """
-    Class to represent green individuals with identities and behaviours
+    Class to represent individuals with identities and behaviours
 
-    [REDUCE THIS]
     ...
 
     Attributes
     ----------
 
-    save_data : bool
+    save_timeseries_data : bool
         whether or not to save data. Set to 0 if only interested in end state of the simulation. If 1 will save
         data into timeseries (lists or lists of lists for arrays) which can then be either accessed directly in
         the social network object or saved into csv's
@@ -47,10 +46,12 @@ class Green_individual:
         list is generated using a linspace function using input parameters phi_array_lower and phi_array_upper. each element has domain = [0,1]
     values: npt.NDArray[float]
         array containing behavioural values, if greater than 0 then the green alternative behaviour is performed and emissions from that behaviour are 0. Domain =  [-1,1]
-    av_behaviour
+    av_behaviour_attitude
         mean attitude towards M behaviours at time t
+    av_behaviour_value
+        mean value towards M behaviours at time t
     av_behaviour_list: list[float]
-        time series of past average attitude values each given by av_behaviour, as far back as culture_momentum
+        time series of past average attitude combined with values depending on action_observation_I, as far back as culture_momentum
     culture: float
         identity of the individual, if > 0.5 it is considered green. Determines who individuals pay attention to. Domain = [0,1]
     total_carbon_emissions: float
@@ -80,7 +81,7 @@ class Green_individual:
         Update behavioural attitudes with social influence of neighbours mediated by the social susceptabilty of each behaviour phi
     calc_total_emissions():
         return total emissions of individual based on behavioural values
-    save_data_individual():
+    save_timeseries_data_individual():
         Save time series data
     next_step(t:float, steps:int, social_component: npt.NDArray):
         Push the individual simulation forwards one time step
@@ -90,6 +91,8 @@ class Green_individual:
     def __init__(
         self,
         individual_params,
+        normalized_discount_vector,
+        culture_momentum,
     ):
         """
         Constructs all the necessary attributes for the Individual object.
@@ -98,29 +101,122 @@ class Green_individual:
         ----------
         individual_params: dict,
             useful parameters from the network
+        init_data_attitudes: npt.NDArray[float]
+            array of inital attitudes generated previously from a beta distribution, evolves over time
+        init_data_thresholds: npt.NDArray[float]
+            array of inital thresholds generated previously from a beta distribution
+        normalized_discount_vector: npt.NDArray[float]
+            normalized single row of the discounts to individual memory when considering how the past influences current identity
+        culture_momentum: int
+            the number of steps into the past that are considered when calculating identity
 
         """
 
+        self.normalized_discount_vector = normalized_discount_vector
+        self.culture_momentum = culture_momentum
+        
         self.M = individual_params["M"]
-        self.save_data = individual_params["save_data"]
+        self.t = individual_params["t"]
+        self.delta_t = individual_params["delta_t"]
+        self.save_timeseries_data = individual_params["save_timeseries_data"]
         self.carbon_intensive_list = individual_params["carbon_emissions"]
         self.compression_factor = individual_params["compression_factor"]
+        self.phi_array = individual_params["phi_array"]
+        self.action_observation_I = individual_params["action_observation_I"]
+        self.guilty_individual_bool = individual_params["guilty_individuals"]
+        self.guilty_individual_power = individual_params["guilty_individual_power"]
+        self.moral_licensing = individual_params["moral_licensing"]
 
-        self.attitudes = np.asarray(self.M*[0.95])
-        self.thresholds = np.asarray(self.M*[0.0])
+        self.attitudes = np.asarray(self.M*[1.00])
+        self.thresholds = np.asarray(self.M*[0.00])
         self.av_behaviour = np.mean(self.attitudes)
         self.values = self.attitudes - self.thresholds
-        self.culture = 0.95
+        self.av_behaviour_list = [self.av_behaviour] * self.culture_momentum
+        self.culture = self.calc_culture()
 
-        if self.save_data:
-            self.total_carbon_emissions = self.calc_total_emissions()
+        self.total_carbon_emissions,self.behavioural_carbon_emissions = self.calc_total_emissions()
+
+        if self.save_timeseries_data:
             self.history_behaviour_values = [list(self.values)]
             self.history_behaviour_attitudes = [list(self.attitudes)]
             self.history_behaviour_thresholds = [list(self.thresholds)]
             self.history_av_behaviour = [self.av_behaviour]
             self.history_culture = [self.culture]
             self.history_carbon_emissions = [self.total_carbon_emissions]
+            self.history_behavioural_carbon_emissions = [self.behavioural_carbon_emissions]
 
+    def calc_av_behaviour(self):
+        self.av_behaviour = np.mean((1 - self.action_observation_I)*self.attitudes  + self.action_observation_I*((self.values + 1)/2))
+
+    def update_av_behaviour_list(self):
+        """
+        Update moving average of past behaviours, inserting present value and 0th index and removing the oldest value
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+        """
+        self.av_behaviour_list.pop()
+        self.av_behaviour_list.insert(0, self.av_behaviour)
+
+    def calc_culture(self) -> float:
+        """
+        Calculate the individual identity from past average attitudes weighted by the truncated quasi-hyperbolic discounting factor
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        float
+        """
+
+        return np.matmul(
+            self.normalized_discount_vector, self.av_behaviour_list
+        )  # here discount list is normalized
+
+    def update_values(self):
+        """
+        Update the behavioural values of an individual with the new attitudinal or threshold values
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+        """
+        self.values = self.attitudes - self.thresholds
+
+    def update_attitudes(self, social_component):
+        """
+        Update behavioural attitudes with social influence of neighbours mediated by the social susceptabilty of each behaviour phi
+
+        Parameters
+        ----------
+        social_component: npt.NDArray[float]
+
+        Returns
+        -------
+        None
+        """
+        if self.guilty_individual_bool:# and self.culture > 0.6:#this is fake though i am creating an arbitrary line i
+            if self.moral_licensing: 
+            #total = self.attitudes * (1 - self.phi_array * self.delta_t) + (self.phi_array*self.delta_t)* (social_component) + (self.culture**self.guilty_individual_power)*(self.culture - self.attitudes)*(self.phi_array * self.delta_t)
+            #print("relative components", 100*self.attitudes * (1 - self.phi_array * self.delta_t)/total,  100*(self.phi_array*self.delta_t)* (social_component)/total, 100*(self.culture**self.guilty_individual_power)*(self.culture - self.attitudes)*(self.phi_array * self.delta_t)/total)
+                self.attitudes = self.attitudes * (1 - self.phi_array * self.delta_t) + (self.phi_array*self.delta_t)* (social_component) + (self.phi_array * self.delta_t)*(self.culture**self.guilty_individual_power)*(self.attitudes- 1)
+            #self.attitudes = self.attitudes * (1 - self.phi_array * self.delta_t) + (self.phi_array*self.delta_t)* (social_component) + (self.culture**self.guilty_individual_power)*(1 - self.attitudes)*(self.phi_array * self.delta_t)
+            else:
+                 self.attitudes = self.attitudes * (1 - self.phi_array * self.delta_t) + (self.phi_array*self.delta_t)* (social_component) + (self.phi_array * self.delta_t)*(self.culture**self.guilty_individual_power)*(1-self.attitudes)
+
+        else:
+            self.attitudes = self.attitudes * (1 - self.phi_array * self.delta_t) + (self.phi_array*self.delta_t)*(social_component)
 
     def calc_total_emissions(self):
         """
@@ -134,9 +230,10 @@ class Green_individual:
         -------
         float
         """
-        return sum(((1-self.values[i])/2)*self.carbon_intensive_list[i] for i in range(self.M))# normalized Beta now used for emissions
+        behavioural_emissions = [((1-self.values[i])/2)*self.carbon_intensive_list[i] for i in range(self.M)]
+        return sum(behavioural_emissions),behavioural_emissions# normalized Beta now used for emissions
 
-    def save_data_individual(self):
+    def save_timeseries_data_individual(self):
         """
         Save time series data
 
@@ -154,6 +251,7 @@ class Green_individual:
         self.history_culture.append(self.culture)
         self.history_av_behaviour.append(self.av_behaviour)
         self.history_carbon_emissions.append(self.total_carbon_emissions)
+        self.history_behavioural_carbon_emissions.append(self.behavioural_carbon_emissions)
 
     def next_step(self, t: float, steps: int, social_component: npt.NDArray):
         """
@@ -162,15 +260,29 @@ class Green_individual:
 
         Parameters
         ----------
+        t: float
+            Internal time of the simulation
         steps: int
             Step counts in the simulation
+        social_component: npt.NDArray
+            NxM Array of the influence of neighbours from imperfect social learning on behavioural attitudes of the individual
         Returns
         -------
         None
         """
+        self.t = t
         self.steps = steps
 
-        if self.save_data:
-            self.total_carbon_emissions = self.calc_total_emissions()
-            if self.steps % self.compression_factor == 0:
-                self.save_data_individual()
+        self.update_values()
+        self.update_attitudes(social_component)
+
+        self.calc_av_behaviour()
+
+        self.update_av_behaviour_list()
+
+        self.culture = self.calc_culture()
+
+        self.total_carbon_emissions, self.behavioural_carbon_emissions = self.calc_total_emissions()
+
+        if (self.save_timeseries_data) and (self.steps % self.compression_factor == 0):
+            self.save_timeseries_data_individual()

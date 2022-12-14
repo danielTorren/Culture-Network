@@ -20,6 +20,7 @@ from resources.run import parallel_run_multi_run_n
 from resources.plot import (
     live_average_multirun_n_diagram_mean_coefficient_variance,
     live_average_multirun_n_diagram_mean_coefficient_variance_cols,
+    linear_Y,
 )
 from resources.multi_run_n_param import (
     produce_param_list_n,
@@ -49,17 +50,9 @@ if __name__ == "__main__":
         reps = sum([x["reps"] for x in variable_parameters_dict.values()])
 
         # AVERAGE OVER MULTIPLE RUNS
-        fileName = "results/multi_run_n_%s_%s_%s_%s_%s" % (
-            str(base_params["N"]),
-            str(base_params["time_steps_max"]),
-            str(base_params["K"]),
-            str(len(base_params["seed_list"])),
-            str(reps),
-        )
 
         root = "multi_n_independent"
         fileName = produce_name_datetime(root)
-        createFolder(fileName)
         print("fileName: ", fileName)
 
         ### GENERATE PARAMS
@@ -71,12 +64,14 @@ if __name__ == "__main__":
         combined_data = parallel_run_multi_run_n(params_list, variable_parameters_dict)
 
         # save the data and params_list  - data,fileName, objectName
+        createFolder(fileName)
 
         save_object(
             variable_parameters_dict, fileName + "/Data", "variable_parameters_dict"
         )
         save_object(combined_data, fileName + "/Data", "combined_data")
         save_object(base_params, fileName + "/Data", "base_params")
+
 
     else:
         createFolder(fileName)
@@ -88,10 +83,15 @@ if __name__ == "__main__":
         )
 
         combined_data = load_object(fileName + "/Data", "combined_data")
+        base_params = save_object(fileName + "/Data", "base_params")
 
     ### PLOTS
 
+    # "action_observation_I": {"property":"action_observation_I","min":0, "max": 1, "title": "AO_I","divisions": "linear", "cmap": "Reds", "cbar_loc": "right", "marker": "o","reps": 256} 
+
     # plot_a = live_average_multirun_n_diagram_mean_coefficient_variance(fileName, mean_data_list,coefficient_variance_data_list ,variable_parameters_dict,dpi_save)
+    
+    """
     plot_b = live_average_multirun_n_diagram_mean_coefficient_variance(
         fileName,
         combined_data,
@@ -101,4 +101,8 @@ if __name__ == "__main__":
     plot_c = live_average_multirun_n_diagram_mean_coefficient_variance_cols(
         fileName, combined_data, variable_parameters_dict, dpi_save
     )
+    """
+    
+    plot_e = linear_Y(fileName, combined_data, variable_parameters_dict, dpi_save)
+
     plt.show()
