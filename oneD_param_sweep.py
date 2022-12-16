@@ -16,6 +16,7 @@ Created: 10/10/2022
 
 # imports
 import json
+import os
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import LinearSegmentedColormap, Normalize, LogNorm
@@ -86,11 +87,11 @@ dpi_save = 600  # 1200
 alpha_val = 0.25
 size_points = 5
 
-RUN = 1
+RUN = 0
 SINGLE = 0
-GRAPH_TYPE = 6
+GRAPH_TYPE = 7
 
-fileName = "results/one_param_sweep_single_15_35_24__16_12_2022"
+fileName = "results/" + "one_param_sweep_multi_18_06_16__16_12_2022"
 
 if __name__ == "__main__":
 
@@ -286,9 +287,10 @@ if __name__ == "__main__":
             shuffle_colours = True
             plot_cluster_culture_time_series_multi(fileName, data_list, dpi_save,clusters_index_lists_list, cluster_example_identity_list_list, cmap_multi,norm_zero_one, shuffle_colours ,nrows, ncols,title_list)#haS TO BE RUN TOGETHER
         elif GRAPH_TYPE == 6 or 7:
+            Data_list_bool = 1
             #plot_last_culture_vector_matrix(fileName, data_list, dpi_save, property_varied, property_varied_title, property_values_list)
-            plot_last_culture_vector_joy(fileName, data_list, dpi_save, property_varied, property_varied_title, property_values_list,cmap_multi)
-            plot_last_culture_vector_joy_hist(fileName, data_list, dpi_save, property_varied, property_varied_title, property_values_list,cmap_multi)
+            plot_last_culture_vector_joy(fileName, data_list, dpi_save, property_varied, property_varied_title, property_values_list,cmap_multi,Data_list_bool)
+            plot_last_culture_vector_joy_hist(fileName, data_list, dpi_save, property_varied, property_varied_title, property_values_list,cmap_multi,Data_list_bool)
         else:
             pass
             
@@ -429,15 +431,7 @@ if __name__ == "__main__":
             save_object(property_values_list, fileName + "/Data", "property_values_list")
 
         else:
-            if GRAPH_TYPE == 6 or 7:
-                results_culture_lists = load_object( fileName + "/Data", "results_culture_lists")
-            else:
-                results_emissions = load_object(fileName + "/Data", "results_emissions")
-                results_mu = load_object(fileName + "/Data", "results_mu")
-                results_var = load_object(fileName + "/Data", "results_var")
-                results_coefficient_of_variance = load_object(fileName + "/Data", "results_coefficient_of_variance")
-                results_emissions_change = load_object( fileName + "/Data", "results_emissions_change")
-                
+            #print("fileName + /Data TYOYOYO", fileName + "/Data", os.path.isfile(fileName + "/Data/" + "base_params"), os.path.exists(fileName + "/Data") ) 
             params = load_object(fileName + "/Data", "base_params")
             property_varied = load_object(fileName + "/Data", "property_varied")
             property_varied_title = load_object(fileName + "/Data", "property_varied_title")
@@ -446,12 +440,26 @@ if __name__ == "__main__":
             title_list = load_object(fileName + "/Data", "title_list")
             property_values_list = load_object(fileName + "/Data", "property_values_list")
 
+            if GRAPH_TYPE == 6 or 7:
+                #print("hey?")
+                results_culture_lists = load_object( fileName + "/Data", "results_culture_lists")
+                #print("results_culture_lists",results_culture_lists)
+            else:
+                results_emissions = load_object(fileName + "/Data", "results_emissions")
+                results_mu = load_object(fileName + "/Data", "results_mu")
+                results_var = load_object(fileName + "/Data", "results_var")
+                results_coefficient_of_variance = load_object(fileName + "/Data", "results_coefficient_of_variance")
+                results_emissions_change = load_object( fileName + "/Data", "results_emissions_change")
+                
+
+
             dataName = fileName + "/Data"
 
             if GRAPH_TYPE == 6 or 7:
+                Data_list_bool = 0
                 #plot_last_culture_vector_matrix(fileName, data_list, dpi_save, property_varied, property_varied_title, property_values_list)
-                plot_last_culture_vector_joy(fileName, results_culture_lists, dpi_save, property_varied, property_varied_title, property_values_list,cmap_multi)
-                plot_last_culture_vector_joy_hist(fileName, results_culture_lists, dpi_save, property_varied, property_varied_title, property_values_list,cmap_multi)
+                plot_last_culture_vector_joy(fileName, results_culture_lists, dpi_save, property_varied, property_varied_title, property_values_list,cmap_multi,Data_list_bool)
+                plot_last_culture_vector_joy_hist(fileName, results_culture_lists, dpi_save, property_varied, property_varied_title, property_values_list,cmap_multi,Data_list_bool)
 
             ###WORKING
     plt.show()

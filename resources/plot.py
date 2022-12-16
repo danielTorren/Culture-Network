@@ -27,6 +27,7 @@ from scipy.stats import gaussian_kde
 from scipy.signal import argrelextrema
 from sklearn.neighbors import KernelDensity
 from sklearn.cluster import MeanShift
+import pandas as pd
 
 
 SMALL_SIZE = 14
@@ -421,17 +422,62 @@ def plot_last_culture_vector_matrix(
     # fig.savefig(f, dpi=dpi_save,format='eps')  
 
 def plot_last_culture_vector_joy(
-    fileName, Data_list, dpi_save, property_varied, property_varied_title, property_varied_vals, cmap
+    fileName, Data_list, dpi_save, property_varied, property_varied_title, property_varied_vals, cmap, Data_list_bool, av_reps = 5
 ):
+    labels = [str(i) for i in property_varied_vals]
 
-    Z = []
-    for i in range(len(Data_list)):
-        Z.append(np.asarray(Data_list[i].culture_list))
+    if Data_list_bool:
+        Z = []
+        for i in range(len(Data_list)):
+            Z.append(np.asarray(Data_list[i].culture_list))
+        labels = [str(i) for i in property_varied_vals]
+        d = {l:v for l,v in zip(labels,Z)}
+        fig, axes = joypy.joyplot(d, colormap=cmap,)
+    else:
+        frames = []
+
+        """
+        Data_list_arr = np.asarray(Data_list).T#data listshape = (proerty varues, reps, individuals)
+        for j in range(av_reps):#5 is the number of reps
+            data = Data_list_arr[:,j,:]#pick out the reps
+            #print("data", data, data .shape)
+            #print("labels")
+            df = pd.DataFrame(data, columns=labels)
+            df = df.assign(av_rep=j)
+            frames.append(df)
+            #print("df",df, j)
+        frames.reverse()
+        result = pd.concat(frames)
+        
+        print("result",result)
+        fig, axes = joypy.joyplot(result, by="av_rep",legend=True, figsize=(10,6))#, , 
+        """
+        label_reps = [str(i) for i in range(av_reps)]
+        Data_list_arr = np.asarray(Data_list).T#data listshape = (proerty varues, reps, individuals)
+        for j in range(len(property_varied_vals)):
+            data = Data_list_arr[:,:,j]#pick out the reps
+            print("data", data, data .shape)
+            print("labels")
+            df = pd.DataFrame(data, columns=label_reps)
+            kwargs={"%s" % (property_varied): property_varied_vals[j]}
+            df = df.assign(**kwargs)
+            frames.append(df)
+            #print("df",df, j)
+        frames.reverse()
+        result = pd.concat(frames)
+        
+        print("result",result)
+        fig, axes = joypy.joyplot(result, by = property_varied,legend=True, figsize=(16,9))#, , 
+
+        #Z = []
+        #Z = Data_list#need to average over the different runs
+        #for i in range(len(Data_list)):
+        #    Z.append(np.mean(Data_list[i], axis= 0))
 
     #Z_arr = np.asarray(Z)
-    labels = [str(i) for i in property_varied_vals]
-    d = {l:v for l,v in zip(labels,Z)}
-    fig, axes = joypy.joyplot(d, colormap=cmap,)
+    #print("arrrray", Z_arr.shape)
+
+
     #print("axes", axes)
 
     axes[-1].set_xlabel(r"Identity, $I_{t,n}$")
@@ -449,12 +495,18 @@ def plot_last_culture_vector_joy(
     # fig.savefig(f, dpi=dpi_save,format='eps')  
 
 def plot_last_culture_vector_joy_hist(
-    fileName, Data_list, dpi_save, property_varied, property_varied_title, property_varied_vals, cmap
+    fileName, Data_list, dpi_save, property_varied, property_varied_title, property_varied_vals, cmap,Data_list_bool
 ):
 
-    Z = []
-    for i in range(len(Data_list)):
-        Z.append(np.asarray(Data_list[i].culture_list))
+    if Data_list_bool:
+        Z = []
+        for i in range(len(Data_list)):
+            Z.append(np.asarray(Data_list[i].culture_list))
+    else:
+        Z = []
+        #Z = Data_list#need to average over the different runs
+        for i in range(len(Data_list)):
+            Z.append(np.mean(Data_list[i], axis= 0))
 
     #Z_arr = np.asarray(Z)
     labels = [str(i) for i in property_varied_vals]
@@ -470,7 +522,7 @@ def plot_last_culture_vector_joy_hist(
     plotName = fileName + "/Plots"
     f = (
         plotName
-        + "/plot_last_culture_vector_joy_%s.png"
+        + "/plot_last_culture_vector_joy_hist_%s.png"
         % property_varied
     )
     fig.savefig(f, dpi=dpi_save, format="png")

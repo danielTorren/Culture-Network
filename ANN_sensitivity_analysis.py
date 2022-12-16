@@ -291,7 +291,7 @@ THIS WAS USE FOR THE LOADED RUN, JUST USEFUL AS A REFERENCEgit
 #THIS IS FOR CREATING THE ANN MODEL FROM SENSITVITY ANALYSIS DATA
 generate_model = 1
 #where to get the data to train the model on
-fileNameModel = "results\SA_AV_reps_5_samples_3840_D_vars_13_N_samples_256"#\SA_AV_reps_5_samples_28672_D_vars_13_N_samples_1024"#
+fileNameModel = "results\SA_AV_reps_5_samples_15360_D_vars_13_N_samples_1024"#\SA_AV_reps_5_samples_28672_D_vars_13_N_samples_1024"#
 N_samplesModel = 256#512#64#1024#512
 calc_second_orderModel = False
 hyper_parameters_fit = 0

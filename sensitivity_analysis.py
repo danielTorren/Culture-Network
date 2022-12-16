@@ -31,9 +31,9 @@ from resources.SA_sobol import (
 )
 
 # constants
-RUN = 1  # False,True
+RUN = 0  # False,True
 if ~RUN:
-    fileName = "results\SA_AV_reps_5_samples_3840_D_vars_13_N_samples_256"
+    fileName = "results\SA_AV_reps_5_samples_15360_D_vars_13_N_samples_1024"
 N_samples = 1024#256#512#64#1024#512
 calc_second_order = False
 
