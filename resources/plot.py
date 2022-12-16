@@ -381,6 +381,101 @@ def plot_cluster_culture_time_series_multi(fileName, Data_list, dpi_save,cluster
     fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
     fig.savefig(f + ".png", dpi=dpi_save, format="png")
 
+def plot_last_culture_vector_matrix(
+    fileName, Data_list, dpi_save, property_varied, property_varied_title, property_varied_vals
+):
+    fig, ax = plt.subplots()
+
+    Z = []
+    for i in range(len(Data_list)):
+        Z.append(Data_list[i].culture_list)
+
+    Z_i_val = np.asarray(Z).T
+    #print(Z_i_val[0], Z_i_val.shape)
+    #ax.matshow(
+    #    Z,
+    #    cmap=cmap,
+    #    aspect="auto",
+    #)
+    for i in range(len(Z)):
+        ax.scatter(x = property_varied_vals, y = Z_i_val[i])
+    #better as a scatter plot? or density
+    # what about a contour map? 
+    ax.set_xlabel(property_varied_title)
+    ax.set_ylabel(r"Identity, $I_{t,n}$")
+
+    # colour bar axes
+    #cbar = fig.colorbar(
+    #    plt.cm.ScalarMappable(cmap=cmap, norm=norm_zero_one),
+    #    ax=ax
+    #)
+    #cbar.set_label(r"Social network weighting, $\alpha_{n,k}$", labelpad= 5)
+
+    plotName = fileName + "/Plots"
+    f = (
+        plotName
+        + "/plot_last_culture_vector_matrix_%s.png"
+        % property_varied
+    )
+    fig.savefig(f, dpi=dpi_save, format="png")
+    # fig.savefig(f, dpi=dpi_save,format='eps')  
+
+def plot_last_culture_vector_joy(
+    fileName, Data_list, dpi_save, property_varied, property_varied_title, property_varied_vals, cmap
+):
+
+    Z = []
+    for i in range(len(Data_list)):
+        Z.append(np.asarray(Data_list[i].culture_list))
+
+    #Z_arr = np.asarray(Z)
+    labels = [str(i) for i in property_varied_vals]
+    d = {l:v for l,v in zip(labels,Z)}
+    fig, axes = joypy.joyplot(d, colormap=cmap,)
+    #print("axes", axes)
+
+    axes[-1].set_xlabel(r"Identity, $I_{t,n}$")
+    for i in axes:
+        i.set_xlim(right = 1)
+    fig.supylabel(property_varied_title)
+
+    plotName = fileName + "/Plots"
+    f = (
+        plotName
+        + "/plot_last_culture_vector_joy_%s.png"
+        % property_varied
+    )
+    fig.savefig(f, dpi=dpi_save, format="png")
+    # fig.savefig(f, dpi=dpi_save,format='eps')  
+
+def plot_last_culture_vector_joy_hist(
+    fileName, Data_list, dpi_save, property_varied, property_varied_title, property_varied_vals, cmap
+):
+
+    Z = []
+    for i in range(len(Data_list)):
+        Z.append(np.asarray(Data_list[i].culture_list))
+
+    #Z_arr = np.asarray(Z)
+    labels = [str(i) for i in property_varied_vals]
+    d = {l:v for l,v in zip(labels,Z)}
+    fig, axes = joypy.joyplot(d, colormap=cmap, hist="True", bins=20, grid=True, overlap=0,)
+    #print("axes", axes)
+
+    axes[-1].set_xlabel(r"Identity, $I_{t,n}$")
+    #for i in axes:
+    #    i.set_xlim(right = 1)
+    fig.supylabel(property_varied_title)
+
+    plotName = fileName + "/Plots"
+    f = (
+        plotName
+        + "/plot_last_culture_vector_joy_%s.png"
+        % property_varied
+    )
+    fig.savefig(f, dpi=dpi_save, format="png")
+    # fig.savefig(f, dpi=dpi_save,format='eps') 
+
 #####RUNPLOT PLOTS - SINGLE NETWORK
 def live_print_culture_timeseries_varynetwork_structure(
     fileName,

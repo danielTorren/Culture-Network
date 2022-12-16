@@ -21,7 +21,7 @@ import numpy as np
 from matplotlib.colors import LinearSegmentedColormap, Normalize, LogNorm
 from matplotlib.cm import get_cmap
 from resources.utility import createFolder,produce_name_datetime,save_object,load_object
-from resources.run import parallel_run, parallel_run_sa
+from resources.run import parallel_run, parallel_run_sa,culture_data_run
 from resources.plot import (
     live_multirun_diagram_mean_coefficient_variance,
     live_average_multirun_diagram_mean_coefficient_variance,
@@ -49,6 +49,9 @@ from resources.plot import (
     live_print_culture_timeseries_varynetwork_structure,
     plot_alpha_group_multi,
     plot_cluster_culture_time_series_multi,
+    plot_last_culture_vector_matrix,
+    plot_last_culture_vector_joy,
+    plot_last_culture_vector_joy_hist,
 )
 from resources.multi_run_single_param import (
     produce_param_list,
@@ -84,10 +87,10 @@ alpha_val = 0.25
 size_points = 5
 
 RUN = 1
-SINGLE = 1
-GRAPH_TYPE = 5
+SINGLE = 0
+GRAPH_TYPE = 6
 
-fileName = "results/one_param_sweep_single_18_42_41__14_12_2022"
+fileName = "results/one_param_sweep_single_15_35_24__16_12_2022"
 
 if __name__ == "__main__":
 
@@ -148,6 +151,23 @@ if __name__ == "__main__":
                 param_max = 50.0  # 50.0
                 title_list = [r"Confirmation bias $\theta$ = 1.0", r"Confirmation bias $\theta$ = 10.0", r"Confirmation bias $\theta$ = 25.0", r"Confirmation bias $\theta$ = 50.0"]
                 property_values_list = np.asarray([0.0, 10.0, 25.0, 50.0])
+            elif GRAPH_TYPE == 6:
+                ######### REMEMBER TO SET SAVE TO 0!!
+                property_varied = "green_N"
+                property_varied_title = "Number of eco-warriors"
+                param_min = 0.0
+                param_max = 64.0  # 50.0
+                title_list = ["Impact of eco-warriors on final identity distribution"]
+                property_values_list =  np.asarray([0, 2, 4, 8, 12, 16, 32, 64])#np.arange(8)
+                #print(property_values_list)
+            elif GRAPH_TYPE == 7:
+                ######### REMEMBER TO SET SAVE TO 0!!
+                property_varied = "confirmation_bias"
+                property_varied_title = "Confirmation bias $\theta$"
+                param_min = 0.0
+                param_max = 50.0  # 50.0
+                title_list = ["Impact of eco-warriors on final identity distribution"] 
+                property_values_list = np.asarray([0, 2, 4, 8, 12, 16, 32, 64])
                 
             f = open("constants/base_params.json")
             params = json.load(f)
@@ -265,6 +285,10 @@ if __name__ == "__main__":
             cluster_example_identity_list_list = load_object(dataName,"cluster_example_identity_list_list")
             shuffle_colours = True
             plot_cluster_culture_time_series_multi(fileName, data_list, dpi_save,clusters_index_lists_list, cluster_example_identity_list_list, cmap_multi,norm_zero_one, shuffle_colours ,nrows, ncols,title_list)#haS TO BE RUN TOGETHER
+        elif GRAPH_TYPE == 6 or 7:
+            #plot_last_culture_vector_matrix(fileName, data_list, dpi_save, property_varied, property_varied_title, property_values_list)
+            plot_last_culture_vector_joy(fileName, data_list, dpi_save, property_varied, property_varied_title, property_values_list,cmap_multi)
+            plot_last_culture_vector_joy_hist(fileName, data_list, dpi_save, property_varied, property_varied_title, property_values_list,cmap_multi)
         else:
             pass
             
@@ -341,6 +365,22 @@ if __name__ == "__main__":
                 param_max = 50.0  # 50.0
                 title_list = [r"Confirmation bias $\theta$ = 1.0", r"Confirmation bias $\theta$ = 10.0", r"Confirmation bias $\theta$ = 25.0", r"Confirmation bias $\theta$ = 50.0"]
                 property_values_list = np.asarray([0.0, 10.0, 25.0, 50.0])
+            elif GRAPH_TYPE == 6:
+                ######### REMEMBER TO SET SAVE TO 0!!
+                property_varied = "green_N"
+                property_varied_title = "Number of eco-warriors"
+                param_min = 0.0
+                param_max = 64.0  # 50.0
+                title_list = ["Impact of eco-warriors on final identity distribution"]
+                property_values_list =  np.asarray([0, 2, 4, 8, 12, 16, 32, 64])#np.arange(8)
+            elif GRAPH_TYPE == 7:
+                ######### REMEMBER TO SET SAVE TO 0!!
+                property_varied = "confirmation_bias"
+                property_varied_title = "Confirmation bias $\theta$"
+                param_min = 0.0
+                param_max = 50.0  # 50.0
+                title_list = ["Impact of eco-warriors on final identity distribution"] 
+                property_values_list = np.asarray([0, 2, 4, 8, 12, 16, 32, 64])
 
             f = open("constants/base_params.json")
             params = json.load(f)
@@ -352,33 +392,66 @@ if __name__ == "__main__":
 
             dataName = fileName + "/Data"
 
-            # AVERAGE OVER MULTIPLE RUNS
-            """Set the number of stochastic repetitions by changing the number of entries in the seed list."""
-            seed_list = [1, 2, 3, 4, 5]  # ie 5 reps per run!
-            params["seed_list"] = seed_list
-            average_reps = len(seed_list)
-
             params_list = produce_param_list(params, property_values_list, property_varied)
-            (
-                results_emissions,
-                results_mean,
-                results_var,
-                results_coefficient_variance,
-            ) = parallel_run_sa(params_list)
 
-            createFolder(fileName)
-            """
-            live_average_multirun_diagram_mean_coefficient_variance(
-                fileName,
-                results_mean,
-                results_coefficient_variance,
-                property_varied,
-                property_values_list,
-                property_varied_title,
-                cmap_weighting,
-                dpi_save,
-                log_norm,
-                )
-            """
-        
+            if GRAPH_TYPE == 6 or 7:
+                (
+                    results_culture_lists
+                    
+                ) = culture_data_run(params_list)
+                
+                createFolder(fileName)
+
+                save_object(results_culture_lists, fileName + "/Data", "results_culture_lists")
+            else:
+                (
+                    results_emissions,
+                    results_mu,
+                    results_var,
+                    results_coefficient_of_variance,
+                    results_emissions_change,
+                ) = parallel_run_sa(params_list)
+                
+                createFolder(fileName)
+
+                save_object(results_emissions, fileName + "/Data", "results_emissions")
+                save_object(results_mu, fileName + "/Data", "results_mu")
+                save_object(results_var, fileName + "/Data", "results_var")
+                save_object( results_coefficient_of_variance, fileName + "/Data","results_coefficient_of_variance")
+                save_object(results_emissions_change, fileName + "/Data", "results_emissions_change")
+
+            save_object(params, fileName + "/Data", "base_params")
+            save_object(property_varied, fileName + "/Data", "property_varied")
+            save_object(property_varied_title, fileName + "/Data", "property_varied_title")
+            save_object(param_min, fileName + "/Data", "param_min")
+            save_object(param_max, fileName + "/Data", "param_max")
+            save_object(title_list, fileName + "/Data", "title_list")
+            save_object(property_values_list, fileName + "/Data", "property_values_list")
+
+        else:
+            if GRAPH_TYPE == 6 or 7:
+                results_culture_lists = load_object( fileName + "/Data", "results_culture_lists")
+            else:
+                results_emissions = load_object(fileName + "/Data", "results_emissions")
+                results_mu = load_object(fileName + "/Data", "results_mu")
+                results_var = load_object(fileName + "/Data", "results_var")
+                results_coefficient_of_variance = load_object(fileName + "/Data", "results_coefficient_of_variance")
+                results_emissions_change = load_object( fileName + "/Data", "results_emissions_change")
+                
+            params = load_object(fileName + "/Data", "base_params")
+            property_varied = load_object(fileName + "/Data", "property_varied")
+            property_varied_title = load_object(fileName + "/Data", "property_varied_title")
+            param_min = load_object(fileName + "/Data", "param_min")
+            param_max = load_object(fileName + "/Data", "param_max")
+            title_list = load_object(fileName + "/Data", "title_list")
+            property_values_list = load_object(fileName + "/Data", "property_values_list")
+
+            dataName = fileName + "/Data"
+
+            if GRAPH_TYPE == 6 or 7:
+                #plot_last_culture_vector_matrix(fileName, data_list, dpi_save, property_varied, property_varied_title, property_values_list)
+                plot_last_culture_vector_joy(fileName, results_culture_lists, dpi_save, property_varied, property_varied_title, property_values_list,cmap_multi)
+                plot_last_culture_vector_joy_hist(fileName, results_culture_lists, dpi_save, property_varied, property_varied_title, property_values_list,cmap_multi)
+
+            ###WORKING
     plt.show()

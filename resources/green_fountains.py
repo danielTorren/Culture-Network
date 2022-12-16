@@ -102,7 +102,7 @@ class Green_fountain:
         """
 
         self.M = individual_params["M"]
-        self.save_data = individual_params["save_data"]
+        self.save_timeseries_data = individual_params["save_timeseries_data"]
         self.carbon_intensive_list = individual_params["carbon_emissions"]
         self.compression_factor = individual_params["compression_factor"]
 
@@ -111,9 +111,9 @@ class Green_fountain:
         self.av_behaviour = np.mean(self.attitudes)
         self.values = self.attitudes - self.thresholds
         self.culture = 1.00
+        self.total_carbon_emissions = 0.0
 
-        if self.save_data:
-            self.total_carbon_emissions = 0.0
+        if self.save_timeseries_data:
             self.history_behaviour_values = [list(self.values)]
             self.history_behaviour_attitudes = [list(self.attitudes)]
             self.history_behaviour_thresholds = [list(self.thresholds)]
@@ -155,5 +155,5 @@ class Green_fountain:
         """
         self.steps = steps
 
-        if self.save_data and self.steps % self.compression_factor == 0:
+        if self.save_timeseries_data and self.steps % self.compression_factor == 0:
             self.save_data_individual()
