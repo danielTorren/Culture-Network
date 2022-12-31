@@ -95,7 +95,7 @@ size_points = 5
 RUN = 0
 SINGLE = 1
 GRAPH_TYPE = 8
-bifurcation_plot_data_analysis = 0
+bifurcation_plot_data_analysis = 1
 
 fileName = "results/" + "one_param_sweep_single_18_10_16__31_12_2022"#one_param_sweep_multi_18_06_16__16_12_2022"
 
@@ -316,12 +316,8 @@ if __name__ == "__main__":
 
                 N = data_list[0].N
 
-                ma_matrix = [calc_pos_clusters_set_bandwidth(np.asarray(i.culture_list),identity_space,bandwidth) for i in data_list]
-                print("ma_matrix",ma_matrix)
-                quit()
-                cluster_pos_matrix = [get_cluster_list(np.asarray(data_list[i].culture_list),identity_space, N, ma_matrix[i]) for i in range(len(ma_matrix))]
-                
-                print("cluster_pos_matrix",cluster_pos_matrix)
+                cluster_pos_matrix = [calc_pos_clusters_set_bandwidth(np.asarray(i.culture_list),identity_space,bandwidth) for i in data_list]
+                # this is a matrix of position of identity clusters within in 
                 
                 save_object(cluster_pos_matrix, fileName + "/Data", "cluster_pos_matrix")
             else:

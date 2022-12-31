@@ -178,21 +178,19 @@ def calc_pos_clusters_set_bandwidth(culture_data,s,bandwidth):
     kde = KernelDensity(kernel='gaussian', bandwidth=bandwidth).fit(X_reshape)
     e = kde.score_samples(s.reshape(-1,1))
     ma = argrelextrema(e, np.greater)[0]
-    return ma
+    list_identity_clusters = s[ma]
+    return list_identity_clusters
+
+    
 
 def get_cluster_list(culture_data,s, N, mi):
 
     index_list = np.arange(N)
-    #print("index_list",index_list)
-    #clusters_index_lists = []
 
     #left edge
-    #print("test left mask",(culture_data < s[mi][0]))
     left_mask = (culture_data < s[mi][0])#maybe i can rearranfe one of o the inputs
-    #print("left_mask",left_mask)
-    #print("index_list[left_mask]",index_list[left_mask])
     clusters_index_lists = [list(index_list[left_mask])]
-    #print("first ne", clusters_index_lists)
+
     #print(a[a < s[mi][0]])  # print most left cluster, the values of those clusters but i want the indexs!
 
     # print all middle cluster
