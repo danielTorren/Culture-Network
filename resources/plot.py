@@ -53,9 +53,14 @@ plt.rcParams.update({
 def bifurcation_plot(fileName,cluster_pos_matrix,vals_list, dpi_save):
     fig, ax = plt.subplots()
     for i in range(len(vals_list)):
-        ax.scatter(x =vals_list[i]*(len(cluster_pos_matrix[i])) ,y = cluster_pos_matrix[i])
+        x = [vals_list[i]]*(len(cluster_pos_matrix[i]))
+        #print("vals_list[i]",vals_list[i])
+        #print(x)
+        y = cluster_pos_matrix[i]
+        #print("y", y)
+        ax.scatter(x,y, color = "k")
     
-    ax.set_xlabel(r"Confirmation Bias ,$\\theta$")
+    ax.set_xlabel(r"Confirmation Bias")
     ax.set_ylabel(r"Final identity cluster")
     
     plotName = fileName + "/Plots"

@@ -95,7 +95,7 @@ size_points = 5
 RUN = 0
 SINGLE = 1
 GRAPH_TYPE = 8
-bifurcation_plot_data_analysis = 1
+bifurcation_plot_data_analysis = 0
 
 fileName = "results/" + "one_param_sweep_single_18_10_16__31_12_2022"#one_param_sweep_multi_18_06_16__16_12_2022"
 
@@ -257,7 +257,7 @@ if __name__ == "__main__":
             save_object(title_list, fileName + "/Data", "title_list")
             save_object(property_values_list, fileName + "/Data", "property_values_list")
         else:
-            data_list = load_object(fileName + "/Data", "data_list")
+            #CHANGE THIS#data_list = load_object(fileName + "/Data", "data_list")
             params = load_object(fileName + "/Data", "base_params")
             property_varied = load_object(fileName + "/Data", "property_varied")
             property_varied_title = load_object(fileName + "/Data", "property_varied_title")
