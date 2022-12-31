@@ -92,7 +92,7 @@ dpi_save = 600  # 1200
 alpha_val = 0.25
 size_points = 5
 
-RUN = 0
+RUN = 1
 SINGLE = 1
 GRAPH_TYPE = 8
 bifurcation_plot_data_analysis = 1
@@ -180,7 +180,7 @@ if __name__ == "__main__":
                 property_varied_title = "Confirmation bias $\theta$"
                 param_min = 0.0
                 param_max = 100.0  # 50.0
-                reps = 50
+                reps = 500
                 title_list = ["Bifurcation"]
                 #title_list = [r"Confirmation bias $\theta$ = 1.0", r"Confirmation bias $\theta$ = 10.0", r"Confirmation bias $\theta$ = 25.0", r"Confirmation bias $\theta$ = 50.0"]
                 property_values_list = np.arange(param_min,param_max, reps)

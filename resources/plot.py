@@ -60,7 +60,7 @@ def bifurcation_plot(fileName,cluster_pos_matrix,vals_list, dpi_save):
         #print("y", y)
         
         #ax.scatter(x,y, color = "k")
-        ax.plot(x,y, ls="", marker=",")
+        ax.plot(x,y, ls="", marker=",", color = "k")
     
     ax.set_xlabel(r"Confirmation Bias")
     ax.set_ylabel(r"Final identity cluster")
