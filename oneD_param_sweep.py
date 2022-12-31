@@ -257,7 +257,7 @@ if __name__ == "__main__":
             save_object(title_list, fileName + "/Data", "title_list")
             save_object(property_values_list, fileName + "/Data", "property_values_list")
         else:
-            #CHANGE THIS#data_list = load_object(fileName + "/Data", "data_list")
+            data_list = load_object(fileName + "/Data", "data_list")
             params = load_object(fileName + "/Data", "base_params")
             property_varied = load_object(fileName + "/Data", "property_varied")
             property_varied_title = load_object(fileName + "/Data", "property_varied_title")
@@ -317,6 +317,8 @@ if __name__ == "__main__":
                 N = data_list[0].N
 
                 ma_matrix = [calc_pos_clusters_set_bandwidth(np.asarray(i.culture_list),identity_space,bandwidth) for i in data_list]
+                print("ma_matrix",ma_matrix)
+                quit()
                 cluster_pos_matrix = [get_cluster_list(np.asarray(data_list[i].culture_list),identity_space, N, ma_matrix[i]) for i in range(len(ma_matrix))]
                 
                 print("cluster_pos_matrix",cluster_pos_matrix)
