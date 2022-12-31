@@ -28,6 +28,7 @@ from scipy.signal import argrelextrema
 from sklearn.neighbors import KernelDensity
 from sklearn.cluster import MeanShift
 import pandas as pd
+from resources.utility import get_cluster_list
 
 
 SMALL_SIZE = 14
@@ -104,34 +105,6 @@ def MeanShift_clusters(X,bandwidth):
 
     #print("number of estimated clusters : %d" % n_clusters)
     return ms, labels, cluster_centers, labels_unique, n_clusters
-
-def get_cluster_list(culture_data,s, N, mi):
-
-    index_list = np.arange(N)
-    #print("index_list",index_list)
-    #clusters_index_lists = []
-
-    #left edge
-    #print("test left mask",(culture_data < s[mi][0]))
-    left_mask = (culture_data < s[mi][0])#maybe i can rearranfe one of o the inputs
-    #print("left_mask",left_mask)
-    #print("index_list[left_mask]",index_list[left_mask])
-    clusters_index_lists = [list(index_list[left_mask])]
-    #print("first ne", clusters_index_lists)
-    #print(a[a < s[mi][0]])  # print most left cluster, the values of those clusters but i want the indexs!
-
-    # print all middle cluster
-    for i_cluster in range(len(mi)-1):
-        center_mask = ((culture_data >= s[mi][i_cluster])*(culture_data <= s[mi][i_cluster+1]))# make sure its true for both, i think u can multiply both! WHy doenst it work with and?
-        clusters_index_lists.append(list(index_list[center_mask]))
-        #print(a[(a >= s[mi][i_cluster]) * (a <= s[mi][i_cluster+1])])
-
-    # print most right cluster
-
-    right_mask = (culture_data >= s[mi][-1])
-    clusters_index_lists.append(list(index_list[right_mask]))
-
-    return clusters_index_lists
 
 def plot_alpha_group(fileName, Data, dpi_save,s, auto_bandwidth, bandwidth,cmap,  round_dec, norm_zero_one):
 

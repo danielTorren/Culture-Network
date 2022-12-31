@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import LinearSegmentedColormap, Normalize, LogNorm
 from matplotlib.cm import get_cmap
-from resources.utility import createFolder,produce_name_datetime,save_object,load_object,calc_pos_clusters_set_bandwidth
+from resources.utility import createFolder,produce_name_datetime,save_object,load_object,calc_pos_clusters_set_bandwidth, get_cluster_list
 from resources.run import parallel_run, parallel_run_sa,culture_data_run
 from resources.plot import (
     live_multirun_diagram_mean_coefficient_variance,
@@ -314,7 +314,11 @@ if __name__ == "__main__":
                 identity_space = np.linspace(0, 1,no_samples)
                 bandwidth = 0.01
 
-                cluster_pos_matrix = [calc_pos_clusters_set_bandwidth(i.culture_list,identity_space,bandwidth) for i in data_list]
+                N = data_list[0].N
+
+                ma_matrix = [calc_pos_clusters_set_bandwidth(np.asarray(i.culture_list),identity_space,bandwidth) for i in data_list]
+                cluster_pos_matrix = [get_cluster_list(np.asarray(data_list[i].culture_list),identity_space, N, ma_matrix[i]) for i in range(len(ma_matrix))]
+                
                 print("cluster_pos_matrix",cluster_pos_matrix)
                 
                 save_object(cluster_pos_matrix, fileName + "/Data", "cluster_pos_matrix")
