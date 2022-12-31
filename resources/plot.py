@@ -48,6 +48,21 @@ plt.rcParams.update({
 })
 
 # modules
+####bifurcation plots
+def bifurcation_plot(fileName,cluster_pos_matrix,vals_list, dpi_save):
+    fig, ax = plt.subplots()
+    for i in range(len(vals_list)):
+        ax.scatter(x =vals_list[i] ,y = cluster_pos_matrix[i])
+    
+    ax.set_xlabel(r"Confirmation Bias ,$\\theta$")
+    ax.set_ylabel(r"Final identity cluster")
+    
+    plotName = fileName + "/Plots"
+    f = plotName + "/bifurcation_plot_%s" % (len(vals_list))
+    fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
+
 ###### estimating number of clusters
 def calc_num_clusters_auto_bandwidth_return(culture_data, s):
     
@@ -771,6 +786,49 @@ def plot_compare_av_culture_seed(
     #fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
     fig.savefig(f + ".png", dpi=dpi_save, format="png")
 
+
+def plot_timeseries_identity_seed(
+    fileName, 
+    data_no_culture,
+    data_culture, 
+    nrows, 
+    ncols, 
+    dpi_save,
+    property_values_list_no_culture, 
+    property_varied_no_culture, 
+    property_values_list_culture, 
+    property_varied_culture,
+    colour_list
+    ):
+
+    y_title = r"Identity, $I_{t,n}$"
+
+    fig, axes = plt.subplots(nrows=nrows,ncols=ncols, sharey=True)
+
+    for i in range(len(data_no_culture)):
+        for v in range(data_no_culture[i].N):
+            axes[0].plot(
+                np.asarray(data_no_culture[i].history_time),
+                np.asarray(data_no_culture[i].agent_list[v].history_culture),
+                color = colour_list[i]
+            )
+    
+    for i in range(len(data_culture)):
+        for v in range(data_culture[i].N):
+            axes[1].plot(
+                np.asarray(data_culture[i].history_time),
+                np.asarray(data_culture[i].agent_list[v].history_culture),
+                color = colour_list[i]
+            )
+
+    ax.set_ylabel(r"%s" % y_title)
+    ax.set_xlabel(r"Time")
+
+    plotName = fileName + "/Prints"
+
+    f = plotName + "/plot_timeseries_identity_seed"
+    #fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
 
 def plot_compare_time_culture_seed(
     fileName, 

@@ -79,8 +79,11 @@ plot_multi_line = 0
 cluster_count_run = 0
 cluster_ratio = 0
 culture_run = 1
+
 data_analysis_culture_run = 0
 single_from_multi = 0
+bifurcation_plot_data_analysis = 1
+bifurcation_plot=1
 
 
 fileName = "results/two_param_sweep_average_18_22_51__04_12_2022"
@@ -571,6 +574,7 @@ if __name__ == "__main__":
             save_object(bandwidth_list, fileName + "/Data","bandwidth_list")
 
             if data_analysis_culture_run:
+
                 #print(results_culture_lists, results_culture_lists.shape)
                 #(25,3,200), so it needs to run on (25,3) different occasions?
                 #  

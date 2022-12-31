@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import LinearSegmentedColormap, Normalize, LogNorm
 from matplotlib.cm import get_cmap
-from resources.utility import createFolder,produce_name_datetime,save_object,load_object
+from resources.utility import createFolder,produce_name_datetime,save_object,load_object,calc_pos_clusters_set_bandwidth
 from resources.run import parallel_run, parallel_run_sa,culture_data_run
 from resources.plot import (
     live_multirun_diagram_mean_coefficient_variance,
@@ -53,6 +53,11 @@ from resources.plot import (
     plot_last_culture_vector_matrix,
     plot_last_culture_vector_joy,
     plot_last_culture_vector_joy_hist,
+    plot_compare_time_culture_seed,
+    plot_network_emissions_timeseries_no_culture,
+    plot_compare_time_behaviour_culture_seed,
+    plot_behaviorual_emissions_timeseries_no_culture,
+    bifurcation_plot,
 )
 from resources.multi_run_single_param import (
     produce_param_list,
@@ -87,11 +92,12 @@ dpi_save = 600  # 1200
 alpha_val = 0.25
 size_points = 5
 
-RUN = 0
-SINGLE = 0
-GRAPH_TYPE = 7
+RUN = 1
+SINGLE = 1
+GRAPH_TYPE = 8
+bifurcation_plot_data_analysis = 1
 
-fileName = "results/" + "one_param_sweep_multi_18_06_16__16_12_2022"
+fileName = "results/" + "one_param_sweep_single_15_35_24__16_12_2022"#"one_param_sweep_multi_18_06_16__16_12_2022"
 
 if __name__ == "__main__":
 
@@ -169,7 +175,17 @@ if __name__ == "__main__":
                 param_max = 50.0  # 50.0
                 title_list = ["Impact of eco-warriors on final identity distribution"] 
                 property_values_list = np.asarray([0, 2, 4, 8, 12, 16, 32, 64])
-                
+            elif GRAPH_TYPE == 5:
+                property_varied = "confirmation_bias"
+                property_varied_title = "Confirmation bias $\theta$"
+                param_min = 0.0
+                param_max = 100.0  # 50.0
+                reps = 50
+                title_list = ["Bifurcation"]
+                #title_list = [r"Confirmation bias $\theta$ = 1.0", r"Confirmation bias $\theta$ = 10.0", r"Confirmation bias $\theta$ = 25.0", r"Confirmation bias $\theta$ = 50.0"]
+                property_values_list = np.arange(param_min,param_max, reps)
+                print("property_values_list ", property_values_list )
+
             f = open("constants/base_params.json")
             params = json.load(f)
             params["time_steps_max"] = int(params["total_time"] / params["delta_t"])
@@ -289,8 +305,23 @@ if __name__ == "__main__":
         elif GRAPH_TYPE == 6 or 7:
             Data_list_bool = 1
             #plot_last_culture_vector_matrix(fileName, data_list, dpi_save, property_varied, property_varied_title, property_values_list)
-            plot_last_culture_vector_joy(fileName, data_list, dpi_save, property_varied, property_varied_title, property_values_list,cmap_multi,Data_list_bool)
-            plot_last_culture_vector_joy_hist(fileName, data_list, dpi_save, property_varied, property_varied_title, property_values_list,cmap_multi,Data_list_bool)
+            #plot_last_culture_vector_joy(fileName, data_list, dpi_save, property_varied, property_varied_title, property_values_list,cmap_multi,Data_list_bool)
+            #plot_last_culture_vector_joy_hist(fileName, data_list, dpi_save, property_varied, property_varied_title, property_values_list,cmap_multi,Data_list_bool)
+            plot_carbon_emissions_total_comparison(fileName, data_list, dpi_save, property_values_list, property_varied_title, round_dec)
+        elif GRAPH_TYPE == 8:
+            if bifurcation_plot_data_analysis:
+                no_samples = 10000
+                identity_space = np.linspace(0, 1,no_samples)
+                bandwidth = 0.01
+
+                cluster_pos_matrix = [calc_pos_clusters_set_bandwidth(i.culture_list,identity_space,bandwidth) for i in data_list]
+                print("cluster_pos_matrix",cluster_pos_matrix)
+                
+                save_object(cluster_pos_matrix, fileName + "/Data", "cluster_pos_matrix")
+            else:
+                cluster_pos_matrix = load_object(fileName + "/Data", "cluster_pos_matrix")
+
+            bifurcation_plot(fileName,cluster_pos_matrix,property_values_list, dpi_save)
         else:
             pass
             
@@ -458,8 +489,8 @@ if __name__ == "__main__":
             if GRAPH_TYPE == 6 or 7:
                 Data_list_bool = 0
                 #plot_last_culture_vector_matrix(fileName, data_list, dpi_save, property_varied, property_varied_title, property_values_list)
-                plot_last_culture_vector_joy(fileName, results_culture_lists, dpi_save, property_varied, property_varied_title, property_values_list,cmap_multi,Data_list_bool)
-                plot_last_culture_vector_joy_hist(fileName, results_culture_lists, dpi_save, property_varied, property_varied_title, property_values_list,cmap_multi,Data_list_bool)
-
+                #plot_last_culture_vector_joy(fileName, results_culture_lists, dpi_save, property_varied, property_varied_title, property_values_list,cmap_multi,Data_list_bool)
+                #plot_last_culture_vector_joy_hist(fileName, results_culture_lists, dpi_save, property_varied, property_varied_title, property_values_list,cmap_multi,Data_list_bool)
+                #plot_carbon_emissions_total_comparison(fileName, data_list, dpi_save, property_values_list, property_varied_title, round_dec)
             ###WORKING
     plt.show()
