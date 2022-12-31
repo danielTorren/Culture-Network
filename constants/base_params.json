@@ -6,7 +6,7 @@
     "guilty_individuals": 0,
     "moral_licensing": 0,
     "immutable_green_fountains": 1,
-    "total_time": 3000,
+    "total_time": 1,
     "delta_t": 1.0,
     "phi_lower": 0.01,
     "phi_upper": 0.05,

@@ -92,12 +92,12 @@ dpi_save = 600  # 1200
 alpha_val = 0.25
 size_points = 5
 
-RUN = 1
+RUN = 0
 SINGLE = 1
 GRAPH_TYPE = 8
 bifurcation_plot_data_analysis = 1
 
-fileName = "results/" + "one_param_sweep_single_15_35_24__16_12_2022"#"one_param_sweep_multi_18_06_16__16_12_2022"
+fileName = "results/" + "one_param_sweep_single_18_10_16__31_12_2022"#one_param_sweep_multi_18_06_16__16_12_2022"
 
 if __name__ == "__main__":
 
@@ -175,7 +175,7 @@ if __name__ == "__main__":
                 param_max = 50.0  # 50.0
                 title_list = ["Impact of eco-warriors on final identity distribution"] 
                 property_values_list = np.asarray([0, 2, 4, 8, 12, 16, 32, 64])
-            elif GRAPH_TYPE == 5:
+            elif GRAPH_TYPE == 8:
                 property_varied = "confirmation_bias"
                 property_varied_title = "Confirmation bias $\theta$"
                 param_min = 0.0
@@ -285,7 +285,7 @@ if __name__ == "__main__":
             #live_print_culture_timeseries(fileName, data, property_varied, title_list, nrows, ncols, dpi_save)
             layout = ["circular","circular", "circular", "spring", "spring", "spring"]
             print_live_intial_culture_networks_and_culture_timeseries(fileName, data_list, dpi_save, property_values_list, property_varied_title, ncols, layout, norm_zero_one, cmap, node_size,round_dec)
-        elif GRAPH_TYPE ==4:
+        elif GRAPH_TYPE == 4:
             live_print_culture_timeseries(fileName, data_list, property_varied, title_list, nrows, ncols, dpi_save)
             plot_carbon_emissions_total_comparison(fileName, data_list, dpi_save, property_values_list, property_varied_title, round_dec)
         elif GRAPH_TYPE == 5:
@@ -302,7 +302,7 @@ if __name__ == "__main__":
             cluster_example_identity_list_list = load_object(dataName,"cluster_example_identity_list_list")
             shuffle_colours = True
             plot_cluster_culture_time_series_multi(fileName, data_list, dpi_save,clusters_index_lists_list, cluster_example_identity_list_list, cmap_multi,norm_zero_one, shuffle_colours ,nrows, ncols,title_list)#haS TO BE RUN TOGETHER
-        elif GRAPH_TYPE == 6 or 7:
+        elif GRAPH_TYPE == (6 or 7):
             Data_list_bool = 1
             #plot_last_culture_vector_matrix(fileName, data_list, dpi_save, property_varied, property_varied_title, property_values_list)
             #plot_last_culture_vector_joy(fileName, data_list, dpi_save, property_varied, property_varied_title, property_values_list,cmap_multi,Data_list_bool)
