@@ -60,12 +60,13 @@ if __name__ == "__main__":
 
     ############################
     if RUN:
-        seed_list_set = [1,2,3,4,5,6,7,8,9,10]
+        seed_list_set = list(range(20))
+        print(seed_list_set)
         property_varied = "confirmation_bias"
         property_varied_title = "Confirmation bias $\theta$"
-        param_min = 0.0
+        param_min = -10.0
         param_max = 100.0  # 50.0
-        reps = 50
+        reps = 220
         title_list = ["Bifurcation"]
         #title_list = [r"Confirmation bias $\theta$ = 1.0", r"Confirmation bias $\theta$ = 10.0", r"Confirmation bias $\theta$ = 25.0", r"Confirmation bias $\theta$ = 50.0"]
         property_values_list = np.linspace(param_min,param_max, reps)
@@ -114,7 +115,7 @@ if __name__ == "__main__":
         bandwidth = 0.01
 
         cluster_pos_matrix_list = [[calc_pos_clusters_set_bandwidth(np.asarray(results_culture_lists[i][j]),identity_space,bandwidth) for i in range(len(property_values_list))] for j in range(len(seed_list))]
-        print("cluster_pos_matrix_list",cluster_pos_matrix_list,len(cluster_pos_matrix_list))
+        #print("cluster_pos_matrix_list",cluster_pos_matrix_list,len(cluster_pos_matrix_list))
         # each entry is a matrix of position of identity clusters, corresponding to one stochastic run
         
         save_object(cluster_pos_matrix_list, fileName + "/Data", "cluster_pos_matrix_list")
@@ -122,7 +123,7 @@ if __name__ == "__main__":
         save_object(bandwidth, fileName + "/Data", "bandwidth")
     else:
         cluster_pos_matrix_list = load_object(fileName + "/Data", "cluster_pos_matrix_list")
-        print("cluster_pos_matrix",cluster_pos_matrix_list)
+        #print("cluster_pos_matrix",cluster_pos_matrix_list)
 
     #bifurcation_plot(fileName,cluster_pos_matrix,property_values_list, dpi_save)
     bifurcation_plot_stochastic(fileName,cluster_pos_matrix_list,property_values_list, seed_list,cmap_multi,dpi_save)
