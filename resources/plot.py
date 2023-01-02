@@ -52,6 +52,7 @@ plt.rcParams.update({
 ####bifurcation plots
 def bifurcation_plot(fileName,cluster_pos_matrix,vals_list, dpi_save):
     fig, ax = plt.subplots()
+
     for i in range(len(vals_list)):
         x = [vals_list[i]]*(len(cluster_pos_matrix[i]))
         #print("vals_list[i]",vals_list[i])
@@ -60,7 +61,9 @@ def bifurcation_plot(fileName,cluster_pos_matrix,vals_list, dpi_save):
         #print("y", y)
         
         #ax.scatter(x,y, color = "k")
-        ax.plot(x,y, ls="", marker=",", color = "k")
+        ax.plot(x,y, ls="", marker=".", color = "k", linewidth = 0.5)
+        #ax.plot(x,y, ls="", color = "k")
+    ax.set_ylim(0,1)
     
     ax.set_xlabel(r"Confirmation Bias")
     ax.set_ylabel(r"Final identity cluster")
@@ -70,6 +73,33 @@ def bifurcation_plot(fileName,cluster_pos_matrix,vals_list, dpi_save):
     fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
     fig.savefig(f + ".png", dpi=dpi_save, format="png")
 
+def bifurcation_plot_stochastic(fileName,cluster_pos_matrix_list,vals_list, seed_list,cmap,dpi_save):
+    fig, ax = plt.subplots()
+    
+    colour_adjust = Normalize(seed_list)
+    step_colours = cmap(colour_adjust)
+
+    for i in range(len(cluster_pos_matrix_list)):
+        for j in range(len(vals_list)):
+            color = color_list[j]
+            x = [vals_list[j]]*(len(cluster_pos_matrix_list[i][j]))
+            #print("vals_list[i]",vals_list[i])
+            #print(x)
+            y = cluster_pos_matrix_list[i][j]
+            #print("y", y)
+            
+            #ax.scatter(x,y, color = "k")
+            ax.plot(x,y, ls="", marker=".", color = step_colours[j], linewidth = 0.5)
+            #ax.plot(x,y, ls="", color = "k")
+    ax.set_ylim(0,1)
+    
+    ax.set_xlabel(r"Confirmation Bias")
+    ax.set_ylabel(r"Final identity cluster")
+    
+    plotName = fileName + "/Plots"
+    f = plotName + "/bifurcation_plot_stochastic%s" % (len(vals_list))
+    fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
 
 ###### estimating number of clusters
 def calc_num_clusters_auto_bandwidth_return(culture_data, s):

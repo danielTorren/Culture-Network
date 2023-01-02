@@ -92,12 +92,12 @@ dpi_save = 600  # 1200
 alpha_val = 0.25
 size_points = 5
 
-RUN = 1
+RUN = 0
 SINGLE = 1
 GRAPH_TYPE = 8
-bifurcation_plot_data_analysis = 1
+bifurcation_plot_data_analysis = 0
 
-fileName = "results/" + "one_param_sweep_single_18_10_16__31_12_2022"#one_param_sweep_multi_18_06_16__16_12_2022"
+fileName = "results/" + "one_param_sweep_single_23_02_15__01_01_2023"#one_param_sweep_multi_18_06_16__16_12_2022"
 
 if __name__ == "__main__":
 
@@ -183,7 +183,7 @@ if __name__ == "__main__":
                 reps = 500
                 title_list = ["Bifurcation"]
                 #title_list = [r"Confirmation bias $\theta$ = 1.0", r"Confirmation bias $\theta$ = 10.0", r"Confirmation bias $\theta$ = 25.0", r"Confirmation bias $\theta$ = 50.0"]
-                property_values_list = np.arange(param_min,param_max, reps)
+                property_values_list = np.linspace(param_min,param_max, reps)
                 print("property_values_list ", property_values_list )
 
             f = open("constants/base_params.json")
@@ -257,7 +257,7 @@ if __name__ == "__main__":
             save_object(title_list, fileName + "/Data", "title_list")
             save_object(property_values_list, fileName + "/Data", "property_values_list")
         else:
-            data_list = load_object(fileName + "/Data", "data_list")
+            #data_list = load_object(fileName + "/Data", "data_list")
             params = load_object(fileName + "/Data", "base_params")
             property_varied = load_object(fileName + "/Data", "property_varied")
             property_varied_title = load_object(fileName + "/Data", "property_varied_title")
@@ -309,6 +309,7 @@ if __name__ == "__main__":
             #plot_last_culture_vector_joy_hist(fileName, data_list, dpi_save, property_varied, property_varied_title, property_values_list,cmap_multi,Data_list_bool)
             plot_carbon_emissions_total_comparison(fileName, data_list, dpi_save, property_values_list, property_varied_title, round_dec)
         elif GRAPH_TYPE == 8:
+            #print(len(data_list), data_list[0])
             if bifurcation_plot_data_analysis:
                 no_samples = 10000
                 identity_space = np.linspace(0, 1,no_samples)
@@ -316,13 +317,14 @@ if __name__ == "__main__":
 
                 N = data_list[0].N
 
+
                 cluster_pos_matrix = [calc_pos_clusters_set_bandwidth(np.asarray(i.culture_list),identity_space,bandwidth) for i in data_list]
                 # this is a matrix of position of identity clusters within in 
                 
                 save_object(cluster_pos_matrix, fileName + "/Data", "cluster_pos_matrix")
             else:
                 cluster_pos_matrix = load_object(fileName + "/Data", "cluster_pos_matrix")
-
+            print("cluster_pos_matrix",cluster_pos_matrix)
             bifurcation_plot(fileName,cluster_pos_matrix,property_values_list, dpi_save)
         else:
             pass
