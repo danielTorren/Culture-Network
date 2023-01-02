@@ -72,21 +72,22 @@ if __name__ == "__main__":
         print("property_values_list ", property_values_list )
 
         f = open("constants/base_params.json")
-        params = json.load(f)
-        params["time_steps_max"] = int(params["total_time"] / params["delta_t"])
-        params["seed_list"] = seed_list_set
+        base_params = json.load(f)
+        base_params["time_steps_max"] = int(base_params["total_time"] / base_params["delta_t"])
+        base_params["seed_list"] = seed_list_set
 
-        root = "one_param_sweep_single"
+        root = "bifurcation_one_param"
         fileName = produce_name_datetime(root)
         print("fileName: ", fileName)
 
-        params_list = produce_param_list(params, property_values_list, property_varied)
+        params_list = produce_param_list(base_params, property_values_list, property_varied)
 
         results_culture_lists = culture_data_run(params_list)#list of lists lists [param set up, stochastic, cluster]
+
         createFolder(fileName)
 
         save_object(results_culture_lists, fileName + "/Data", "results_culture_lists")
-        save_object(params, fileName + "/Data", "base_params")
+        save_object(base_params, fileName + "/Data", "base_params")
         save_object(property_varied, fileName + "/Data", "property_varied")
         save_object(property_varied_title, fileName + "/Data", "property_varied_title")
         save_object(param_min, fileName + "/Data", "param_min")
