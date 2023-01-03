@@ -1964,8 +1964,8 @@ def double_matrix_plot(
     col_dict = variable_parameters_dict["col"]
     row_dict = variable_parameters_dict["row"]
 
-    ax.set_xlabel(r"Confirmation bias, $\theta$")
-    ax.set_ylabel(r"Attitude Beta parameters, $(a,b)$")
+    ax.set_xlabel(col_dict["title"])
+    ax.set_ylabel(row_dict["title"])
 
     if col_dict["divisions"] == "log":
         ax.set_xscale("log")

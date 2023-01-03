@@ -34,12 +34,6 @@ plt.rcParams.update({
 
 
 # constants
-alpha_attitude = 1
-beta_attitude = 8
-
-alpha_threshold = 0.1
-beta_threshold = 6
-
 bin_num = 1000
 num_counts = 100000
 
@@ -64,18 +58,7 @@ def plot_beta_alt(f:str, a_b_combo_list: list):
 if __name__ == "__main__":
     fileName = "results/plot_beta_distribution"
     
-    """
-    plot_beta(
-        fileName,
-        alpha_attitude,
-        beta_attitude,
-        alpha_threshold,
-        beta_threshold,
-        bin_num,
-        num_counts,
-    )
-    """
-    a_b_combo_list = [[5,5],[2,3],[1,1],[0.1,0.1]]
+    a_b_combo_list = [[1,4],[1,5],[1,6],[0.5,2]]#[[5,5],[2,3],[1,1],[0.1,0.1]]
 
     plot_beta_alt(fileName,a_b_combo_list)
 
