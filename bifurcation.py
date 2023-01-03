@@ -63,7 +63,7 @@ ONE_PARAM = 0
 TWO_PARAM_ONE_SEED = 0
 bifurcation_plot_data_analysis = 1
 
-fileName = "results/" + "bifurcation_one_param_11_52_34__02_01_2023"#one_param_sweep_multi_18_06_16__16_12_2022"
+fileName = "results/" + "bifurcation_SINGLE_COMPARE_IDENTITY_13_01_16__03_01_2023"#one_param_sweep_multi_18_06_16__16_12_2022"
 
 if __name__ == "__main__":
     if SINGLE_COMPARE_IDENTITY:
@@ -84,7 +84,7 @@ if __name__ == "__main__":
             f = open("constants/base_params.json")
             base_params = json.load(f)
             base_params["time_steps_max"] = int(base_params["total_time"] / base_params["delta_t"])
-            base_params["alpha"] = 1.0
+            base_params["alpha_change"] = 1.0
 
             params_list_identity = produce_param_list(base_params, property_values_list_identity, property_varied_identity)
             results_culture_lists_identity = one_seed_culture_data_run(params_list_identity)#list of lists lists [param set up, stochastic, cluster]
@@ -101,7 +101,7 @@ if __name__ == "__main__":
             property_values_list_no_identity = np.linspace(param_min_no_identity,param_max_no_identity, reps_no_identity)
             print("property_values_list_no_identity ", property_values_list_no_identity )
 
-            base_params["alpha"] = 2.0
+            base_params["alpha_change"] = 2.0
 
             params_list_no_identity = produce_param_list(base_params, property_values_list_no_identity, property_varied_no_identity)
             results_culture_lists_no_identity = one_seed_culture_data_run(params_list_no_identity)#list of lists lists [param set up, stochastic, cluster]
@@ -167,7 +167,8 @@ if __name__ == "__main__":
             save_object(identity_space, fileName + "/Data", "identity_space")
             save_object(bandwidth, fileName + "/Data", "bandwidth")
         else:
-            cluster_pos_matrix_list = load_object(fileName + "/Data", "cluster_pos_matrix_list")
+            cluster_pos_matrix_list_no_identity = load_object(fileName + "/Data", "cluster_pos_matrix_list_no_identity")
+            cluster_pos_matrix_list_identity = load_object(fileName + "/Data", "cluster_pos_matrix_list_identity")
             #print("cluster_pos_matrix",cluster_pos_matrix_list)
 
         #bifurcation_plot(fileName,cluster_pos_matrix,property_values_list, dpi_save)

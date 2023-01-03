@@ -207,6 +207,25 @@ def generate_cluster_output(params: dict,s):
         stochastic_norm_clusters_count,
     )
 
+def generate_single_stochastic_output(params):
+    data = generate_data(params)
+    #print("data.total_carbon_emissions",data.total_carbon_emissions)
+    return data.total_carbon_emissions
+
+
+def single_stochstic_emissions_run(
+        params_dict: list[dict]
+) -> npt.NDArray:
+
+    #print("params_dict", params_dict)
+    num_cores = multiprocessing.cpu_count()
+    #results_carbon_emissions = [generate_single_stochastic_output(i) for i in params_dict]
+    results_carbon_emissions = Parallel(n_jobs=num_cores, verbose=10)(
+        delayed(generate_single_stochastic_output)(i) for i in params_dict
+    )
+
+    return np.asarray(results_carbon_emissions)#can't run with multiple different network sizes
+
 def generate_culture_lists_output(params):
 
     cultures_list = []

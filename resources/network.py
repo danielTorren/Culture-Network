@@ -250,7 +250,7 @@ class Network:
         # network
         self.M = int(round(parameters["M"]))
         self.N = int(round(parameters["N"]))
-        self.green_N = parameters["green_N"]
+        self.green_N = int(round(parameters["green_N"]))
 
         # culture
         self.culture_momentum_real = parameters["culture_momentum_real"]

@@ -75,34 +75,34 @@ def bifurcation_plot(fileName,cluster_pos_matrix,vals_list, dpi_save):
     fig.savefig(f + ".png", dpi=dpi_save, format="png")
 
 def bifurcation_plot_culture_or_not(fileName,cluster_pos_matrix_identity,cluster_pos_matrix_no_identity,vals_list_identity,vals_list_no_identity, dpi_save):
-    fig, ax = plt.subplots()
+    fig, axes = plt.subplots(nrows = 1, ncols=2)
 
     for i in range(len(vals_list_identity)):
-        x = [vals_list_identity[i]]*(len(cluster_pos_matrix_identity[i]))
+        x_identity = [vals_list_identity[i]]*(len(cluster_pos_matrix_identity[i]))
         #print("vals_list[i]",vals_list[i])
         #print(x)
-        y = cluster_pos_matrix_identity[i]
+        y_identity = cluster_pos_matrix_identity[i]
         #print("y", y)
         
         #ax.scatter(x,y, color = "k")
-        ax.plot(x,y, ls="", marker=".", color = "k", linewidth = 0.5)
+        axes[0].plot(x_identity,y_identity, ls="", marker=".", color = "k", linewidth = 0.5)
         #ax.plot(x,y, ls="", color = "k")
     
     for i in range(len(vals_list_no_identity)):
-        x = [vals_list_no_identity[i]]*(len(cluster_pos_matrix_no_identity[i]))
+        x_no_identity = [vals_list_no_identity[i]]*(len(cluster_pos_matrix_no_identity[i]))
         #print("vals_list[i]",vals_list[i])
         #print(x)
-        y = cluster_pos_matrix_no_identity[i]
+        y_no_identity = cluster_pos_matrix_no_identity[i]
         #print("y", y)
         
         #ax.scatter(x,y, color = "k")
-        ax.plot(x,y, ls="", marker=".", color = "r", linewidth = 0.5)
+        axes[1].plot(x_no_identity,y_no_identity, ls="", marker=".", color = "r", linewidth = 0.5)
         #ax.plot(x,y, ls="", color = "k")
 
-    ax.set_ylim(0,1)
+    #ax.set_ylim(0,1)
     
-    ax.set_xlabel(r"Confirmation Bias")
-    ax.set_ylabel(r"Final identity cluster")
+    #ax.set_xlabel(r"Confirmation Bias")
+    #ax.set_ylabel(r"Final identity cluster")
     
     plotName = fileName + "/Plots"
     f = plotName + "/bifurcation_plot_%s_%s" % (len(vals_list_identity),len(vals_list_no_identity))
