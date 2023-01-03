@@ -236,6 +236,7 @@ class Network:
         self.compression_factor = parameters["compression_factor"]
         self.degroot_aggregation = parameters["degroot_aggregation"]
         self.immutable_green_fountains = parameters["immutable_green_fountains"]
+        self.polarisation_test = parameters["polarisation_test"]#whether to have a = b
 
         self.guilty_individuals = parameters["guilty_individuals"]
         self.guilty_individual_power = parameters["guilty_individual_power"]
@@ -301,10 +302,14 @@ class Network:
 
         #############################################################################################################################
         #Associate people with attitude values CHANGE THIS BACK
+        
         self.a_attitude = parameters["a_attitude"]
-        #self.b_attitude = 2 - self.a_attitude 
-        #self.b_attitude = self.a_attitude 
-        self.b_attitude = parameters["b_attitude"]
+        if self.polarisation_test:
+            self.b_attitude = self.a_attitude
+        else:
+            #self.b_attitude = 2 - self.a_attitude 
+            #self.b_attitude = self.a_attitude 
+            self.b_attitude = parameters["b_attitude"]
         self.a_threshold = parameters["a_threshold"]
         self.b_threshold = parameters["b_threshold"]
         #################################################################################################################################

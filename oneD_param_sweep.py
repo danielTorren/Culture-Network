@@ -92,10 +92,10 @@ dpi_save = 600  # 1200
 alpha_val = 0.25
 size_points = 5
 
-RUN = 0
+RUN = 1
 SINGLE = 1
 GRAPH_TYPE = 8
-bifurcation_plot_data_analysis = 0
+bifurcation_plot_data_analysis = 1
 
 fileName = "results/" + "one_param_sweep_single_23_02_15__01_01_2023"#one_param_sweep_multi_18_06_16__16_12_2022"
 
@@ -178,7 +178,7 @@ if __name__ == "__main__":
             elif GRAPH_TYPE == 8:
                 property_varied = "confirmation_bias"
                 property_varied_title = "Confirmation bias $\theta$"
-                param_min = 0.0
+                param_min = -0.0
                 param_max = 100.0  # 50.0
                 reps = 500
                 title_list = ["Bifurcation"]

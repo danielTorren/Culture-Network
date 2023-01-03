@@ -218,6 +218,10 @@ def generate_culture_lists_output(params):
 
     return cultures_list
 
+def generate_culture_lists_one_seed_output(params):
+    data = generate_data(params)
+    return data.culture_list
+
 def culture_data_run(
         params_dict: list[dict]
 ) -> npt.NDArray:
@@ -229,7 +233,19 @@ def culture_data_run(
     )
 
     return np.asarray(results_culture_lists)#can't run with multiple different network sizes
-    
+
+def one_seed_culture_data_run(
+        params_dict: list[dict]
+) -> npt.NDArray:
+    #print("params_dict", params_dict)
+    num_cores = multiprocessing.cpu_count()
+    #res = [generate_sensitivity_output(i) for i in params_dict]
+    results_culture_lists = Parallel(n_jobs=num_cores, verbose=10)(
+        delayed(generate_culture_lists_one_seed_output)(i) for i in params_dict
+    )
+
+    return np.asarray(results_culture_lists)#can't run with multiple different network sizes
+
 def cluster_data_run(
         params_dict: dict[dict],s
 ) -> tuple[npt.NDArray, npt.NDArray, npt.NDArray, npt.NDArray]:

@@ -16,6 +16,7 @@ from pandas import DataFrame
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from matplotlib.colors import Normalize, LinearSegmentedColormap, SymLogNorm
+from matplotlib.image import NonUniformImage
 from matplotlib.collections import LineCollection
 from matplotlib.cm import get_cmap
 from typing import Union
@@ -73,15 +74,49 @@ def bifurcation_plot(fileName,cluster_pos_matrix,vals_list, dpi_save):
     fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
     fig.savefig(f + ".png", dpi=dpi_save, format="png")
 
+def bifurcation_plot_culture_or_not(fileName,cluster_pos_matrix_identity,cluster_pos_matrix_no_identity,vals_list_identity,vals_list_no_identity, dpi_save):
+    fig, ax = plt.subplots()
+
+    for i in range(len(vals_list_identity)):
+        x = [vals_list_identity[i]]*(len(cluster_pos_matrix_identity[i]))
+        #print("vals_list[i]",vals_list[i])
+        #print(x)
+        y = cluster_pos_matrix_identity[i]
+        #print("y", y)
+        
+        #ax.scatter(x,y, color = "k")
+        ax.plot(x,y, ls="", marker=".", color = "k", linewidth = 0.5)
+        #ax.plot(x,y, ls="", color = "k")
+    
+    for i in range(len(vals_list_no_identity)):
+        x = [vals_list_no_identity[i]]*(len(cluster_pos_matrix_no_identity[i]))
+        #print("vals_list[i]",vals_list[i])
+        #print(x)
+        y = cluster_pos_matrix_no_identity[i]
+        #print("y", y)
+        
+        #ax.scatter(x,y, color = "k")
+        ax.plot(x,y, ls="", marker=".", color = "r", linewidth = 0.5)
+        #ax.plot(x,y, ls="", color = "k")
+
+    ax.set_ylim(0,1)
+    
+    ax.set_xlabel(r"Confirmation Bias")
+    ax.set_ylabel(r"Final identity cluster")
+    
+    plotName = fileName + "/Plots"
+    f = plotName + "/bifurcation_plot_%s_%s" % (len(vals_list_identity),len(vals_list_no_identity))
+    fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
 def bifurcation_plot_stochastic(fileName,cluster_pos_matrix_list,vals_list, seed_list,cmap,dpi_save):
     fig, ax = plt.subplots()
-    
-    colour_adjust = Normalize(seed_list)
-    step_colours = cmap(colour_adjust)
+    #print(seed_list)
+    #colour_adjust = Normalize(min(seed_list), max(seed_list))
+    #step_colours = cmap(colour_adjust)
 
     for i in range(len(cluster_pos_matrix_list)):
         for j in range(len(vals_list)):
-            color = color_list[j]
             x = [vals_list[j]]*(len(cluster_pos_matrix_list[i][j]))
             #print("vals_list[i]",vals_list[i])
             #print(x)
@@ -89,7 +124,7 @@ def bifurcation_plot_stochastic(fileName,cluster_pos_matrix_list,vals_list, seed
             #print("y", y)
             
             #ax.scatter(x,y, color = "k")
-            ax.plot(x,y, ls="", marker=".", color = step_colours[j], linewidth = 0.5)
+            ax.plot(x,y, ls="", marker=".", linewidth = 0.5)# color = step_colours[j],
             #ax.plot(x,y, ls="", color = "k")
     ax.set_ylim(0,1)
     
@@ -97,7 +132,79 @@ def bifurcation_plot_stochastic(fileName,cluster_pos_matrix_list,vals_list, seed
     ax.set_ylabel(r"Final identity cluster")
     
     plotName = fileName + "/Plots"
-    f = plotName + "/bifurcation_plot_stochastic%s" % (len(vals_list))
+    f = plotName + "/bifurcation_plot_stochastic_%s" % (len(vals_list))
+    fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
+
+def bifurcation_heat_map_stochastic(fileName,cluster_pos_matrix_list,vals_list, seed_list,cmap,dpi_save):
+    
+    fig, ax = plt.subplots()
+    #print(seed_list)
+    #colour_adjust = Normalize(min(seed_list), max(seed_list))
+    #step_colours = cmap(colour_adjust)
+
+    x_list = []
+    y_list = []
+    for i in range(len(cluster_pos_matrix_list)):
+        for j in range(len(vals_list)):
+            y_list.extend(cluster_pos_matrix_list[i][j])
+            x_list.extend([vals_list[j]]*(len(cluster_pos_matrix_list[i][j])))
+
+            
+            #ax.scatter(x,y, color = "k")
+            #ax.plot(x,y, ls="", marker=".", linewidth = 0.5)# color = step_colours[j],
+            #ax.plot(x,y, ls="", color = "k")
+    print("x_list", x_list)
+    print("y_list", y_list)
+    #flatten the list
+    #print(len(x_list), len(y_list))
+    H, xedges, yedges = np.histogram2d(x_list, y_list, bins=(100,100))
+
+    #pcolormesh
+    X, Y = np.meshgrid(xedges, yedges)
+    ax.pcolormesh(X, Y, H)
+
+    #interpolated image
+    #im = NonUniformImage(ax, interpolation='bilinear')
+    #xcenters = (xedges[:-1] + xedges[1:]) / 2
+    #ycenters = (yedges[:-1] + yedges[1:]) / 2
+    #im.set_data(xcenters, ycenters, H)
+    #ax.images.append(im)
+
+    #ax.set_ylim(0,1)
+    
+    ax.set_xlabel(r"Confirmation Bias")
+    ax.set_ylabel(r"Final identity cluster")
+    
+    plotName = fileName + "/Plots"
+    f = plotName + "/bifurcation_heatmap_stochastic_%s" % (len(vals_list))
+    fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
+def bifurcation_plot_one_seed_two_params(fileName,cluster_pos_matrix_list,variable_parameters_dict,cmap,dpi_save):
+    fig, ax = plt.subplots()
+    
+    colour_adjust = Normalize(variable_parameters_dict["row"]["vals"])
+    step_colours = cmap(colour_adjust)
+
+    for i in range(variable_parameters_dict["row"]["reps"]):
+        for j in range(variable_parameters_dict["col"]["reps"]):
+
+            x = [variable_parameters_dict["row"]["vals"][j]]*(len(cluster_pos_matrix_list[i][j]))#confirmation bias
+            y = cluster_pos_matrix_list[i][j]#identity
+            z = [variable_parameters_dict["col"]["vals"][j]]*(len(cluster_pos_matrix_list[i][j]))#polarisation
+
+            ax.plot(x,y,x, ls="", marker=".", color = step_colours[j], linewidth = 0.5)#colour based on polarsation
+            #ax.plot(x,y, ls="", color = "k")
+    ax.set_ylim(0,1)
+    
+    ax.set_xlabel(r"Confirmation Bias")
+    ax.set_ylabel(r"Final identity cluster")
+    ax.set_zlabel(r"Initial polarisation")
+    
+    plotName = fileName + "/Plots"
+    f = plotName + "/bifurcation_plot_one_seed_two_params_%s_%s" % (variable_parameters_dict["row"]["reps"],variable_parameters_dict["col"]["reps"])
     fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
     fig.savefig(f + ".png", dpi=dpi_save, format="png")
 
