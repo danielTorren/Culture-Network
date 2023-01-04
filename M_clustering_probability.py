@@ -105,7 +105,7 @@ if __name__ == "__main__":
             base_params = json.load(f_base_params)
             f_base_params.close()
             base_params["time_steps_max"] = int(base_params["total_time"] / base_params["delta_t"])
-            base_params["seed_list"] = np.arange(20)
+            base_params["seed_list"] = np.arange(start = 1, stop = 21)
 
             # load variable params
             variable_parameters_dict = {
