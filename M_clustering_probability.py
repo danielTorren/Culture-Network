@@ -105,8 +105,9 @@ if __name__ == "__main__":
             base_params = json.load(f_base_params)
             f_base_params.close()
             base_params["time_steps_max"] = int(base_params["total_time"] / base_params["delta_t"])
-            base_params["seed_list"] = np.arange(start = 1, stop = 21)
-
+            base_params["seed_list"] = list(np.arange(start = 1, stop = 21))
+            print("seed list: ",base_params["seed_list"])
+            #quit()
             # load variable params
             variable_parameters_dict = {
                 "col":{"property":"confirmation_bias","min":-10, "max":101 , "title": "Confirmation bias, $\\theta$","divisions": "linear", "reps": 50},  
