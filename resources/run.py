@@ -229,7 +229,6 @@ def single_stochstic_emissions_run(
 def generate_culture_lists_output(params):
 
     cultures_list = []
-
     for v in params["seed_list"]:
         params["set_seed"] = v
         data = generate_data(params)
