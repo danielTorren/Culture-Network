@@ -117,6 +117,8 @@ if __name__ == "__main__":
                 variable_parameters_dict
             )
 
+            print('variable_parameters_dict["col"]["vals"]',variable_parameters_dict["col"]["vals"],variable_parameters_dict["row"]["vals"])
+
             root = "M_clustering_probability"
             fileName = produce_name_datetime(root)
             print("fileName:", fileName)

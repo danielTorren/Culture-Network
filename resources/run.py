@@ -246,10 +246,10 @@ def culture_data_run(
 ) -> npt.NDArray:
     #print("params_dict", params_dict)
     num_cores = multiprocessing.cpu_count()
-    #res = [generate_sensitivity_output(i) for i in params_dict]
-    results_culture_lists = Parallel(n_jobs=num_cores, verbose=10)(
-        delayed(generate_culture_lists_output)(i) for i in params_dict
-    )
+    results_culture_lists = [generate_culture_lists_output(i) for i in params_dict]
+    #results_culture_lists = Parallel(n_jobs=num_cores, verbose=10)(
+    #    delayed(generate_culture_lists_output)(i) for i in params_dict
+    #)
 
     return np.asarray(results_culture_lists)#can't run with multiple different network sizes
 
