@@ -75,7 +75,9 @@ def bifurcation_plot(fileName,cluster_pos_matrix,vals_list, dpi_save):
     fig.savefig(f + ".png", dpi=dpi_save, format="png")
 
 def bifurcation_plot_culture_or_not(fileName,cluster_pos_matrix_identity,cluster_pos_matrix_no_identity,vals_list_identity,vals_list_no_identity, dpi_save):
-    fig, axes = plt.subplots(nrows = 1, ncols=2)
+    fig, axes = plt.subplots(nrows = 1, ncols=2, sharey= True, figsize= (10,6))
+
+    print(axes) 
 
     for i in range(len(vals_list_identity)):
         x_identity = [vals_list_identity[i]]*(len(cluster_pos_matrix_identity[i]))
@@ -99,10 +101,14 @@ def bifurcation_plot_culture_or_not(fileName,cluster_pos_matrix_identity,cluster
         axes[1].plot(x_no_identity,y_no_identity, ls="", marker=".", color = "r", linewidth = 0.5)
         #ax.plot(x,y, ls="", color = "k")
 
-    #ax.set_ylim(0,1)
-    
-    #ax.set_xlabel(r"Confirmation Bias")
-    #ax.set_ylabel(r"Final identity cluster")
+    axes[0].set_ylim(0,1)
+
+    axes[0].set_title(r"Inter-behavioural dependance")
+    axes[1].set_title(r"Behavioural independance")
+
+    axes[0].set_xlabel(r"Confirmation bias, $\theta$")
+    axes[1].set_xlabel(r"Confirmation bias, $\theta$")
+    axes[0].set_ylabel(r"Final identity clusters")
     
     plotName = fileName + "/Plots"
     f = plotName + "/bifurcation_plot_%s_%s" % (len(vals_list_identity),len(vals_list_no_identity))

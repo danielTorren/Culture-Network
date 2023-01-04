@@ -68,11 +68,11 @@ from resources.run import (
 import numpy as np
 
 # run bools
-RUN = 1 # run or load in previously saved data
+RUN = 0 # run or load in previously saved data
 SINGLE = 1 # determine if you runs single shots or study the averages over multiple runs for each experiment
 
 
-fileName = "results/two_param_sweep_average_18_22_51__04_12_2022"
+fileName = "results/splitting_eco_warriors_single_14_47_07__03_01_2023"
 #"results/twoD_Average_confirmation_bias_M_200_3000_20_70_20_5"#"results/twoD_Average_confirmation_bias_a_attitude_200_3000_20_64_64_5"#"
 #"results/twoD_Average_confirmation_bias_a_attitude_200_3000_20_64_64_5"
 #"results/twoD_Average_action_observation_I_a_attitude_200_2000_20_64_64_5"
@@ -100,8 +100,8 @@ if __name__ == "__main__":
 
             # load variable params
             variable_parameters_dict = {
-                "col":{"property":"confirmation_bias","min":-10, "max":100 , "title": "Confirmation bias, $\\theta$","divisions": "linear", "reps": 64},  
-                "row":{"property":"green_N","min":0, "max": 100, "title": "Eco warrior count","divisions": "linear", "reps": 64}, 
+                "col":{"property":"confirmation_bias","min":0, "max":100 , "title": "Confirmation bias, $\\theta$","divisions": "linear", "reps": 100},  
+                "row":{"property":"green_N","min":0, "max": 100, "title": "Eco warrior count","divisions": "linear", "reps": 100}, 
             }
 
             variable_parameters_dict = generate_vals_variable_parameters_and_norms(
@@ -153,9 +153,10 @@ if __name__ == "__main__":
 
         row_label = r"Eco-warriors count"#r"Number of behaviours per agent, M"
         col_label = r'Confirmation bias, $\theta$'#r'Confirmation bias, $\theta$'
-        y_label = r"Emissions, $E$"#r"Identity variance, $\sigma^2$"
+        y_label = r"Final emissions, $E$"#r"Identity variance, $\sigma^2$"
 
-        multi_line_matrix_plot(fileName,matrix_emissions, col_dict["vals"], row_dict["vals"],"variance", get_cmap("plasma"),dpi_save,col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label, 1, col_label, row_label, y_label)#y_ticks_pos, y_ticks_label
+        multi_line_matrix_plot(fileName,matrix_emissions, col_dict["vals"], row_dict["vals"],"emissions", get_cmap("plasma"),dpi_save,col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label, 0, col_label, row_label, y_label)#y_ticks_pos, y_ticks_label
+        multi_line_matrix_plot(fileName,matrix_emissions, col_dict["vals"], row_dict["vals"],"emissions", get_cmap("plasma"),dpi_save,col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label, 1, col_label, row_label, y_label)#y_ticks_pos, y_ticks_label
         #multi_line_matrix_plot(fileName, Z, col_vals, row_vals,  Y_param, cmap, dpi_save, col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label,col_axis_x, col_label, row_label, y_label)
         
         #### two D plot of emissions with confimation bias and number of eco warriors

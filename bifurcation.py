@@ -57,13 +57,13 @@ dpi_save = 600  # 1200
 alpha_val = 0.25
 size_points = 5
 
-RUN = 1
+RUN = 0
 SINGLE_COMPARE_IDENTITY = 1
 ONE_PARAM = 0
 TWO_PARAM_ONE_SEED = 0
-bifurcation_plot_data_analysis = 1
+bifurcation_plot_data_analysis = 0
 
-fileName = "results/" + "bifurcation_SINGLE_COMPARE_IDENTITY_13_01_16__03_01_2023"#one_param_sweep_multi_18_06_16__16_12_2022"
+fileName = "results/" + "bifurcation_SINGLE_COMPARE_IDENTITY_16_52_02__03_01_2023"#one_param_sweep_multi_18_06_16__16_12_2022"
 
 if __name__ == "__main__":
     if SINGLE_COMPARE_IDENTITY:
