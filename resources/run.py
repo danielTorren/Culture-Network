@@ -18,7 +18,7 @@ from resources.utility import calc_num_clusters_auto_bandwidth
 
 # modules
 ####SINGLE SHOT RUN
-def generate_data(parameters: dict) -> Network:
+def generate_data(parameters: dict,print_simu = 0) -> Network:
     """
     Generate the Network object which itself contains list of Individual objects. Run this forward in time for the desired number of steps
 
@@ -64,8 +64,6 @@ def generate_data(parameters: dict) -> Network:
     social_network: Network
         Social network that has evolved from initial conditions
     """
-
-    print_simu = 1  # Whether of not to print how long the single shot simulation took
 
     if print_simu:
         start_time = time.time()

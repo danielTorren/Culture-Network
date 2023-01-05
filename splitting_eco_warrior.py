@@ -68,11 +68,14 @@ from resources.run import (
 import numpy as np
 
 # run bools
-RUN = 0 # run or load in previously saved data
+RUN = 1 # run or load in previously saved data
 SINGLE = 1 # determine if you runs single shots or study the averages over multiple runs for each experiment
 
 
-fileName = "results/splitting_eco_warriors_single_14_47_07__03_01_2023"
+fileName = "results/splitting_eco_warriors_single_12_16_58__04_01_2023"#this is the NO identity one
+#fileName = "results/splitting_eco_warriors_single_12_14_06__04_01_2023"#this is the identity one
+
+
 #"results/twoD_Average_confirmation_bias_M_200_3000_20_70_20_5"#"results/twoD_Average_confirmation_bias_a_attitude_200_3000_20_64_64_5"#"
 #"results/twoD_Average_confirmation_bias_a_attitude_200_3000_20_64_64_5"
 #"results/twoD_Average_action_observation_I_a_attitude_200_2000_20_64_64_5"
@@ -100,7 +103,7 @@ if __name__ == "__main__":
 
             # load variable params
             variable_parameters_dict = {
-                "col":{"property":"confirmation_bias","min":0, "max":100 , "title": "Confirmation bias, $\\theta$","divisions": "linear", "reps": 100},  
+                "col":{"property":"confirmation_bias","min":0, "max":100 , "title": r"Confirmation bias, $\\theta$","divisions": "linear", "reps": 100},  
                 "row":{"property":"green_N","min":0, "max": 100, "title": "Eco warrior count","divisions": "linear", "reps": 100}, 
             }
 

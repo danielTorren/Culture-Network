@@ -63,6 +63,7 @@ from resources.plot import (
     cluster_estimation_plot,
     plot_alpha_group,
     plot_cluster_culture_time_series,
+    print_live_initial_culture_network,
 )
 
 # FOR fileName
@@ -128,7 +129,7 @@ SHOW_PLOT = 1
 
 if __name__ == "__main__":
     if RUN == False:
-        fileName = "results/single_shot_17_52_51__14_12_2022"
+        fileName = "results/single_shot_11_52_34__05_01_2023"
     else:
         f = open("constants/base_params.json")
         base_params = json.load(f)
@@ -160,6 +161,7 @@ if __name__ == "__main__":
         #cluster_estimation(Data,bandwidth_list)
         #cluster_estimation_plot(Data,s,bandwidth)
         plot_culture_timeseries(fileName, Data, dpi_save)
+        print_live_initial_culture_network(fileName,Data,dpi_save,layout,norm_zero_one,cmap,node_size,round_dec)
         #plot_alpha_group(fileName, Data, dpi_save,s, 1, bandwidth,cmap_multi, round_dec,norm_zero_one )#autoset bandwidth
         #weighting_histogram(fileName, Data, dpi_save,bin_num)
         #weighting_histogram_time(fileName, Data, dpi_save,bin_num,300)

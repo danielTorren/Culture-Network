@@ -327,6 +327,8 @@ class Network:
             else:
                 self.mix_in_green_individuals()
 
+        self.shuffle_agent_list()#partial shuffle of the list based on culture
+
         if self.alpha_change == 2.0:#independant behaviours
             self.weighting_matrix_list = [self.weighting_matrix]*self.M
 
@@ -465,7 +467,7 @@ class Network:
             G,
         )
 
-    def produce_circular_list(self, list) -> list:
+    def circular_agent_list(self) -> list:
         """
         Makes an ordered list circular so that the start and end values are matched in value and value distribution is symmetric
 
@@ -479,59 +481,20 @@ class Network:
             a circular list symmetric about its middle entry e.g [1,3,5,4,2]
         """
 
-        first_half = list[::2]  # take every second element in the list, even indicies
-        second_half = (list[1::2])[::-1]  # take every second element , odd indicies
-        circular = first_half + second_half
-        return circular
+        first_half = self.agent_list[::2]  # take every second element in the list, even indicies
+        second_half = (self.agent_list[1::2])[::-1]  # take every second element , odd indicies
+        self.agent_list = first_half + second_half
 
-    def partial_shuffle(self, l, swap_reps) -> list:
+    def partial_shuffle_agent_list(self) -> list:
         """
         Partially shuffle a list using Fisher Yates shuffle
-
-        Parameters
-        ----------
-        l: list
-            list to be partially shuffled
-        swap_reps: int
-            Number of times to switch elements in the list. e.g if = 1 then [1,2,3] could go to [1,3,2] where we have swapped the index of two elements
-
-        Returns
-        -------
-        l: list
-            partially shuffled list
         """
 
-        n = len(l)
-        for _ in range(swap_reps):
+        for _ in range(self.shuffle_reps):
             a, b = np.random.randint(
-                low=0, high=n, size=2
+                low=0, high=self.N, size=2
             )  # generate pair of indicies to swap
-            l[b], l[a] = l[a], l[b]
-        return l
-
-    def quick_calc_culture(self, attitude_matrix: npt.NDArray) -> list:
-        """
-        Calculate the identity of individuals not using class properties. Used once for intial homophily measures.
-        No individual objects are created yet so use this as a intermediate step
-
-        Parameters
-        ----------
-        attitude matrix: npt.NDArray
-            NxM matrix of initial behavioural attitudes
-
-        Returns
-        -------
-        cul_list: list
-            list of cultures corresponding to the attitude_matrix
-        """
-
-        cul_list = []
-        for i in range(len(attitude_matrix)):
-            av_behaviour = np.mean(attitude_matrix[i])
-            av_behaviour_list = [av_behaviour] * self.culture_momentum_list[i]
-            indiv_cul = np.matmul(self.normalized_discount_array[i], av_behaviour_list)
-            cul_list.append(indiv_cul)
-        return cul_list
+            self.agent_list[b], self.agent_list[a] = self.agent_list[a], self.agent_list[b]
 
     def generate_init_data_behaviours(self) -> tuple[npt.NDArray, npt.NDArray]:
         """
@@ -543,9 +506,8 @@ class Network:
 
         Returns
         -------
-        attitude_list_sorted_shuffle: npt.NDArray
-            NxM array which is sorted to the correct degree of homophily. used to create Individual objects, one from each row of the array.
-            Entries represent how positive a persons attitudes towards a green alternative behaviour are
+        attitude_matrix: npt.NDArray
+            NxM array of behavioural attitudes
         threshold_matrix: npt.NDArray
             NxM array of behavioural thresholds, represents the barriers to entry to performing a behaviour e.g the distance of a
             commute or disposable income of an individual
@@ -566,114 +528,7 @@ class Network:
         attitude_matrix = np.asarray(attitude_list)
         threshold_matrix = np.asarray(threshold_list)
 
-        culture_list = self.quick_calc_culture(attitude_matrix)  # ,threshold_matrix
-
-        # shuffle the indexes!
-        
-        #print("culture_list",culture_list)
-        #print("attitude_list",attitude_list)
-        #print("zip(culture_list, attitude_list)",zip(culture_list, attitude_list))
-        #print("sorted",sorted(zip(culture_list, attitude_list), key=lambda x: x[0]))
-        attitude_list_sorted = [v for _, v in sorted(zip(culture_list, attitude_list), key=lambda x: x[0])]# the , key=lambda x: x[0] is to explicitly sort only but the first value
-
-        attitude_array_circular = self.produce_circular_list(attitude_list_sorted)
-        attitude_array_circular_indexes = list(range(len(attitude_array_circular)))
-        attitude_array_circular_indexes_shuffled = self.partial_shuffle(
-            attitude_array_circular_indexes, self.shuffle_reps
-        )
-        attitude_list_sorted_shuffle = [x for _, x in sorted(zip(attitude_array_circular_indexes_shuffled, attitude_array_circular), key=lambda x: x[0])]
-
-        return np.asarray(attitude_list_sorted_shuffle), threshold_matrix
-
-    def generate_init_data_behaviours_two_types(self) -> tuple[npt.NDArray, npt.NDArray]:
-        """
-        Generate the initial values for agent behavioural attitudes and thresholds using Beta distribution
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        attitude_list_sorted_shuffle: npt.NDArray
-            NxM array which is sorted to the correct degree of homophily. used to create Individual objects, one from each row of the array.
-            Entries represent how positive a persons attitudes towards a green alternative behaviour are
-        threshold_matrix: npt.NDArray
-            NxM array of behavioural thresholds, represents the barriers to entry to performing a behaviour e.g the distance of a
-            commute or disposable income of an individual
-        """
-
-        green_vals = [0.9]*self.M
-        brown_vals = [0.1]*self.M
-        N_green = self.N/2
-
-        threshold_list = [
-            np.random.beta(self.a_threshold, self.b_threshold, size=self.M)
-            for n in range(self.N)
-        ]
-
-        #start: select 2 random persons
-        index_init_green, index_init_brown = np.random.choice(range(self.N), 2)
-        
-        green_list = [index_init_green]
-        brown_list = [index_init_brown]
-        green_candidate_list = list(np.where(self.adjacency_matrix[index_init_green] == 1)[0])#get index of row
-        brown_candidate_list = list(np.where(self.adjacency_matrix[index_init_brown] == 1)[0])#get index of row
-        #print("init green candidates", green_candidate_list)
-
-        while len(green_list) < N_green:
-            
-            #next step
-            new_green_candidate = np.random.choice(green_candidate_list, 1)[0]
-            new_brown_candidate = np.random.choice(brown_candidate_list, 1)[0]
-            if new_green_candidate == new_brown_candidate:
-                new_brown_candidate = np.random.choice(brown_candidate_list, 1)[0]#just dp it once for now?
-            #print("new_green_candidate",new_green_candidate)
-            green_list.append(new_green_candidate)
-            brown_list.append(new_brown_candidate)
-
-            green_candidate_list.remove(new_green_candidate)
-            brown_candidate_list.remove(new_brown_candidate)
-
-            if new_brown_candidate in green_candidate_list:
-                green_candidate_list.remove(new_brown_candidate)
-
-            if new_green_candidate in brown_candidate_list:
-                brown_candidate_list.remove(new_green_candidate)
-
-            new_green_neighbours = list(np.where((self.adjacency_matrix[new_green_candidate] == 1))[0])
-            #print("new_neighbours", new_neighbours)
-            unique_green_neighbours = [x for x in new_green_neighbours if ((x not in green_candidate_list) and (x not in brown_list))]#throw out stuff thats aleardy in
-            
-            new_brown_neighbours = list(np.where((self.adjacency_matrix[new_brown_candidate] == 1))[0])
-            unique_brown_neighbours = [x for x in new_brown_neighbours if ((x not in brown_candidate_list) and (x not in green_list))]#throw out stuff thats aleardy in
-
-            #print("unique neighbours", unique_neighbours)
-            green_candidate_list = green_candidate_list + unique_green_neighbours
-            brown_candidate_list = brown_candidate_list + unique_brown_neighbours
-
-            #print(len(green_list), len(brown_list))
-            if not green_candidate_list:#check if list empty
-                other_list = [x for x in range(self.N) if ((x not in green_list) and (x not in brown_list))]
-                green_candidate_list = list(np.random.choice(other_list, 1)[0])
-                #print("empty no longer",green_candidate_list)
-            if not brown_candidate_list:
-                other_list = [x for x in range(self.N) if ((x not in green_list) and (x not in brown_list))]
-                brown_candidate_list = list(np.random.choice(other_list, 1)[0])
-            else:
-                pass
-
-        
-        attitude_list = [green_vals if x in green_list else brown_vals for x in range(self.N)]
-
-        attitude_list_shuffled = self.partial_shuffle(
-            attitude_list, self.shuffle_reps
-        )
-        #print("attitude_list", attitude_list)
-        #print("attitude_list_shufledd", attitude_list_shuffled)
-            
-
-        return np.asarray(attitude_list_shuffled), np.asarray(threshold_list)
+        return attitude_matrix, threshold_matrix
 
     def create_agent_list(self) -> list[Individual]:
         """
@@ -751,6 +606,12 @@ class Network:
         for i in n_list_green:
             self.agent_list[i] = Green_fountain(individual_params)
 
+    def shuffle_agent_list(self): 
+        #make list cirucalr then partial shuffle it
+
+        self.agent_list.sort(key=lambda x: x.culture)#sorted by culture
+        self.circular_agent_list()#agent list is now circular in terms of culture
+        self.partial_shuffle_agent_list()#partial shuffle of the list
 
     def calc_ego_influence_voter(self) -> npt.NDArray:
         """

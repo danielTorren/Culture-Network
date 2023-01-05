@@ -2826,6 +2826,47 @@ def plot_live_cum_link_change_per_agent_comparison(
     f = plotName + "/%s_live_cum_link_change_per_agent.eps" % (property)
     fig.savefig(f, dpi=dpi_save, format="eps")
 
+def print_live_initial_culture_network(
+    fileName: str,
+    Data,
+    dpi_save: int,
+    layout: str,
+    norm_zero_one,
+    cmap,
+    node_size,
+    round_dec,
+):
+
+    fig, ax = plt.subplots()
+
+
+    G = nx.from_numpy_matrix(Data.history_weighting_matrix[0])
+    pos_culture_network = prod_pos(layout, G)
+
+    indiv_culutre_list = [v.history_culture[0] for v in Data.agent_list]
+    # print(indiv_culutre_list)
+    colour_adjust = norm_zero_one(indiv_culutre_list)
+    ani_step_colours = cmap(colour_adjust)
+
+    nx.draw(
+        G,
+        node_color=ani_step_colours,
+        ax=ax,
+        pos=pos_culture_network,
+        node_size=node_size,
+        edgecolors="black",
+    )
+
+    # colour bar axes
+    cbar = fig.colorbar(
+        plt.cm.ScalarMappable(cmap=cmap, norm=norm_zero_one), ax=ax
+    )
+    cbar.set_label(r"Identity, $I_{t,n}$")
+
+    plotName = fileName + "/Prints"
+    f = plotName + "/print_live_intial_culture_network"
+    fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
 
 def print_live_intial_culture_networks(
     fileName: str,
