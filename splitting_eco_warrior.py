@@ -37,6 +37,7 @@ from resources.plot import (
     double_phase_diagram_using_meanandvariance,
     double_matrix_plot,
     multi_line_matrix_plot,
+    multi_line_matrix_plot_difference,
     multi_line_matrix_plot_divide_through,
     double_matrix_plot_ab,
     double_matrix_plot_cluster,
@@ -63,17 +64,20 @@ from resources.multi_run_2D_param import (
     produce_param_list_n_double,
 )
 from resources.run import (
-    single_stochstic_emissions_run
+    single_stochstic_emissions_run,
+    multi_stochstic_emissions_run
 )
 import numpy as np
 
 # run bools
 RUN = 1 # run or load in previously saved data
-SINGLE = 1 # determine if you runs single shots or study the averages over multiple runs for each experiment
+SINGLE = 0 # determine if you runs single shots or study the averages over multiple runs for each experiment
+MULTI = 1
+multi_line_plot = 0
+DUAL_plot = 0
 
-
-fileName = "results/splitting_eco_warriors_single_12_16_58__04_01_2023"#this is the NO identity one
-#fileName = "results/splitting_eco_warriors_single_12_14_06__04_01_2023"#this is the identity one
+fileName_no_identity = "results/splitting_eco_warriors_single_12_51_29__05_01_2023"#this is the NO identity one
+fileName = "results/splitting_eco_warriors_single_12_50_12__05_01_2023"#this is the identity one
 
 
 #"results/twoD_Average_confirmation_bias_M_200_3000_20_70_20_5"#"results/twoD_Average_confirmation_bias_a_attitude_200_3000_20_64_64_5"#"
@@ -130,9 +134,52 @@ if __name__ == "__main__":
 
         else:
             base_params = load_object(fileName + "/Data", "base_params")
+            print("alpha state: ", base_params["alpha_change"])
             variable_parameters_dict = load_object(fileName + "/Data", "variable_parameters_dict")
             matrix_emissions = load_object(fileName + "/Data", "matrix_emissions")
+    if MULTI:
+        if RUN:
+            # load base params
+            f_base_params = open("constants/base_params.json")
+            base_params = json.load(f_base_params)
+            f_base_params.close()
+            base_params["time_steps_max"] = int(base_params["total_time"] / base_params["delta_t"])
+            base_params["seed_list"] = range(5)
+            print("seed list: ",base_params["seed_list"])
+            # load variable params
+            variable_parameters_dict = {
+                "col":{"property":"confirmation_bias","min":0, "max":100 , "title": r"Confirmation bias, $\\theta$","divisions": "linear", "reps": 40},  
+                "row":{"property":"green_N","min":0, "max": 100, "title": "Eco warrior count","divisions": "linear", "reps": 40}, 
+            }
 
+            variable_parameters_dict = generate_vals_variable_parameters_and_norms(
+                variable_parameters_dict
+            )
+
+            root = "splitting_eco_warriors_multi"
+            fileName = produce_name_datetime(root)
+            print("fileName:", fileName)
+            #print("fileName: ", fileName)
+
+            params_dict_list = produce_param_list_n_double(base_params, variable_parameters_dict)
+
+            emissions_list = multi_stochstic_emissions_run(params_dict_list)
+
+            matrix_emissions = emissions_list.reshape((variable_parameters_dict["row"]["reps"], variable_parameters_dict["col"]["reps"]))
+
+            createFolder(fileName)
+    
+            save_object(base_params, fileName + "/Data", "base_params")
+            save_object(variable_parameters_dict, fileName + "/Data", "variable_parameters_dict")
+            save_object(matrix_emissions, fileName + "/Data", "matrix_emissions")
+
+        else:
+            base_params = load_object(fileName + "/Data", "base_params")
+            print("alpha state: ", base_params["alpha_change"])
+            variable_parameters_dict = load_object(fileName + "/Data", "variable_parameters_dict")
+            matrix_emissions = load_object(fileName + "/Data", "matrix_emissions")
+    
+    if multi_line_plot:
         col_dict = variable_parameters_dict["col"]
         row_dict = variable_parameters_dict["row"]
 
@@ -140,16 +187,16 @@ if __name__ == "__main__":
         index_len_x_matrix = col_dict["reps"]
         max_x_val = col_dict["max"]
         min_x_val = col_dict["min"]
-        col_ticks_label = np.arange(min_x_val, min_x_val, 10)#[-10,0,10,20,30,40,50,60,70,80,90]#[-10,0,10,20,30,40,50,60]#[col_dict["vals"][x] for x in range(len(col_dict["vals"]))  if x % select_val_x == 0]
-        col_ticks_pos = np.arange(min_x_val, min_x_val, 10)#[-10,0,10,20,30,40,50,60,70,80,90]#[int(round(index_len_x_matrix*((x - min_x_val)/(max_x_val- min_x_val)))) for x in col_ticks_label]#[0,30,70,50]#[0,10,20,30,40,50,60,70]#[x for x in range(len(col_dict["vals"]))  if x % select_val_x == 0]
-        #print("x_ticks_pos",x_ticks_pos)
+        col_ticks_label = list(range(min_x_val, max_x_val, 10))#[-10,0,10,20,30,40,50,60,70,80,90]#[-10,0,10,20,30,40,50,60]#[col_dict["vals"][x] for x in range(len(col_dict["vals"]))  if x % select_val_x == 0]
+        col_ticks_pos = list(range(min_x_val, max_x_val, 10))#[-10,0,10,20,30,40,50,60,70,80,90]#[int(round(index_len_x_matrix*((x - min_x_val)/(max_x_val- min_x_val)))) for x in col_ticks_label]#[0,30,70,50]#[0,10,20,30,40,50,60,70]#[x for x in range(len(col_dict["vals"]))  if x % select_val_x == 0]
+        print("out col_ticks_pos",col_ticks_pos)
 
                 
         index_len_y_matrix =row_dict["reps"]
         max_y_val = row_dict["max"]
         min_y_val = row_dict["min"]
-        row_ticks_label = np.arange(min_y_val, min_y_val, 10)#[0.05,0.25,0.50,0.75,1.00,1.25,1.50,1.75,2.00]#[-10,0,10,20,30,40,50,60]#[col_dict["vals"][x] for x in range(len(col_dict["vals"]))  if x % select_val_x == 0]
-        row_ticks_pos = np.arange(min_y_val, min_y_val, 10)#[0.05,0.25,0.50,0.75,1.00,1.25,1.50,1.75,2.00]#[int(round(index_len_y_matrix*((y - min_y_val)/(max_y_val- min_y_val)))) for y in col_ticks_label]#[0,30,70,50]#[0,10,20,30,40,50,60,70]#[x for x in range(len(col_dict["vals"]))  if x % select_val_x == 0]
+        row_ticks_label = list(range(min_y_val, max_y_val, 10))#[0.05,0.25,0.50,0.75,1.00,1.25,1.50,1.75,2.00]#[-10,0,10,20,30,40,50,60]#[col_dict["vals"][x] for x in range(len(col_dict["vals"]))  if x % select_val_x == 0]
+        row_ticks_pos = list(range(min_y_val, max_y_val, 10))#[0.05,0.25,0.50,0.75,1.00,1.25,1.50,1.75,2.00]#[int(round(index_len_y_matrix*((y - min_y_val)/(max_y_val- min_y_val)))) for y in col_ticks_label]#[0,30,70,50]#[0,10,20,30,40,50,60,70]#[x for x in range(len(col_dict["vals"]))  if x % select_val_x == 0]
         
         #print("row",row_ticks_pos,row_ticks_label)
         #print("col",col_ticks_pos,col_ticks_label)
@@ -157,12 +204,53 @@ if __name__ == "__main__":
         row_label = r"Eco-warriors count"#r"Number of behaviours per agent, M"
         col_label = r'Confirmation bias, $\theta$'#r'Confirmation bias, $\theta$'
         y_label = r"Final emissions, $E$"#r"Identity variance, $\sigma^2$"
-
+        
         multi_line_matrix_plot(fileName,matrix_emissions, col_dict["vals"], row_dict["vals"],"emissions", get_cmap("plasma"),dpi_save,col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label, 0, col_label, row_label, y_label)#y_ticks_pos, y_ticks_label
         multi_line_matrix_plot(fileName,matrix_emissions, col_dict["vals"], row_dict["vals"],"emissions", get_cmap("plasma"),dpi_save,col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label, 1, col_label, row_label, y_label)#y_ticks_pos, y_ticks_label
         #multi_line_matrix_plot(fileName, Z, col_vals, row_vals,  Y_param, cmap, dpi_save, col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label,col_axis_x, col_label, row_label, y_label)
         
-        #### two D plot of emissions with confimation bias and number of eco warriors
+    #### two D plot of emissions with confimation bias and number of eco warriors
+    if DUAL_plot:
+        col_dict = variable_parameters_dict["col"]
+        row_dict = variable_parameters_dict["row"]
 
+        #### FOR confimation bias vs attitude polarisation
+        index_len_x_matrix = col_dict["reps"]
+        max_x_val = col_dict["max"]
+        min_x_val = col_dict["min"]
+        col_ticks_label = list(range(min_x_val, max_x_val, 10))#[-10,0,10,20,30,40,50,60,70,80,90]#[-10,0,10,20,30,40,50,60]#[col_dict["vals"][x] for x in range(len(col_dict["vals"]))  if x % select_val_x == 0]
+        col_ticks_pos = list(range(min_x_val, max_x_val, 10))#[-10,0,10,20,30,40,50,60,70,80,90]#[int(round(index_len_x_matrix*((x - min_x_val)/(max_x_val- min_x_val)))) for x in col_ticks_label]#[0,30,70,50]#[0,10,20,30,40,50,60,70]#[x for x in range(len(col_dict["vals"]))  if x % select_val_x == 0]
+        print("out col_ticks_pos",col_ticks_pos)
+
+                
+        index_len_y_matrix =row_dict["reps"]
+        max_y_val = row_dict["max"]
+        min_y_val = row_dict["min"]
+        row_ticks_label = list(range(min_y_val, max_y_val, 10))#[0.05,0.25,0.50,0.75,1.00,1.25,1.50,1.75,2.00]#[-10,0,10,20,30,40,50,60]#[col_dict["vals"][x] for x in range(len(col_dict["vals"]))  if x % select_val_x == 0]
+        row_ticks_pos = list(range(min_y_val, max_y_val, 10))#[0.05,0.25,0.50,0.75,1.00,1.25,1.50,1.75,2.00]#[int(round(index_len_y_matrix*((y - min_y_val)/(max_y_val- min_y_val)))) for y in col_ticks_label]#[0,30,70,50]#[0,10,20,30,40,50,60,70]#[x for x in range(len(col_dict["vals"]))  if x % select_val_x == 0]
+        
+        #print("row",row_ticks_pos,row_ticks_label)
+        #print("col",col_ticks_pos,col_ticks_label)
+
+        row_label = r"Eco-warriors count"#r"Number of behaviours per agent, M"
+        col_label = r'Confirmation bias, $\theta$'#r'Confirmation bias, $\theta$'
+        y_label = r"Change in final emissions, $\Delta E$"#r"Identity variance, $\sigma^2$"
+
+        base_params_no_identity = load_object(fileName_no_identity + "/Data", "base_params")
+        #print("alpha state: ", base_params_no_identity["alpha_change"])
+        variable_parameters_dict_no_identity = load_object(fileName_no_identity + "/Data", "variable_parameters_dict")
+        matrix_emissions_no_identity = load_object(fileName_no_identity + "/Data", "matrix_emissions")
+        
+        #print(type( matrix_emissions))
+        #print(matrix_emissions.shape)
+        
+        difference_emissions_matrix = matrix_emissions - matrix_emissions_no_identity
+        #print(difference_emissions_matrix, difference_emissions_matrix.shape)
+
+        #multi_line_matrix_plot_difference(fileName,difference_emissions_matrix, col_dict["vals"], row_dict["vals"],"emissions", get_cmap("plasma"),dpi_save,col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label, 0, col_label, row_label, y_label)#y_ticks_pos, y_ticks_label
+        #multi_line_matrix_plot_difference(fileName,difference_emissions_matrix, col_dict["vals"], row_dict["vals"],"emissions", get_cmap("plasma"),dpi_save,col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label, 1, col_label, row_label, y_label)#y_ticks_pos, y_ticks_label
+
+
+        double_matrix_plot(fileName,difference_emissions_matrix, y_label, "emissions",variable_parameters_dict, get_cmap("plasma"),dpi_save,col_ticks_pos,row_ticks_pos,col_ticks_label,row_ticks_label)
 
     plt.show()

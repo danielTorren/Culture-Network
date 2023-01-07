@@ -2393,6 +2393,7 @@ def multi_line_matrix_plot(
         ax.set_xlabel(col_label)#(r'Confirmation bias, $\theta$')
         ax.set_xticks(col_ticks_pos)
         ax.set_xticklabels(col_ticks_label)
+        print("x ticks", col_label,col_ticks_pos, col_ticks_label)
         #ax.set_xlim(left = 0.0, right = 60)
         #ax.set_xlim(left = -10.0, right = 90)
 
@@ -2401,13 +2402,14 @@ def multi_line_matrix_plot(
         ax.set_xlabel(row_label)#(r"Number of behaviours per agent, M")
         ax.set_xticks(row_ticks_pos)
         ax.set_xticklabels(row_ticks_label)
+        print("x ticks", row_label, row_ticks_pos, row_ticks_label)
         #ax.set_xlim(left = 1.0)
         #ax.set_xlim(left = 0.0, right = 2.0)
 
     plotName = fileName + "/Plots"
     f = plotName + "/multi_line_matrix_plot_%s_%s" % (Y_param, col_axis_x)
     fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
-    #fig.savefig(f + ".png", dpi=dpi_save, format="png")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
 
 def multi_line_matrix_plot_divide_through(
     fileName, Z, col_vals, row_vals,  Y_param, cmap, dpi_save, col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label,col_axis_x
@@ -2448,6 +2450,54 @@ def multi_line_matrix_plot_divide_through(
     fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
     fig.savefig(f + ".png", dpi=dpi_save, format="png")
 
+
+def multi_line_matrix_plot_difference(
+    fileName, Z, col_vals, row_vals,  Y_param, cmap, dpi_save, col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label,col_axis_x, col_label, row_label, y_label
+    ):
+
+    fig, ax = plt.subplots( constrained_layout=True)#figsize=(14, 7)
+
+    if col_axis_x:
+        xs = np.tile(col_vals, (len(row_vals), 1))
+        ys = Z
+        c = row_vals
+
+    else:
+        xs = np.tile(row_vals, (len(col_vals), 1))
+        ys = np.transpose(Z)
+        c = col_vals
+    
+    #print("after",xs.shape, ys.shape, c.shape)
+
+    ax.set_ylabel(y_label)#(r"First behaviour attitude variance, $\sigma^2$")
+    
+    #plt.xticks(x_ticks_pos, x_ticks_label)
+
+    lc = multiline(xs, ys, c, cmap=cmap, lw=2)
+    axcb = fig.colorbar(lc)
+
+    if col_axis_x:
+        axcb.set_label(row_label)#(r"Number of behaviours per agent, M")
+        ax.set_xlabel(col_label)#(r'Confirmation bias, $\theta$')
+        ax.set_xticks(col_ticks_pos)
+        ax.set_xticklabels(col_ticks_label)
+        print("x ticks", col_label,col_ticks_pos, col_ticks_label)
+        #ax.set_xlim(left = 0.0, right = 60)
+        #ax.set_xlim(left = -10.0, right = 90)
+
+    else:
+        axcb.set_label(col_label)#)(r'Confirmation bias, $\theta$')
+        ax.set_xlabel(row_label)#(r"Number of behaviours per agent, M")
+        ax.set_xticks(row_ticks_pos)
+        ax.set_xticklabels(row_ticks_label)
+        print("x ticks", row_label, row_ticks_pos, row_ticks_label)
+        #ax.set_xlim(left = 1.0)
+        #ax.set_xlim(left = 0.0, right = 2.0)
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/multi_line_matrix_plot_difference_%s_%s" % (Y_param, col_axis_x)
+    fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
 
 def print_culture_timeseries_vary_array(
     fileName: str,
