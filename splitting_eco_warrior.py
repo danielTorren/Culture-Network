@@ -70,14 +70,20 @@ from resources.run import (
 import numpy as np
 
 # run bools
-RUN = 1 # run or load in previously saved data
+RUN = 0 # run or load in previously saved data
+
 SINGLE = 0 # determine if you runs single shots or study the averages over multiple runs for each experiment
-MULTI = 1
+MULTI_THETA_M = 1
+MULTI = 0
+
 multi_line_plot = 0
 DUAL_plot = 0
 
-fileName_no_identity = "results/splitting_eco_warriors_single_12_51_29__05_01_2023"#this is the NO identity one
-fileName = "results/splitting_eco_warriors_single_12_50_12__05_01_2023"#this is the identity one
+
+
+
+fileName_no_identity = "results/splitting_eco_warriors_multi_17_39_29__07_01_2023"#this is the NO identity one
+fileName = "results/splitting_eco_warriors_multi_17_36_19__07_01_2023"#this is the identity one
 
 
 #"results/twoD_Average_confirmation_bias_M_200_3000_20_70_20_5"#"results/twoD_Average_confirmation_bias_a_attitude_200_3000_20_64_64_5"#"
@@ -137,14 +143,57 @@ if __name__ == "__main__":
             print("alpha state: ", base_params["alpha_change"])
             variable_parameters_dict = load_object(fileName + "/Data", "variable_parameters_dict")
             matrix_emissions = load_object(fileName + "/Data", "matrix_emissions")
-    if MULTI:
+    elif MULTI_THETA_M:
         if RUN:
             # load base params
             f_base_params = open("constants/base_params.json")
             base_params = json.load(f_base_params)
             f_base_params.close()
             base_params["time_steps_max"] = int(base_params["total_time"] / base_params["delta_t"])
-            base_params["seed_list"] = range(5)
+            base_params["seed_list"] = list(range(5))
+            print("seed list: ",base_params["seed_list"])
+
+            base_params["green_N"] = 20 # this is 10%
+            # load variable params
+            variable_parameters_dict = {
+                "col":{"property":"confirmation_bias","min":0, "max":50 , "title": r"Confirmation bias, $\\theta$","divisions": "linear", "reps": 50},  
+                "row":{"property":"M","min":1, "max": 11, "title": "M","divisions": "linear", "reps": 10}, 
+            }
+
+            variable_parameters_dict = generate_vals_variable_parameters_and_norms(
+                variable_parameters_dict
+            )
+
+            root = "splitting_eco_warriors_multi"
+            fileName = produce_name_datetime(root)
+            print("fileName:", fileName)
+            #print("fileName: ", fileName)
+
+            params_dict_list = produce_param_list_n_double(base_params, variable_parameters_dict)
+
+            emissions_list = multi_stochstic_emissions_run(params_dict_list)
+
+            matrix_emissions = emissions_list.reshape((variable_parameters_dict["row"]["reps"], variable_parameters_dict["col"]["reps"]))
+
+            createFolder(fileName)
+    
+            save_object(base_params, fileName + "/Data", "base_params")
+            save_object(variable_parameters_dict, fileName + "/Data", "variable_parameters_dict")
+            save_object(matrix_emissions, fileName + "/Data", "matrix_emissions")
+
+        else:
+            base_params = load_object(fileName + "/Data", "base_params")
+            print("alpha state: ", base_params["alpha_change"])
+            variable_parameters_dict = load_object(fileName + "/Data", "variable_parameters_dict")
+            matrix_emissions = load_object(fileName + "/Data", "matrix_emissions")
+    elif MULTI:#multi run
+        if RUN:
+            # load base params
+            f_base_params = open("constants/base_params.json")
+            base_params = json.load(f_base_params)
+            f_base_params.close()
+            base_params["time_steps_max"] = int(base_params["total_time"] / base_params["delta_t"])
+            base_params["seed_list"] = list(range(5))
             print("seed list: ",base_params["seed_list"])
             # load variable params
             variable_parameters_dict = {
@@ -237,7 +286,7 @@ if __name__ == "__main__":
         y_label = r"Change in final emissions, $\Delta E$"#r"Identity variance, $\sigma^2$"
 
         base_params_no_identity = load_object(fileName_no_identity + "/Data", "base_params")
-        #print("alpha state: ", base_params_no_identity["alpha_change"])
+        #print("alpha state no identity: ", base_params_no_identity["alpha_change"])
         variable_parameters_dict_no_identity = load_object(fileName_no_identity + "/Data", "variable_parameters_dict")
         matrix_emissions_no_identity = load_object(fileName_no_identity + "/Data", "matrix_emissions")
         
@@ -247,8 +296,8 @@ if __name__ == "__main__":
         difference_emissions_matrix = matrix_emissions - matrix_emissions_no_identity
         #print(difference_emissions_matrix, difference_emissions_matrix.shape)
 
-        #multi_line_matrix_plot_difference(fileName,difference_emissions_matrix, col_dict["vals"], row_dict["vals"],"emissions", get_cmap("plasma"),dpi_save,col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label, 0, col_label, row_label, y_label)#y_ticks_pos, y_ticks_label
-        #multi_line_matrix_plot_difference(fileName,difference_emissions_matrix, col_dict["vals"], row_dict["vals"],"emissions", get_cmap("plasma"),dpi_save,col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label, 1, col_label, row_label, y_label)#y_ticks_pos, y_ticks_label
+        multi_line_matrix_plot_difference(fileName,difference_emissions_matrix, col_dict["vals"], row_dict["vals"],"emissions", get_cmap("plasma"),dpi_save,col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label, 0, col_label, row_label, y_label)#y_ticks_pos, y_ticks_label
+        multi_line_matrix_plot_difference(fileName,difference_emissions_matrix, col_dict["vals"], row_dict["vals"],"emissions", get_cmap("plasma"),dpi_save,col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label, 1, col_label, row_label, y_label)#y_ticks_pos, y_ticks_label
 
 
         double_matrix_plot(fileName,difference_emissions_matrix, y_label, "emissions",variable_parameters_dict, get_cmap("plasma"),dpi_save,col_ticks_pos,row_ticks_pos,col_ticks_label,row_ticks_label)
