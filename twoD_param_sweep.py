@@ -72,21 +72,26 @@ import numpy as np
 RUN = 0 # run or load in previously saved data
 SINGLE = 0 # determine if you runs single shots or study the averages over multiple runs for each experiment
 
-ab_plot = 0
+ab_plot = 1
 plot_conf_attiude = 0
 plot_multi_line_divide = 0
 plot_multi_line = 0
 cluster_count_run = 0
 cluster_ratio = 0
-culture_run = 1
+culture_run = 0
 
 data_analysis_culture_run = 0
 single_from_multi = 0
-bifurcation_plot_data_analysis = 1
-bifurcation_plot=1
+bifurcation_plot_data_analysis = 0
+bifurcation_plot=0
 
 
-fileName = "results/two_param_sweep_average_18_22_51__04_12_2022"
+fileName = "results/average_b_attitude_a_attitude_200_2000_20_64_64_5"
+
+#"results/two_param_sweep_average_18_22_51__04_12_2022"
+
+#"results/average_b_attitude_a_attitude_200_2000_20_64_64_5"# THE A B PLOT IN THE APPENDIX
+
 #"results/twoD_Average_confirmation_bias_M_200_3000_20_70_20_5"#"results/twoD_Average_confirmation_bias_a_attitude_200_3000_20_64_64_5"#"
 #"results/twoD_Average_confirmation_bias_a_attitude_200_3000_20_64_64_5"
 #"results/twoD_Average_action_observation_I_a_attitude_200_2000_20_64_64_5"
@@ -382,13 +387,21 @@ if __name__ == "__main__":
             #print("row",row_ticks_pos,row_ticks_label)
             #print("col",col_ticks_pos,col_ticks_label)
 
-            #col_ticks_pos = [0, 6, 64] 
-            #col_ticks_label = [r"$10^{-1}$", r"$10^{0}$", r"$10^{1}$"] 
-            #row_ticks_pos = [0, 6, 64] 
-            #row_ticks_label = [r"$10^{-1}$", r"$10^{0}$", r"$10^{1}$"]
 
-            double_matrix_plot_ab(fileName, matrix_emissions, r"Total normalised emissions $E/NM$", "emissions",variable_parameters_dict, get_cmap("Reds"),dpi_save,col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label)
-            #double_matrix_plot(fileName, matrix_mu, r"Average identity, $\mu$", "mu",variable_parameters_dict, get_cmap("Blues"),dpi_save)
+
+            levels = 10
+            double_phase_diagram(fileName, matrix_emissions, r"Total normalised emissions $E/NM$", "emissions",variable_parameters_dict, get_cmap("Reds"),dpi_save, levels)  
+
+            col_ticks_pos = [0, 6, 63] 
+            col_ticks_label = [r"$10^{-1}$", r"$10^{0}$", r"$10^{1}$"] 
+            row_ticks_pos = [0, 6, 63] 
+            row_ticks_label = [r"$10^{-1}$", r"$10^{0}$", r"$10^{1}$"]
+
+            #double_matrix_plot_ab(fileName, matrix_emissions, r"Total normalised emissions $E/NM$", "emissions",variable_parameters_dict, get_cmap("Reds"),dpi_save,col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label)
+            #test_matrix = matrix_emissions.T
+            #double_matrix_plot_ab(fileName, test_matrix, r"Trasn Total normalised emissions $E/NM$", "emissions",variable_parameters_dict, get_cmap("Reds"),dpi_save,col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label)
+            #double_matrix_plot(fileName, test_matrix, r"Rotate Total normalised emissions $E/NM$", "emissions",variable_parameters_dict, get_cmap("Reds"),dpi_save,col_ticks_pos, row_ticks_pos,col_ticks_label, row_ticks_label)
+            
             #print("variable_parameters_dict",variable_parameters_dict)
             #double_phase_diagram(fileName, matrix_var, r"Identity variance, $\sigma^2$", "variance",variable_parameters_dict, get_cmap("Oranges"),dpi_save)
             #double_matrix_plot_ab(fileName,matrix_var, r"Identity variance, $\sigma^2$", "variance",variable_parameters_dict, get_cmap("Oranges"),dpi_save)

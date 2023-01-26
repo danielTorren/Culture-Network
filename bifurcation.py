@@ -64,6 +64,11 @@ TWO_PARAM_ONE_SEED = 0
 bifurcation_plot_data_analysis = 0
 
 fileName = "results/" + "bifurcation_SINGLE_COMPARE_IDENTITY_16_52_02__03_01_2023"#one_param_sweep_multi_18_06_16__16_12_2022"
+"""
+{'save_timeseries_data': 0, 'degroot_aggregation': 1, 'network_structure': 'small_world', 'alpha_change': 2.0, 'guilty_individuals': 0, 'moral_licensing': 0, 'immutable_green_fountains': 1, 'polarisation_test': 0, 'total_time': 3000, 'delta_t': 1.0, 'phi_lower': 0.01, 'phi_upper': 0.05, 'compression_factor': 10, 'seed_list': [1, 2, 3, 4, 5], 'N': 200, 'M': 3, 'K': 20, 'prob_rewire': 0.1, 'set_seed': 1, 'culture_momentum_real': 1000, 'learning_error_scale': 0.02, 'discount_factor': 0.95, 'homophily': 0.95, 'homophilly_rate': 1, 'confirmation_bias': 100.0, 'a_attitude': 1, 'b_attitude': 1, 'a_threshold': 1, 'b_threshold': 1, 'action_observation_I': 0.0, 'action_observation_S': 0.0, 'green_N': 
+0, 'guilty_individual_power': 0, 'time_steps_max': 3000}
+"""
+
 
 if __name__ == "__main__":
     if SINGLE_COMPARE_IDENTITY:
@@ -133,7 +138,8 @@ if __name__ == "__main__":
             save_object(property_values_list_no_identity, fileName + "/Data", "property_values_list_no_identity")
         else:
             base_params = load_object(fileName + "/Data", "base_params")
-
+            #print(base_params)
+            #quit()
             results_culture_lists_identity = load_object(fileName + "/Data", "results_culture_lists_identity")
             property_varied_identity = load_object(fileName + "/Data", "property_varied_identity")
             property_varied_title_identity = load_object(fileName + "/Data", "property_varied_title_identity")

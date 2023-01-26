@@ -50,6 +50,144 @@ plt.rcParams.update({
 })
 
 # modules
+
+def plot_behaviours_time_series_emissions_and_culture(fileName,Data_culture, Data_no_culture, dpi_save):
+    fig, axes = plt.subplots(nrows = 1, ncols = Data_culture.M + 1, figsize=(14,7), sharey=True)
+    
+    axes[0].set_ylabel(r"Behavioural attitude, $A_{t,n,m}$")
+    axes[0].set_ylim(0, 1)
+
+    axes[Data_culture.M].get_shared_y_axes().remove(axes[Data_culture.M])
+    
+    print(axes)
+    print(axes[0].get_shared_y_axes())
+    print(axes[Data_culture.M].get_shared_y_axes())
+    quit()
+    #axes.get_shared_y_axes().remove(axes[Data_culture.M + 1])
+
+    for z, ax in enumerate(axes.flat):
+        if z < Data_culture.M:
+            #########################################
+            #plot no culture - red
+            #label='Behavioural independance' if label == x_labels[0] else ''
+            for v in Data_no_culture.agent_list:
+                ax.plot(np.asarray(Data_no_culture.history_time), np.asarray(v.history_behaviour_attitudes)[:,z], color = "red", alpha= 0.5 )
+
+            ###########################################
+            #plot cultue - black
+            # label='Inter-behavioural dependance' if label == x_labels[0] else ''
+            for v in Data_culture.agent_list:
+                ax.plot(np.asarray(Data_culture.history_time), np.asarray(v.history_behaviour_attitudes)[:,z], color = "k", alpha= 0.5)
+
+
+            ax.set_title(r"$\phi_{%s} = %s$" % (z + 1, Data_culture.phi_array[z]))
+            ax.set_xlabel(r"Time")
+        else:
+            
+            #########################################
+            #plot no culture - red
+            #label='Behavioural independance' if label == x_labels[0] else ''
+            for v in Data_no_culture.agent_list:
+                ax.plot(np.asarray(Data_no_culture.history_time), np.asarray(v.history_culture), color = "red", alpha= 0.5 )
+
+            ###########################################
+            #plot cultue - black
+            # label='Inter-behavioural dependance' if label == x_labels[0] else ''
+            for v in Data_culture.agent_list:
+                ax.plot(np.asarray(Data_culture.history_time), np.asarray(v.history_culture), color = "k", alpha= 0.5)
+
+            ax.set_xlabel(r"Time")
+            ax.set_ylabel(r"Identity, $I_{t,n}$")
+            ax.set_ylim(0, 1)
+
+            ########################
+            # Now do the emissions over time
+            ax2=ax.twinx()
+            # twin object for two different y-axis on the sample plot
+            #plot no culture - red
+            ax2.plot(np.asarray(Data_no_culture.history_time), Data_no_culture.history_total_carbon_emissions,color="red",linestyle="--")
+            #plot culture - black
+            ax2.plot(np.asarray(Data_culture.history_time), Data_culture.history_total_carbon_emissions,color="k",linestyle='--')
+
+            ax2.set_ylabel(r"Total emissions, $E$")
+
+    plt.tight_layout()
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/plot_behaviours_time_series_emissions_and_culture"
+    fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
+def plot_behaviours_time_series_emissions(fileName,Data_culture, Data_no_culture, dpi_save):
+    fig, axes = plt.subplots(nrows = 1, ncols = Data_culture.M, figsize=(10,6), sharey=True)
+    
+    axes[0].set_ylabel(r"Behavioural attitude, $A_{t,n,m}$")
+    axes[0].set_ylim(0, 1)
+
+    for z, ax in enumerate(axes.flat):
+        #########################################
+        #plot no culture - red
+        #label='Behavioural independance' if label == x_labels[0] else ''
+        for v in Data_no_culture.agent_list:
+            ax.plot(np.asarray(Data_no_culture.history_time), np.asarray(v.history_behaviour_attitudes)[:,z], color = "red", alpha= 0.5 )
+
+        ###########################################
+        #plot cultue - black
+        # label='Inter-behavioural dependance' if label == x_labels[0] else ''
+        for v in Data_culture.agent_list:
+            ax.plot(np.asarray(Data_culture.history_time), np.asarray(v.history_behaviour_attitudes)[:,z], color = "k", alpha= 0.5)
+
+
+        ax.set_title(r"$\phi_{%s} = %s$" % (z + 1, Data_culture.phi_array[z]))
+        ax.set_xlabel(r"Time")
+
+    plt.tight_layout()
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/plot_behaviours_time_series_emissions"
+    #fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
+
+def plot_culture_time_series_emissions(fileName,Data_culture, Data_no_culture, dpi_save):
+    fig, ax = plt.subplots(figsize=(10,6))
+
+    ###########################################
+    #plot cultue - black
+    # label='Inter-behavioural dependance' if label == x_labels[0] else ''
+    for v in Data_culture.agent_list:
+        ax.plot(np.asarray(Data_culture.history_time), np.asarray(v.history_culture), color = "k", alpha= 0.5)
+
+    #########################################
+    #plot no culture - red
+    #label='Behavioural independance' if label == x_labels[0] else ''
+    for v in Data_no_culture.agent_list:
+        ax.plot(np.asarray(Data_no_culture.history_time), np.asarray(v.history_culture), color = "red", alpha= 0.5 )
+
+    ax.set_xlabel(r"Time")
+    ax.set_ylabel(r"Identity, $I_{t,n}$")
+    ax.set_ylim(0, 1.01)
+    
+
+    ########################
+    # Now do the emissions over time
+    ax2=ax.twinx()
+    # twin object for two different y-axis on the sample plot
+    #plot culture - black
+    ax2.plot(np.asarray(Data_culture.history_time), Data_culture.history_total_carbon_emissions,color="k",linestyle='--')
+    #plot no culture - red
+    ax2.plot(np.asarray(Data_no_culture.history_time), Data_no_culture.history_total_carbon_emissions,color="red",linestyle="--")
+
+    ax2.set_ylabel(r"Total emissions, $E$")
+
+
+    plt.tight_layout()
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/plot_culture_time_series_emissions"
+    fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
 ####bifurcation plots
 def bifurcation_plot(fileName,cluster_pos_matrix,vals_list, dpi_save):
     fig, ax = plt.subplots()
@@ -448,7 +586,7 @@ def plot_cluster_culture_time_series(fileName, Data, dpi_save,clusters_index_lis
             #print(i,j)
             colours_dict["%s" % (j)] = ani_step_colours[i]
         
-    #print("colours_dict",colours_dict)
+    print("colours_dict",colours_dict)
 
     for v in range(len(Data.agent_list)):
         ax.plot(np.asarray(Data.history_time), np.asarray(Data.agent_list[v].history_culture), color = colours_dict["%s" % (v)])
@@ -1271,9 +1409,9 @@ def live_print_culture_timeseries(
         ax.text(0.5, 1.03, string.ascii_uppercase[i], transform=ax.transAxes, size=20, weight='bold')
 
         ax.set_xlabel(r"Time")
-        ax.set_ylabel(r"%s" % y_title)
-    
         ax.set_ylim(0, 1)
+
+    axes[0].set_ylabel(r"%s" % y_title)
 
     plt.tight_layout()
 
@@ -1881,7 +2019,7 @@ def live_average_multirun_double_phase_diagram_C_of_V_alt(
 
 
 def double_phase_diagram(
-    fileName, Z, Y_title, Y_param, variable_parameters_dict, cmap, dpi_save
+    fileName, Z, Y_title, Y_param, variable_parameters_dict, cmap, dpi_save, levels
 ):
 
     fig, ax = plt.subplots(figsize=(10, 6), constrained_layout=True)
@@ -1889,19 +2027,19 @@ def double_phase_diagram(
     col_dict = variable_parameters_dict["col"]
     row_dict = variable_parameters_dict["row"]
 
-    ax.set_xlabel(r"%s" % col_dict["title"])
-    ax.set_ylabel(r"%s" % row_dict["title"])
+    ax.set_xlabel(r"Initial attitude Beta, $b_A$")
+    ax.set_ylabel(r"Initial attitude Beta, $a_A$")
 
-    if col_dict["divisions"] == "log":
-        ax.set_xscale("log")
-    if row_dict["divisions"] == "log":
-        ax.set_yscale("log")
+    #if col_dict["divisions"] == "log":
+    #    ax.set_xscale("log")
+    #if row_dict["divisions"] == "log":
+    #    ax.set_yscale("log")
 
     X, Y = np.meshgrid(col_dict["vals"], row_dict["vals"])
-    contours = ax.contour(X, Y, Z, colors="black")
-    ax.clabel(contours, inline=True, fontsize=8)
+    #contours = ax.contour(X, Y, Z, colors="black", levels = levels)
+    #ax.clabel(contours, inline=True, fontsize=8)
 
-    cp = ax.contourf(X, Y, Z, cmap=cmap, alpha=0.5)
+    cp = ax.contourf(X, Y, Z, cmap=cmap, alpha=0.5, levels = levels)
     cbar = fig.colorbar(
         cp,
         ax=ax,
@@ -1965,18 +2103,20 @@ def double_matrix_plot(
     fileName, Z, Y_title, Y_param, variable_parameters_dict, cmap, dpi_save,x_ticks_pos,y_ticks_pos,x_ticks_label,y_ticks_label
 ):
 
-    fig, ax = plt.subplots(figsize=(10, 6))
+    fig, ax = plt.subplots()#figsize=(10, 6)
 
     col_dict = variable_parameters_dict["col"]
     row_dict = variable_parameters_dict["row"]
 
-    ax.set_xlabel(col_dict["title"])
-    ax.set_ylabel(row_dict["title"])
+    #ax.set_xlabel(col_dict["title"])
+    #ax.set_ylabel(row_dict["title"])
 
-    if col_dict["divisions"] == "log":
-        ax.set_xscale("log")
-    if row_dict["divisions"] == "log":
-        ax.set_yscale("log")
+    ax.set_xlabel(r"Initial attitude Beta, $a_A$")
+    ax.set_ylabel(r"Initial attitude Beta, $b_A$")
+
+    X, Y = np.meshgrid(col_dict["vals"], row_dict["vals"])
+
+    
 
     mat = ax.matshow(
         Z,
@@ -1990,18 +2130,25 @@ def double_matrix_plot(
     )
     cbar.set_label(Y_title)
 
+    if col_dict["divisions"] == "log":
+        ax.set_xscale("log")
+    if row_dict["divisions"] == "log":
+        ax.set_yscale("log")
+
+
     # HAS TO BE AFTER PUTTING INT THE MATRIX 
-    ax.set_xticks(x_ticks_pos)
-    ax.set_xticklabels(x_ticks_label)  
+    #ax.set_xticks(x_ticks_pos)
+    #ax.set_xticklabels(x_ticks_label)  
+
     ax.xaxis.set_ticks_position('bottom')
 
-    ax.set_yticks(y_ticks_pos)
-    ax.set_yticklabels(y_ticks_label)  
+    #ax.set_yticks(y_ticks_pos)
+    ##ax.set_yticklabels(y_ticks_label)  
 
     plotName = fileName + "/Plots"
     f = plotName + "/live_average_double_matrix_plot_%s" % (Y_param)
     #fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
-    fig.savefig(f + ".png", dpi=dpi_save, format="png")
+    #fig.savefig(f + ".png", dpi=dpi_save, format="png")
 
 def double_matrix_plot_cluster(
     fileName, Z, variable_parameters_dict, cmap, dpi_save, col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label
@@ -2273,21 +2420,22 @@ def double_matrix_plot_ab(fileName, Z, Y_title, Y_param, variable_parameters_dic
     cbar.set_label(Y_title)
     ax.xaxis.set_ticks_position('bottom')
     
-    ax.set_xlabel(r"Attitude Beta parameter, $a$")
-    ax.set_ylabel(r"Attitude Beta parameter, $b$")
+    ax.set_xlabel(r"Initial attitude Beta, $a_A$")
+    ax.set_ylabel(r"Initial attitude Beta, $b_A$")
 
+    if col_dict["divisions"] == "log":
+        ax.set_xscale("log")
+        print("LOOGGGG")
+    if row_dict["divisions"] == "log":
+        ax.set_yscale("log")
 
-    #if col_dict["divisions"] == "log":
-    #    ax.set_xscale("log")
-    #if row_dict["divisions"] == "log":
-    #    ax.set_yscale("log")
-
-    ax.set_xticks(col_ticks_pos)
-    ax.set_xticklabels(col_ticks_label)  
+    #ax.set_xticks(col_ticks_pos)
+    #ax.set_xticklabels(col_ticks_label)  
     ax.xaxis.set_ticks_position('bottom')
 
-    ax.set_yticks(row_ticks_pos)
-    ax.set_yticklabels(row_ticks_label)  
+    #ax.set_yticks(row_ticks_pos)
+    #ax.set_yticklabels(row_ticks_label)  
+    #print("Y_param",Y_param)
 
     plotName = fileName + "/Plots"
     f = plotName + "/live_average_double_matrix_plot_%s" % (Y_param)
@@ -2498,6 +2646,55 @@ def multi_line_matrix_plot_difference(
     f = plotName + "/multi_line_matrix_plot_difference_%s_%s" % (Y_param, col_axis_x)
     fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
     fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
+def multi_line_matrix_plot_difference_percentage(
+    fileName, Z, col_vals, row_vals,  Y_param, cmap, dpi_save, col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label,col_axis_x, col_label, row_label, y_label
+    ):
+
+    fig, ax = plt.subplots( constrained_layout=True)#figsize=(14, 7)
+
+    if col_axis_x:
+        xs = np.tile(col_vals, (len(row_vals), 1))
+        ys = Z
+        c = row_vals
+
+    else:
+        xs = np.tile(row_vals, (len(col_vals), 1))
+        ys = np.transpose(Z)
+        c = col_vals
+    
+    #print("after",xs.shape, ys.shape, c.shape)
+
+    ax.set_ylabel(y_label)#(r"First behaviour attitude variance, $\sigma^2$")
+    
+    #plt.xticks(x_ticks_pos, x_ticks_label)
+
+    lc = multiline(xs, ys, c, cmap=cmap, lw=2)
+    axcb = fig.colorbar(lc)
+
+    if col_axis_x:
+        axcb.set_label(row_label)#(r"Number of behaviours per agent, M")
+        ax.set_xlabel(col_label)#(r'Confirmation bias, $\theta$')
+        ax.set_xticks(col_ticks_pos)
+        ax.set_xticklabels(col_ticks_label)
+        #print("x ticks", col_label,col_ticks_pos, col_ticks_label)
+        #ax.set_xlim(left = 0.0, right = 60)
+        #ax.set_xlim(left = -10.0, right = 90)
+
+    else:
+        axcb.set_label(col_label)#)(r'Confirmation bias, $\theta$')
+        ax.set_xlabel(row_label)#(r"Number of behaviours per agent, M")
+        ax.set_xticks(row_ticks_pos)
+        ax.set_xticklabels(row_ticks_label)
+        #print("x ticks", row_label, row_ticks_pos, row_ticks_label)
+        #ax.set_xlim(left = 1.0)
+        #ax.set_xlim(left = 0.0, right = 2.0)
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/multi_line_matrix_plot_difference_percentage_%s_%s" % (Y_param, col_axis_x)
+    fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
 
 def print_culture_timeseries_vary_array(
     fileName: str,
@@ -3618,7 +3815,7 @@ def multi_scatter_seperate_total_sensitivity_analysis_plot(
     #dict_list = ['var','emissions']#
     #dict_list = ['var','emissions',"emissions_change"]#list(data_dict.keys())
     #dict_list = list(data_dict.keys())
-    dict_list = ['var',"coefficient_of_variance",'emissions',"emissions_change"]
+    dict_list = ['emissions','var',"emissions_change"]#"coefficient_of_variance",
 
     fig, axes = plt.subplots(ncols=len(dict_list), nrows=1, constrained_layout=True , sharey=True,figsize=(12, 6))#,#sharex=True# figsize=(14, 7) # len(list(data_dict.keys())))
     
@@ -3649,7 +3846,7 @@ def multi_scatter_seperate_total_sensitivity_analysis_plot(
         ax.set_xlim(left=0)
         #ax.set_xlabel(r"%s Sobol sensitivity" % (order))
     #fig.text(0.5, 0.04, r"%s Sobol sensitivity" % (order), ha='center')
-    fig.supxlabel(r"%s Sobol sensitivity" % (order))
+    fig.supxlabel(r"%s order Sobol index" % (order))
     #plt.xlabel(r"%s Sobol sensitivity" % (order))
         #ax.set_ylabel(r"Exogenous parameters")
             
@@ -3671,7 +3868,7 @@ def multi_scatter_seperate_total_sensitivity_analysis_plot(
         % (len(names), N_samples, order)
     )
     fig.savefig(f, dpi=dpi_save, format="eps")
-    #fig.savefig(f_png, dpi=dpi_save, format="png")
+    fig.savefig(f_png, dpi=dpi_save, format="png")
 
 def multi_scatter_parallel_total_sensitivity_analysis_plot(
     fileName, data_dict, names, dpi_save, N_samples, order

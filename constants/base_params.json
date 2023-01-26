@@ -1,5 +1,5 @@
 {
-    "save_timeseries_data": 1, 
+    "save_timeseries_data": 0, 
     "degroot_aggregation": 1,
     "network_structure": "small_world",
     "alpha_change" : 1.0,
@@ -23,7 +23,7 @@
     "discount_factor": 0.95,
     "homophily": 0.95,
     "homophilly_rate" : 1,
-    "confirmation_bias": 20,
+    "confirmation_bias": 40,
     "a_attitude": 1,
     "b_attitude": 1,
     "a_threshold": 1,

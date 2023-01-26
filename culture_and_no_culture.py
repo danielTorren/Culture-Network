@@ -61,7 +61,7 @@ cmap = LinearSegmentedColormap.from_list(
 norm_zero_one = Normalize(vmin=0, vmax=1)
 
 # run bools
-RUN = 1 # run or load in previously saved data
+RUN = 0 # run or load in previously saved data
 
 colour_list = ["red", "green", "blue"]
 

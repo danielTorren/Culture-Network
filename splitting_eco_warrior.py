@@ -38,6 +38,7 @@ from resources.plot import (
     double_matrix_plot,
     multi_line_matrix_plot,
     multi_line_matrix_plot_difference,
+    multi_line_matrix_plot_difference_percentage,
     multi_line_matrix_plot_divide_through,
     double_matrix_plot_ab,
     double_matrix_plot_cluster,
@@ -45,6 +46,9 @@ from resources.plot import (
     double_matrix_plot_cluster_multi,
     double_matrix_plot_cluster_var_multi,
     double_contour_plot_cluster,
+    plot_culture_time_series_emissions,
+    plot_behaviours_time_series_emissions,
+    plot_behaviours_time_series_emissions_and_culture,
 )
 from resources.utility import (
     createFolder,
@@ -65,26 +69,57 @@ from resources.multi_run_2D_param import (
 )
 from resources.run import (
     single_stochstic_emissions_run,
-    multi_stochstic_emissions_run
+    multi_stochstic_emissions_run,
+    generate_data,
 )
 import numpy as np
 
-# run bools
-RUN = 0 # run or load in previously saved data
+"""
+{
+    "save_timeseries_data": 1, 
+    "degroot_aggregation": 1,
+    "network_structure": "small_world",
+    "alpha_change" : 1.0,
+    "guilty_individuals": 0,
+    "moral_licensing": 0,
+    "immutable_green_fountains": 1,
+    "polarisation_test": 0,
+    "total_time": 3000,
+    "delta_t": 1.0,
+    "phi_lower": 0.01,
+    "phi_upper": 0.05,
+    "compression_factor": 10,
+    "seed_list": [1,2,3,4,5],
+    "set_seed": 1,
+    "N": 200,
+    "M": 3,
+    "K": 20,
+    "prob_rewire": 0.1,
+    "culture_momentum_real": 1000,
+    "learning_error_scale": 0.02,
+    "discount_factor": 0.95,
+    "homophily": 0.95,
+    "homophilly_rate" : 1,
+    "confirmation_bias": 20,
+    "a_attitude": 1,
+    "b_attitude": 1,
+    "a_threshold": 1,
+    "b_threshold": 1,
+    "action_observation_I": 0.0,
+    "action_observation_S": 0.0,
+    "green_N": 0,
+    "guilty_individual_power": 0
+}
 
-SINGLE = 0 # determine if you runs single shots or study the averages over multiple runs for each experiment
-MULTI_THETA_M = 1
-MULTI = 0
-
-multi_line_plot = 0
-DUAL_plot = 0
+"""
 
 
 
+#fileName_no_identity = "results/splitting_eco_warriors_multi_set_N_10_49_28__08_01_2023"#this is the NO identity one
+#fileName = "results/splitting_eco_warriors_multi_set_N_10_48_11__08_01_2023"#this is the identity one
+#fileName = "results/splitting_eco_warriors_multi_17_39_29__07_01_2023"#this is the NO identity one
 
-fileName_no_identity = "results/splitting_eco_warriors_multi_17_39_29__07_01_2023"#this is the NO identity one
-fileName = "results/splitting_eco_warriors_multi_17_36_19__07_01_2023"#this is the identity one
-
+fileName = "results/splitting_eco_warriors_single_time_series_17_43_32__24_01_2023"#TIME SERIES RUN
 
 #"results/twoD_Average_confirmation_bias_M_200_3000_20_70_20_5"#"results/twoD_Average_confirmation_bias_a_attitude_200_3000_20_64_64_5"#"
 #"results/twoD_Average_confirmation_bias_a_attitude_200_3000_20_64_64_5"
@@ -92,6 +127,18 @@ fileName = "results/splitting_eco_warriors_multi_17_36_19__07_01_2023"#this is t
 #twoD_Average_M_confirmation_bias_200_2000_20_40_64_5
 #twoD_Average_homophily_confirmation_bias_200_2000_20_64_64_5
 #twoD_Average_M_confirmation_bias_200_2000_20_10_402_5
+
+# run bools
+RUN = 0 # run or load in previously saved data
+
+SINGLE = 0 # determine if you runs single shots or study the averages over multiple runs for each experiment
+MULTI_THETA_M = 0
+MULTI = 0
+SINGLE_TIME_SERIES = 1
+
+multi_line_plot = 0
+DUAL_plot = 0
+
 
 
 ###PLOT STUFF
@@ -164,7 +211,7 @@ if __name__ == "__main__":
                 variable_parameters_dict
             )
 
-            root = "splitting_eco_warriors_multi"
+            root = "splitting_eco_warriors_multi_set_N"
             fileName = produce_name_datetime(root)
             print("fileName:", fileName)
             #print("fileName: ", fileName)
@@ -227,7 +274,67 @@ if __name__ == "__main__":
             print("alpha state: ", base_params["alpha_change"])
             variable_parameters_dict = load_object(fileName + "/Data", "variable_parameters_dict")
             matrix_emissions = load_object(fileName + "/Data", "matrix_emissions")
-    
+    elif SINGLE_TIME_SERIES:
+        if RUN:
+            #f = open("constants/base_params.json")
+            base_params = {
+                "save_timeseries_data": 1, 
+                "degroot_aggregation": 1,
+                "network_structure": "small_world",
+                "alpha_change" : 1.0,
+                "guilty_individuals": 0,
+                "moral_licensing": 0,
+                "immutable_green_fountains": 1,
+                "polarisation_test": 0,
+                "total_time": 3000,
+                "delta_t": 1.0,
+                "phi_lower": 0.01,
+                "phi_upper": 0.05,
+                "compression_factor": 10,
+                "seed_list": [1,2,3,4,5],
+                "set_seed": 1,
+                "N": 200,
+                "M": 3,
+                "K": 20,
+                "prob_rewire": 0.1,
+                "culture_momentum_real": 1000,
+                "learning_error_scale": 0.02,
+                "discount_factor": 0.95,
+                "homophily": 0.95,
+                "homophilly_rate" : 1,
+                "confirmation_bias": 20,
+                "a_attitude": 1,
+                "b_attitude": 1,
+                "a_threshold": 1,
+                "b_threshold": 1,
+                "action_observation_I": 0.0,
+                "action_observation_S": 0.0,
+                "green_N": 20,
+                "guilty_individual_power": 0
+            }
+            base_params["time_steps_max"] = int(base_params["total_time"] / base_params["delta_t"])
+
+            #fileName = produceName(params, params_name)
+            root = "splitting_eco_warriors_single_time_series"
+            fileName = produce_name_datetime(root)
+            print("fileName:", fileName)
+            ##############################################################################
+            #CULTURED RUN
+            Data_culture = generate_data(base_params)  # run the simulation
+            #NO CULTURE RUN
+            base_params["alpha_change"] = 2.0
+            Data_no_culture = generate_data(base_params)  # run the simulation
+
+
+            createFolder(fileName)
+            save_object(Data_culture, fileName + "/Data", "Data_culture")
+            save_object(Data_no_culture, fileName + "/Data", "Data_no_culture")
+            save_object(base_params, fileName + "/Data", "base_params")
+        else:
+            Data_culture = load_object( fileName + "/Data", "Data_culture")
+            Data_no_culture = load_object( fileName + "/Data", "Data_no_culture")
+            base_params = load_object( fileName + "/Data", "base_params")
+
     if multi_line_plot:
         col_dict = variable_parameters_dict["col"]
         row_dict = variable_parameters_dict["row"]
@@ -250,7 +357,7 @@ if __name__ == "__main__":
         #print("row",row_ticks_pos,row_ticks_label)
         #print("col",col_ticks_pos,col_ticks_label)
 
-        row_label = r"Eco-warriors count"#r"Number of behaviours per agent, M"
+        row_label = r"Number of behaviours per agent, M"#r"Eco-warriors count"#r"Number of behaviours per agent, M"
         col_label = r'Confirmation bias, $\theta$'#r'Confirmation bias, $\theta$'
         y_label = r"Final emissions, $E$"#r"Identity variance, $\sigma^2$"
         
@@ -281,7 +388,7 @@ if __name__ == "__main__":
         #print("row",row_ticks_pos,row_ticks_label)
         #print("col",col_ticks_pos,col_ticks_label)
 
-        row_label = r"Eco-warriors count"#r"Number of behaviours per agent, M"
+        row_label = r"Number of behaviours per agent, M"#r"Eco-warriors count"#
         col_label = r'Confirmation bias, $\theta$'#r'Confirmation bias, $\theta$'
         y_label = r"Change in final emissions, $\Delta E$"#r"Identity variance, $\sigma^2$"
 
@@ -294,12 +401,23 @@ if __name__ == "__main__":
         #print(matrix_emissions.shape)
         
         difference_emissions_matrix = matrix_emissions - matrix_emissions_no_identity
+
+        difference_emissions_matrix_percentage = ((matrix_emissions - matrix_emissions_no_identity)/matrix_emissions_no_identity)*100
+        #print("difference_emissions_matrix_percentage", difference_emissions_matrix_percentage)
         #print(difference_emissions_matrix, difference_emissions_matrix.shape)
 
-        multi_line_matrix_plot_difference(fileName,difference_emissions_matrix, col_dict["vals"], row_dict["vals"],"emissions", get_cmap("plasma"),dpi_save,col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label, 0, col_label, row_label, y_label)#y_ticks_pos, y_ticks_label
-        multi_line_matrix_plot_difference(fileName,difference_emissions_matrix, col_dict["vals"], row_dict["vals"],"emissions", get_cmap("plasma"),dpi_save,col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label, 1, col_label, row_label, y_label)#y_ticks_pos, y_ticks_label
+        #multi_line_matrix_plot_difference(fileName,difference_emissions_matrix, col_dict["vals"], row_dict["vals"],"emissions", get_cmap("plasma"),dpi_save,col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label, 0, col_label, row_label, y_label)#y_ticks_pos, y_ticks_label
+        #multi_line_matrix_plot_difference(fileName,difference_emissions_matrix, col_dict["vals"], row_dict["vals"],"emissions", get_cmap("plasma"),dpi_save,col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label, 1, col_label, row_label, y_label)#y_ticks_pos, y_ticks_label
 
 
-        double_matrix_plot(fileName,difference_emissions_matrix, y_label, "emissions",variable_parameters_dict, get_cmap("plasma"),dpi_save,col_ticks_pos,row_ticks_pos,col_ticks_label,row_ticks_label)
+        #multi_line_matrix_plot_difference_percentage(fileName,difference_emissions_matrix_percentage, col_dict["vals"], row_dict["vals"],"emissions", get_cmap("plasma"),dpi_save,col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label, 0, col_label, row_label, y_label)#y_ticks_pos, y_ticks_label
+        multi_line_matrix_plot_difference_percentage(fileName,difference_emissions_matrix_percentage, col_dict["vals"], row_dict["vals"],"emissions", get_cmap("plasma"),dpi_save,col_ticks_pos, col_ticks_label, row_ticks_pos, row_ticks_label, 1, col_label, row_label, y_label)#y_ticks_pos, y_ticks_label
+
+        #double_matrix_plot(fileName,difference_emissions_matrix, y_label, "emissions",variable_parameters_dict, get_cmap("plasma"),dpi_save,col_ticks_pos,row_ticks_pos,col_ticks_label,row_ticks_label)
+        #double_matrix_plot(fileName,difference_emissions_matrix_percentage, y_label, "emissions_percent",variable_parameters_dict, get_cmap("plasma"),dpi_save,col_ticks_pos,row_ticks_pos,col_ticks_label,row_ticks_label)
+    if SINGLE_TIME_SERIES:
+        #plot_culture_time_series_emissions(fileName,Data_culture, Data_no_culture, dpi_save)
+        #plot_behaviours_time_series_emissions(fileName,Data_culture, Data_no_culture, dpi_save)
+        plot_behaviours_time_series_emissions_and_culture(fileName,Data_culture, Data_no_culture, dpi_save)
 
     plt.show()

@@ -261,6 +261,12 @@ def generate_culture_lists_one_seed_output(params):
     data = generate_data(params)
     return data.culture_list
 
+
+def generate_first_behaviour_lists_one_seed_output(params):
+    data = generate_data(params)
+    return [x.attitudes[0] for x in data.agent_list]
+
+
 def culture_data_run(
         params_dict: list[dict]
 ) -> npt.NDArray:
@@ -280,7 +286,8 @@ def one_seed_culture_data_run(
     num_cores = multiprocessing.cpu_count()
     #res = [generate_sensitivity_output(i) for i in params_dict]
     results_culture_lists = Parallel(n_jobs=num_cores, verbose=10)(
-        delayed(generate_culture_lists_one_seed_output)(i) for i in params_dict
+        #delayed(generate_culture_lists_one_seed_output)(i) for i in params_dict
+        delayed(generate_first_behaviour_lists_one_seed_output)(i) for i in params_dict
     )
 
     return np.asarray(results_culture_lists)#can't run with multiple different network sizes

@@ -94,10 +94,11 @@ size_points = 5
 
 RUN = 1
 SINGLE = 1
-GRAPH_TYPE = 8
+GRAPH_TYPE = 1
 bifurcation_plot_data_analysis = 1
 
-fileName = "results/" + "one_param_sweep_single_23_02_15__01_01_2023"#one_param_sweep_multi_18_06_16__16_12_2022"
+fileName = "results/" + "a_attitude_variation_200_3000_20_0.05_2.0_3"#one_param_sweep_multi_18_06_16__16_12_2022"
+#a_attitude_variation_200_3000_20_0.05_2.0_3 this Figure 1, the dynamics
 
 if __name__ == "__main__":
 
