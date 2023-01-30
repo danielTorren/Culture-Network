@@ -50,6 +50,136 @@ plt.rcParams.update({
 })
 
 # modules
+def plot_emissions_multi_ab_relative(fileName, emissions_list_culture, emissions_list_no_culture, mean_list, dpi_save):
+    fig, ax = plt.subplots()
+
+    emissions_difference = np.asarray(emissions_list_culture) -  np.asarray(emissions_list_no_culture)
+
+    ax.plot(mean_list,emissions_difference, ls="", marker=".", color = "k", linewidth = 0.5)
+    
+    ax.set_xlabel(r"Initial attitude mean, $a_A/(a_A + b_A)$")
+    ax.set_ylabel( r"Change in final emissions, $\Delta E_{\tau}$")
+    
+    plotName = fileName + "/Plots"
+    f = plotName + "/plot_emissions_multi_ab__relative_%s" % (len(mean_list))
+    fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
+def plot_emissions_multi_ab(fileName, emissions_list_culture, emissions_list_no_culture, mean_list, dpi_save):
+    fig, ax = plt.subplots()
+
+    ################################################
+    #culture
+
+    ax.plot(mean_list,emissions_list_culture, ls="", marker=".", color = "k", linewidth = 0.5)
+    #######################################
+    #no culture
+    ax.plot(mean_list,emissions_list_no_culture, ls="", marker=".", color = "red", linewidth = 0.5)
+    
+    ax.set_xlabel(r"Initial attitude mean, $a_A/(a_A + b_A)$")
+    ax.set_ylabel(r"Total emissions, $E_t$")
+    
+    plotName = fileName + "/Plots"
+    f = plotName + "/plot_emissions_multi_ab_%s" % (len(mean_list))
+    fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
+def plot_emissions_distance(fileName,data_list_culture, data_list_no_culture,init_attitudes_list, dpi_save):
+
+    fig, axes = plt.subplots(nrows = 1, ncols = 3, figsize=(14,7))
+    
+    #axes[2].get_shared_y_axes().remove(axes[2])
+
+    axes[0].set_ylabel(r"Behavioural attitude, $A_{t,n,1}$")
+    axes[0].set_title(r"Inter-behavioural dependence")
+    axes[0].set_ylim(0, 1)
+
+    axes[1].set_ylabel(r"Behavioural attitude, $A_{t,n,1}$")
+    axes[1].set_title(r"Behavioural independence")
+    axes[1].set_ylim(0, 1)
+
+    axes[2].set_ylabel(r"Total emissions, $E_t$")
+    
+    axes[0].set_xlabel(r"Time")
+    axes[1].set_xlabel(r"Time")
+    axes[2].set_xlabel(r"Time")
+
+    ###########################################
+    #plot cultue - black
+    # label='Inter-behavioural dependance' if label == x_labels[0] else ''
+
+    color_list = ["red", "green", "blue"]
+    for i in range(len(data_list_culture)):
+        for v in data_list_culture[i].agent_list:
+            axes[0].plot(np.asarray(data_list_culture[i].history_time), np.asarray(v.history_behaviour_attitudes)[:,0], color = color_list[i], alpha= 0.5, linestyle="-")
+
+    #########################################
+    #plot no culture - red
+    #label='Behavioural independance' if label == x_labels[0] else ''
+    for i in range(len(data_list_culture)):
+        for v in data_list_no_culture[i].agent_list:
+            axes[1].plot(np.asarray(data_list_no_culture[i].history_time), np.asarray(v.history_behaviour_attitudes)[:,0], color = color_list[i], alpha= 0.5,linestyle="--")
+
+    #plot culture - black
+    for i in range(len(data_list_culture)):
+        axes[2].plot(np.asarray(data_list_culture[i].history_time), data_list_culture[i].history_total_carbon_emissions, color = color_list[i], linestyle='-', label = r"Inter-behavioural dependence, $a_A = %s, b_A = %s$" % (init_attitudes_list[i][0], init_attitudes_list[i][1]))
+        axes[2].plot(np.asarray(data_list_no_culture[i].history_time), data_list_no_culture[i].history_total_carbon_emissions, color = color_list[i], linestyle="--", label = r"Behavioural independence, $a_A = %s, b_A = %s$" % (init_attitudes_list[i][0], init_attitudes_list[i][1]))
+    
+    axes[2].legend(loc = 'upper left', prop={'size': 11.5})
+    
+    plt.tight_layout()
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/plot_emissions_distance"
+    fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
+
+def plot_behaviours_time_series_emissions_and_behaviour(fileName,Data_culture, Data_no_culture, dpi_save):
+
+    fig, axes = plt.subplots(nrows = 1, ncols = 3, figsize=(14,7))
+    
+    #axes[2].get_shared_y_axes().remove(axes[2])
+
+    axes[0].set_ylabel(r"Behavioural attitude, $A_{t,n,1}$")
+    axes[0].set_title(r"Inter-behavioural dependence")
+    axes[0].set_ylim(0, 1)
+
+    axes[1].set_ylabel(r"Behavioural attitude, $A_{t,n,1}$")
+    axes[1].set_title(r"Behavioural independence")
+    axes[1].set_ylim(0, 1)
+
+    axes[2].set_ylabel(r"Total emissions, $E_t$")
+    
+    axes[0].set_xlabel(r"Time")
+    axes[1].set_xlabel(r"Time")
+    axes[2].set_xlabel(r"Time")
+
+    ###########################################
+    #plot cultue - black
+    # label='Inter-behavioural dependance' if label == x_labels[0] else ''
+    for v in Data_culture.agent_list:
+        axes[0].plot(np.asarray(Data_culture.history_time), np.asarray(v.history_behaviour_attitudes)[:,0], color = "k", alpha= 0.5, linestyle="-")
+
+    #########################################
+    #plot no culture - red
+    #label='Behavioural independance' if label == x_labels[0] else ''
+    for v in Data_no_culture.agent_list:
+        axes[1].plot(np.asarray(Data_no_culture.history_time), np.asarray(v.history_behaviour_attitudes)[:,0], color = "red", alpha= 0.5,linestyle="--")
+
+    #plot culture - black
+    axes[2].plot(np.asarray(Data_culture.history_time), Data_culture.history_total_carbon_emissions,color="k",linestyle='-', label = "Inter-behavioural dependence")
+
+    axes[2].plot(np.asarray(Data_no_culture.history_time), Data_no_culture.history_total_carbon_emissions,color="red",linestyle="--", label = "Behavioural independence")
+    axes[2].legend(loc = 'upper left', prop={'size': 11.5})
+    plt.tight_layout()
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/plot_behaviours_time_series_emissions_and_beahviour"
+    fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
+
 
 def plot_behaviours_time_series_emissions_and_culture(fileName,Data_culture, Data_no_culture, dpi_save):
     fig, axes = plt.subplots(nrows = 1, ncols = Data_culture.M + 1, figsize=(14,7), sharey=True)
@@ -62,7 +192,6 @@ def plot_behaviours_time_series_emissions_and_culture(fileName,Data_culture, Dat
     print(axes)
     print(axes[0].get_shared_y_axes())
     print(axes[Data_culture.M].get_shared_y_axes())
-    quit()
     #axes.get_shared_y_axes().remove(axes[Data_culture.M + 1])
 
     for z, ax in enumerate(axes.flat):

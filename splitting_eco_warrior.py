@@ -49,6 +49,9 @@ from resources.plot import (
     plot_culture_time_series_emissions,
     plot_behaviours_time_series_emissions,
     plot_behaviours_time_series_emissions_and_culture,
+    plot_emissions_distance,
+    plot_emissions_multi_ab,
+    plot_emissions_multi_ab_relative,
 )
 from resources.utility import (
     createFolder,
@@ -71,47 +74,9 @@ from resources.run import (
     single_stochstic_emissions_run,
     multi_stochstic_emissions_run,
     generate_data,
+    parallel_run,
 )
 import numpy as np
-
-"""
-{
-    "save_timeseries_data": 1, 
-    "degroot_aggregation": 1,
-    "network_structure": "small_world",
-    "alpha_change" : 1.0,
-    "guilty_individuals": 0,
-    "moral_licensing": 0,
-    "immutable_green_fountains": 1,
-    "polarisation_test": 0,
-    "total_time": 3000,
-    "delta_t": 1.0,
-    "phi_lower": 0.01,
-    "phi_upper": 0.05,
-    "compression_factor": 10,
-    "seed_list": [1,2,3,4,5],
-    "set_seed": 1,
-    "N": 200,
-    "M": 3,
-    "K": 20,
-    "prob_rewire": 0.1,
-    "culture_momentum_real": 1000,
-    "learning_error_scale": 0.02,
-    "discount_factor": 0.95,
-    "homophily": 0.95,
-    "homophilly_rate" : 1,
-    "confirmation_bias": 20,
-    "a_attitude": 1,
-    "b_attitude": 1,
-    "a_threshold": 1,
-    "b_threshold": 1,
-    "action_observation_I": 0.0,
-    "action_observation_S": 0.0,
-    "green_N": 0,
-    "guilty_individual_power": 0
-}
-
-"""
 
 
 
@@ -119,7 +84,9 @@ import numpy as np
 #fileName = "results/splitting_eco_warriors_multi_set_N_10_48_11__08_01_2023"#this is the identity one
 #fileName = "results/splitting_eco_warriors_multi_17_39_29__07_01_2023"#this is the NO identity one
 
-fileName = "results/splitting_eco_warriors_single_time_series_17_43_32__24_01_2023"#TIME SERIES RUN
+fileName = "results/splitting_eco_warriors_distance_single_17_31_07__30_01_2023"#timer seriess fro distances 
+
+#"results/splitting_eco_warriors_single_time_series_17_43_32__24_01_2023"#TIME SERIES RUN
 
 #"results/twoD_Average_confirmation_bias_M_200_3000_20_70_20_5"#"results/twoD_Average_confirmation_bias_a_attitude_200_3000_20_64_64_5"#"
 #"results/twoD_Average_confirmation_bias_a_attitude_200_3000_20_64_64_5"
@@ -129,12 +96,14 @@ fileName = "results/splitting_eco_warriors_single_time_series_17_43_32__24_01_20
 #twoD_Average_M_confirmation_bias_200_2000_20_10_402_5
 
 # run bools
-RUN = 0 # run or load in previously saved data
+RUN = 1 # run or load in previously saved data
 
 SINGLE = 0 # determine if you runs single shots or study the averages over multiple runs for each experiment
 MULTI_THETA_M = 0
 MULTI = 0
-SINGLE_TIME_SERIES = 1
+SINGLE_TIME_SERIES = 0
+DISTANCE_SINGLE_TIME_SERIES = 0
+MULTI_A_B = 1
 
 multi_line_plot = 0
 DUAL_plot = 0
@@ -334,6 +303,186 @@ if __name__ == "__main__":
             Data_culture = load_object( fileName + "/Data", "Data_culture")
             Data_no_culture = load_object( fileName + "/Data", "Data_no_culture")
             base_params = load_object( fileName + "/Data", "base_params")
+    elif DISTANCE_SINGLE_TIME_SERIES:
+        if RUN:
+            #f = open("constants/base_params.json")
+            base_params = {
+                "save_timeseries_data": 1, 
+                "degroot_aggregation": 1,
+                "network_structure": "small_world",
+                "alpha_change" : 1.0,
+                "guilty_individuals": 0,
+                "moral_licensing": 0,
+                "immutable_green_fountains": 1,
+                "polarisation_test": 0,
+                "total_time": 3000,
+                "delta_t": 1.0,
+                "phi_lower": 0.01,
+                "phi_upper": 0.05,
+                "compression_factor": 10,
+                "seed_list": [1,2,3,4,5],
+                "set_seed": 1,
+                "N": 200,
+                "M": 3,
+                "K": 20,
+                "prob_rewire": 0.1,
+                "culture_momentum_real": 1000,
+                "learning_error_scale": 0.02,
+                "discount_factor": 0.95,
+                "homophily": 0.95,
+                "homophilly_rate" : 1,
+                "confirmation_bias": 20,
+                "a_attitude": 1,
+                "b_attitude": 1,
+                "a_threshold": 1,
+                "b_threshold": 1,
+                "action_observation_I": 0.0,
+                "action_observation_S": 0.0,
+                "green_N": 20,
+                "guilty_individual_power": 0
+            }
+            base_params["time_steps_max"] = int(base_params["total_time"] / base_params["delta_t"])
+
+            ###############################################################
+            init_attitudes_list = [[2,5],[2,2],[5,2]]
+
+            params_list_culture = []
+
+            for i in init_attitudes_list:
+                #print("i",i)
+                base_params["a_attitude"] = i[0]
+                base_params["b_attitude"] = i[1]
+                params_list_culture.append(base_params.copy())
+
+            params_list_no_culture  = []
+            base_params["alpha_change"] = 2.0
+            for i in init_attitudes_list:
+                #print("i",i)
+                base_params["a_attitude"] = i[0]
+                base_params["b_attitude"] = i[1]
+                params_list_no_culture.append(base_params.copy())
+            #############################################################
+
+            #fileName = produceName(params, params_name)
+            root = "splitting_eco_warriors_distance_single"
+            fileName = produce_name_datetime(root)
+            print("fileName:", fileName)
+
+            ##############################################################################
+            #CULTURED RUN
+            data_list_culture = parallel_run(params_list_culture)
+            #NO CULTURE RUN
+            data_list_no_culture = parallel_run(params_list_no_culture)
+
+            createFolder(fileName)
+            save_object(data_list_culture, fileName + "/Data", "data_list_culture")
+            save_object(data_list_no_culture, fileName + "/Data", "data_list_no_culture")
+            save_object(base_params, fileName + "/Data", "base_params")
+            save_object(init_attitudes_list,fileName + "/Data", "init_attitudes_list")
+        else:
+            data_list_culture = load_object( fileName + "/Data", "data_list_culture")
+            data_list_no_culture  = load_object( fileName + "/Data", "data_list_no_culture")
+            base_params = load_object( fileName + "/Data", "base_params")
+            init_attitudes_list = load_object(fileName + "/Data", "init_attitudes_list")
+    elif MULTI_A_B:
+        if RUN:
+            #f = open("constants/base_params.json")
+            base_params = {
+                "save_timeseries_data": 1, 
+                "degroot_aggregation": 1,
+                "network_structure": "small_world",
+                "alpha_change" : 1.0,
+                "guilty_individuals": 0,
+                "moral_licensing": 0,
+                "immutable_green_fountains": 1,
+                "polarisation_test": 0,
+                "total_time": 3000,
+                "delta_t": 1.0,
+                "phi_lower": 0.01,
+                "phi_upper": 0.05,
+                "compression_factor": 10,
+                "seed_list": [1,2,3,4,5, 6, 7, 8, 9, 10],
+                "set_seed": 1,
+                "N": 200,
+                "M": 3,
+                "K": 20,
+                "prob_rewire": 0.1,
+                "culture_momentum_real": 1000,
+                "learning_error_scale": 0.02,
+                "discount_factor": 0.95,
+                "homophily": 0.95,
+                "homophilly_rate" : 1,
+                "confirmation_bias": 20,
+                "a_attitude": 1,
+                "b_attitude": 1,
+                "a_threshold": 1,
+                "b_threshold": 1,
+                "action_observation_I": 0.0,
+                "action_observation_S": 0.0,
+                "green_N": 20,
+                "guilty_individual_power": 0
+            }
+            base_params["time_steps_max"] = int(base_params["total_time"] / base_params["delta_t"])
+
+            ###############################################################
+
+            def gen_atttiudes_list(mean_list, sum_a_b):
+                init_attitudes_list = []
+                for i in mean_list:
+                    a = i*sum_a_b
+                    b = sum_a_b - a
+                    init_attitudes_list.append([a,b])
+                return init_attitudes_list
+            
+            mean_list = np.linspace(0.01,0.99, 100)
+            sum_a_b = 7
+
+            init_attitudes_list = gen_atttiudes_list(mean_list, sum_a_b)# GET THE LIST
+
+            params_list_culture = []
+
+            for i in init_attitudes_list:
+                #print("i",i)
+                base_params["a_attitude"] = i[0]
+                base_params["b_attitude"] = i[1]
+                params_list_culture.append(base_params.copy())
+
+            params_list_no_culture  = []
+            base_params["alpha_change"] = 2.0
+            for i in init_attitudes_list:
+                #print("i",i)
+                base_params["a_attitude"] = i[0]
+                base_params["b_attitude"] = i[1]
+                params_list_no_culture.append(base_params.copy())
+            #############################################################
+
+            #fileName = produceName(params, params_name)
+            root = "splitting_eco_warriors_distance_reps"
+            fileName = produce_name_datetime(root)
+            print("fileName:", fileName)
+
+            ##############################################################################
+            #CULTURED RUN
+            emissions_list_culture = multi_stochstic_emissions_run(params_list_culture)
+            #data_list_culture = parallel_run(params_list_culture)
+            #NO CULTURE RUN
+            #data_list_no_culture = parallel_run(params_list_no_culture)
+            emissions_list_no_culture = multi_stochstic_emissions_run(params_list_no_culture)
+
+            createFolder(fileName)
+            save_object(mean_list, fileName + "/Data", "mean_list")
+            save_object(sum_a_b , fileName + "/Data", "sum_a_b ")
+            save_object(emissions_list_culture, fileName + "/Data", "emissions_list_culture")
+            save_object(emissions_list_no_culture, fileName + "/Data", "emissions_list_no_culture")
+            save_object(base_params, fileName + "/Data", "base_params")
+            save_object(init_attitudes_list,fileName + "/Data", "init_attitudes_list")
+        else:
+            emissions_list_culture = load_object( fileName + "/Data", "emissions_list_culture")
+            emissions_list_no_culture  = load_object( fileName + "/Data", "emissions_list_no_culture")
+            base_params = load_object( fileName + "/Data", "base_params")
+            init_attitudes_list = load_object(fileName + "/Data", "init_attitudes_list")
+            mean_list = load_object(fileName + "/Data", "mean_list")
+            sum_a_b = load_object(fileName + "/Data", "sum_a_b ")
 
     if multi_line_plot:
         col_dict = variable_parameters_dict["col"]
@@ -420,4 +569,10 @@ if __name__ == "__main__":
         #plot_behaviours_time_series_emissions(fileName,Data_culture, Data_no_culture, dpi_save)
         plot_behaviours_time_series_emissions_and_culture(fileName,Data_culture, Data_no_culture, dpi_save)
 
+    if DISTANCE_SINGLE_TIME_SERIES:
+        plot_emissions_distance(fileName,data_list_culture, data_list_no_culture,init_attitudes_list, dpi_save)
+
+    if MULTI_A_B:
+        #plot_emissions_multi_ab(fileName, emissions_list_culture, emissions_list_no_culture, mean_list, dpi_save)
+        plot_emissions_multi_ab_relative(fileName, emissions_list_culture, emissions_list_no_culture, mean_list, dpi_save)
     plt.show()

@@ -58,7 +58,7 @@ def plot_beta_alt(f:str, a_b_combo_list: list):
 if __name__ == "__main__":
     fileName = "results/plot_beta_distribution"
     
-    a_b_combo_list = [[1,4],[1,5],[1,6],[0.5,2]]#[[5,5],[2,3],[1,1],[0.1,0.1]]
+    a_b_combo_list = [[2,5],[2,2],[5,2]]#[[5,5],[2,3],[1,1],[0.1,0.1]]
 
     plot_beta_alt(fileName,a_b_combo_list)
 

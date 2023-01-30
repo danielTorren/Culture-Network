@@ -18,7 +18,7 @@ from resources.utility import calc_num_clusters_auto_bandwidth
 
 # modules
 ####SINGLE SHOT RUN
-def generate_data(parameters: dict,print_simu = 1) -> Network:
+def generate_data(parameters: dict,print_simu = 0) -> Network:
     """
     Generate the Network object which itself contains list of Individual objects. Run this forward in time for the desired number of steps
 
@@ -165,6 +165,8 @@ def generate_sensitivity_output(params: dict):
         stochastic_norm_coefficient_variance,
         stochastic_norm_emissions_change
     )
+
+
 
 def generate_cluster_output(params: dict,s):
 
