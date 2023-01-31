@@ -222,6 +222,16 @@ def generate_multi_stochastic_output(params):
     #print("data.total_carbon_emissions",data.total_carbon_emissions)
     return np.mean(emissions_list)
 
+def generate_multi_output_emissions_list(params):
+    emissions_list = []
+    for v in params["seed_list"]:
+        params["set_seed"] = v
+        data = generate_data(params)
+        # Insert more measures below that want to be used for evaluating the
+        emissions_list.append(data.total_carbon_emissions)
+    #print("data.total_carbon_emissions",data.total_carbon_emissions)
+    return emissions_list
+
 
 def single_stochstic_emissions_run(
         params_dict: list[dict]
@@ -245,6 +255,20 @@ def multi_stochstic_emissions_run(
     #results_carbon_emissions = [generate_single_stochastic_output(i) for i in params_dict]
     results_carbon_emissions = Parallel(n_jobs=num_cores, verbose=10)(
         delayed(generate_multi_stochastic_output)(i) for i in params_dict
+    )
+
+    return np.asarray(results_carbon_emissions)#can't run with multiple different network sizes
+
+
+def multi_stochstic_emissions_run_all(
+        params_dict: list[dict]
+) -> npt.NDArray:
+
+    #print("params_dict", params_dict)
+    num_cores = multiprocessing.cpu_count()
+    #results_carbon_emissions = [generate_single_stochastic_output(i) for i in params_dict]
+    results_carbon_emissions = Parallel(n_jobs=num_cores, verbose=10)(
+        delayed(generate_multi_output_emissions_list)(i) for i in params_dict
     )
 
     return np.asarray(results_carbon_emissions)#can't run with multiple different network sizes

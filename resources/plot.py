@@ -50,6 +50,56 @@ plt.rcParams.update({
 })
 
 # modules
+
+def plot_emissions_multi_ab_relative_all(fileName, emissions_list_culture, emissions_list_no_culture, mean_list, dpi_save, seed_reps):
+    fig, ax = plt.subplots()
+
+    emissions_array_culture = np.asarray(emissions_list_culture)
+    emissions_array_no_culture = np.asarray(emissions_list_no_culture)
+    #print("emissions_array_culture",emissions_array_culture, emissions_array_culture.shape)
+
+    emissions_difference = ((emissions_array_culture -  emissions_array_no_culture)/emissions_array_no_culture)*100
+
+    #print("emissions_difference",emissions_difference, emissions_difference.shape)
+
+    mu_emissions_difference = emissions_difference.mean(axis=1)
+    sigma_emissions_difference = emissions_difference.std(axis=1)
+
+    #print("mu_emissions_difference ",mu_emissions_difference , mu_emissions_difference.shape)
+    
+    #quit()
+    ax.plot(mean_list,mu_emissions_difference, ls="", marker=".", linewidth = 0.5, color='blue')
+    ax.fill_between(mean_list, mu_emissions_difference+sigma_emissions_difference, mu_emissions_difference-sigma_emissions_difference, facecolor='blue', alpha=0.5)
+
+    ax.set_xlabel(r"Initial attitude mean, $a_A/(a_A + b_A)$")
+    ax.set_ylabel( r"$\%$ Change in final emissions, $\Delta E_{\tau}$")
+    
+    plotName = fileName + "/Plots"
+    f = plotName + "/plot_emissions_multi_ab__relative_%s" % (len(mean_list))
+    fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
+
+def plot_emissions_multi_ab_all(fileName, emissions_list_culture, emissions_list_no_culture, mean_list, dpi_save, seed_reps):
+    fig, ax = plt.subplots()
+
+    ################################################
+    #culture
+
+    ax.plot(mean_list,emissions_list_culture, ls="", marker=".", color = "k", linewidth = 0.5)
+    #######################################
+    #no culture
+    ax.plot(mean_list,emissions_list_no_culture, ls="", marker=".", color = "red", linewidth = 0.5)
+    
+    ax.set_xlabel(r"Initial attitude mean, $a_A/(a_A + b_A)$")
+    ax.set_ylabel(r"Total emissions, $E_t$")
+    
+    plotName = fileName + "/Plots"
+    f = plotName + "/plot_emissions_multi_ab_%s" % (len(mean_list))
+    fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
+
 def plot_emissions_multi_ab_relative(fileName, emissions_list_culture, emissions_list_no_culture, mean_list, dpi_save):
     fig, ax = plt.subplots()
 

@@ -72,7 +72,7 @@ def plot_discount_factors_delta(
             label=r"$\delta$ = %s" % (delta_vals[i]),
         )  # bodge so that we dont repeat one of the lines
 
-    ax.set_xlabel(r"Time")
+    ax.set_xlabel(r"Time steps into past")
     ax.set_ylabel(r"Discount array, $D_t$")
     ax.set_xticks(np.arange(0, -culture_momentum, step=-20))
     ax.legend()

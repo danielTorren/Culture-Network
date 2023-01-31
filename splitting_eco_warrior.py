@@ -52,6 +52,8 @@ from resources.plot import (
     plot_emissions_distance,
     plot_emissions_multi_ab,
     plot_emissions_multi_ab_relative,
+    plot_emissions_multi_ab_relative_all,
+    plot_emissions_multi_ab_all,
 )
 from resources.utility import (
     createFolder,
@@ -75,6 +77,7 @@ from resources.run import (
     multi_stochstic_emissions_run,
     generate_data,
     parallel_run,
+    multi_stochstic_emissions_run_all,
 )
 import numpy as np
 
@@ -84,7 +87,11 @@ import numpy as np
 #fileName = "results/splitting_eco_warriors_multi_set_N_10_48_11__08_01_2023"#this is the identity one
 #fileName = "results/splitting_eco_warriors_multi_17_39_29__07_01_2023"#this is the NO identity one
 
-fileName = "results/splitting_eco_warriors_distance_single_17_31_07__30_01_2023"#timer seriess fro distances 
+fileName = "results/splitting_eco_warriors_distance_reps_10_29_17__31_01_2023"
+
+#"results/splitting_eco_warriors_distance_reps_17_47_40__30_01_2023"
+
+#"results/splitting_eco_warriors_distance_single_17_31_07__30_01_2023"#timer seriess fro distances 
 
 #"results/splitting_eco_warriors_single_time_series_17_43_32__24_01_2023"#TIME SERIES RUN
 
@@ -401,7 +408,7 @@ if __name__ == "__main__":
                 "phi_lower": 0.01,
                 "phi_upper": 0.05,
                 "compression_factor": 10,
-                "seed_list": [1,2,3,4,5, 6, 7, 8, 9, 10],
+                "seed_list": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],
                 "set_seed": 1,
                 "N": 200,
                 "M": 3,
@@ -434,8 +441,8 @@ if __name__ == "__main__":
                     init_attitudes_list.append([a,b])
                 return init_attitudes_list
             
-            mean_list = np.linspace(0.01,0.99, 100)
-            sum_a_b = 7
+            mean_list = np.linspace(0.01,0.99, 200)
+            sum_a_b = 4#set the degree of polarisation? i think the more polarised the stronger the effect will be
 
             init_attitudes_list = gen_atttiudes_list(mean_list, sum_a_b)# GET THE LIST
 
@@ -463,11 +470,11 @@ if __name__ == "__main__":
 
             ##############################################################################
             #CULTURED RUN
-            emissions_list_culture = multi_stochstic_emissions_run(params_list_culture)
+            emissions_list_culture = multi_stochstic_emissions_run_all(params_list_culture)
             #data_list_culture = parallel_run(params_list_culture)
             #NO CULTURE RUN
             #data_list_no_culture = parallel_run(params_list_no_culture)
-            emissions_list_no_culture = multi_stochstic_emissions_run(params_list_no_culture)
+            emissions_list_no_culture = multi_stochstic_emissions_run_all(params_list_no_culture)
 
             createFolder(fileName)
             save_object(mean_list, fileName + "/Data", "mean_list")
@@ -574,5 +581,9 @@ if __name__ == "__main__":
 
     if MULTI_A_B:
         #plot_emissions_multi_ab(fileName, emissions_list_culture, emissions_list_no_culture, mean_list, dpi_save)
-        plot_emissions_multi_ab_relative(fileName, emissions_list_culture, emissions_list_no_culture, mean_list, dpi_save)
+        #plot_emissions_multi_ab_relative(fileName, emissions_list_culture, emissions_list_no_culture, mean_list, dpi_save)
+    
+        #plot_emissions_multi_ab_all(fileName, emissions_list_culture, emissions_list_no_culture, mean_list, dpi_save, len(base_params["seed_list"]))
+        plot_emissions_multi_ab_relative_all(fileName, emissions_list_culture, emissions_list_no_culture, mean_list, dpi_save, len(base_params["seed_list"]))
+    
     plt.show()
