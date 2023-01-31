@@ -94,17 +94,18 @@ size_points = 5
 
 RUN = 1
 SINGLE = 1
-GRAPH_TYPE = 1
-bifurcation_plot_data_analysis = 1
+GRAPH_TYPE = 2
+bifurcation_plot_data_analysis = 0
 
-fileName = "results/" + "a_attitude_variation_200_3000_20_0.05_2.0_3"#one_param_sweep_multi_18_06_16__16_12_2022"
+fileName = "results/" + "one_param_sweep_single_17_43_28__31_01_2023"
+#"a_attitude_variation_200_3000_20_0.05_2.0_3"#one_param_sweep_multi_18_06_16__16_12_2022"
 #a_attitude_variation_200_3000_20_0.05_2.0_3 this Figure 1, the dynamics
 
 if __name__ == "__main__":
 
     """The number of rows and cols set the number of experiments ie 4 rows and 3 cols gives 12 experiments"""
     nrows = 2 #leave as 1 for alpha and homophily plots, but change for network!
-    ncols = 2  # due to screen ratio want more cols than rows usually
+    ncols = 3  # due to screen ratio want more cols than rows usually
     reps = nrows * ncols  # make multiples of the number of cores for efficieny
 
     ############################
@@ -135,7 +136,7 @@ if __name__ == "__main__":
                 param_min = 0.0
                 param_max = 1.0  # 50.0
                 title_list = [r"Homophily, h = 0.0", r"Homophily, h = 0.5", r"Homophily, h = 1.0"]
-                property_values_list = np.asarray([0.2, 0.6, 1.0])
+                property_values_list = np.asarray([0.1, 0.5, 1.0])
             elif GRAPH_TYPE == 3:
                 ###############################
                 #FOR NETOWRK STRUCTURE HOMOPHILY PLOT
@@ -258,7 +259,7 @@ if __name__ == "__main__":
             save_object(title_list, fileName + "/Data", "title_list")
             save_object(property_values_list, fileName + "/Data", "property_values_list")
         else:
-            #data_list = load_object(fileName + "/Data", "data_list")
+            data_list = load_object(fileName + "/Data", "data_list")
             params = load_object(fileName + "/Data", "base_params")
             property_varied = load_object(fileName + "/Data", "property_varied")
             property_varied_title = load_object(fileName + "/Data", "property_varied_title")
@@ -280,6 +281,7 @@ if __name__ == "__main__":
         elif GRAPH_TYPE == 2:
             ###############################
             #FOR HOMOPHILY PLOT
+            layout = ["circular","circular", "circular"]
             print_live_intial_culture_networks_and_culture_timeseries(fileName, data_list, dpi_save, property_values_list, property_varied_title, ncols, layout, norm_zero_one, cmap, node_size,round_dec)
         elif GRAPH_TYPE == 3:
             #Data_dict = {"small_world": data[:3], "barabasi_albert_graph": data[3:]}

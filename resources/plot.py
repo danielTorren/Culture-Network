@@ -51,6 +51,68 @@ plt.rcParams.update({
 
 # modules
 
+def plot_behaviours_time_series_culture_and_emissions_ab_relative_all(fileName, data_list_culture, data_list_no_culture,emissions_list_culture, emissions_list_no_culture, mean_list, dpi_save, seed_reps):
+    
+    fig, axes = plt.subplots(nrows = 1, ncols = 3, figsize=(14,7))
+
+    axes[0].set_ylabel(r"Behavioural attitude, $A_{t,n,1}$")
+    axes[0].set_title(r"Inter-behavioural dependence")
+    axes[0].set_ylim(0, 1.05)
+
+    axes[1].set_ylabel(r"Behavioural attitude, $A_{t,n,1}$")
+    axes[1].set_title(r"Behavioural independence")
+    axes[1].set_ylim(0, 1.05)
+
+    axes[2].set_xlabel(r"Initial attitude mean, $a_A/(a_A + b_A)$")
+    axes[2].set_ylabel( r"$\%$ Change in final emissions, $\Delta E_{\tau}$")
+    
+    axes[0].set_xlabel(r"Time")
+    axes[1].set_xlabel(r"Time")
+    #axes[2].set_xlabel(r"Time")
+
+    ###########################################
+    #plot cultue - black
+    # label='Inter-behavioural dependance' if label == x_labels[0] else ''
+
+    color_list = ["#B847A5", "#A5B847", "#47A5B8"]
+    for i in range(len(data_list_culture)):
+        for v in data_list_culture[i].agent_list:
+            axes[0].plot(np.asarray(data_list_culture[i].history_time), np.asarray(v.history_behaviour_attitudes)[:,0], color = color_list[i], alpha= 0.5, linestyle="-")
+
+    #########################################
+    #plot no culture - red
+    #label='Behavioural independance' if label == x_labels[0] else ''
+    for i in range(len(data_list_culture)):
+        for v in data_list_no_culture[i].agent_list:
+            axes[1].plot(np.asarray(data_list_no_culture[i].history_time), np.asarray(v.history_behaviour_attitudes)[:,0], color = color_list[i], alpha= 0.5,linestyle="--")
+
+
+    emissions_array_culture = np.asarray(emissions_list_culture)
+    emissions_array_no_culture = np.asarray(emissions_list_no_culture)
+    #print("emissions_array_culture",emissions_array_culture, emissions_array_culture.shape)
+
+    emissions_difference = ((emissions_array_culture -  emissions_array_no_culture)/emissions_array_no_culture)*100
+
+    #print("emissions_difference",emissions_difference, emissions_difference.shape)
+
+    mu_emissions_difference = emissions_difference.mean(axis=1)
+    sigma_emissions_difference = emissions_difference.std(axis=1)
+
+    #print("mu_emissions_difference ",mu_emissions_difference , mu_emissions_difference.shape)
+    
+    #quit()
+    axes[2].plot(mean_list,mu_emissions_difference, ls="", marker=".", linewidth = 0.5, color='blue')
+    axes[2].fill_between(mean_list, mu_emissions_difference+sigma_emissions_difference, mu_emissions_difference-sigma_emissions_difference, facecolor='blue', alpha=0.5)
+    
+    plt.tight_layout()
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/plot_behaviours_time_series_culture_and_emissions_ab_relative_all"
+    fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
+
+
 def plot_emissions_multi_ab_relative_all(fileName, emissions_list_culture, emissions_list_no_culture, mean_list, dpi_save, seed_reps):
     fig, ax = plt.subplots()
 
@@ -3355,6 +3417,7 @@ def print_live_intial_culture_networks_and_culture_timeseries(
     node_size,
     round_dec,
 ):
+    print("HEY!",layout)
     y_title = r"Identity, $I_{t,n}$"
     fig, axes = plt.subplots(
         nrows=2, ncols=ncols, figsize=(14, 7), constrained_layout=True

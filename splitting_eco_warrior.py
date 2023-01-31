@@ -54,6 +54,7 @@ from resources.plot import (
     plot_emissions_multi_ab_relative,
     plot_emissions_multi_ab_relative_all,
     plot_emissions_multi_ab_all,
+    plot_behaviours_time_series_culture_and_emissions_ab_relative_all,
 )
 from resources.utility import (
     createFolder,
@@ -87,7 +88,9 @@ import numpy as np
 #fileName = "results/splitting_eco_warriors_multi_set_N_10_48_11__08_01_2023"#this is the identity one
 #fileName = "results/splitting_eco_warriors_multi_17_39_29__07_01_2023"#this is the NO identity one
 
-fileName = "results/splitting_eco_warriors_distance_reps_10_29_17__31_01_2023"
+fileName = "results/splitting_eco_warriors_distance_reps_10_39_19__31_01_2023"
+fileName_DISTANCE_SINGLE_TIME_SERIES = "results/splitting_eco_warriors_distance_single_16_18_30__30_01_2023"
+#"results/splitting_eco_warriors_distance_reps_10_29_17__31_01_2023"
 
 #"results/splitting_eco_warriors_distance_reps_17_47_40__30_01_2023"
 
@@ -103,14 +106,15 @@ fileName = "results/splitting_eco_warriors_distance_reps_10_29_17__31_01_2023"
 #twoD_Average_M_confirmation_bias_200_2000_20_10_402_5
 
 # run bools
-RUN = 1 # run or load in previously saved data
+RUN = 0 # run or load in previously saved data
 
 SINGLE = 0 # determine if you runs single shots or study the averages over multiple runs for each experiment
 MULTI_THETA_M = 0
 MULTI = 0
 SINGLE_TIME_SERIES = 0
 DISTANCE_SINGLE_TIME_SERIES = 0
-MULTI_A_B = 1
+MULTI_A_B = 0
+MULTI_A_B_and_DISTANCE_SINGLE_TIME_SERIES = 1
 
 multi_line_plot = 0
 DUAL_plot = 0
@@ -395,7 +399,7 @@ if __name__ == "__main__":
         if RUN:
             #f = open("constants/base_params.json")
             base_params = {
-                "save_timeseries_data": 1, 
+                "save_timeseries_data": 0, 
                 "degroot_aggregation": 1,
                 "network_structure": "small_world",
                 "alpha_change" : 1.0,
@@ -490,6 +494,18 @@ if __name__ == "__main__":
             init_attitudes_list = load_object(fileName + "/Data", "init_attitudes_list")
             mean_list = load_object(fileName + "/Data", "mean_list")
             sum_a_b = load_object(fileName + "/Data", "sum_a_b ")
+    elif MULTI_A_B_and_DISTANCE_SINGLE_TIME_SERIES:
+        data_list_culture = load_object( fileName_DISTANCE_SINGLE_TIME_SERIES + "/Data", "data_list_culture")
+        data_list_no_culture  = load_object( fileName_DISTANCE_SINGLE_TIME_SERIES + "/Data", "data_list_no_culture")
+        #base_params = load_object( fileName_DISTANCE_SINGLE_TIME_SERIES + "/Data", "base_params")
+        #init_attitudes_list = load_object(fileName_DISTANCE_SINGLE_TIME_SERIES + "/Data", "init_attitudes_list")
+
+        emissions_list_culture = load_object( fileName + "/Data", "emissions_list_culture")
+        emissions_list_no_culture  = load_object( fileName + "/Data", "emissions_list_no_culture")
+        base_params = load_object( fileName + "/Data", "base_params")
+        init_attitudes_list = load_object(fileName + "/Data", "init_attitudes_list")
+        mean_list = load_object(fileName + "/Data", "mean_list")
+        sum_a_b = load_object(fileName + "/Data", "sum_a_b ")
 
     if multi_line_plot:
         col_dict = variable_parameters_dict["col"]
@@ -585,5 +601,7 @@ if __name__ == "__main__":
     
         #plot_emissions_multi_ab_all(fileName, emissions_list_culture, emissions_list_no_culture, mean_list, dpi_save, len(base_params["seed_list"]))
         plot_emissions_multi_ab_relative_all(fileName, emissions_list_culture, emissions_list_no_culture, mean_list, dpi_save, len(base_params["seed_list"]))
-    
+        print(" MULTI_A_B")
+    if MULTI_A_B_and_DISTANCE_SINGLE_TIME_SERIES:
+        plot_behaviours_time_series_culture_and_emissions_ab_relative_all(fileName, data_list_culture, data_list_no_culture, emissions_list_culture, emissions_list_no_culture, mean_list, dpi_save, len(base_params["seed_list"]))
     plt.show()
