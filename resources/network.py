@@ -237,6 +237,7 @@ class Network:
         self.degroot_aggregation = parameters["degroot_aggregation"]
         self.immutable_green_fountains = parameters["immutable_green_fountains"]
         self.polarisation_test = parameters["polarisation_test"]#whether to have a = b
+        self.additional_greens = parameters["additional_greens"]
 
         self.guilty_individuals = parameters["guilty_individuals"]
         self.guilty_individual_power = parameters["guilty_individual_power"]
@@ -248,9 +249,14 @@ class Network:
         self.delta_t = parameters["delta_t"]
 
         # network
+        self.green_N = int(round(parameters["green_N"]))
         self.M = int(round(parameters["M"]))
         self.N = int(round(parameters["N"]))
-        self.green_N = int(round(parameters["green_N"]))
+        #if self.green_N > 0 and self.additional_greens:
+        #    self.N = int(round(parameters["N"])) + self.green_N
+        #else:
+            #self.N = int(round(parameters["N"]))
+        
 
         # culture
         self.culture_momentum_real = parameters["culture_momentum_real"]
@@ -277,7 +283,7 @@ class Network:
         self.phi_array = np.linspace(self.phi_lower, self.phi_upper, num=self.M)
 
         # emissions associated with each behaviour
-        self.carbon_emissions = [1] * self.M
+        self.carbon_intensive_list = [1] * self.M
 
         #how much are individuals influenced by what they see or hear, do opinions or actions more
         self.action_observation_I = parameters["action_observation_I"]
@@ -291,11 +297,18 @@ class Network:
         )
 
         # create network
-        (
-            self.adjacency_matrix,
-            self.weighting_matrix,
-            self.network,
-        ) = self.create_weighting_matrix()
+        if self.green_N>0 and self.additional_greens:
+            (
+                self.adjacency_matrix,
+                self.weighting_matrix,
+                self.network,
+            ) = self.create_weighting_matrix_add_greens()
+        else:
+            (
+                self.adjacency_matrix,
+                self.weighting_matrix,
+                self.network,
+            ) = self.create_weighting_matrix()
 
         self.network_density = nx.density(self.network)
         #print("self.network_density",self.network_density)
@@ -321,11 +334,21 @@ class Network:
         
         self.agent_list = self.create_agent_list()
 
+        #print("GREEN N", self.green_N)
+        #print("BEFORE",len(self.agent_list),self.calc_total_emissions())
+
+        #add the GREEN HERE !!
         if self.green_N > 0:
-            if self.immutable_green_fountains:
-                self.mix_in_green_fountains()
+            if self.additional_greens:
+                self.add_green_fountains_list()
+                self.N = len(self.agent_list)
             else:
-                self.mix_in_green_individuals()
+                if self.immutable_green_fountains:
+                    self.mix_in_green_fountains()
+                else:
+                    self.mix_in_green_individuals()
+        
+        #print("AFTER",len(self.agent_list),self.calc_total_emissions())
 
         self.shuffle_agent_list()#partial shuffle of the list based on culture
 
@@ -466,6 +489,46 @@ class Network:
             norm_weighting_matrix,
             G,
         )
+    
+    def create_weighting_matrix_add_greens(self):
+        """
+        Create watts-strogatz small world graph using Networkx library but with N GREEN indivduals
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        weighting_matrix: npt.NDArray[bool]
+            adjacency matrix, array giving social network structure where 1 represents a connection between agents and 0 no connection. It is symetric about the diagonal
+        norm_weighting_matrix: npt.NDArray[float]
+            an NxN array how how much each agent values the opinion of their neighbour. Note that is it not symetric and agent i doesn't need to value the
+            opinion of agent j as much as j does i's opinion
+        ws: nx.Graph
+            a networkx watts strogatz small world graph
+        """
+
+        if self.network_structure == "small_world":
+            G = nx.watts_strogatz_graph(n=self.N+self.green_N, k=self.K, p=self.prob_rewire, seed=self.set_seed)  # Watts–Strogatz small-world graph,watts_strogatz_graph( n, k, p[, seed])
+        elif self.network_structure == "erdos_renyi_graph":
+            G = nx.erdos_renyi_graph(n = self.N+self.green_N, p = self.prob_edge, seed=self.set_seed)
+        elif self.network_structure == "barabasi_albert_graph":
+            G = nx.barabasi_albert_graph(n = self.N+self.green_N, m = self.k_new_node, seed=self.set_seed)
+
+        #nx.draw(G)
+
+        weighting_matrix = nx.to_numpy_array(G)
+
+        #print(self.network_structure, weighting_matrix)
+
+        norm_weighting_matrix = self.normlize_matrix(weighting_matrix)
+
+        return (
+            weighting_matrix,
+            norm_weighting_matrix,
+            G,
+        )
 
     def circular_agent_list(self) -> list:
         """
@@ -549,7 +612,7 @@ class Network:
             "t": self.t,
             "M": self.M,
             "save_timeseries_data": self.save_timeseries_data,
-            "carbon_emissions": self.carbon_emissions,
+            "carbon_intensive_list": self.carbon_intensive_list,
             "phi_array": self.phi_array,
             "compression_factor": self.compression_factor,
             "action_observation_I": self.action_observation_I,
@@ -565,6 +628,7 @@ class Network:
                 self.threshold_matrix_init[n],
                 self.normalized_discount_array[n],
                 self.culture_momentum_list[n],
+                n
             )
             for n in range(self.N)
         ]
@@ -577,7 +641,7 @@ class Network:
             "t": self.t,
             "M": self.M,
             "save_timeseries_data": self.save_timeseries_data,
-            "carbon_emissions": self.carbon_emissions,
+            "carbon_intensive_list": self.carbon_intensive_list,
             "phi_array": self.phi_array,
             "compression_factor": self.compression_factor,
             "action_observation_I": self.action_observation_I,
@@ -587,6 +651,7 @@ class Network:
         }
         #randomly mix in the greens 
         n_list_green = np.random.choice(self.N, self.green_N,  replace=False)
+        #print(n_list_green)
         for i in n_list_green:
             self.agent_list[i] = Green_individual(
                 individual_params,
@@ -597,14 +662,30 @@ class Network:
         individual_params = {
             "M": self.M,
             "save_timeseries_data": self.save_timeseries_data,
-            "carbon_emissions": self.carbon_emissions,
+            "carbon_intensive_list": self.carbon_intensive_list,
             "compression_factor": self.compression_factor,
         }
 
         #randomly mix in the greens 
         n_list_green = np.random.choice(self.N, self.green_N,  replace=False)
+        #print("n to replace",n_list_green)
+
+
         for i in n_list_green:
             self.agent_list[i] = Green_fountain(individual_params)
+        
+    def add_green_fountains_list(self):
+        individual_params = {
+            "M": self.M,
+            "save_timeseries_data": self.save_timeseries_data,
+            "carbon_intensive_list": self.carbon_intensive_list,
+            "compression_factor": self.compression_factor,
+        }
+
+        green_fountains_list = [Green_fountain(individual_params) for n in range(self.green_N)]
+        self.agent_list.extend(green_fountains_list)
+        #print("added", self.agent_list)
+
 
     def shuffle_agent_list(self): 
         #make list cirucalr then partial shuffle it

@@ -96,6 +96,7 @@ class Individual:
         init_data_thresholds,
         normalized_discount_vector,
         culture_momentum,
+        id_n,
     ):
         """
         Constructs all the necessary attributes for the Individual object.
@@ -124,13 +125,16 @@ class Individual:
         self.t = individual_params["t"]
         self.delta_t = individual_params["delta_t"]
         self.save_timeseries_data = individual_params["save_timeseries_data"]
-        self.carbon_intensive_list = individual_params["carbon_emissions"]
+        self.carbon_intensive_list = individual_params["carbon_intensive_list"]
         self.compression_factor = individual_params["compression_factor"]
         self.phi_array = individual_params["phi_array"]
         self.action_observation_I = individual_params["action_observation_I"]
         self.guilty_individual_bool = individual_params["guilty_individuals"]
         self.guilty_individual_power = individual_params["guilty_individual_power"]
         self.moral_licensing = individual_params["moral_licensing"]
+        self.id = id_n
+
+        self.green_fountain_state = 0
 
         self.values = self.attitudes - self.thresholds
 

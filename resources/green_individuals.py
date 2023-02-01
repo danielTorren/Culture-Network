@@ -119,7 +119,7 @@ class Green_individual:
         self.t = individual_params["t"]
         self.delta_t = individual_params["delta_t"]
         self.save_timeseries_data = individual_params["save_timeseries_data"]
-        self.carbon_intensive_list = individual_params["carbon_emissions"]
+        self.carbon_intensive_list = individual_params["carbon_intensive_list"]
         self.compression_factor = individual_params["compression_factor"]
         self.phi_array = individual_params["phi_array"]
         self.action_observation_I = individual_params["action_observation_I"]
@@ -131,10 +131,12 @@ class Green_individual:
         self.thresholds = np.asarray(self.M*[0.00])
         self.av_behaviour = np.mean(self.attitudes)
         self.values = self.attitudes - self.thresholds
+        
         self.av_behaviour_list = [self.av_behaviour] * self.culture_momentum
         self.culture = self.calc_culture()
 
         self.total_carbon_emissions,self.behavioural_carbon_emissions = self.calc_total_emissions()
+       
 
         if self.save_timeseries_data:
             self.history_behaviour_values = [list(self.values)]
@@ -230,7 +232,8 @@ class Green_individual:
         -------
         float
         """
-        behavioural_emissions = [((1-self.values[i])/2)*self.carbon_intensive_list[i] for i in range(self.M)]
+        behavioural_emissions = [ ((1-self.values[i])/2)*self.carbon_intensive_list[i] for i in range(self.M)]
+        #print("GREEN?", self.values,sum(behavioural_emissions),behavioural_emissions)
         return sum(behavioural_emissions),behavioural_emissions# normalized Beta now used for emissions
 
     def save_timeseries_data_individual(self):

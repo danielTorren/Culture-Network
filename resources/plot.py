@@ -50,6 +50,99 @@ plt.rcParams.update({
 })
 
 # modules
+def bifurcation_plot_add_green(fileName,emissions_pos_matrix,vals_list, dpi_save):
+    fig, ax = plt.subplots()
+
+    for i in range(len(vals_list)):
+        x = [vals_list[i]]*(len(emissions_pos_matrix[i]))
+        #print("vals_list[i]",vals_list[i])
+        #print(x)
+        y = emissions_pos_matrix[i]
+        #print("y", y)
+        
+        #ax.scatter(x,y, color = "k")
+        ax.plot(x,y, ls="", marker=".", color = "k", linewidth = 0.5)
+        #ax.plot(x,y, ls="", color = "k")
+    ax.set_ylim(0,1)
+    
+    ax.set_xlabel(r"Initial attitude distance, $1-a_A/(a_A + b_A)$")
+    ax.set_ylabel( r"$\%$ change in final emissions, $\Delta E_{\tau}$")
+    
+    plotName = fileName + "/Plots"
+    f = plotName + "/bifurcation_plot_add_green_%s" % (len(vals_list))
+    fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
+def plot_emissions_multi_ab_relative_all_add_green(fileName, emissions_list_default, emissions_list_add_green, mean_list, dpi_save, seed_reps):
+    fig, ax = plt.subplots()
+
+    emissions_array_add_green = np.asarray(emissions_list_add_green)
+    emissions_array_default = np.asarray(emissions_list_default)
+    #print("emissions_array_culture",emissions_array_culture, emissions_array_culture.shape)
+
+    emissions_difference = ((emissions_array_add_green -  emissions_array_default)/emissions_array_default)*100
+
+    #print("emissions_difference",emissions_difference, emissions_difference.shape)
+
+    mu_emissions_difference = emissions_difference.mean(axis=1)
+    sigma_emissions_difference = emissions_difference.std(axis=1)
+
+    #print("mu_emissions_difference ",mu_emissions_difference , mu_emissions_difference.shape)
+    
+    #quit()
+    # REVERSE IT FOR DISTANCE!
+    ax.plot(mean_list[::-1],mu_emissions_difference[::-1], ls="", marker=".", linewidth = 0.5, color='blue')
+    ax.fill_between(mean_list[::-1], mu_emissions_difference[::-1]+sigma_emissions_difference[::-1], mu_emissions_difference[::-1]-sigma_emissions_difference[::-1], facecolor='blue', alpha=0.5)
+
+    ax.set_xlabel(r"Initial attitude distance, $1-a_A/(a_A + b_A)$")
+    ax.set_ylabel( r"$\%$ change in final emissions, $\Delta E_{\tau}$")
+    
+    plotName = fileName + "/Plots"
+    f = plotName + "/plot_emissions_multi_ab_relative_all_add_green_%s" % (len(mean_list))
+    fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
+
+def live_print_culture_timeseries_green(
+    fileName, Data_list, property_varied, title_list, nrows, ncols, dpi_save, colour_list
+):
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols,figsize=(10, 6), sharey=True)#, ,figsize=(14, 7)
+    y_title = r"Identity, $I_{t,n}$"
+
+    for i, ax in enumerate(axes.flat):
+        for v in Data_list[i].agent_list:
+            ax.plot(
+                np.asarray(Data_list[i].history_time), np.asarray(v.history_culture), color = colour_list[i]
+            )
+            #print("v.history_culture",v.history_culture)
+
+        ax.set_xlabel(r"Time")
+        ax.set_ylim(0, 1.05)
+        ax.set_title(title_list[i])
+
+    axes[0].set_ylabel(r"%s" % y_title)
+
+    plt.tight_layout()
+
+    plotName = fileName + "/Prints"
+    f = plotName + "/live_plot_culture_timeseries_green_%s.eps" % property_varied
+    fig.savefig(f, dpi=dpi_save, format="eps")
+
+def plot_compare_emissions_adding_green(fileName,Data_no_greens,Data_add_greens,dpi_save):
+    
+    fig, ax = plt.subplots()
+    ax.plot(np.asarray(Data_no_greens.history_time), Data_no_greens.history_total_carbon_emissions, color =  "#4421af", linestyle='-', label = r"Default")
+    ax.plot(np.asarray(Data_add_greens.history_time), Data_add_greens.history_total_carbon_emissions, color = "#5ad45a", linestyle="--", label = r"Green influencers")
+    
+    ax.legend()
+    
+    plt.tight_layout()
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/plot_compare_emissions_adding_green"
+    fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
 
 def plot_behaviours_time_series_culture_and_emissions_ab_relative_all(fileName, data_list_culture, data_list_no_culture,emissions_list_culture, emissions_list_no_culture, mean_list, dpi_save, seed_reps):
     
@@ -64,7 +157,7 @@ def plot_behaviours_time_series_culture_and_emissions_ab_relative_all(fileName, 
     axes[1].set_ylim(0, 1.05)
 
     axes[2].set_xlabel(r"Initial attitude mean, $a_A/(a_A + b_A)$")
-    axes[2].set_ylabel( r"$\%$ Change in final emissions, $\Delta E_{\tau}$")
+    axes[2].set_ylabel( r" Relative $\%$ change in final emissions")
     
     axes[0].set_xlabel(r"Time")
     axes[1].set_xlabel(r"Time")
@@ -134,7 +227,7 @@ def plot_emissions_multi_ab_relative_all(fileName, emissions_list_culture, emiss
     ax.fill_between(mean_list, mu_emissions_difference+sigma_emissions_difference, mu_emissions_difference-sigma_emissions_difference, facecolor='blue', alpha=0.5)
 
     ax.set_xlabel(r"Initial attitude mean, $a_A/(a_A + b_A)$")
-    ax.set_ylabel( r"$\%$ Change in final emissions, $\Delta E_{\tau}$")
+    ax.set_ylabel( r"$\%$ change in final emissions, $\Delta E_{\tau}$")
     
     plotName = fileName + "/Plots"
     f = plotName + "/plot_emissions_multi_ab__relative_%s" % (len(mean_list))
