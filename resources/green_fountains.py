@@ -103,7 +103,7 @@ class Green_fountain:
 
         self.M = individual_params["M"]
         self.save_timeseries_data = individual_params["save_timeseries_data"]
-        self.carbon_intensive_list = individual_params["carbon_emissions"]
+        self.carbon_intensive_list = individual_params["carbon_intensive_list"]
         self.compression_factor = individual_params["compression_factor"]
 
         self.attitudes = np.asarray(self.M*[1.00])
@@ -111,7 +111,8 @@ class Green_fountain:
         self.av_behaviour = np.mean(self.attitudes)
         self.values = self.attitudes - self.thresholds
         self.culture = 1.00
-        self.total_carbon_emissions = 0.0
+        self.total_carbon_emissions,self.behavioural_carbon_emissions = self.calc_total_emissions()
+        self.green_fountain_state = 1
 
         if self.save_timeseries_data:
             self.history_behaviour_values = [list(self.values)]
@@ -120,6 +121,23 @@ class Green_fountain:
             self.history_av_behaviour = [self.av_behaviour]
             self.history_culture = [self.culture]
             self.history_carbon_emissions = [self.total_carbon_emissions]
+            self.history_behavioural_carbon_emissions = [self.behavioural_carbon_emissions]
+
+    def calc_total_emissions(self):
+        """
+        Return total emissions of individual based on behavioural values
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        float
+        """
+        behavioural_emissions = [ ((1-self.values[i])/2)*self.carbon_intensive_list[i] for i in range(self.M)]
+        #print("GREEN?", self.values,sum(behavioural_emissions),behavioural_emissions)
+        return sum(behavioural_emissions),behavioural_emissions# normalized Beta now used for emissions
 
     def save_data_individual(self):
         """
@@ -139,6 +157,7 @@ class Green_fountain:
         self.history_culture.append(self.culture)
         self.history_av_behaviour.append(self.av_behaviour)
         self.history_carbon_emissions.append(self.total_carbon_emissions)
+        self.history_behavioural_carbon_emissions.append(self.behavioural_carbon_emissions)
 
     def next_step(self, t: float, steps: int, social_component: npt.NDArray):
         """

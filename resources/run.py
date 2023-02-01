@@ -232,6 +232,18 @@ def generate_multi_output_emissions_list(params):
     #print("data.total_carbon_emissions",data.total_carbon_emissions)
     return emissions_list
 
+def generate_multi_output_individual_emissions_list(params):
+    emissions_list = []
+    emissions_id_individuals_lists = []
+    for v in params["seed_list"]:
+        params["set_seed"] = v
+        data = generate_data(params)
+        # Insert more measures below that want to be used for evaluating the
+        emissions_list.append(data.total_carbon_emissions)
+        emissions_id_individuals_lists.append({x.id:x.total_carbon_emissions for x in data.agent_list if not x.green_fountain_state})
+    #print("data.total_carbon_emissions",data.total_carbon_emissions)
+    return (emissions_list, emissions_id_individuals_lists)
+
 
 def single_stochstic_emissions_run(
         params_dict: list[dict]
@@ -272,6 +284,23 @@ def multi_stochstic_emissions_run_all(
     )
 
     return np.asarray(results_carbon_emissions)#can't run with multiple different network sizes
+
+def multi_stochstic_emissions_run_all_individual(
+        params_dict: list[dict]
+) -> npt.NDArray:
+
+    #print("params_dict", params_dict)
+    num_cores = multiprocessing.cpu_count()
+    #results_carbon_emissions = [generate_single_stochastic_output(i) for i in params_dict]
+    res = Parallel(n_jobs=num_cores, verbose=10)(
+        delayed(generate_multi_output_individual_emissions_list)(i) for i in params_dict
+    )
+    results_total_carbon_emissions,results_individual_carbon_emissions_id = zip(
+        *res
+    )
+    #print("results_individual_carbon_emissions_id",results_individual_carbon_emissions_id)
+
+    return np.asarray(results_total_carbon_emissions),np.asarray(results_individual_carbon_emissions_id)#can't run with multiple different network sizes
 
 def generate_culture_lists_output(params):
 
