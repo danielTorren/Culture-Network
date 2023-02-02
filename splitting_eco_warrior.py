@@ -132,10 +132,10 @@ MULTI_THETA_M = 0
 MULTI = 0
 SINGLE_TIME_SERIES = 0
 DISTANCE_SINGLE_TIME_SERIES = 0
-MULTI_A_B = 0
+MULTI_A_B = 1
 MULTI_A_B_and_DISTANCE_SINGLE_TIME_SERIES = 0
 ADD_GREENS_SINGLE = 0
-ADD_GREENS_MULTI_A_B = 1
+ADD_GREENS_MULTI_A_B = 0
 
 multi_line_plot = 0
 DUAL_plot = 0
@@ -428,6 +428,7 @@ if __name__ == "__main__":
                 "guilty_individuals": 0,
                 "moral_licensing": 0,
                 "immutable_green_fountains": 1,
+                "additional_greens":1,
                 "polarisation_test": 0,
                 "total_time": 3000,
                 "delta_t": 1.0,
@@ -445,7 +446,7 @@ if __name__ == "__main__":
                 "discount_factor": 0.95,
                 "homophily": 0.95,
                 "homophilly_rate" : 1,
-                "confirmation_bias": 20,
+                "confirmation_bias": 5,
                 "a_attitude": 1,
                 "b_attitude": 1,
                 "a_threshold": 1,
@@ -550,8 +551,8 @@ if __name__ == "__main__":
                 "homophily": 0.95,
                 "homophilly_rate" : 1,
                 "confirmation_bias": 20,
-                "a_attitude": 5,
-                "b_attitude": 2,
+                "a_attitude": 1,
+                "b_attitude": 1,
                 "a_threshold": 1,
                 "b_threshold": 1,
                 "action_observation_I": 0.0,
@@ -608,9 +609,9 @@ if __name__ == "__main__":
                 "guilty_individuals": 0,
                 "moral_licensing": 0,
                 "immutable_green_fountains": 1,
-                "additional_greens":3000,
+                "additional_greens":1,
                 "polarisation_test": 0,
-                "total_time": 0,
+                "total_time": 3000,
                 "delta_t": 1.0,
                 "phi_lower": 0.01,
                 "phi_upper": 0.05,
@@ -633,7 +634,7 @@ if __name__ == "__main__":
                 "b_threshold": 1,
                 "action_observation_I": 0.0,
                 "action_observation_S": 0.0,
-                "green_N": 20,
+                "green_N": 0,
                 "guilty_individual_power": 0
             }
             base_params["time_steps_max"] = int(base_params["total_time"] / base_params["delta_t"])
@@ -709,7 +710,7 @@ if __name__ == "__main__":
 
             createFolder(fileName)
             save_object(mean_list, fileName + "/Data", "mean_list")
-            save_object(sum_a_b , fileName + "/Data", "sum_a_b ")
+            save_object(sum_a_b , fileName + "/Data", "sum_a_b")
             save_object(emissions_list_default, fileName + "/Data", "emissions_list_default")
             save_object(emissions_list_add_green, fileName + "/Data", "emissions_list_add_green")
             save_object(emissions_id_list_individual_default, fileName + "/Data", "emissions_id_list_individual_default")
@@ -727,7 +728,7 @@ if __name__ == "__main__":
             base_params = load_object( fileName + "/Data", "base_params")
             init_attitudes_list = load_object(fileName + "/Data", "init_attitudes_list")
             mean_list = load_object(fileName + "/Data", "mean_list")
-            sum_a_b = load_object(fileName + "/Data", "sum_a_b ")
+            sum_a_b = load_object(fileName + "/Data", "sum_a_b")
             green_N = load_object( fileName + "/Data", "green_N")
             green_K = load_object(fileName + "/Data", "green_K")
             emissions_difference_matrix = load_object(fileName + "/Data", "emissions_difference_matrix")

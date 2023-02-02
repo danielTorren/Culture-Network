@@ -237,7 +237,6 @@ class Network:
         self.degroot_aggregation = parameters["degroot_aggregation"]
         self.immutable_green_fountains = parameters["immutable_green_fountains"]
         self.polarisation_test = parameters["polarisation_test"]#whether to have a = b
-        self.additional_greens = parameters["additional_greens"]
 
         self.guilty_individuals = parameters["guilty_individuals"]
         self.guilty_individual_power = parameters["guilty_individual_power"]
@@ -250,6 +249,8 @@ class Network:
 
         # network
         self.green_N = int(round(parameters["green_N"]))
+        if self.green_N > 0:
+            self.additional_greens = parameters["additional_greens"]
         self.M = int(round(parameters["M"]))
         self.N = int(round(parameters["N"]))
         #if self.green_N > 0 and self.additional_greens:
