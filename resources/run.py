@@ -13,7 +13,7 @@ import numpy as np
 import numpy.typing as npt
 from joblib import Parallel, delayed
 import multiprocessing
-from resources.network import Network
+from model.network import Network
 from resources.utility import calc_num_clusters_auto_bandwidth
 
 # modules

@@ -16,12 +16,11 @@ from pandas import DataFrame
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from matplotlib.colors import Normalize, LinearSegmentedColormap, SymLogNorm
-from matplotlib.image import NonUniformImage
 from matplotlib.collections import LineCollection
 from matplotlib.cm import get_cmap
 from typing import Union
 #from pydlc import dense_lines
-from resources.network import Network
+from model.network import Network
 import joypy
 #from resources.utility import calc_num_clusters_auto_bandwidth
 from scipy.stats import gaussian_kde
@@ -30,6 +29,8 @@ from sklearn.neighbors import KernelDensity
 from sklearn.cluster import MeanShift
 import pandas as pd
 from resources.utility import get_cluster_list
+from scipy.stats import beta
+import numpy.typing as npt
 
 
 SMALL_SIZE = 14
@@ -50,6 +51,71 @@ plt.rcParams.update({
 })
 
 # modules
+# modules
+def plot_discount_factors_delta(
+    f: str,
+    delta_discount_list: list,
+    delta_vals: list,
+    time_list: npt.NDArray,
+    culture_momentum: float,
+    dpi_save: int,
+) -> None:
+    """
+    Plot several distributions for the truncated discounting factor for different parameter values
+
+    Parameters
+    ----------
+    f: str
+        filename, where plot is saved
+    const_delta_discount_list: list[list]
+        list of time series data of discount factor for the case where discount parameter delta is constant
+    delta_vals: list
+        values of delta the discount parameter used in graph
+    time_list: npt.NDArray
+        time points used
+    culture_momentum: float
+        the number of steps into the past that are considered when individuals consider their identity
+    dpi_save: int
+        the dpi of image saved
+
+    Returns
+    -------
+    None
+    """
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    for i in range(len(delta_vals)):
+        ax.plot(
+            time_list,
+            delta_discount_list[i],
+            linestyle="--",
+            label=r"$\delta$ = %s" % (delta_vals[i]),
+        )  # bodge so that we dont repeat one of the lines
+
+    ax.set_xlabel(r"Time steps into past")
+    ax.set_ylabel(r"Discount array, $D_t$")
+    ax.set_xticks(np.arange(0, -culture_momentum, step=-20))
+    ax.legend()
+
+    fig.savefig(f, dpi=dpi_save, format="eps")
+
+
+def plot_beta_alt(f:str, a_b_combo_list: list ):
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    x = np.linspace(0,1,100)
+
+    for i in a_b_combo_list:
+        y = beta.pdf(x, i[0], i[1])
+        ax.plot(x,y, label = r"a = %s, b = %s" % (i[0],i[1]))
+
+    ax.set_xlabel(r"x")
+    ax.set_ylabel(r"Probability Density Function")
+    ax.legend()
+
+    fig.savefig(f + "%s" % (len(a_b_combo_list)) + ".eps", format="eps")
+
 def bifurcation_plot_add_green(fileName,emissions_pos_matrix,vals_list, dpi_save):
     fig, ax = plt.subplots()
 
