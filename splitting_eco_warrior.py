@@ -16,7 +16,6 @@ Created: 10/10/2022
 """
 
 # imports
-import networkx as nx
 import matplotlib.pyplot as plt
 import json
 from matplotlib.colors import LinearSegmentedColormap, Normalize
@@ -60,6 +59,10 @@ from resources.plot import (
     live_print_culture_timeseries_green,
     plot_emissions_multi_ab_relative_all_add_green,
     bifurcation_plot_add_green,
+    plot_emissions_multi_ab_relative_all_two_theta,
+    plot_emissions_multi_ab_relative_all_two_theta_reverse,
+    plot_emissions_multi_ab_min_max_two_theta_reverse,
+    plot_emissions_multi_ab_min_max_two_theta_reverse_add_green,
 )
 from resources.utility import (
     createFolder,
@@ -105,9 +108,16 @@ def gen_atttiudes_list(mean_list, sum_a_b):
 #fileName = "results/splitting_eco_warriors_multi_set_N_10_48_11__08_01_2023"#this is the identity one
 #fileName = "results/splitting_eco_warriors_multi_17_39_29__07_01_2023"#this is the NO identity one
 
-fileName = "results/splitting_eco_warriors_single_add_greens_17_44_05__01_02_2023"
+fileName = "results/splitting_eco_warriors_distance_reps_10_17_02__02_02_2023"
+#"results/splitting_eco_warriors_single_add_greens_17_44_05__01_02_2023"
 #"results/splitting_eco_warriors_distance_reps_10_39_19__31_01_2023"
 fileName_DISTANCE_SINGLE_TIME_SERIES = "results/splitting_eco_warriors_distance_single_10_52_16__01_02_2023"
+
+fileName_add_greens_theta_one = "results/splitting_eco_warriors__add_green_10_20_51__02_02_2023"
+fileName_add_greens_theta_two = "results/splitting_eco_warriors__add_green_10_23_41__02_02_2023"
+
+fileName_theta_one = "results/splitting_eco_warriors_distance_reps_10_17_02__02_02_2023"
+fileName_theta_two = "results/splitting_eco_warriors_distance_reps_10_15_39__02_02_2023"
 #"results/splitting_eco_warriors_distance_single_16_18_30__30_01_2023"
 #"results/splitting_eco_warriors_distance_reps_10_29_17__31_01_2023"
 
@@ -132,10 +142,13 @@ MULTI_THETA_M = 0
 MULTI = 0
 SINGLE_TIME_SERIES = 0
 DISTANCE_SINGLE_TIME_SERIES = 0
-MULTI_A_B = 1
+MULTI_A_B = 0
+MULTI_A_B_TWO_THETA = 0
 MULTI_A_B_and_DISTANCE_SINGLE_TIME_SERIES = 0
 ADD_GREENS_SINGLE = 0
 ADD_GREENS_MULTI_A_B = 0
+ADD_GREENS_MULTI_A_B_TWO_THETA = 0
+ADD_GREENS_MULTI_A_B_COMPARE_CULTURE = 1
 
 multi_line_plot = 0
 DUAL_plot = 0
@@ -446,7 +459,7 @@ if __name__ == "__main__":
                 "discount_factor": 0.95,
                 "homophily": 0.95,
                 "homophilly_rate" : 1,
-                "confirmation_bias": 5,
+                "confirmation_bias": 20,
                 "a_attitude": 1,
                 "b_attitude": 1,
                 "a_threshold": 1,
@@ -509,6 +522,18 @@ if __name__ == "__main__":
             init_attitudes_list = load_object(fileName + "/Data", "init_attitudes_list")
             mean_list = load_object(fileName + "/Data", "mean_list")
             sum_a_b = load_object(fileName + "/Data", "sum_a_b ")
+    elif MULTI_A_B_TWO_THETA:
+            emissions_list_culture_theta_one = load_object( fileName_theta_one + "/Data", "emissions_list_culture")
+            emissions_list_no_culture_theta_one  = load_object( fileName_theta_one + "/Data", "emissions_list_no_culture")
+            base_params_theta_one = load_object( fileName_theta_one + "/Data", "base_params")
+
+            emissions_list_culture_theta_two = load_object( fileName_theta_two + "/Data", "emissions_list_culture")
+            emissions_list_no_culture_theta_two  = load_object( fileName_theta_two + "/Data", "emissions_list_no_culture")
+            base_params_theta_two = load_object( fileName_theta_two + "/Data", "base_params")
+
+            init_attitudes_list_theta_one = load_object(fileName_theta_one + "/Data", "init_attitudes_list")
+            mean_list_theta_one = load_object(fileName_theta_one + "/Data", "mean_list")
+            sum_a_b_theta_one = load_object(fileName_theta_one + "/Data", "sum_a_b ")
     elif MULTI_A_B_and_DISTANCE_SINGLE_TIME_SERIES:
         data_list_culture = load_object( fileName_DISTANCE_SINGLE_TIME_SERIES + "/Data", "data_list_culture")
         data_list_no_culture  = load_object( fileName_DISTANCE_SINGLE_TIME_SERIES + "/Data", "data_list_no_culture")
@@ -672,7 +697,7 @@ if __name__ == "__main__":
             #############################################################
 
             #fileName = produceName(params, params_name)
-            root = "splitting_eco_warriors_distance_reps"
+            root = "splitting_eco_warriors_add_green"
             fileName = produce_name_datetime(root)
             print("fileName:", fileName)
 
@@ -732,6 +757,138 @@ if __name__ == "__main__":
             green_N = load_object( fileName + "/Data", "green_N")
             green_K = load_object(fileName + "/Data", "green_K")
             emissions_difference_matrix = load_object(fileName + "/Data", "emissions_difference_matrix")
+    elif ADD_GREENS_MULTI_A_B_TWO_THETA:
+            emissions_list_default_theta_one = load_object( fileName_add_greens_theta_one + "/Data", "emissions_list_default")
+            emissions_list_add_green_theta_one  = load_object( fileName_add_greens_theta_one + "/Data", "emissions_list_add_green")
+            emissions_id_list_individual_default_theta_one = load_object( fileName_add_greens_theta_one + "/Data", "emissions_id_list_individual_default")
+            emissions_id_list_individual_add_green_theta_one  = load_object( fileName_add_greens_theta_one + "/Data", "emissions_id_list_individual_add_green")
+            base_params_theta_one = load_object( fileName_add_greens_theta_one + "/Data", "base_params")
+            init_attitudes_list_theta_one = load_object(fileName_add_greens_theta_one + "/Data", "init_attitudes_list")
+            mean_list_theta_one = load_object(fileName_add_greens_theta_one + "/Data", "mean_list")
+            sum_a_b_theta_one = load_object(fileName_add_greens_theta_one + "/Data", "sum_a_b")
+            green_N_theta_one = load_object( fileName_add_greens_theta_one + "/Data", "green_N")
+            green_K_theta_one = load_object(fileName_add_greens_theta_one + "/Data", "green_K")
+            emissions_difference_matrix_theta_one = load_object(fileName_add_greens_theta_one + "/Data", "emissions_difference_matrix")
+
+            emissions_list_default_theta_two = load_object( fileName_add_greens_theta_two + "/Data", "emissions_list_default")
+            emissions_list_add_green_theta_two  = load_object( fileName_add_greens_theta_two + "/Data", "emissions_list_add_green")
+            emissions_id_list_individual_default_theta_two = load_object( fileName_add_greens_theta_two + "/Data", "emissions_id_list_individual_default")
+            emissions_id_list_individual_add_green_theta_two  = load_object( fileName_add_greens_theta_two + "/Data", "emissions_id_list_individual_add_green")
+            base_params_theta_two = load_object( fileName_add_greens_theta_two + "/Data", "base_params")
+            init_attitudes_list_theta_two = load_object(fileName_add_greens_theta_two + "/Data", "init_attitudes_list")
+            mean_list_theta_two = load_object(fileName_add_greens_theta_two + "/Data", "mean_list")
+            sum_a_b_theta_two = load_object(fileName_add_greens_theta_two + "/Data", "sum_a_b")
+            green_N_theta_two = load_object( fileName_add_greens_theta_two + "/Data", "green_N")
+            green_K_theta_two = load_object(fileName_add_greens_theta_two + "/Data", "green_K")
+            emissions_difference_matrix_theta_two = load_object(fileName_add_greens_theta_two + "/Data", "emissions_difference_matrix")
+    elif ADD_GREENS_MULTI_A_B_COMPARE_CULTURE:
+        if RUN:
+            #f = open("constants/base_params.json")
+            base_params = {
+                "save_timeseries_data": 0, 
+                "degroot_aggregation": 1,
+                "network_structure": "small_world",
+                "alpha_change" : 1.0,
+                "guilty_individuals": 0,
+                "moral_licensing": 0,
+                "immutable_green_fountains": 1,
+                "additional_greens":1,
+                "polarisation_test": 0,
+                "total_time": 3000,
+                "delta_t": 1.0,
+                "phi_lower": 0.01,
+                "phi_upper": 0.05,
+                "compression_factor": 10,
+                "seed_list": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],#[1,2,3],#,#
+                "set_seed": 1,
+                "N": 200,
+                "M": 3,
+                "K": 22,
+                "prob_rewire": 0.1,
+                "culture_momentum_real": 1000,
+                "learning_error_scale": 0.02,
+                "discount_factor": 0.95,
+                "homophily": 0.95,
+                "homophilly_rate" : 1,
+                "confirmation_bias": 5,
+                "a_attitude": 1,
+                "b_attitude": 1,
+                "a_threshold": 1,
+                "b_threshold": 1,
+                "action_observation_I": 0.0,
+                "action_observation_S": 0.0,
+                "green_N": 20,
+                "guilty_individual_power": 0
+            }
+            base_params["time_steps_max"] = int(base_params["total_time"] / base_params["delta_t"])
+            base_params_no_culture = base_params.copy()
+
+
+            # K HAS BEEN ADJUSTED FROM 20 to 22 to account for the increased density from the additional 20 green indviduals
+            ###############################################################
+            
+            mean_list = np.linspace(0.01,0.99, 200)
+            sum_a_b = 4#set the degree of polarisation? i think the more polarised the stronger the effect will be
+
+            init_attitudes_list = gen_atttiudes_list(mean_list, sum_a_b)# GET THE LIST
+            params_list_culture = []
+            base_params["alpha_change"] = 1.0
+            for i in init_attitudes_list:
+                #print("i",i)
+                base_params["a_attitude"] = i[0]
+                base_params["b_attitude"] = i[1]
+                base_params["b_attitude"]
+                params_list_culture.append(base_params.copy())
+
+            base_params_no_culture["alpha_change"] = 2.0
+            params_list_no_culture  = []
+            for i in init_attitudes_list:
+                #print("i",i)
+                base_params_no_culture["a_attitude"] = i[0]
+                base_params_no_culture["b_attitude"] = i[1]
+                params_list_no_culture.append(base_params_no_culture.copy())
+
+            #############################################################
+
+            #fileName = produceName(params, params_name)
+            root = "splitting_eco_warriors_add_green_culture_compare"
+            fileName = produce_name_datetime(root)
+            print("fileName:", fileName)
+
+            ##############################################################################
+            #NO CULTURE RUN
+            emissions_list_no_culture, emissions_id_list_individual_no_culture = multi_stochstic_emissions_run_all_individual(params_list_no_culture)
+            #CULTURED RUN
+            emissions_list_culture, emissions_id_list_individual_culture = multi_stochstic_emissions_run_all_individual(params_list_culture)
+
+            
+            emissions_difference_lists = []
+            for i in range(len(mean_list)):
+                mean_row = []
+                for k in range(base_params["N"]):
+                    person_row = []
+                    for j in range(len(base_params["seed_list"])):
+                        emissions_difference_stochastic = ((emissions_id_list_individual_culture[i,j][k] -  emissions_id_list_individual_no_culture[i,j][k])/emissions_id_list_individual_no_culture[i,j][k])*100
+                        person_row.append(emissions_difference_stochastic)
+                    mean_row.append(np.mean(person_row))
+                emissions_difference_lists.append(mean_row)
+            
+            emissions_difference_matrix = np.asarray(emissions_difference_lists)
+            #print("eemissions_difference_matrix.shape",emissions_difference_matrix,emissions_difference_matrix.shape)
+
+            #emissions_difference_matrix = np.mean(emissions_difference_stochastic, axis=0) 
+            #print("emissions_difference_matrix.shape",emissions_difference_matrix.shape)
+
+            createFolder(fileName)
+            save_object(mean_list, fileName + "/Data", "mean_list")
+            save_object(sum_a_b , fileName + "/Data", "sum_a_b")
+            save_object(emissions_list_no_culture, fileName + "/Data", "emissions_list_default")
+            save_object(emissions_list_culture, fileName + "/Data", "emissions_list_add_green")
+            save_object(emissions_id_list_individual_no_culture, fileName + "/Data", "emissions_id_list_individual_default")
+            save_object(emissions_id_list_individual_culture, fileName + "/Data", "emissions_id_list_individual_add_green")
+            save_object(base_params, fileName + "/Data", "base_params")
+            save_object(init_attitudes_list,fileName + "/Data", "init_attitudes_list")
+            save_object(emissions_difference_matrix,fileName + "/Data", "emissions_difference_matrix")
 
     if multi_line_plot:
         col_dict = variable_parameters_dict["col"]
@@ -828,6 +985,20 @@ if __name__ == "__main__":
         #plot_emissions_multi_ab_all(fileName, emissions_list_culture, emissions_list_no_culture, mean_list, dpi_save, len(base_params["seed_list"]))
         plot_emissions_multi_ab_relative_all(fileName, emissions_list_culture, emissions_list_no_culture, mean_list, dpi_save, len(base_params["seed_list"]))
         print(" MULTI_A_B")
+    if MULTI_A_B_TWO_THETA:
+        #####################################low theta run
+        emissions_array_culture_theta_one = np.asarray(emissions_list_culture_theta_one)
+        emissions_array_no_culture_theta_one = np.asarray(emissions_list_no_culture_theta_one)
+
+        emissions_difference_theta_one = ((emissions_array_culture_theta_one -  emissions_array_no_culture_theta_one)/emissions_array_no_culture_theta_one)*100
+        ###################################high theta run
+        emissions_array_culture_theta_two = np.asarray(emissions_list_culture_theta_two)
+        emissions_array_no_culture_theta_two = np.asarray(emissions_list_no_culture_theta_two)
+
+        emissions_difference_theta_two = ((emissions_array_culture_theta_two -  emissions_array_no_culture_theta_two)/emissions_array_no_culture_theta_two)*100
+        #plot_emissions_multi_ab_relative_all_two_theta(fileName, emissions_difference_theta_one, emissions_difference_theta_two, base_params_theta_one["confirmation_bias"],base_params_theta_two["confirmation_bias"],mean_list, dpi_save, len(base_params_theta_one["seed_list"]))
+        #plot_emissions_multi_ab_relative_all_two_theta_reverse(fileName, emissions_difference_theta_one, emissions_difference_theta_two, base_params_theta_one["confirmation_bias"],base_params_theta_two["confirmation_bias"],mean_list, dpi_save, len(base_params_theta_one["seed_list"]))
+        plot_emissions_multi_ab_min_max_two_theta_reverse(fileName_theta_one, emissions_difference_theta_one, emissions_difference_theta_two, base_params_theta_one["confirmation_bias"],base_params_theta_two["confirmation_bias"],mean_list_theta_one, dpi_save, len(base_params_theta_one["seed_list"]))
     if MULTI_A_B_and_DISTANCE_SINGLE_TIME_SERIES:
         plot_behaviours_time_series_culture_and_emissions_ab_relative_all(fileName, data_list_culture, data_list_no_culture, emissions_list_culture, emissions_list_no_culture, mean_list, dpi_save, len(base_params["seed_list"]))
     
@@ -839,4 +1010,10 @@ if __name__ == "__main__":
         plot_emissions_multi_ab_relative_all_add_green(fileName, emissions_list_default, emissions_list_add_green, mean_list, dpi_save, len(base_params["seed_list"]))
         bifurcation_plot_add_green(fileName,emissions_difference_matrix, mean_list, dpi_save)
     
+    if ADD_GREENS_MULTI_A_B_TWO_THETA:
+        plot_emissions_multi_ab_min_max_two_theta_reverse_add_green(fileName_add_greens_theta_one,   emissions_difference_matrix_theta_one,    emissions_difference_matrix_theta_two, base_params_theta_one["confirmation_bias"],base_params_theta_two["confirmation_bias"],   mean_list_theta_one,   dpi_save, len(base_params_theta_one["seed_list"])  )
+    
+    if ADD_GREENS_MULTI_A_B_COMPARE_CULTURE:
+        plot_emissions_multi_ab_relative_all_add_green(fileName, emissions_list_no_culture, emissions_list_culture, mean_list, dpi_save, len(base_params["seed_list"]))
+
     plt.show()
