@@ -63,7 +63,7 @@ def bifurcation_plot_add_green(fileName,emissions_pos_matrix,vals_list, dpi_save
         #ax.scatter(x,y, color = "k")
         ax.plot(x,y, ls="", marker=".", color = "k", linewidth = 0.5)
         #ax.plot(x,y, ls="", color = "k")
-    ax.set_ylim(0,1)
+    #ax.set_ylim(0,1)
     
     ax.set_xlabel(r"Initial attitude distance, $1-a_A/(a_A + b_A)$")
     ax.set_ylabel( r"$\%$ change in final emissions, $\Delta E_{\tau}$")
@@ -266,7 +266,7 @@ def plot_emissions_multi_ab_relative_all_two_theta_reverse(fileName, emissions_d
     fig.savefig(f + ".png", dpi=dpi_save, format="png")
 
 def plot_emissions_multi_ab_min_max_two_theta_reverse_add_green(fileName, emissions_difference_theta_one, emissions_difference_theta_two, theta_one,theta_two,mean_list, dpi_save, seed_reps):
-    fig, ax = plt.subplots()    
+    fig, ax = plt.subplots(figsize=(10,7))    
 
     mu_emissions_difference_theta_one = emissions_difference_theta_one.mean(axis=1)
     min_emissions_difference_theta_one = emissions_difference_theta_one.min(axis=1)
@@ -287,9 +287,10 @@ def plot_emissions_multi_ab_min_max_two_theta_reverse_add_green(fileName, emissi
     ax.fill_between(mean_list[::-1], max_emissions_difference_theta_two, min_emissions_difference_theta_two, facecolor='red', alpha=0.5)
 
     ax.set_xlabel(r"Initial attitude distance, $1-a_A/(a_A + b_A)$")
-    ax.set_ylabel( r"$\%$ change in final emissions, $\Delta E_{\tau}$")
+    ax.set_ylabel( r"Relative $\%$ change in final emissions")
     
     ax.legend(loc = "lower right")
+    plt.tight_layout()
 
     plotName = fileName + "/Plots"
     f = plotName + "/plot_emissions_multi_ab_min_max_two_theta_reverse_add_green_%s" % (len(mean_list))
@@ -319,9 +320,10 @@ def plot_emissions_multi_ab_min_max_two_theta_reverse(fileName, emissions_differ
     ax.fill_between(mean_list[::-1], max_emissions_difference_theta_two, min_emissions_difference_theta_two, facecolor='red', alpha=0.5)
 
     ax.set_xlabel(r"Initial attitude distance, $1-a_A/(a_A + b_A)$")
-    ax.set_ylabel( r"$\%$ change in final emissions, $\Delta E_{\tau}$")
+    ax.set_ylabel( r"Relative $\%$ change in final emissions")
     
     ax.legend(loc = "upper right")
+    plt.tight_layout()
 
     plotName = fileName + "/Plots"
     f = plotName + "/plot_emissions_multi_ab_min_max_two_theta_reverse_%s" % (len(mean_list))

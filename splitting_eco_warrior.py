@@ -108,7 +108,7 @@ def gen_atttiudes_list(mean_list, sum_a_b):
 #fileName = "results/splitting_eco_warriors_multi_set_N_10_48_11__08_01_2023"#this is the identity one
 #fileName = "results/splitting_eco_warriors_multi_17_39_29__07_01_2023"#this is the NO identity one
 
-fileName = "results/splitting_eco_warriors_distance_reps_10_17_02__02_02_2023"
+fileName = "results/splitting_eco_warriors__add_green_10_20_51__02_02_2023"
 #"results/splitting_eco_warriors_single_add_greens_17_44_05__01_02_2023"
 #"results/splitting_eco_warriors_distance_reps_10_39_19__31_01_2023"
 fileName_DISTANCE_SINGLE_TIME_SERIES = "results/splitting_eco_warriors_distance_single_10_52_16__01_02_2023"
@@ -837,7 +837,6 @@ if __name__ == "__main__":
                 #print("i",i)
                 base_params["a_attitude"] = i[0]
                 base_params["b_attitude"] = i[1]
-                base_params["b_attitude"]
                 params_list_culture.append(base_params.copy())
 
             base_params_no_culture["alpha_change"] = 2.0
@@ -882,13 +881,23 @@ if __name__ == "__main__":
             createFolder(fileName)
             save_object(mean_list, fileName + "/Data", "mean_list")
             save_object(sum_a_b , fileName + "/Data", "sum_a_b")
-            save_object(emissions_list_no_culture, fileName + "/Data", "emissions_list_default")
-            save_object(emissions_list_culture, fileName + "/Data", "emissions_list_add_green")
-            save_object(emissions_id_list_individual_no_culture, fileName + "/Data", "emissions_id_list_individual_default")
-            save_object(emissions_id_list_individual_culture, fileName + "/Data", "emissions_id_list_individual_add_green")
+            save_object(emissions_list_no_culture, fileName + "/Data", "emissions_list_no_culture")
+            save_object(emissions_list_culture, fileName + "/Data", "emissions_list_culture")
+            save_object(emissions_id_list_individual_no_culture, fileName + "/Data", "emissions_id_list_individual_no_culture")
+            save_object(emissions_id_list_individual_culture, fileName + "/Data", "emissions_id_list_individual_culture")
             save_object(base_params, fileName + "/Data", "base_params")
             save_object(init_attitudes_list,fileName + "/Data", "init_attitudes_list")
             save_object(emissions_difference_matrix,fileName + "/Data", "emissions_difference_matrix")
+        else:
+            emissions_list_no_culture = load_object( fileName + "/Data", "emissions_list_no_culture")
+            emissions_list_culture  = load_object( fileName + "/Data", "emissions_list_culture")
+            emissions_id_list_individual_no_culture = load_object( fileName + "/Data", "emissions_id_list_individual_no_culture")
+            emissions_id_list_individual_culture  = load_object( fileName + "/Data", "emissions_id_list_individual_culture")
+            base_params = load_object( fileName + "/Data", "base_params")
+            init_attitudes_list = load_object(fileName + "/Data", "init_attitudes_list")
+            mean_list = load_object(fileName + "/Data", "mean_list")
+            sum_a_b = load_object(fileName + "/Data", "sum_a_b")
+            emissions_difference_matrix = load_object(fileName + "/Data", "emissions_difference_matrix")      
 
     if multi_line_plot:
         col_dict = variable_parameters_dict["col"]
@@ -1007,8 +1016,8 @@ if __name__ == "__main__":
         live_print_culture_timeseries_green(fileName, [Data_no_greens,Data_add_greens], "Green_Influencers", ["Default", "Add Green Influencers"],1, 2, dpi_save,["#4421af","#5ad45a"])
     
     if ADD_GREENS_MULTI_A_B:
-        plot_emissions_multi_ab_relative_all_add_green(fileName, emissions_list_default, emissions_list_add_green, mean_list, dpi_save, len(base_params["seed_list"]))
-        bifurcation_plot_add_green(fileName,emissions_difference_matrix, mean_list, dpi_save)
+        #plot_emissions_multi_ab_relative_all_add_green(fileName, emissions_list_default, emissions_list_add_green, mean_list, dpi_save, len(base_params["seed_list"]))
+        bifurcation_plot_add_green(fileName,emissions_difference_matrix, mean_list[::-1], dpi_save)
     
     if ADD_GREENS_MULTI_A_B_TWO_THETA:
         plot_emissions_multi_ab_min_max_two_theta_reverse_add_green(fileName_add_greens_theta_one,   emissions_difference_matrix_theta_one,    emissions_difference_matrix_theta_two, base_params_theta_one["confirmation_bias"],base_params_theta_two["confirmation_bias"],   mean_list_theta_one,   dpi_save, len(base_params_theta_one["seed_list"])  )
