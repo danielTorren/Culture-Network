@@ -16,17 +16,20 @@ from oneD_param_sweep_gen import (
 )
 
 def main( 
-    RUN_NAME = "SINGLE"
+    RUN_NAME = "SINGLE",
+    no_samples = 10000,
+    bandwidth = 0.01,
+    param_min_identity = 0.0,
+    param_max_identity = 100.0,
+    reps_identity = 500,
+    property_varied_identity = "confirmation_bias",
+    property_varied_title_identity = "Confirmation bias $\theta$"
     ) -> str:
 
     if RUN_NAME == "SINGLE":
 
         ###FIRST RUN WITH IDENTITY (BEHAVIORAL INTERDEPENDANCE), ALPHA  = 1.0
-        property_varied_identity = "confirmation_bias"
-        property_varied_title_identity = "Confirmation bias $\theta$"
-        param_min_identity = 0.0
-        param_max_identity = 100.0  # 50.0
-        reps_identity = 500
+
         title_list_identity = ["Bifurcation"]
         #title_list = [r"Confirmation bias $\theta$ = 1.0", r"Confirmation bias $\theta$ = 10.0", r"Confirmation bias $\theta$ = 25.0", r"Confirmation bias $\theta$ = 50.0"]
         property_values_list_identity = np.linspace(param_min_identity,param_max_identity, reps_identity)
@@ -85,9 +88,8 @@ def main(
         ###WORKING
         N = base_params["N"]
 
-        no_samples = 10000
         identity_space = np.linspace(0, 1,no_samples)
-        bandwidth = 0.01
+
 
         cluster_pos_matrix_list_identity = [calc_pos_clusters_set_bandwidth(np.asarray(results_culture_lists_identity[i]),identity_space,bandwidth) for i in range(len(property_values_list_identity))] 
         cluster_pos_matrix_list_no_identity = [calc_pos_clusters_set_bandwidth(np.asarray(results_culture_lists_no_identity[i]),identity_space,bandwidth) for i in range(len(property_values_list_no_identity))] 

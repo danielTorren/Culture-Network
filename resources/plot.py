@@ -2417,6 +2417,97 @@ def live_average_multirun_double_phase_diagram_C_of_V_alt(
     fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
     fig.savefig(f + ".png", dpi=dpi_save, format="png")
 
+def load_plot_alpha_group_single(fileName, Data, clusters_index_lists,cluster_example_identity_list, vals_time_data, dpi_save, auto_bandwidth, bandwidth,cmap, norm_zero_one,)   -> None:
+
+    fig, ax = plt.subplots()
+
+    inverse_N_g_list = [1/len(i) for i in clusters_index_lists]
+
+    colour_adjust = norm_zero_one(cluster_example_identity_list)
+    ani_step_colours = cmap(colour_adjust)
+
+    for i in range(len(clusters_index_lists)): 
+        ax.plot(Data.history_time, vals_time_data[i], color = ani_step_colours[i], label = "Cluster %s" % (i + 1))#
+        ax.axhline(y= inverse_N_g_list[i], color = ani_step_colours[i], linestyle = "--")
+
+    #ax.set_title(title_list[z])
+    ax.legend()
+
+    ax.set_ylabel(r"Cluster center Identity, $I_{t,n}$")
+    ax.set_xlabel(r"Time")
+
+    cbar = fig.colorbar(
+        plt.cm.ScalarMappable(cmap=cmap, norm=norm_zero_one), ax=ax
+    )
+    cbar.set_label(r"Identity, $I_{t,n}$")
+
+    plotName = fileName + "/Prints"
+    f = plotName + "/ plot_alpha_group_single_%s_%s" % (auto_bandwidth, bandwidth)
+    fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
+def plot_joint_cluster_micro(fileName, Data, clusters_index_lists,cluster_example_identity_list, vals_time_data, dpi_save, auto_bandwidth, bandwidth,cmap_multi, norm_zero_one,shuffle_colours) -> None:
+    
+    fig, axes = plt.subplots(nrows = 1, ncols = 2, figsize = (10,6), constrained_layout=True)
+
+    ###################################################
+    
+    #colour_adjust = norm_zero_one(cluster_example_identity_list)
+    #ani_step_colours = cmap(colour_adjust)
+
+    cmap = get_cmap(name='viridis', lut = len(cluster_example_identity_list))
+    ani_step_colours = [cmap(i) for i in range(len(cluster_example_identity_list))] 
+
+    if shuffle_colours:
+        np.random.shuffle(ani_step_colours)
+    #else:
+        #cbar = fig.colorbar(
+        #    plt.cm.ScalarMappable(cmap=cmap, norm=norm_zero_one), ax=axes[0]
+        #)
+        #cbar.set_label(r"Cluster center Identity, $I_{t,n}$")
+    #print("ani_step_colours",ani_step_colours)
+
+    colours_dict = {}#It cant be a list as you need to do it out of order
+    for i in range(len(clusters_index_lists)):#i is the list of index in that cluster
+        for j in clusters_index_lists[i]:#j is an index in that cluster
+            #print(i,j)
+            colours_dict["%s" % (j)] = ani_step_colours[i]
+        
+    #print("colours_dict",colours_dict)
+
+    for v in range(len(Data.agent_list)):
+        axes[0].plot(np.asarray(Data.history_time), np.asarray(Data.agent_list[v].history_culture), color = colours_dict["%s" % (v)])
+
+    axes[0].set_ylabel(r"Identity, $I_{t,n}$")
+    axes[0].set_ylim(0, 1)
+    axes[0].set_xlabel(r"Time")
+
+    ##################################################
+
+    inverse_N_g_list = [1/len(i) for i in clusters_index_lists]
+
+    #colour_adjust = norm_zero_one(cluster_example_identity_list)
+    #ani_step_colours = cmap(colour_adjust)
+
+    for i in range(len(clusters_index_lists)): 
+        axes[1].plot(Data.history_time, vals_time_data[i], color = ani_step_colours[i])#, label = "Cluster %s" % (i + 1)
+        axes[1].axhline(y= inverse_N_g_list[i], color = ani_step_colours[i], linestyle = "--")
+
+    #ax.set_title(title_list[z])
+    #axes[1].legend()
+
+    axes[1].set_ylabel(r"Mean cluster weighting")
+    axes[1].set_xlabel(r"Time")
+
+    #cbar = fig.colorbar(
+    #    plt.cm.ScalarMappable(cmap=cmap, norm=norm_zero_one), ax=axes[1]
+    #)
+    #cbar.set_label(r"Identity, $I_{t,n}$")
+
+    plotName = fileName + "/Prints"
+    f = plotName + "/plot_joint_cluster_micro_%s_%s" % (auto_bandwidth, bandwidth)
+    fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
 
 def double_phase_diagram(
     fileName, Z, Y_title, Y_param, variable_parameters_dict, cmap, dpi_save, levels

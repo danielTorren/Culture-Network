@@ -254,8 +254,9 @@ def analyze_results(
 def main(
     fileName = "results\SA_AV_reps_5_samples_15360_D_vars_13_N_samples_1024",
     SECOND_ORDER = 0,
-    dpi_save = 1200
     ) -> None: 
+    
+    dpi_save = 1200
 
     plot_dict = {
         "emissions": {"title": r"$E/NM$", "colour": "red", "linestyle": "--"},

@@ -51,7 +51,7 @@ from resources.plot import (
 )
 
 def main(
-    fileName = "results/" + "one_param_sweep_single_17_43_28__31_01_2023",
+    fileName = "results/one_param_sweep_single_17_43_28__31_01_2023",
     PLOT_NAME = "SINGLE",
     GRAPH_TYPE = 0,
     ANIMATION = 0,

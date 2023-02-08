@@ -25,7 +25,7 @@ def main(
     fileName = "results/" + "bifurcation_SINGLE_COMPARE_IDENTITY_16_52_02__03_01_2023",
     PLOT_NAME = "SINGLE_COMPARE_IDENTITY",
     bifurcation_plot_data_analysis = 0,
-    dpi_save = 600,
+    dpi_save = 1200,
     ) -> None: 
     cmap_multi = get_cmap("plasma"),
     if PLOT_NAME == "SINGLE":

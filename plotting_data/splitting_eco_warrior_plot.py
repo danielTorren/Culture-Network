@@ -46,8 +46,10 @@ def main(
     PLOT_NAME = "SINGLE",
     fileName_DISTANCE_SINGLE_TIME_SERIES = "results/splitting_eco_warriors_distance_single_10_52_16__01_02_2023",
     fileName_MULTI_THETA_M_no_identity = "test",
-    dpi_save = 1200,
+    dpi_save = 1200
     ) -> None: 
+
+    
 
     if PLOT_NAME == "MULTI_THETA_M":
             base_params = load_object(fileName + "/Data", "base_params")
