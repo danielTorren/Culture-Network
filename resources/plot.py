@@ -50,6 +50,92 @@ plt.rcParams.update({
 })
 
 # modules
+def plot_emissions_no_culture_add_greens(fileName, emissions_list_no_culture_theta_one,emissions_list_culture_theta_one,  emissions_list_no_culture_theta_two,emissions_list_culture_theta_two, theta_one,theta_two,mean_list, dpi_save, seed_reps):
+    fig, ax = plt.subplots(figsize=(10,7))    
+    #IN THIS FUNCTION,  NO CULTURE = DEFAULT, CULTURE = ADD GREENS, CANT BE FUSSED TO CHANGE
+    emissions_array_no_culture_theta_one = np.asarray(emissions_list_no_culture_theta_one)
+    emissions_array_culture_theta_one = np.asarray(emissions_list_culture_theta_one)
+    emissions_array_no_culture_theta_two = np.asarray(emissions_list_no_culture_theta_two)
+    emissions_array_culture_theta_two = np.asarray(emissions_list_culture_theta_two)
+    #print("emissions_array_culture",emissions_array_culture, emissions_array_culture.shape)
+
+    emissions_difference_theta_one = ((emissions_array_culture_theta_one -  emissions_array_no_culture_theta_one )/emissions_array_no_culture_theta_one )*100
+    emissions_difference_theta_two = ((emissions_array_culture_theta_two -  emissions_array_no_culture_theta_two )/emissions_array_no_culture_theta_two )*100
+
+    mu_emissions_difference_theta_one = emissions_difference_theta_one.mean(axis=1)
+    min_emissions_difference_theta_one = emissions_difference_theta_one.min(axis=1)
+    max_emissions_difference_theta_one = emissions_difference_theta_one.max(axis=1)
+
+
+    mu_emissions_difference_theta_two = emissions_difference_theta_two.mean(axis=1)
+    min_emissions_difference_theta_two = emissions_difference_theta_two.min(axis=1)
+    max_emissions_difference_theta_two = emissions_difference_theta_two.max(axis=1)
+
+    #print("mu_emissions_difference ",mu_emissions_difference , mu_emissions_difference.shape)
+    
+    #quit()
+    ax.plot(mean_list[::-1],mu_emissions_difference_theta_one, ls="", marker=".", linewidth = 0.5, color='blue', label = r"Confirmation bias $\theta = %s$"% (theta_one))
+    ax.fill_between(mean_list[::-1], max_emissions_difference_theta_one, min_emissions_difference_theta_one, facecolor='blue', alpha=0.5)
+
+    ax.plot(mean_list[::-1],mu_emissions_difference_theta_two, ls="", marker=".", linewidth = 0.5, color='red', label = r"Confirmation bias $\theta = %s$"% (theta_two))
+    ax.fill_between(mean_list[::-1], max_emissions_difference_theta_two, min_emissions_difference_theta_two, facecolor='red', alpha=0.5)
+
+    ax.set_xlabel(r"Initial attitude distance, $1-a_A/(a_A + b_A)$")
+    ax.set_ylabel( r"Relative $\%$ change in final emissions")
+    
+    ax.legend(loc = "lower right")
+    plt.tight_layout()
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/plot_emissions_no_culture_add_greens_%s" % (len(mean_list))
+    fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
+def plot_emissions_multi_ab_relative_all_add_green_two_theta(fileName, emissions_list_no_culture_theta_one,emissions_list_culture_theta_one,  emissions_list_no_culture_theta_two,emissions_list_culture_theta_two, theta_one,theta_two,mean_list, dpi_save, seed_reps):
+    fig, ax = plt.subplots(figsize=(10,7))    
+
+    
+    emissions_array_no_culture_theta_one = np.asarray(emissions_list_no_culture_theta_one)
+    emissions_array_culture_theta_one = np.asarray(emissions_list_culture_theta_one)
+    emissions_array_no_culture_theta_two = np.asarray(emissions_list_no_culture_theta_two)
+    emissions_array_culture_theta_two = np.asarray(emissions_list_culture_theta_two)
+    #print("emissions_array_culture",emissions_array_culture, emissions_array_culture.shape)
+
+    emissions_difference_theta_one = ((emissions_array_culture_theta_one -  emissions_array_no_culture_theta_one )/emissions_array_no_culture_theta_one )*100
+    emissions_difference_theta_two = ((emissions_array_culture_theta_two -  emissions_array_no_culture_theta_two )/emissions_array_no_culture_theta_two )*100
+
+    mu_emissions_difference_theta_one = emissions_difference_theta_one.mean(axis=1)
+    min_emissions_difference_theta_one = emissions_difference_theta_one.min(axis=1)
+    max_emissions_difference_theta_one = emissions_difference_theta_one.max(axis=1)
+
+
+    mu_emissions_difference_theta_two = emissions_difference_theta_two.mean(axis=1)
+    min_emissions_difference_theta_two = emissions_difference_theta_two.min(axis=1)
+    max_emissions_difference_theta_two = emissions_difference_theta_two.max(axis=1)
+
+    #print("mu_emissions_difference ",mu_emissions_difference , mu_emissions_difference.shape)
+    
+    #quit()
+    ax.plot(mean_list[::-1],mu_emissions_difference_theta_one, ls="", marker=".", linewidth = 0.5, color='blue', label = r"Confirmation bias $\theta = %s$"% (theta_one))
+    ax.fill_between(mean_list[::-1], max_emissions_difference_theta_one, min_emissions_difference_theta_one, facecolor='blue', alpha=0.5)
+
+    ax.plot(mean_list[::-1],mu_emissions_difference_theta_two, ls="", marker=".", linewidth = 0.5, color='red', label = r"Confirmation bias $\theta = %s$"% (theta_two))
+    ax.fill_between(mean_list[::-1], max_emissions_difference_theta_two, min_emissions_difference_theta_two, facecolor='red', alpha=0.5)
+
+    ax.set_xlabel(r"Initial attitude distance, $1-a_A/(a_A + b_A)$")
+    ax.set_ylabel( r"Relative $\%$ change in final emissions")
+    
+    ax.legend(loc = "lower right")
+    plt.tight_layout()
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/plot_emissions_multi_ab_relative_all_add_green_two_theta_%s" % (len(mean_list))
+    fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
+
+
+
 def bifurcation_plot_add_green(fileName,emissions_pos_matrix,vals_list, dpi_save):
     fig, ax = plt.subplots()
 
