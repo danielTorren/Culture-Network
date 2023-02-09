@@ -1,4 +1,0 @@
-{
-    "discount_factor": {"property":"discount_factor","min":-2, "max":0 , "title": "$\\delta$", "divisions": "log", "cmap": "Reds", "cbar_loc": "right", "marker": "o", "reps": 4}, 
-    "inverse_homophily": {"property":"inverse_homophily","min":0.0, "max": 1.0, "title": "$h$", "divisions": "linear", "cmap": "Blues", "cbar_loc": "right", "marker": "v", "reps": 4} 
-}

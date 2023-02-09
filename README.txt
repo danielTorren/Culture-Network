@@ -1,4 +1,6 @@
-Version 0.1 of the model.
+Version 0.5 of the model.
+
+[NEED TO UPDATE]
 
 The aim of this model is to simulate how behaviours can lead to idenity change which in turn changes who indvidiuals listen to whilst learning socially. 
 
