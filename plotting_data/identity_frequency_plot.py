@@ -61,14 +61,10 @@ def main(
     data_analysis_clusters = 0,
     alpha_change_plot = 0,
     micro_clusters_plot = 0,
-    joint_cluster_micro = 1,
-    dpi_save = 600,
+    dpi_save = 1200,
     shuffle_colours = False,
     ) -> None: 
 
-    cmap = LinearSegmentedColormap.from_list(
-        "BrownGreen", ["sienna", "whitesmoke", "olivedrab"], gamma=1
-    ),
     norm_zero_one = Normalize(vmin=0, vmax=1),
     cmap_weighting = get_cmap("Reds"),
     cmap_multi = get_cmap("plasma"),
@@ -109,11 +105,8 @@ def main(
             bandwidth = load_object( fileName + "/Data", "bandwidth")
             auto_bandwidth = load_object( fileName + "/Data", "auto_bandwidth")
         
-        if joint_cluster_micro:
-            plot_joint_cluster_micro(fileName, data_list_reduc, clusters_index_lists,cluster_example_identity_list, vals_time_data, dpi_save, auto_bandwidth, bandwidth,cmap_multi, norm_zero_one,shuffle_colours)
-        else:
-            load_plot_alpha_group_single(fileName, data_list_reduc, clusters_index_lists,cluster_example_identity_list, vals_time_data, dpi_save, auto_bandwidth, bandwidth,cmap_multi, norm_zero_one,)
-            plot_cluster_culture_time_series(fileName, data_list_reduc, dpi_save,clusters_index_lists,cluster_example_identity_list, cmap,norm_zero_one, shuffle_colours)
+
+        plot_joint_cluster_micro(fileName, data_list_reduc, clusters_index_lists,cluster_example_identity_list, vals_time_data, dpi_save, auto_bandwidth, bandwidth,cmap_multi, norm_zero_one,shuffle_colours)
 
     plt.show()
 

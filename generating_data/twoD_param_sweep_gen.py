@@ -27,8 +27,6 @@ from resources.utility import (
     produce_name_datetime,
 )
 from resources.run import (
-    cluster_data_run,
-    culture_data_run,
     parallel_run, 
 )
 
@@ -94,7 +92,6 @@ def produce_param_list_n_double(
 
     return params_list
 
-
 def shot_two_dimensional_param_run(
     fileName: str,
     base_params: dict,
@@ -147,109 +144,30 @@ def save_data_shot(fileName, variable_parameters_dict, data_list, data_array):
 
 
 def main(
-    RUN_NAME = "SINGLE",
-    cluster_count_run = 0,
-    culture_run = 0
     ) -> str: 
-    
-    # run bools
-    SINGLE = 0 # determine if you runs single shots or study the averages over multiple runs for each experiment
 
+    # load base params
+    f_base_params = open("constants/base_params.json")
+    base_params = json.load(f_base_params)
+    f_base_params.close()
+    base_params["time_steps_max"] = int(base_params["total_time"] / base_params["delta_t"])
 
-    if RUN_NAME == "SINGLE":
+    # load variable params
+    f_variable_parameters = open(
+        "constants/variable_parameters_dict_2D.json"
+    )
+    variable_parameters_dict = json.load(f_variable_parameters)
+    f_variable_parameters.close()
 
-        # load base params
-        f_base_params = open("constants/base_params.json")
-        base_params = json.load(f_base_params)
-        f_base_params.close()
-        base_params["time_steps_max"] = int(base_params["total_time"] / base_params["delta_t"])
+    # AVERAGE OVER MULTIPLE RUNS
+    variable_parameters_dict = generate_vals_variable_parameters_and_norms(
+        variable_parameters_dict
+    )
 
-        # load variable params
-        f_variable_parameters = open(
-            "constants/variable_parameters_dict_2D.json"
-        )
-        variable_parameters_dict = json.load(f_variable_parameters)
-        f_variable_parameters.close()
+    root = "two_param_sweep_average"
+    fileName = produce_name_datetime(root)
+    print("fileName:", fileName)
 
-        variable_parameters_dict = generate_vals_variable_parameters_and_norms(
-            variable_parameters_dict
-        )
-
-        root = "two_param_sweep_single"
-        fileName = produce_name_datetime(root)
-        print("fileName:", fileName)
-        #print("fileName: ", fileName)
-
-        shot_two_dimensional_param_run(
-            fileName,
-            base_params,
-            variable_parameters_dict,
-            variable_parameters_dict["row"]["reps"],
-            variable_parameters_dict["col"]["reps"],
-        )
-
-    elif RUN_NAME == "MULTI":
-        # load base params
-        f_base_params = open("constants/base_params.json")
-        base_params = json.load(f_base_params)
-        f_base_params.close()
-        base_params["time_steps_max"] = int(base_params["total_time"] / base_params["delta_t"])
-
-        # load variable params
-        f_variable_parameters = open(
-            "constants/variable_parameters_dict_2D.json"
-        )
-        variable_parameters_dict = json.load(f_variable_parameters)
-        f_variable_parameters.close()
-
-        # AVERAGE OVER MULTIPLE RUNS
-        variable_parameters_dict = generate_vals_variable_parameters_and_norms(
-            variable_parameters_dict
-        )
-
-        root = "two_param_sweep_average"
-        fileName = produce_name_datetime(root)
-        print("fileName:", fileName)
-
-        createFolder(fileName)
-
-        if culture_run:
-
-            print("INSIDE")
-            params_list = produce_param_list_n_double(base_params, variable_parameters_dict)
-            (
-                results_culture_lists
-                
-            ) = culture_data_run(params_list)
-
-            # save the data and params_list
-            save_object(variable_parameters_dict, fileName + "/Data", "variable_parameters_dict")
-            save_object(base_params, fileName + "/Data", "base_params")
-            save_object(results_culture_lists,fileName + "/Data","results_culture_lists") 
-        elif cluster_count_run:
-            
-                s = np.linspace(0,1,200)
-                params_list = produce_param_list_n_double(base_params, variable_parameters_dict)
-                (
-                    results_emissions,
-                    results_mu,
-                    results_var,
-                    results_coefficient_of_variance,
-                    results_emissions_change,
-                    results_clusters_count,
-                    
-                ) = cluster_data_run(params_list,s)
-
-                # save the data and params_list
-                save_object(
-                    variable_parameters_dict, fileName + "/Data", "variable_parameters_dict"
-                )
-                save_object(results_emissions, fileName + "/Data", "results_emissions")
-                save_object(results_mu, fileName + "/Data", "results_mu")
-                save_object(results_var, fileName + "/Data", "results_var")
-                save_object(results_coefficient_of_variance,fileName + "/Data","results_coefficient_of_variance")
-                save_object(results_emissions_change,fileName + "/Data","results_emissions_change")
-                save_object(results_clusters_count,fileName + "/Data","results_clusters_count")
-                save_object(base_params, fileName + "/Data", "base_params")
+    createFolder(fileName)
 
     return fileName

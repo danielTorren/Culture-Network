@@ -7,10 +7,8 @@ Created: 10/10/2022
 """
 
 # imports
-import matplotlib.pyplot as plt
 import json
 import numpy as np
-from matplotlib.cm import get_cmap
 
 # imports
 import numpy as np
@@ -149,8 +147,9 @@ def produce_param_list_SA(
         params_list.append(base_params_copy)
     return params_list
 
-def main(N_samples = 1024,calc_second_order = False) -> str: 
-
+def main(N_samples = 1024) -> str: 
+    
+    calc_second_order = False
     # load base params
     f = open("constants/base_params.json")
     base_params = json.load(f)

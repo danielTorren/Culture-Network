@@ -7,25 +7,20 @@ Author: Daniel Torren Peraire Daniel.Torren@uab.cat dtorrenp@hotmail.com
 Created: 10/10/2022
 """
 # imports
-import time
-import json
-import numpy as np
 from resources.run import generate_data
 from resources.utility import (
     createFolder, 
     save_object, 
-    load_object,
-    produceName,
     produce_name_datetime
 )
 
-def main() -> str: 
-    f = open("constants/base_params.json")
-    base_params = json.load(f)
+def main(
+    base_params
+) -> str: 
+
     base_params["time_steps_max"] = int(base_params["total_time"] / base_params["delta_t"])
 
-    #fileName = produceName(params, params_name)
-    root = "single_shot"
+    root = "single_experiment"
     fileName = produce_name_datetime(root)
     print("fileName:", fileName)
 
