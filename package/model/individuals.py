@@ -24,27 +24,17 @@ class Individual:
 
     save_timeseries_data : bool
         whether or not to save data. Set to 0 if only interested in end state of the simulation. If 1 will save
-        data into timeseries (lists or lists of lists for arrays) which can then be either accessed directly in
-        the social network object or saved into csv's
+        data into timeseries.
     compression_factor: int
         how often data is saved. If set to 1 its every step, then 10 is every 10th steps. Higher value gives lower
         resolution for graphs but more managable saved or end object size
     t: float
-        keep track of time, increased with each step by time step delta_t
-    delta_t: float
-        size of time step in the simulation, default should be 1 and if this is changed then time dependant parameters
-        such as phi(the degree of conspicuous consumption or social suseptability of a behaviour) also needs to be
-        adjusted i.e. a larger delta_t requires a smaller phi to produce the same resolution of results
+        keep track of time
     M: int
         number of behaviours per individual. These behaviours are meant to represent action decisions that operate under the
         same identity such as the decision to cycle to work or take the car.
-    carbon_emissions: list
-        list of emissions of each behaviour, defaulted to 1 for each behaviour if its performed in a brown way, B =< 0
     phi_array: npt.NDArray[float]
-        list of degree of social susceptibility or conspicous consumption of the different behaviours. Affects how much social interaction
-        influences an individuals attitude towards a behaviour. As the behaviours are abstract the current values
-        are not based on any empircal data hence the network behaviour is independent of their order so the
-        list is generated using a linspace function using input parameters phi_array_lower and phi_array_upper. each element has domain = [0,1]
+        list of degree of social susceptibility or conspicous consumption of the different behaviours.
     values: npt.NDArray[float]
         array containing behavioural values, if greater than 0 then the green alternative behaviour is performed and emissions from that behaviour are 0. Domain =  [-1,1]
     av_behaviour_attitude
@@ -230,7 +220,7 @@ class Individual:
         Save time series data
 
         Parameters
-        ----------neigh
+        ----------
         None
 
         Returns
@@ -254,8 +244,6 @@ class Individual:
         ----------
         t: float
             Internal time of the simulation
-        steps: int
-            Step counts in the simulation
         social_component: npt.NDArray
             NxM Array of the influence of neighbours from imperfect social learning on behavioural attitudes of the individual
         Returns

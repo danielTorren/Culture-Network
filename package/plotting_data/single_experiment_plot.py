@@ -1,6 +1,4 @@
-"""Runs a single simulation to produce data which is saved and plotted 
-A module that use dictionary of data for the simulation run. The single shot simualtion is run
-for a given intial set seed. The desired plots are then produced and saved.
+"""Plots a single simulation to produce data which is saved and plotted 
 
 Author: Daniel Torren Peraire Daniel.Torren@uab.cat dtorrenp@hotmail.com
 

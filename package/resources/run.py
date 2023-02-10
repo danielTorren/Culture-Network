@@ -26,38 +26,6 @@ def generate_data(parameters: dict,print_simu = 0) -> Network:
     parameters: dict
         Dictionary of parameters used to generate attributes, dict used for readability instead of super long list of input parameters
 
-        An example of this is:
-
-        params = {
-            "total_time": 2000,#200,
-            "delta_t": 1.0,#0.05,
-            "compression_factor": 10,
-            "save_data": True,
-            "alpha_change" : "C",
-            "harsh_data": False,
-            "averaging_method": "Arithmetic",
-            "phi_lower": 0.001,
-            "phi_upper": 0.005,
-            "N": 20,
-            "M": 5,
-            "K": 10,
-            "prob_rewire": 0.2,#0.05,
-            "set_seed": 1,
-            "culture_momentum_real": 100,#5,
-            "learning_error_scale": 0.02,
-            "discount_factor": 0.8,
-            "present_discount_factor": 0.99,
-            "inverse_homophily": 0.2,#0.1,#1 is total mixing, 0 is no mixing
-            "homophilly_rate" : 1,
-            "confirmation_bias": -100,
-            "alpha_attitude": 0.1,
-            "beta_attitude": 0.1,
-            "alpha_threshold": 1,
-            "beta_threshold": 1,
-        }
-
-        params["time_steps_max"] = int(params["total_time"] / params["delta_t"])
-
     Returns
     -------
     social_network: Network
@@ -80,26 +48,28 @@ def generate_data(parameters: dict,print_simu = 0) -> Network:
         )
     return social_network
 
+def generate_first_behaviour_lists_one_seed_output(params):
+    """For birfurcation just need attitude of first behaviour"""
+    data = generate_data(params)
+    return [x.attitudes[0] for x in data.agent_list]
+
+def generate_multi_output_individual_emissions_list(params):
+    """Individual specific emission and associated id to compare runs with and without behavioural interdependence"""
+
+    emissions_list = []
+    emissions_id_individuals_lists = []
+    for v in params["seed_list"]:
+        params["set_seed"] = v
+        data = generate_data(params)
+
+        emissions_list.append(data.total_carbon_emissions)
+        emissions_id_individuals_lists.append({x.id:x.total_carbon_emissions for x in data.agent_list if not x.green_fountain_state})
+
+    return (emissions_list, emissions_id_individuals_lists)
+
 def generate_sensitivity_output(params: dict):
-    # -> tuple[float,float,float,float]
     """
     Generate data from a set of parameter contained in a dictionary. Average results over multiple stochastic seeds contained in params["seed_list"]
-
-    Parameters
-    ----------
-    params: dict,
-        dictionary of parameters used to generate attributes, dict used for readability instead of super long list of input parameters. See generate_data for an example
-
-    Returns
-    -------
-    stochastic_norm_emissions: float
-        normalized societal emissions at the end of the allowed time, normalize by number of agents and behaviours per agent. Averaged for different stochastic values
-    stochastic_norm_mean: float
-        normalized mean societal identity at the end of the allowed time, normalize by number of agents and behaviours per agent and averaged for different stochastic values
-    stochastic_norm_var: float
-        variance of societal identity at the end of the allowed time, averaged for different stochastic values
-    stochastic_norm_coefficient_variance: float
-        coefficient of variance (std/mu) of societal identity at the end of the allowed time, averaged for different stochastic values
 
     """
 
@@ -118,7 +88,7 @@ def generate_sensitivity_output(params: dict):
         # Insert more measures below that want to be used for evaluating the
         emissions_list.append(data.total_carbon_emissions / norm_factor)
         mean_list.append(data.average_culture)
-        var_list.append(data.var_culture)#data.var_first_behaviour# BOTCH
+        var_list.append(data.var_culture)
         coefficient_variance_list.append(data.std_culture / (data.average_culture))
         emissions_change_list.append(np.abs(data.history_total_carbon_emissions[-1] - data.history_total_carbon_emissions[0])/norm_factor)
 
@@ -136,21 +106,11 @@ def generate_sensitivity_output(params: dict):
         stochastic_norm_emissions_change
     )
 
-###MULTIPLE RUNS
+
 def parallel_run(params_dict: dict[dict]) -> list[Network]:
     """
     Generate data from a list of parameter dictionaries, parallelize the execution of each single shot simulation
 
-    Parameters
-    ----------
-    params_dict: dict[dict],
-        dictionary of dictionary of parameters used to generate attributes, dict used for readability instead of super long list of input parameters.
-        Each entry corresponds to a different society. See generate_data for an example
-
-    Returns
-    -------
-    data_parallel: list[list[Network]]
-        serialized list of networks, each generated with a different set of parameters
     """
 
     num_cores = multiprocessing.cpu_count()
@@ -164,7 +124,7 @@ def multi_stochstic_emissions_run_all_individual(
         params_dict: list[dict]
 ) -> npt.NDArray:
 
-    #print("params_dict", params_dict)
+
     num_cores = multiprocessing.cpu_count()
     #results_carbon_emissions = [generate_single_stochastic_output(i) for i in params_dict]
     res = Parallel(n_jobs=num_cores, verbose=10)(
@@ -173,18 +133,18 @@ def multi_stochstic_emissions_run_all_individual(
     results_total_carbon_emissions,results_individual_carbon_emissions_id = zip(
         *res
     )
-    #print("results_individual_carbon_emissions_id",results_individual_carbon_emissions_id)
 
-    return np.asarray(results_total_carbon_emissions),np.asarray(results_individual_carbon_emissions_id)#can't run with multiple different network sizes
+
+    return np.asarray(results_total_carbon_emissions),np.asarray(results_individual_carbon_emissions_id)
 
 def one_seed_culture_data_run(
         params_dict: list[dict]
 ) -> npt.NDArray:
-    #print("params_dict", params_dict)
+
     num_cores = multiprocessing.cpu_count()
     #res = [generate_sensitivity_output(i) for i in params_dict]
     results_culture_lists = Parallel(n_jobs=num_cores, verbose=10)(
-        #delayed(generate_culture_lists_one_seed_output)(i) for i in params_dict
+
         delayed(generate_first_behaviour_lists_one_seed_output)(i) for i in params_dict
     )
 
@@ -197,22 +157,6 @@ def parallel_run_sa(
     Generate data for sensitivity analysis for model varying lots of parameters dictated by params_dict, producing output
     measures emissions,mean,variance and coefficient of variance. Results averaged over multiple runs with different stochastic seed
 
-    Parameters
-    ----------
-    params_dict: dict[dict],
-        dictionary of dictionary of parameters used to generate attributes, dict used for readability instead of super long list of input parameters.
-        Each entry corresponds to a different society. See generate_data for an example
-
-    Returns
-    -------
-    results_emissions: npt.NDArray
-        Array of normalized societal emissions at the end of the allowed time, normalize by number of agents and behaviours per agent.
-    results_mean: npt.NDArray
-        Array of normalized mean societal identity
-    results_var: npt.NDArray
-        Array of variance of societal identity for different parameter runs
-    results_coefficient_variance: npt.NDArray
-        Array of coefficient of variance (std/mu) of societal identity for different parameter runs
     """
 
     #print("params_dict", params_dict)

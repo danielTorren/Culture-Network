@@ -15,110 +15,6 @@ import datetime
 from sklearn.neighbors import KernelDensity
 
 # modules
-def createFolder(fileName: str) -> str:
-    """
-    Check if folders exist and if they dont create results folder in which place Data, Plots, Animations
-    and Prints folders
-
-    Parameters
-    ----------
-    fileName:
-        name of file where results may be found
-
-    Returns
-    -------
-    None
-    """
-
-    # print(fileName)
-    # check for resutls folder
-    if str(os.path.exists("results")) == "False":
-        os.mkdir("results")
-
-    # check for runName folder
-    if str(os.path.exists(fileName)) == "False":
-        os.mkdir(fileName)
-
-    # make data folder:#
-    dataName = fileName + "/Data"
-    if str(os.path.exists(dataName)) == "False":
-        os.mkdir(dataName)
-    # make plots folder:
-    plotsName = fileName + "/Plots"
-    if str(os.path.exists(plotsName)) == "False":
-        os.mkdir(plotsName)
-
-    # make animation folder:
-    plotsName = fileName + "/Animations"
-    if str(os.path.exists(plotsName)) == "False":
-        os.mkdir(plotsName)
-
-    # make prints folder:
-    plotsName = fileName + "/Prints"
-    if str(os.path.exists(plotsName)) == "False":
-        os.mkdir(plotsName)
-
-def save_object(data, fileName, objectName):
-    """save single object as a pickle object
-
-    Parameters
-    ----------
-    data: object,
-        object to be saved
-    fileName: str
-        where to save it e.g in the results folder in data or plots folder
-    objectName: str
-        what name to give the saved object
-
-    Returns
-    -------
-    None
-    """
-    with open(fileName + "/" + objectName + ".pkl", "wb") as f:
-        pickle.dump(data, f)
-
-def load_object(fileName, objectName) -> dict:
-    """load single pickle file
-
-    Parameters
-    ----------
-    fileName: str
-        where to load it from e.g in the results folder in data folder
-    objectName: str
-        what name of the object to load is
-
-    Returns
-    -------
-    data: object
-        the pickle file loaded
-    """
-    with open(fileName + "/" + objectName + ".pkl", "rb") as f:
-        data = pickle.load(f)
-    return data
-
-def produceName(parameters: dict, parameters_name_list: list) -> str:
-    """produce a file name from a subset list of parameters and values  to create a unique identifier for each simulation run
-
-    Parameters
-    ----------
-    params_dict: dict[dict],
-        dictionary of parameters used to generate attributes, dict used for readability instead of super long list of input parameters.
-        See generate_data function for an example
-    parameters_name_list: list
-        list of parameters to be used in the filename
-
-    Returns
-    -------
-    fileName: str
-        name of file where results may be found composed of value from the different assigned parameters.
-    """
-
-    fileName = "results/"
-    for key, value in parameters.items():
-        if key in parameters_name_list:
-            fileName = fileName + "_" + str(key) + "_" + str(value)
-    return fileName
-    
 def produce_name_datetime(root):
     fileName = "results/" + root +  "_" + datetime.datetime.now().strftime("%H_%M_%S__%d_%m_%Y")
     return fileName
@@ -221,19 +117,15 @@ def get_cluster_list(culture_data,s, N, mi):
     index_list = np.arange(N)
 
     #left edge
-    left_mask = (culture_data < s[mi][0])#maybe i can rearranfe one of o the inputs
+    left_mask = (culture_data < s[mi][0])
     clusters_index_lists = [list(index_list[left_mask])]
 
-    #print(a[a < s[mi][0]])  # print most left cluster, the values of those clusters but i want the indexs!
-
-    # print all middle cluster
+    #  all middle cluster
     for i_cluster in range(len(mi)-1):
-        center_mask = ((culture_data >= s[mi][i_cluster])*(culture_data <= s[mi][i_cluster+1]))# make sure its true for both, i think u can multiply both! WHy doenst it work with and?
+        center_mask = ((culture_data >= s[mi][i_cluster])*(culture_data <= s[mi][i_cluster+1]))
         clusters_index_lists.append(list(index_list[center_mask]))
-        #print(a[(a >= s[mi][i_cluster]) * (a <= s[mi][i_cluster+1])])
 
-    # print most right cluster
-
+    # most right cluster
     right_mask = (culture_data >= s[mi][-1])
     clusters_index_lists.append(list(index_list[right_mask]))
 

@@ -1,3 +1,5 @@
+"""Conduct analysis and plots for varying the frequency of identity updating"""
+
 # imports
 import matplotlib.pyplot as plt
 import numpy as np
@@ -13,13 +15,10 @@ from scipy.signal import argrelextrema
 
 def calc_groups( Data,s, bandwidth) :
 
-    fig, ax = plt.subplots()
-
     culture_data = np.asarray([Data.agent_list[n].culture for n in range(Data.N)])
 
     kde, e = calc_num_clusters_set_bandwidth(culture_data,s,bandwidth)
     
-    #print("bandwidth used:",bandwidth)
 
     mi = argrelextrema(e, np.less)[0]#list of minimum values in the kde
     ma = argrelextrema(e, np.greater)[0]#list of minimum values in the kde
@@ -30,24 +29,14 @@ def calc_groups( Data,s, bandwidth) :
     for t in range(len(Data.history_time)):
         time_vals_data_row = []
         for i in range(len(clusters_index_lists)):
-            #print("clusters_index_lists[i]",clusters_index_lists[i],len(clusters_index_lists[i]))
             sub_weighting_matrix = Data.history_weighting_matrix[t][clusters_index_lists[i]]
-            #print("sub_weighting_matrix", sub_weighting_matrix, sub_weighting_matrix.shape)
-            #i want a matrix that excludes all the values that arent from the indes in the clusters_index_lists[i]
             sub_sub_weighting_matrix = sub_weighting_matrix[:,clusters_index_lists[i]]
-            #print("sub_sub_weighting_matrix", sub_sub_weighting_matrix, sub_sub_weighting_matrix.shape)
-
             mean_weighting_val = np.mean(sub_sub_weighting_matrix)
-            #print("mean_value",mean_weighting_val)
-
             time_vals_data_row.append(mean_weighting_val)
-            #quit()
         time_vals_data.append(time_vals_data_row)
     
     time_vals_data_array = np.asarray(time_vals_data)
-    #print("time_vals_data_array", time_vals_data_array.shape)
     vals_time_data = time_vals_data_array.T
-    #print("vals_time_data ",vals_time_data.shape)
 
     cluster_example_identity_list = s[ma]
 

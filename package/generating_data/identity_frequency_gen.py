@@ -1,3 +1,6 @@
+"""Generate data on differing frequency of identity updating
+"""
+
 # imports
 import json
 import numpy as np
@@ -7,13 +10,15 @@ from generating_data.oneD_param_sweep_gen import (
     produce_param_list,
 )
 
-def main() -> str: 
+def main(
+    BASE_PARAMS_LOAD = "constants/base_params_identity_frequency.json"
+) -> str: 
 
     property_varied = "alpha_change"
     title_list = [r"Static uniform $\alpha_{n,k}$", r"Static culturally determined $\alpha_{n,k}$", r"Dynamic culturally determined $\alpha_{n,k}$"]
     property_values_list = ["A", "B", "C"]
 
-    f = open("constants/base_params.json")
+    f = open(BASE_PARAMS_LOAD)
     base_params = json.load(f)
 
     root = "alpha_change_micro_consensus_single"
