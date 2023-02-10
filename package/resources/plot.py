@@ -11,16 +11,12 @@ Created: 10/10/2022
 import string
 import networkx as nx
 import numpy as np
-from pandas import DataFrame
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from matplotlib.colors import Normalize, LinearSegmentedColormap, SymLogNorm
 from matplotlib.cm import get_cmap
 from typing import Union
-#from pydlc import dense_lines
 from model.network import Network
-from scipy.signal import argrelextrema
-from resources.utility import calc_num_clusters_set_bandwidth
 from scipy.stats import beta
 import numpy.typing as npt
 
@@ -109,9 +105,9 @@ def plot_discount_factors_delta(
     fig.savefig(f, dpi=dpi_save, format="eps")
 
 def live_print_culture_timeseries(
-    fileName, Data_list, property_varied, title_list, nrows, ncols, dpi_save
+    fileName, Data_list, property_varied, dpi_save
 ):
-    fig, axes = plt.subplots(nrows=nrows, ncols=ncols,figsize=(10, 6), sharey=True)#, ,figsize=(14, 7)
+    fig, axes = plt.subplots(nrows=1, ncols=len(Data_list),figsize=(10, 6), sharey=True)
     y_title = r"Identity, $I_{t,n}$"
 
     for i, ax in enumerate(axes.flat):
@@ -134,37 +130,163 @@ def live_print_culture_timeseries(
     f = plotName + "/live_plot_culture_timeseries_%s.eps" % property_varied
     fig.savefig(f, dpi=dpi_save, format="eps")
 
+def bifurcation_plot_culture_or_not(fileName,cluster_pos_matrix_identity,cluster_pos_matrix_no_identity,vals_list, dpi_save):
+    fig, axes = plt.subplots(nrows = 1, ncols=2, sharey= True, figsize= (10,6))
+
+    for i in range(len(vals_list)):
+        x_identity = [vals_list[i]]*(len(cluster_pos_matrix_identity[i]))
+        y_identity = cluster_pos_matrix_identity[i]
+        axes[0].plot(x_identity,y_identity, ls="", marker=".", color = "k", linewidth = 0.5)
+
+    
+        x_no_identity = [vals_list[i]]*(len(cluster_pos_matrix_no_identity[i]))
+        y_no_identity = cluster_pos_matrix_no_identity[i]
+        axes[1].plot(x_no_identity,y_no_identity, ls="", marker=".", color = "r", linewidth = 0.5)
+
+
+    axes[0].set_ylim(0,1)
+
+    axes[0].set_title(r"Inter-behavioural dependance")
+    axes[1].set_title(r"Behavioural independance")
+
+    axes[0].set_xlabel(r"Confirmation bias, $\theta$")
+    axes[1].set_xlabel(r"Confirmation bias, $\theta$")
+    axes[0].set_ylabel(r"Final identity clusters")
+    
+    plotName = fileName + "/Plots"
+    f = plotName + "/bifurcation_plot_%s" % (len(vals_list))
+    fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
+def multi_scatter_seperate_total_sensitivity_analysis_plot(
+    fileName, data_dict, dict_list, names, dpi_save, N_samples, order
+):
+    """
+    Create scatter chart of results.
+    """
+
+    fig, axes = plt.subplots(ncols=len(dict_list), nrows=1, constrained_layout=True , sharey=True,figsize=(12, 6))#,#sharex=True# figsize=(14, 7) # len(list(data_dict.keys())))
+    
+    plt.rc('ytick', labelsize=4) 
+
+    for i, ax in enumerate(axes.flat):
+        if order == "First":
+            ax.errorbar(
+                data_dict[dict_list[i]]["data"]["S1"].tolist(),
+                names,
+                xerr=data_dict[dict_list[i]]["yerr"]["S1"].tolist(),
+                fmt="o",
+                ecolor="k",
+                color=data_dict[dict_list[i]]["colour"],
+                label=data_dict[dict_list[i]]["title"],
+            )
+        else:
+            ax.errorbar(
+                data_dict[dict_list[i]]["data"]["ST"].tolist(),
+                names,
+                xerr=data_dict[dict_list[i]]["yerr"]["ST"].tolist(),
+                fmt="o",
+                ecolor="k",
+                color=data_dict[dict_list[i]]["colour"],
+                label=data_dict[dict_list[i]]["title"],
+            )
+        ax.legend()
+        ax.set_xlim(left=0)
+
+    fig.supxlabel(r"%s order Sobol index" % (order))
+
+    plt.tight_layout()
+
+    plotName = fileName + "/Prints"
+    f = (
+        plotName
+        + "/"
+        + "%s_%s_%s_multi_scatter_seperate_sensitivity_analysis_plot.eps"
+        % (len(names), N_samples, order)
+    )
+    f_png = (
+        plotName
+        + "/"
+        + "%s_%s_%s_multi_scatter_seperate_sensitivity_analysis_plot.png"
+        % (len(names), N_samples, order)
+    )
+    fig.savefig(f, dpi=dpi_save, format="eps")
+    fig.savefig(f_png, dpi=dpi_save, format="png")
+
+def live_print_culture_timeseries_with_weighting(
+    fileName, Data_list, property_varied, title_list, dpi_save, cmap
+):
+
+    fig, axes = plt.subplots(
+        nrows=2, ncols=3, figsize=(14, 7), constrained_layout=True
+    )
+
+    y_title = r"Identity, $I_{t,n}$"
+
+    for i in range(3):
+        for v in Data_list[i].agent_list:
+            axes[0][i].plot(
+                np.asarray(Data_list[i].history_time), np.asarray(v.history_culture)
+            )
+
+        axes[0][i].set_xlabel(r"Time")
+        axes[0][i].set_ylabel(r"%s" % y_title)
+        axes[0][i].set_title(title_list[i], pad=5)
+        axes[0][i].set_ylim(0, 1)
+
+        axes[1][i].matshow(
+            Data_list[i].history_weighting_matrix[-1],
+            cmap=cmap,
+            norm=Normalize(vmin=0, vmax=1),
+            aspect="auto",
+        )
+        axes[1][i].set_xlabel(r"Individual $k$")
+        axes[1][i].set_ylabel(r"Individual $n$")
+
+    # colour bar axes
+    cbar = fig.colorbar(
+        plt.cm.ScalarMappable(cmap=cmap, norm=Normalize(vmin=0, vmax=1)),
+        ax=axes[1]#axes.ravel().tolist(),
+    ) 
+    cbar.set_label(r"Social network weighting, $\alpha_{n,k}$", labelpad= 5)
+
+    plotName = fileName + "/Prints"
+    f = (
+        plotName
+        + "/lowres_live_print_culture_timeseries_with_weighting_%s.png"
+        % property_varied
+    )
+    fig.savefig(f, dpi=dpi_save, format="png")
+
 def print_live_intial_culture_networks_and_culture_timeseries(
     fileName: str,
     Data_list: list[Network],
     dpi_save: int,
     property_list: list,
     property,
-    ncols: int,
-    layout: str,
     norm_zero_one,
     cmap,
     node_size,
     round_dec,
 ):
-    print("HEY!",layout)
+
     y_title = r"Identity, $I_{t,n}$"
     fig, axes = plt.subplots(
-        nrows=2, ncols=ncols, figsize=(14, 7), constrained_layout=True
+        nrows=2, ncols=len(Data_list), figsize=(14, 7), constrained_layout=True
     )
 
-    for i in range(ncols):
-        #####NETWORK
-        G = nx.from_numpy_matrix(Data_list[i].history_weighting_matrix[0])
+    for i in range(len(Data_list)):
+
+        G = nx.from_numpy_array(Data_list[i].history_weighting_matrix[0])
         
-        pos_culture_network = prod_pos(layout[i], G)
-        # print(i,ax)
+        pos_culture_network = prod_pos("circular", G)
+
         axes[0][i].set_title(
             r"{} = {}".format(property, round(property_list[i], round_dec))
         )
 
         indiv_culutre_list = [v.history_culture[0] for v in Data_list[i].agent_list]
-        # print(indiv_culutre_list)
+
         colour_adjust = norm_zero_one(indiv_culutre_list)
         ani_step_colours = cmap(colour_adjust)
 
@@ -208,183 +330,32 @@ def print_live_intial_culture_networks_and_culture_timeseries(
     )
     fig.savefig(f_eps, dpi=dpi_save, format="eps")
 
-def bifurcation_plot_culture_or_not(fileName,cluster_pos_matrix_identity,cluster_pos_matrix_no_identity,vals_list_identity,vals_list_no_identity, dpi_save):
-    fig, axes = plt.subplots(nrows = 1, ncols=2, sharey= True, figsize= (10,6))
+def plot_emissions_multi_ab_min_max_two_theta_reverse_add_green(fileName, emissions_difference_theta_one, emissions_difference_theta_two, theta_one,theta_two,mean_list, dpi_save, seed_reps):
+    fig, ax = plt.subplots(figsize=(10,7))    
 
-    print(axes) 
+    mu_emissions_difference_theta_one = emissions_difference_theta_one.mean(axis=1)
+    min_emissions_difference_theta_one = emissions_difference_theta_one.min(axis=1)
+    max_emissions_difference_theta_one = emissions_difference_theta_one.max(axis=1)
 
-    for i in range(len(vals_list_identity)):
-        x_identity = [vals_list_identity[i]]*(len(cluster_pos_matrix_identity[i]))
-        #print("vals_list[i]",vals_list[i])
-        #print(x)
-        y_identity = cluster_pos_matrix_identity[i]
-        #print("y", y)
-        
-        #ax.scatter(x,y, color = "k")
-        axes[0].plot(x_identity,y_identity, ls="", marker=".", color = "k", linewidth = 0.5)
-        #ax.plot(x,y, ls="", color = "k")
-    
-    for i in range(len(vals_list_no_identity)):
-        x_no_identity = [vals_list_no_identity[i]]*(len(cluster_pos_matrix_no_identity[i]))
-        #print("vals_list[i]",vals_list[i])
-        #print(x)
-        y_no_identity = cluster_pos_matrix_no_identity[i]
-        #print("y", y)
-        
-        #ax.scatter(x,y, color = "k")
-        axes[1].plot(x_no_identity,y_no_identity, ls="", marker=".", color = "r", linewidth = 0.5)
-        #ax.plot(x,y, ls="", color = "k")
 
-    axes[0].set_ylim(0,1)
+    mu_emissions_difference_theta_two = emissions_difference_theta_two.mean(axis=1)
+    min_emissions_difference_theta_two = emissions_difference_theta_two.min(axis=1)
+    max_emissions_difference_theta_two = emissions_difference_theta_two.max(axis=1)
 
-    axes[0].set_title(r"Inter-behavioural dependance")
-    axes[1].set_title(r"Behavioural independance")
+    ax.plot(mean_list[::-1],mu_emissions_difference_theta_one, ls="", marker=".", linewidth = 0.5, color='blue', label = r"Confirmation bias $\theta = %s$"% (theta_one))
+    ax.fill_between(mean_list[::-1], max_emissions_difference_theta_one, min_emissions_difference_theta_one, facecolor='blue', alpha=0.5)
 
-    axes[0].set_xlabel(r"Confirmation bias, $\theta$")
-    axes[1].set_xlabel(r"Confirmation bias, $\theta$")
-    axes[0].set_ylabel(r"Final identity clusters")
-    
-    plotName = fileName + "/Plots"
-    f = plotName + "/bifurcation_plot_%s_%s" % (len(vals_list_identity),len(vals_list_no_identity))
-    fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
-    fig.savefig(f + ".png", dpi=dpi_save, format="png")
-
-def multi_scatter_seperate_total_sensitivity_analysis_plot(
-    fileName, data_dict, names, dpi_save, N_samples, order
-):
-    """
-    Create scatter chart of results.
-    """
-
-    #dict_list = ['var','emissions']#
-    #dict_list = ['var','emissions',"emissions_change"]#list(data_dict.keys())
-    #dict_list = list(data_dict.keys())
-    dict_list = ['emissions','var',"emissions_change"]#"coefficient_of_variance",
-
-    fig, axes = plt.subplots(ncols=len(dict_list), nrows=1, constrained_layout=True , sharey=True,figsize=(12, 6))#,#sharex=True# figsize=(14, 7) # len(list(data_dict.keys())))
-    
-    plt.rc('ytick', labelsize=4) 
-
-    for i, ax in enumerate(axes.flat):
-        if order == "First":
-            ax.errorbar(
-                data_dict[dict_list[i]]["data"]["S1"].tolist(),
-                names,
-                xerr=data_dict[dict_list[i]]["yerr"]["S1"].tolist(),
-                fmt="o",
-                ecolor="k",
-                color=data_dict[dict_list[i]]["colour"],
-                label=data_dict[dict_list[i]]["title"],
-            )
-        else:
-            ax.errorbar(
-                data_dict[dict_list[i]]["data"]["ST"].tolist(),
-                names,
-                xerr=data_dict[dict_list[i]]["yerr"]["ST"].tolist(),
-                fmt="o",
-                ecolor="k",
-                color=data_dict[dict_list[i]]["colour"],
-                label=data_dict[dict_list[i]]["title"],
-            )
-        ax.legend()
-        ax.set_xlim(left=0)
-        #ax.set_xlabel(r"%s Sobol sensitivity" % (order))
-    #fig.text(0.5, 0.04, r"%s Sobol sensitivity" % (order), ha='center')
-    fig.supxlabel(r"%s order Sobol index" % (order))
-    #plt.xlabel(r"%s Sobol sensitivity" % (order))
-        #ax.set_ylabel(r"Exogenous parameters")
-            
-        #ax.set_yticklabels(names, rotation = 45)
-
-    plt.tight_layout()
-
-    plotName = fileName + "/Prints"
-    f = (
-        plotName
-        + "/"
-        + "%s_%s_%s_multi_scatter_seperate_sensitivity_analysis_plot.eps"
-        % (len(names), N_samples, order)
-    )
-    f_png = (
-        plotName
-        + "/"
-        + "%s_%s_%s_multi_scatter_seperate_sensitivity_analysis_plot.png"
-        % (len(names), N_samples, order)
-    )
-    fig.savefig(f, dpi=dpi_save, format="eps")
-    fig.savefig(f_png, dpi=dpi_save, format="png")
-
-def live_print_culture_timeseries_with_weighting(
-    fileName, Data_list, property_varied, title_list, dpi_save, cmap
-):
-
-    fig, axes = plt.subplots(
-        nrows=2, ncols=3, figsize=(14, 7), constrained_layout=True
-    )
-    #print("axes", axes)
-    y_title = r"Identity, $I_{t,n}$"
-
-    for i in range(3):
-        for v in Data_list[i].agent_list:
-            axes[0][i].plot(
-                np.asarray(Data_list[i].history_time), np.asarray(v.history_culture)
-            )
-
-        axes[0][i].set_xlabel(r"Time")
-        axes[0][i].set_ylabel(r"%s" % y_title)
-        axes[0][i].set_title(title_list[i], pad=5)
-        axes[0][i].set_ylim(0, 1)
-
-        axes[1][i].matshow(
-            Data_list[i].history_weighting_matrix[-1],
-            cmap=cmap,
-            norm=Normalize(vmin=0, vmax=1),
-            aspect="auto",
-        )
-        axes[1][i].set_xlabel(r"Individual $k$")
-        axes[1][i].set_ylabel(r"Individual $n$")
-
-    # colour bar axes
-    cbar = fig.colorbar(
-        plt.cm.ScalarMappable(cmap=cmap, norm=Normalize(vmin=0, vmax=1)),
-        ax=axes[1]#axes.ravel().tolist(),
-    )  # This does a mapabble on the fly i think, not sure
-    cbar.set_label(r"Social network weighting, $\alpha_{n,k}$", labelpad= 5)
-
-    plotName = fileName + "/Prints"
-    f = (
-        plotName
-        + "/lowres_live_print_culture_timeseries_with_weighting_%s.png"
-        % property_varied
-    )
-    fig.savefig(f, dpi=dpi_save, format="png")
-
-def plot_emissions_multi_ab_relative_all_add_green(fileName, emissions_list_default, emissions_list_add_green, mean_list, dpi_save, seed_reps):
-    fig, ax = plt.subplots()
-
-    emissions_array_add_green = np.asarray(emissions_list_add_green)
-    emissions_array_default = np.asarray(emissions_list_default)
-    #print("emissions_array_culture",emissions_array_culture, emissions_array_culture.shape)
-
-    emissions_difference = ((emissions_array_add_green -  emissions_array_default)/emissions_array_default)*100
-
-    #print("emissions_difference",emissions_difference, emissions_difference.shape)
-
-    mu_emissions_difference = emissions_difference.mean(axis=1)
-    sigma_emissions_difference = emissions_difference.std(axis=1)
-
-    #print("mu_emissions_difference ",mu_emissions_difference , mu_emissions_difference.shape)
-    
-    #quit()
-    # REVERSE IT FOR DISTANCE!
-    ax.plot(mean_list[::-1],mu_emissions_difference[::-1], ls="", marker=".", linewidth = 0.5, color='blue')
-    ax.fill_between(mean_list[::-1], mu_emissions_difference[::-1]+sigma_emissions_difference[::-1], mu_emissions_difference[::-1]-sigma_emissions_difference[::-1], facecolor='blue', alpha=0.5)
+    ax.plot(mean_list[::-1],mu_emissions_difference_theta_two, ls="", marker=".", linewidth = 0.5, color='red', label = r"Confirmation bias $\theta = %s$"% (theta_two))
+    ax.fill_between(mean_list[::-1], max_emissions_difference_theta_two, min_emissions_difference_theta_two, facecolor='red', alpha=0.5)
 
     ax.set_xlabel(r"Initial attitude distance, $1-a_A/(a_A + b_A)$")
-    ax.set_ylabel( r"$\%$ change in final emissions, $\Delta E_{\tau}$")
+    ax.set_ylabel( r"Relative $\%$ change in final emissions")
     
+    ax.legend(loc = "lower right")
+    plt.tight_layout()
+
     plotName = fileName + "/Plots"
-    f = plotName + "/plot_emissions_multi_ab_relative_all_add_green_%s" % (len(mean_list))
+    f = plotName + "/plot_emissions_multi_ab_min_max_two_theta_reverse_add_green_%s" % (len(mean_list))
     fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
     fig.savefig(f + ".png", dpi=dpi_save, format="png")
 
@@ -404,35 +375,50 @@ def plot_beta_alt(f:str, a_b_combo_list: list ):
 
     fig.savefig(f + "%s" % (len(a_b_combo_list)) + ".eps", format="eps")
 
+def double_phase_diagram(
+    fileName, Z, Y_title, Y_param, variable_parameters_dict, cmap, dpi_save, levels
+):
+
+    fig, ax = plt.subplots(figsize=(10, 6), constrained_layout=True)
+
+    col_dict = variable_parameters_dict["col"]
+    row_dict = variable_parameters_dict["row"]
+
+    ax.set_xlabel(r"Initial attitude Beta, $b_A$")
+    ax.set_ylabel(r"Initial attitude Beta, $a_A$")
+
+    X, Y = np.meshgrid(col_dict["vals"], row_dict["vals"])
+
+    cp = ax.contourf(X, Y, Z, cmap=cmap, alpha=0.5, levels = levels)
+    cbar = fig.colorbar(
+        cp,
+        ax=ax,
+    )
+    cbar.set_label(Y_title)
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/live_average_multirun_double_phase_diagram_%s" % (Y_param)
+    #fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
+    
 def plot_joint_cluster_micro(fileName, Data, clusters_index_lists,cluster_example_identity_list, vals_time_data, dpi_save, auto_bandwidth, bandwidth,cmap_multi, norm_zero_one,shuffle_colours) -> None:
     
     fig, axes = plt.subplots(nrows = 1, ncols = 2, figsize = (10,6), constrained_layout=True)
 
     ###################################################
-    
-    #colour_adjust = norm_zero_one(cluster_example_identity_list)
-    #ani_step_colours = cmap(colour_adjust)
 
     cmap = get_cmap(name='viridis', lut = len(cluster_example_identity_list))
     ani_step_colours = [cmap(i) for i in range(len(cluster_example_identity_list))] 
 
     if shuffle_colours:
         np.random.shuffle(ani_step_colours)
-    #else:
-        #cbar = fig.colorbar(
-        #    plt.cm.ScalarMappable(cmap=cmap, norm=norm_zero_one), ax=axes[0]
-        #)
-        #cbar.set_label(r"Cluster center Identity, $I_{t,n}$")
-    #print("ani_step_colours",ani_step_colours)
+
 
     colours_dict = {}#It cant be a list as you need to do it out of order
     for i in range(len(clusters_index_lists)):#i is the list of index in that cluster
         for j in clusters_index_lists[i]:#j is an index in that cluster
-            #print(i,j)
             colours_dict["%s" % (j)] = ani_step_colours[i]
         
-    #print("colours_dict",colours_dict)
-
     for v in range(len(Data.agent_list)):
         axes[0].plot(np.asarray(Data.history_time), np.asarray(Data.agent_list[v].history_culture), color = colours_dict["%s" % (v)])
 
@@ -495,30 +481,33 @@ def plot_individual_timeseries(
     dpi_save: int,
     ylim_low: int,
 ):
-    fig, axes = plt.subplots(nrows=1, ncols=Data.M, figsize=(14, 7))
+    fig, axes = plt.subplots(nrows=1, ncols=Data.M, figsize=(14, 7), sharey=True)
 
     for i, ax in enumerate(axes.flat):
         for v in range(len(Data.agent_list)):
             data_ind = np.asarray(eval("Data.agent_list[%s].%s" % (str(v), property)))
             ax.plot(np.asarray(Data.history_time), data_ind[:, i])
+
+        ax.set_title(r"$\phi_{%s} = %s$" % ((i + 1),  Data.phi_array[i]))
         ax.set_xlabel(r"Time")
-        ax.set_ylabel(r"%s" % y_title)
+        
         ax.set_ylim(ylim_low, 1)
 
+    axes[0].set_ylabel(r"%s" % y_title)
     plt.tight_layout()
 
     plotName = fileName + "/Plots"
     f = plotName + "/plot_%s_timeseries.eps" % property
     fig.savefig(f, dpi=dpi_save, format="eps")
 
-def plot_value_timeseries(fileName: str, Data: DataFrame, dpi_save: int):
+def plot_value_timeseries(fileName: str, Data , dpi_save: int):
     y_title = r"Behavioural value, $B_{t,n,m}$"
     property = "history_behaviour_values"
     ylim_low = -1
 
     plot_individual_timeseries(fileName, Data, y_title, property, dpi_save, ylim_low)
 
-def plot_attitude_timeseries(fileName: str, Data: DataFrame, dpi_save: int):
+def plot_attitude_timeseries(fileName: str, Data, dpi_save: int):
     y_title = r"Behavioural attiude, $A_{t,n,m}$"
     property = "history_behaviour_attitudes"
     ylim_low = 0
@@ -536,8 +525,8 @@ def print_live_initial_culture_network(
 ):
 
     fig, ax = plt.subplots()
-
-    G = nx.from_numpy_matrix(Data.history_weighting_matrix[0])
+    
+    G = nx.from_numpy_array(Data.history_weighting_matrix[0])
     pos_culture_network = prod_pos(layout, G)
 
     indiv_culutre_list = [v.history_culture[0] for v in Data.agent_list]
@@ -582,43 +571,30 @@ def plot_network_timeseries(
     f = plotName + "/" + property + "_timeseries.eps"
     fig.savefig(f, dpi=dpi_save, format="eps")
 
-def plot_cultural_range_timeseries(fileName: str, Data: DataFrame, dpi_save: int):
+def plot_cultural_range_timeseries(fileName: str, Data, dpi_save: int):
     y_title = "Identity variance"
     property = "history_var_culture"
     plot_network_timeseries(fileName, Data, y_title, property, dpi_save)
 
 def plot_weighting_matrix_convergence_timeseries(
-    fileName: str, Data: DataFrame, dpi_save: int
+    fileName: str, Data, dpi_save: int
 ):
     y_title = "Change in Agent Link Strength"
     property = "history_weighting_matrix_convergence"
     plot_network_timeseries(fileName, Data, y_title, property, dpi_save)
 
 def plot_total_carbon_emissions_timeseries(
-    fileName: str, Data: DataFrame, dpi_save: int
+    fileName: str, Data, dpi_save: int
 ):
     y_title = "Carbon Emissions"
     property = "history_total_carbon_emissions"
     plot_network_timeseries(fileName, Data, y_title, property, dpi_save)
 
-def plot_green_adoption_timeseries(fileName: str, Data: DataFrame, dpi_save: int):
-    y_title = "Green adoption %"
-    property = "history_green_adoption"
-
-    plot_network_timeseries(fileName, Data, y_title, property, dpi_save)
-
-def plot_average_culture_timeseries(fileName: str, Data: DataFrame, dpi_save: int):
+def plot_average_culture_timeseries(fileName: str, Data, dpi_save: int):
     y_title = "Average identity"
     property = "history_average_culture"
 
     plot_network_timeseries(fileName, Data, y_title, property, dpi_save)
-    culture_data = np.asarray([Data.agent_list[n].culture for n in range(Data.N)])
-
-    kde, e = calc_num_clusters_set_bandwidth(culture_data, s, bandwidth)
-    ma = argrelextrema(e, np.greater)[0]
-
-    fig, ax = plt.subplots()
-    ax.plot(s, e)
 
 def live_animate_culture_network_weighting_matrix(
     fileName: str,
@@ -643,7 +619,7 @@ def live_animate_culture_network_weighting_matrix(
         colour_adjust = norm_zero_one(individual_culture_list)
         ani_step_colours = cmap_culture(colour_adjust)
 
-        G = nx.from_numpy_matrix(Data.history_weighting_matrix[i])
+        G = nx.from_numpy_array(Data.history_weighting_matrix[i])
 
         # get pos
         pos = prod_pos(layout, G)

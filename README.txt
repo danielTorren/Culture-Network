@@ -1,30 +1,62 @@
-Version 0.5 of the model.
+Code associated with working paper, "An agent-based model of cultural change for a low-carbon transition" available at https://ssrn.com/abstract=4344035.
 
-[NEED TO UPDATE]
-
-The aim of this model is to simulate how behaviours can lead to idenity change which in turn changes who indvidiuals listen to whilst learning socially. 
+Folder structure:
+Inside the package folder, you will find a set of folders that include the core model itself, running, plotting and other utility code. Additionally, there
+are two jupyter notebooks. The first of which, "produce_figures.ipynb" is a guide to reproduce the figures found in the paper, some of these require 
+substantial run times. Secondly, there is "model_playground.ipynb" which allows you to test out a single model run for a variety of different parameter 
+inputs and produce different plots and animations to analyse that experiment.
 
 Outline of model:
-The python files that model is built of may be found in src. network.py is the main manager of the simulation and holds a list of Individual objects (individual.py) that represent people which interact within a small world social network. Each N individuals has M behaviours which evolve over time due to the social interactions either through a DeGroot model interaction or by selecting a single indivdual who influences them that turn. The average over over M  attitudes behaviours produces an identity representing how green an indivdiual sees themselves. The distance between individuals identity then determines how strong their connection is and thus how much attentioned is paid to that neighbours opinion when learning socially.
+The python files that the core model is built of may be found in package/model, network.py is the main manager of the simulation and holds a list of Individual objects 
+(individual.py) that represent people which interact within a small world social network. Each of the N individuals has M behaviours which evolve due to 
+imperfect social interactions. The time-discounted average-over-M attitudes produce an identity representing how green individuals see themselves. 
+The distance between individuals' environmental identities then determines how strong their connection is and thus how much attention is paid to that 
+neighbour's opinion.
 
-How to run it:
-To execute a single run of the simulation first edit the base_params.json file in the constants folder then go to runplot.py, here choose which plots you would like to produce and make sure RUN is set to 1 or True.
+Other folders in the package:
+"constants" contains several json files. "base_params.json" contains the default model parameters which are used to reproduce multiple figures. Variable 
+parameter json files which are used to set the ranges of parameter variations for the sensitivity analysis (variable_parameters_dict_SA.json) or which two parameters
+to vary to cover a 2D parameter space (variable_parameters_dict_2D.json).
 
-To execute multiple runs varying one parameter have a look at multi_run_single_param.py 
+"generating_data" contains several python files that load in inputs and run the model for said conditions, then save this data. "single_experiment_gen.py"
+runs a single experiment, "oneD_param_sweep_gen.py" runs multiple experiments whilst varying a single parameter, "bifurcation_gen.py" runs experiments for
+conditions with and without behavioural interdependency, "sensitivity_analysis_gen.py" runs the model for a large number of parameter values and over 
+multiple stochastic initial conditions, "identity_frequency_gen.py" runs three experiments with each different with different identity updating frequency,
+"adding_green_influencers_gen.py" runs the default model but adds green influencers and "twoD_param_sweep_gen.py" runs experiments varying two parameters
+to cover a two-dimensional parameter space.
 
-To execute multiple runs varying two parameters in a dependant or grid like fashion have a look at multi_run_2D_param.py
+"plotting_data" loads the model results created in the "generating_data" folder, analyzes them and calls the plot functions.
 
-To exectute multiple runs varying n parameters independantly have a look at multi_run_n_param.py
-
-To perform sensitivity analysis on the model see SA_sobol, this takes ages!
-
-Other information:
- - figures are produced in plot.py which is a bit of a mess, I have left in functions that are not working at the moment (commented out) for the sake of inspiration and the plots are stored in either png or eps
- - its not a particularly rapid model to run for lots of time steps
- - To use the load (or not RUN) functionality paste in the location of the folder name of the date you want to use. This is printed when you first run that set up so if say you want to test out different graph aesthetic you can quickly test this without re-running the simulation.
- 
-For any questions please contact Daniel Torren Peraire at Daniel.Torren@uab.cat or dtorrenp@hotmail.com
-
+"resources" contains code that is used frequently such as saving or loading data (utility.py), running the simulation for a specific number of time steps 
+(run.py) and plots that may be used by several files in "plotting_data", (plot.py).
 
 
+Set up steps for code and jupyter notebooks (Note that the model was built with python3.9):
+1. Clone the repository
+	```
+	git clone https://github.com/danielTorren/Culture-Network.git
+	```
+2. Create a virtual environment inside the repository (may need to ```python -m pip install virtualenv```), 
+	```
+	python3 -m venv name_of_your_virtual_environment
+	```
+3. Activate it 
+	```
+	venv\Scripts\activate
+	```
 
+4. Install the necessary python libraries using pip:
+	```
+	python -m pip install -r requirements-txt
+	```
+5. Attach the jupyter notebook kernel to the virtual environment
+	```
+	python -m ipykernel install --name=name_of_your_virtual_environment
+	```
+6. Now open the jupyter notebooks
+	```
+	python -m jupyter notebook
+	```  
+7. Finally, have a play around with both the model parameters in "model_playground.ipynb" and reproduce paper figures using "produce_figures.ipynb".
+
+For any questions please contact Daniel Torren Peraire at Daniel.Torren@uab.cat.

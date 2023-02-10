@@ -1,4 +1,4 @@
-"""
+""" Generate data comparing effect of green influencers
 Author: Daniel Torren Peraire Daniel.Torren@uab.cat dtorrenp@hotmail.com
 
 Created: 10/10/2022
@@ -6,6 +6,7 @@ Created: 10/10/2022
 
 # imports
 import numpy as np
+import json
 from resources.utility import (
     createFolder,
     save_object,
@@ -29,54 +30,23 @@ def gen_atttiudes_list(mean_list, sum_a_b):
 
 
 def main(
+    BASE_PARAMS_LOAD = "constants/base_params_add_greens.json",
     green_N = 20,
     mean_list_min = 0.01,
     mean_list_max = 0.99,
-    mean_list_reps = 200
+    mean_list_reps = 200,
+    sum_a_b = 4,
+    confirmation_bias = 5
     ) -> str: 
 
-    base_params = {
-        "save_timeseries_data": 0, 
-        "degroot_aggregation": 1,
-        "network_structure": "small_world",
-        "alpha_change" : "C",
-        "guilty_individuals": 0,
-        "moral_licensing": 0,
-        "immutable_green_fountains": 1,
-        "additional_greens":1,
-        "polarisation_test": 0,
-        "total_time": 3000,
-        "delta_t": 1.0,
-        "phi_lower": 0.01,
-        "phi_upper": 0.05,
-        "compression_factor": 10,
-        "seed_list": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],#[1,2,3],#
-        "set_seed": 1,
-        "N": 200,
-        "M": 3,
-        "K": 20,
-        "prob_rewire": 0.1,
-        "culture_momentum_real": 1000,
-        "learning_error_scale": 0.02,
-        "discount_factor": 0.95,
-        "homophily": 0.95,
-        "homophilly_rate" : 1,
-        "confirmation_bias": 20,
-        "a_attitude": 1,
-        "b_attitude": 1,
-        "a_threshold": 1,
-        "b_threshold": 1,
-        "action_observation_I": 0.0,
-        "action_observation_S": 0.0,
-        "green_N": 0,
-        "guilty_individual_power": 0
-    }
+    f = open(BASE_PARAMS_LOAD)
+    base_params = json.load(f)
+    base_params["confirmation_bias"] = confirmation_bias
+
     base_params_add_green = base_params.copy()
 
     ###############################################################
-    
     mean_list = np.linspace(mean_list_min,mean_list_max, mean_list_reps)
-    sum_a_b = 4#set the degree of polarisation? i think the more polarised the stronger the effect will be
 
     init_attitudes_list = gen_atttiudes_list(mean_list, sum_a_b)# GET THE LIST
 
@@ -93,18 +63,17 @@ def main(
     #base_params_add_green["N"] = base_params["N"] + green_N
     green_K = calc_new_K(base_params["K"],base_params["N"], green_N)
     base_params_add_green["K"] = green_K
-    #print("green_K, N",green_K,base_params_add_green["N"], base_params_add_green["green_N"])
+
 
     params_list_add_green  = []
     for i in init_attitudes_list:
-        #print("i",i)
+
         base_params_add_green["a_attitude"] = i[0]
         base_params_add_green["b_attitude"] = i[1]
         params_list_add_green.append(base_params_add_green.copy())
 
     #############################################################
 
-    #fileName = produceName(params, params_name)
     root = "splitting_eco_warriors_distance_reps"
     fileName = produce_name_datetime(root)
     print("fileName:", fileName)
@@ -114,10 +83,7 @@ def main(
     emissions_list_default, emissions_id_list_individual_default = multi_stochstic_emissions_run_all_individual(params_list_default)
     emissions_list_add_green, emissions_id_list_individual_add_green = multi_stochstic_emissions_run_all_individual(params_list_add_green)
 
-    #emissions_list_individual_add_green is a list or matrix? the entries are difference means and then for each stochastic run a list of indiviudal emissions [means, stochastic, indivdual emissions]
-    #emissions_pos_matrix needs to be means then indivduals, so need to aggregate across the stochastic runs, for the differences between individuals (they are indifferet places but same initial values)
-
-    #go through each stochastic run and sutract
+    #go through each stochastic run and subtract
 
     emissions_difference_lists = []
     for i in range(len(mean_list)):

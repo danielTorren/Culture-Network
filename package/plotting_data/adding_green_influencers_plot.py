@@ -7,7 +7,7 @@ Created: 10/10/2022
 # imports
 import matplotlib.pyplot as plt
 from resources.plot import (
-    plot_emissions_multi_ab_relative_all_add_green,
+    plot_emissions_multi_ab_min_max_two_theta_reverse_add_green,
 )
 from resources.utility import (
     load_object,
@@ -26,15 +26,35 @@ def gen_atttiudes_list(mean_list, sum_a_b):
     return init_attitudes_list
 
 def main(
-    fileName = "results/splitting_eco_warriors_single_add_greens_17_44_05__01_02_2023",
+    fileName_add_greens_theta_one = "results/splitting_eco_warriors_single_add_greens_17_44_05__01_02_2023",
+    fileName_add_greens_theta_two = "results/splitting_eco_warriors_single_add_greens_17_44_05__01_02_2023",
     dpi_save = 1200
     ) -> None: 
 
-    emissions_list_default = load_object( fileName + "/Data", "emissions_list_default")
-    emissions_list_add_green  = load_object( fileName + "/Data", "emissions_list_add_green")
-    base_params = load_object( fileName + "/Data", "base_params")
-    mean_list = load_object(fileName + "/Data", "mean_list")
+    #emissions_list_default_theta_one = load_object( fileName_add_greens_theta_one + "/Data", "emissions_list_default")
+    #emissions_list_add_green_theta_one  = load_object( fileName_add_greens_theta_one + "/Data", "emissions_list_add_green")
+    #emissions_id_list_individual_default_theta_one = load_object( fileName_add_greens_theta_one + "/Data", "emissions_id_list_individual_default")
+    #emissions_id_list_individual_add_green_theta_one  = load_object( fileName_add_greens_theta_one + "/Data", "emissions_id_list_individual_add_green")
+    base_params_theta_one = load_object( fileName_add_greens_theta_one + "/Data", "base_params")
+    #init_attitudes_list_theta_one = load_object(fileName_add_greens_theta_one + "/Data", "init_attitudes_list")
+    mean_list_theta_one = load_object(fileName_add_greens_theta_one + "/Data", "mean_list")
+    #sum_a_b_theta_one = load_object(fileName_add_greens_theta_one + "/Data", "sum_a_b")
+    #green_N_theta_one = load_object( fileName_add_greens_theta_one + "/Data", "green_N")
+    #green_K_theta_one = load_object(fileName_add_greens_theta_one + "/Data", "green_K")
+    emissions_difference_matrix_theta_one = load_object(fileName_add_greens_theta_one + "/Data", "emissions_difference_matrix")
 
-    plot_emissions_multi_ab_relative_all_add_green(fileName, emissions_list_default, emissions_list_add_green, mean_list, dpi_save, len(base_params["seed_list"]))
+    #emissions_list_default_theta_two = load_object( fileName_add_greens_theta_two + "/Data", "emissions_list_default")
+    #emissions_list_add_green_theta_two  = load_object( fileName_add_greens_theta_two + "/Data", "emissions_list_add_green")
+    #emissions_id_list_individual_default_theta_two = load_object( fileName_add_greens_theta_two + "/Data", "emissions_id_list_individual_default")
+    #emissions_id_list_individual_add_green_theta_two  = load_object( fileName_add_greens_theta_two + "/Data", "emissions_id_list_individual_add_green")
+    base_params_theta_two = load_object( fileName_add_greens_theta_two + "/Data", "base_params")
+    #init_attitudes_list_theta_two = load_object(fileName_add_greens_theta_two + "/Data", "init_attitudes_list")
+    #mean_list_theta_two = load_object(fileName_add_greens_theta_two + "/Data", "mean_list")
+    #sum_a_b_theta_two = load_object(fileName_add_greens_theta_two + "/Data", "sum_a_b")
+    #green_N_theta_two = load_object( fileName_add_greens_theta_two + "/Data", "green_N")
+    #green_K_theta_two = load_object(fileName_add_greens_theta_two + "/Data", "green_K")
+    emissions_difference_matrix_theta_two = load_object(fileName_add_greens_theta_two + "/Data", "emissions_difference_matrix")
+
+    plot_emissions_multi_ab_min_max_two_theta_reverse_add_green(fileName_add_greens_theta_one,   emissions_difference_matrix_theta_one,    emissions_difference_matrix_theta_two, base_params_theta_one["confirmation_bias"],base_params_theta_two["confirmation_bias"],   mean_list_theta_one,   dpi_save, len(base_params_theta_one["seed_list"])  )
     
     plt.show()

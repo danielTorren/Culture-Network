@@ -14,7 +14,6 @@ from resources.utility import (
 )
 from resources.plot import (
     multi_scatter_seperate_total_sensitivity_analysis_plot,
-
 )
 
 def get_plot_data(
@@ -60,26 +59,14 @@ def get_plot_data(
 
     Si_emissions , Si_mu , Si_var , Si_coefficient_of_variance, Si_emissions_change = analyze_results(problem,Y_emissions,Y_mu,Y_var,Y_coefficient_of_variance,Y_emissions_change,calc_second_order) 
 
-    #### Bar chart
-    if calc_second_order:
-        total_emissions, first_emissions, second_emissions = Si_emissions.to_df()
-        total_mu, first_mu, second_mu = Si_mu.to_df()
-        total_var, first_var, second_var = Si_var.to_df()
-        (
-            total_coefficient_of_variance,
-            first_coefficient_of_variance,
-            second_coefficient_of_variance,
-        ) = Si_coefficient_of_variance.to_df()
-        total_emissions_change, first_emissions_change, second_emissions_change =  Si_emissions_change.to_df()
-    else:
-        total_emissions, first_emissions = Si_emissions.to_df()
-        total_mu, first_mu = Si_mu.to_df()
-        total_var, first_var = Si_var.to_df()
-        (
-            total_coefficient_of_variance,
-            first_coefficient_of_variance,
-        ) = Si_coefficient_of_variance.to_df()
-        total_emissions_change, first_emissions_change = Si_emissions_change.to_df()
+    total_emissions, first_emissions = Si_emissions.to_df()
+    total_mu, first_mu = Si_mu.to_df()
+    total_var, first_var = Si_var.to_df()
+    (
+        total_coefficient_of_variance,
+        first_coefficient_of_variance,
+    ) = Si_coefficient_of_variance.to_df()
+    total_emissions_change, first_emissions_change = Si_emissions_change.to_df()
 
     total_data_sa_emissions, total_yerr_emissions = get_data_bar_chart(total_emissions)
     total_data_sa_mu, total_yerr_mu = get_data_bar_chart(total_mu)
@@ -144,14 +131,13 @@ def get_plot_data(
         },
     }
 
-    ##### FINISH NEED TO GENERATE DATA FOR SECOND ORDER ANALYSIS!!
-
     return data_sa_dict_total, data_sa_dict_first
 
 def get_data_bar_chart(Si_df):
     """
     Taken from: https://salib.readthedocs.io/en/latest/_modules/SALib/plotting/bar.html
-    Reduce the sobol index dataframe down to just the bits I want for easy plotting of sobol index and it error
+    Reduce the sobol index dataframe down to just the bits I want for easy plotting of sobol index and its error
+
     Parameters
     ----------
     Si_df: pd.DataFrame,
@@ -246,20 +232,20 @@ def analyze_results(
 
     return Si_emissions , Si_mu , Si_var , Si_coefficient_of_variance,Si_emissions_change
 
-
 def main(
     fileName = "results\SA_AV_reps_5_samples_15360_D_vars_13_N_samples_1024",
+    plot_outputs = ['emissions','var',"emissions_change"],
+    dpi_save = 1200
     ) -> None: 
     
-    dpi_save = 1200
-
     plot_dict = {
         "emissions": {"title": r"$E/NM$", "colour": "red", "linestyle": "--"},
-        "mu": {"title": r"$\mu$", "colour": "blue", "linestyle": "-"},
+        "mu": {"title": r"$\mu_{I}$", "colour": "blue", "linestyle": "-"},
         "var": {"title": r"$\sigma^{2}_{I}$", "colour": "green", "linestyle": "*"},
         "coefficient_of_variance": {"title": r"$\sigma/\mu$","colour": "orange","linestyle": "-.",},
         "emissions_change": {"title": r"$\Delta E/NM$", "colour": "brown", "linestyle": "-*"},
-    },
+    }
+
     titles = [
         r"Number of individuals, $N$", 
         r"Number of behaviours, $M$", 
@@ -273,28 +259,25 @@ def main(
         r"Discount factor, $\delta$",
         r"Attribute homophily, $h$",
         r"Confirmation bias, $\theta$"
-    ],
+    ]
 
-    #variable_parameters_dict = load_object(fileName + "/Data", "variable_parameters_dict")
+
     problem = load_object(fileName + "/Data", "problem")
     Y_emissions = load_object(fileName + "/Data", "Y_emissions")
     Y_mu = load_object(fileName + "/Data", "Y_mu")
     Y_var = load_object(fileName + "/Data", "Y_var")
-    Y_coefficient_of_variance = load_object(
-        fileName + "/Data", "Y_coefficient_of_variance"
-    )
+    Y_coefficient_of_variance = load_object(fileName + "/Data", "Y_coefficient_of_variance")
     Y_emissions_change = load_object(fileName + "/Data", "Y_emissions_change")
+
     N_samples = load_object(fileName + "/Data","N_samples" )
     calc_second_order = load_object(fileName + "/Data", "calc_second_order")
 
-    data_sa_dict_total, data_sa_dict_first = get_plot_data(
-        problem, Y_emissions, Y_mu, Y_var, Y_coefficient_of_variance,Y_emissions_change, calc_second_order
-    )
+    data_sa_dict_total, data_sa_dict_first = get_plot_data(problem, Y_emissions, Y_mu, Y_var, Y_coefficient_of_variance,Y_emissions_change, calc_second_order)
 
     data_sa_dict_first = Merge_dict_SA(data_sa_dict_first, plot_dict)
     
     ###############################
 
-    multi_scatter_seperate_total_sensitivity_analysis_plot(fileName, data_sa_dict_first, titles, dpi_save, N_samples, "First")
+    multi_scatter_seperate_total_sensitivity_analysis_plot(fileName, data_sa_dict_first,plot_outputs, titles, dpi_save, N_samples, "First")
 
     plt.show()

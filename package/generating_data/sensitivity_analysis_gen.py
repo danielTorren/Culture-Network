@@ -1,5 +1,4 @@
-"""Performs sobol sensitivity analysis on the model. 
-[COMPLETE]
+"""Generate data for sensitivity analysis
 
 Author: Daniel Torren Peraire Daniel.Torren@uab.cat dtorrenp@hotmail.com
 
@@ -8,9 +7,6 @@ Created: 10/10/2022
 
 # imports
 import json
-import numpy as np
-
-# imports
 import numpy as np
 from SALib.sample import saltelli
 import numpy.typing as npt
@@ -79,14 +75,7 @@ def generate_problem(
     }
 
     ########################################
-    """
-    fileName = "results/SA_AV_reps_%s_samples_%s_D_vars_%s_N_samples_%s" % (
-        str(AV_reps),
-        str(samples),
-        str(D_vars),
-        str(N_samples),
-    )
-    """
+
     root = "senstivity_analysis"
     fileName = produce_name_datetime(root)
     print("fileName:", fileName)
@@ -147,17 +136,20 @@ def produce_param_list_SA(
         params_list.append(base_params_copy)
     return params_list
 
-def main(N_samples = 1024) -> str: 
+def main(
+        N_samples = 1024,
+        BASE_PARAMS_LOAD = "constants/base_params.json",
+        VARIABLE_PARAMS_LOAD = "constants/variable_parameters_dict_SA.json"
+         ) -> str: 
     
     calc_second_order = False
+
     # load base params
-    f = open("constants/base_params.json")
+    f = open(BASE_PARAMS_LOAD)
     base_params = json.load(f)
 
     # load variable params
-    f_variable_parameters = open(
-        "constants/variable_parameters_dict_SA.json"
-    )
+    f_variable_parameters = open(VARIABLE_PARAMS_LOAD)
     variable_parameters_dict = json.load(f_variable_parameters)
     f_variable_parameters.close()
 

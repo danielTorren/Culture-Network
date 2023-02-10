@@ -34,26 +34,12 @@ class Network:
     alpha_change : char
         determines how  and how often agent's re-asses their connections strength in the social network
     save_timeseries_data : bool
-        whether or not to save data. Set to 0 if only interested in end state of the simulation. If 1 will save
-        data into timeseries (lists or lists of lists for arrays) which can then be either accessed directly in
-        the social network object or saved into csv's
+        whether or not to save data. Set to 0 if only interested in end state of the simulation.
     compression_factor: int
         how often data is saved. If set to 1 its every step, then 10 is every 10th steps. Higher value gives lower
         resolution for graphs but more managable saved or end object size
-    degroot_aggregation:
-        determines whether using Degroot or voter model style social learning
     t: float
-        keep track of time, increased with each step by time step delta_t
-    steps: int
-        count number of steps in the simualtion
-    delta_t: float
-        size of time step in the simulation, default should be 1 and if this is changed then time dependant parameters
-        such as phi(the degree of conspicuous consumption or social suseptability of a behaviour) also needs to be
-        adjusted i.e. a larger delta_t requires a smaller phi to produce the same resolution of results
-    guilty_individuals: bool
-        Do individuals strive to be green?
-    guilty_individual_power: float
-        How much does identity drive the strive to be green
+        keep track of time
     M: int
         number of behaviours per individual. These behaviours are meant to represent action decisions that operate under the
         same identity such as the decision to cycle to work or take the car.
@@ -65,45 +51,26 @@ class Network:
     prob_rewire: float
         Probability of rewiring connections in the social network from one indivdual to another. The greater this values
         the more long distance connections within the network exist. Domain = [0,1]
-    culture_momentum_real: float
-        the real time that individuals consider in their past when evaluating their identity. The greater this is the further
-        into the past individuals look.
     culture_momentum: float
         the number of steps into the past that are considered when individuals consider their identity
-    culture_momentum_list: list[int]
-        list of each agents cultural momentum. Allows for greater heterogenity in agent population with some being laggards and
-        others being fast to change
     discount_factor: float
         the degree to which each previous time step has a decreasing importance to an individuals memory. Domain = [0,1]
     normalized_discount_array: npt.NDArray[float]
-        array where each row represents the specific agent and the columns a time series that is the length of that
-        agents culture_momentum. The array is row normalized so that each row sums to 1
+        discounting time series that is the length of that agents culture_momentum. The array is row normalized so that each row sums to 1
     confirmation_bias: float
         the extent to which individuals will only pay attention to other idividuals who are similar to them in social interactions
-        values of > 50 usually lead to clustering of individuals into information bubbles that dont interact very much slowing cnsensus
-        formation. If set to 0 then each individual considers its neighbours opinion equally. Negative values have a similar effect
-        as who the individual pays attention too bounces around so much that its the same as listening to everyone equally
     learning_error_scale: float
         the standard deviation of a guassian distribution centered on zero, representing the imperfection of learning in social transmission
     phi_array: npt.NDArray[float]
-        list of degree of social susceptibility or conspicous consumption of the different behaviours. Affects how much social interaction
-        influences an individuals attitude towards a behaviour. As the behaviours are abstract the currnet values
-        are not based on any empircal data hence the network behaviour is independent of their order so the
-        list is generated using a linspace function using input parameters phi_array_lower and phi_array_upper. each element has domain = [0,1]
-    carbon_emissions: list
-        list of emissions of each behaviour, defaulted to 1 for each behaviour if its performed in a brown way, B =< 0
-    action_observation: float
-        Do actions matter more than attitudes in opinion formation
+        list of degree of social susceptibility or conspicous consumption of the different behaviours. 
     homophily: float
         the degree to which an agents neighbours are similar to them identity wise. A value of 1 means agents are placed in the small world social network
         next to their cultural peers. The closer to 0 the more times agents are swapped around in the network using the Fisher Yates shuffle. Domain [0,1]
-    homophilly_rate: float
-        the greater this value the more shuffling of individuals occur for a given value of homophily
     shuffle_reps: int
         the number of time indivdiuals swap positions within the social network, note that this doesn't affect the actual network structure
     a_attitude,bb_attitude, a_threshold, b_threshold: float
         parameters used to generate the beta distribution for the intial agent attitudes and threholds for each behaviour respectively.
-        The same distribution is used for all agents adn behaviours
+        The same distribution is used for all agents and behaviours
     attitude_matrix_init: npt.NDArray[float]
         array of shape (N,M) with the intial values of the attitudes of each agent towards M behaviours which then evolve over time. Used to generated
         Indivdual objects
@@ -133,8 +100,6 @@ class Network:
         maximum individual idenity at time t
     weighting_matrix_convergence: float
         total change in agent link strength from previous to current step, a measure of convergece should tend to zero
-    green_adoption: float
-        what percentage of total behaviours are green, i.e. B > 0
     total_carbon_emissions: float
         total emissions due to behavioural choices of agents. Note the difference between this and carbon_emissions list for each behaviour
     history_weighting_matrix: list[npt.NDArray[float]]
@@ -155,12 +120,7 @@ class Network:
         time series of std_culture
     history_min_culture: list[float]
         time series of min_culture
-    history_green_adoption: list[float]
-        time series of green_adoption
-    prop_green: float
-        proportion of network that are green emitters
     
-
 
     Methods
     -------
@@ -168,22 +128,16 @@ class Network:
         Row normalize an array
     calc_normalized_discount_array(self):
         Returns row normalized discount array
-    calc_network_density():
-        Prints social network density
     create_weighting_matrix()-> tuple[npt.NDArray, npt.NDArray, nx.Graph]:
         Create small world social network
     produce_circular_list(list) -> list:
         Makes an ordered list circular so that the start and end values are close in value
     partial_shuffle(l, swap_reps) -> list:
         Partially shuffle a list using Fisher Yates shuffle
-    quick_calc_culture(attitude_matrix) -> list:
-        Calculate the identity of individuals not using class properties. Used once for initial homophily measures
     generate_init_data_behaviours() -> tuple:
         Generate the initial values for agent behavioural attitudes and thresholds
     create_agent_list() -> list:
         Create list of Individual objects that each have behaviours
-    calc_ego_influence_voter() ->  npt.NDArray:
-        Calculate the influence of neighbours by selecting a neighbour to imitate using the link strength as a probability of selection
     calc_ego_influence_degroot() ->  npt.NDArray:
         Calculate the influence of neighbours using the Degroot model of weighted aggregation
     calc_social_component_matrix() ->  npt.NDArray:
@@ -196,8 +150,6 @@ class Network:
         Calculate total carbon emissions of N*M behaviours
     calc_network_culture() ->  tuple[float, float, float, float]:
         Return various identity properties
-    calc_green_adoption() -> float:
-        Calculate the percentage of green behaviours adopted
     update_individuals():
         Update Individual objects with new information
     save_timeseries_data_network():
@@ -296,7 +248,6 @@ class Network:
         self.social_component_matrix = self.calc_social_component_matrix()
 
         if self.alpha_change == ("B" or "C"):
-            print("INSIDE", self.alpha_change)
             self.weighting_matrix, self.total_identity_differences,__ = self.update_weightings()
         elif self.alpha_change == "D":#independent behaviours
             self.weighting_matrix_list = self.update_weightings_list()
@@ -352,7 +303,7 @@ class Network:
 
     def calc_normalized_discount_array(self) -> npt.NDArray:
         """
-        Row normalize an array
+        produce normalized discount array
 
         Parameters
         ----------
@@ -530,6 +481,8 @@ class Network:
         return agent_list
         
     def add_green_fountains_list(self):
+        """Add green influencers to agent list"""
+
         individual_params = {
             "M": self.M,
             "save_timeseries_data": self.save_timeseries_data,
@@ -568,7 +521,7 @@ class Network:
 
     def calc_ego_influence_degroot_independent(self) -> npt.NDArray:
         """
-        Calculate the influence of neighbours using the Degroot model of weighted aggregation, BEHAVIOURS INDEPENDANT
+        Calculate the influence of neighbours using the Degroot model of weighted aggregation, BEHAVIOURS INDEPENDANT ("alpha_change" case D)
 
         Parameters
         ----------
@@ -647,6 +600,7 @@ class Network:
         -------
         norm_weighting_matrix: npt.NDArray
             Row normalized weighting array giving the strength of inter-Individual connections due to similarity in identity
+        total_identity_differences
         total_difference: float
             total element wise difference between the previous weighting arrays
         """
@@ -688,10 +642,8 @@ class Network:
 
         Returns
         -------
-        norm_weighting_matrix: npt.NDArray
-            Row normalized weighting array giving the strength of inter-Individual connections due to similarity in identity
-        total_difference: float
-            total element wise difference between the previous weighting arrays
+        weighting_matrix_list: list[npt.NDArray]
+            List of row normalized weighting array giving the strength of inter-Individual connections due to similarity in attitude
         """
         weighting_matrix_list = []
 
@@ -699,7 +651,6 @@ class Network:
             attitude_list = np.array([x.attitudes[m] for x in self.agent_list])
 
             difference_matrix = np.subtract.outer(attitude_list, attitude_list)
-            #print("difference_matrix",difference_matrix)
 
             alpha_numerator = np.exp(
                 -np.multiply(self.confirmation_bias, np.abs(difference_matrix))
@@ -714,8 +665,6 @@ class Network:
             )  # normalize the matrix row wise
 
             weighting_matrix_list.append(norm_weighting_matrix)
-
-        #print("weighting_matrix_list", weighting_matrix_list[0], weighting_matrix_list[2])
 
         return weighting_matrix_list
 
@@ -748,8 +697,12 @@ class Network:
 
         Returns
         -------
+        culture_list: list
+            list of individuals culture 
         culture_mean: float
             mean of network identity at time step t
+        culture_std: float
+            std of network identity at time step t
         culture_variance: float
             variance of network identity at time step t
         culture_max: float
