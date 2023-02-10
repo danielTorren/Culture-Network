@@ -3,4 +3,4 @@ venv/
 package/results/
 package/".ipynb_checkpoints"/
 package/.ipynb_checkpoints/
-.ipynb_checkpoints
+package/.ipynb_checkpoints
