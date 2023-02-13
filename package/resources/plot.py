@@ -732,4 +732,4 @@ def live_animate_culture_network_weighting_matrix(
         writervideo = animation.FFMpegWriter(fps=fps)
         ani.save(f, writer=writervideo)
 
-    return 
+    return ani
