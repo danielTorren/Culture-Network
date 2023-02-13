@@ -22,22 +22,26 @@ import numpy.typing as npt
 
 ###########################################################
 #Setting fonts and font sizes
-SMALL_SIZE = 14
-MEDIUM_SIZE = 18
-BIGGER_SIZE = 22
 
-plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
-plt.rc('axes', titlesize=SMALL_SIZE)     # fontsize of the axes title
-plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
-plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
-plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
-plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
-plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
+def set_latex(
+    SMALL_SIZE = 14,
+    MEDIUM_SIZE = 18,
+    BIGGER_SIZE = 22,
+):
 
-plt.rcParams.update({
-    "text.usetex": True,
-    "font.family": "Helvetica"
-})
+
+    plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
+    plt.rc('axes', titlesize=SMALL_SIZE)     # fontsize of the axes title
+    plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
+    plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+    plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+    plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
+    plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
+
+    plt.rcParams.update({
+        "text.usetex": True,
+        "font.family": "Helvetica"
+    })
 
 #########################################################
 def prod_pos(layout_type: str, network: nx.Graph) -> nx.Graph:
@@ -64,6 +68,7 @@ def plot_discount_factors_delta(
     time_list: npt.NDArray,
     culture_momentum: float,
     dpi_save: int,
+    latex_bool = False
 ) -> None:
     """
     Plot several distributions for the truncated discounting factor for different parameter values
@@ -87,6 +92,9 @@ def plot_discount_factors_delta(
     -------
     None
     """
+    if latex_bool:
+        set_latex()
+
     fig, ax = plt.subplots(figsize=(10, 6))
 
     for i in range(len(delta_vals)):
@@ -105,8 +113,11 @@ def plot_discount_factors_delta(
     fig.savefig(f, dpi=dpi_save, format="eps")
 
 def live_print_culture_timeseries(
-    fileName, Data_list, property_varied, dpi_save
+    fileName, Data_list, property_varied, dpi_save,latex_bool = False
 ):
+    if latex_bool:
+        set_latex()
+
     fig, axes = plt.subplots(nrows=1, ncols=len(Data_list),figsize=(10, 6), sharey=True)
     y_title = r"Identity, $I_{t,n}$"
 
@@ -130,7 +141,9 @@ def live_print_culture_timeseries(
     f = plotName + "/live_plot_culture_timeseries_%s.eps" % property_varied
     fig.savefig(f, dpi=dpi_save, format="eps")
 
-def bifurcation_plot_culture_or_not(fileName,cluster_pos_matrix_identity,cluster_pos_matrix_no_identity,vals_list, dpi_save):
+def bifurcation_plot_culture_or_not(fileName,cluster_pos_matrix_identity,cluster_pos_matrix_no_identity,vals_list, dpi_save,latex_bool = False):
+    if latex_bool:
+        set_latex()
     fig, axes = plt.subplots(nrows = 1, ncols=2, sharey= True, figsize= (10,6))
 
     for i in range(len(vals_list)):
@@ -159,11 +172,14 @@ def bifurcation_plot_culture_or_not(fileName,cluster_pos_matrix_identity,cluster
     fig.savefig(f + ".png", dpi=dpi_save, format="png")
 
 def multi_scatter_seperate_total_sensitivity_analysis_plot(
-    fileName, data_dict, dict_list, names, dpi_save, N_samples, order
+    fileName, data_dict, dict_list, names, dpi_save, N_samples, order,latex_bool = False
 ):
     """
     Create scatter chart of results.
     """
+
+    if latex_bool:
+        set_latex()
 
     fig, axes = plt.subplots(ncols=len(dict_list), nrows=1, constrained_layout=True , sharey=True,figsize=(12, 6))#,#sharex=True# figsize=(14, 7) # len(list(data_dict.keys())))
     
@@ -214,9 +230,10 @@ def multi_scatter_seperate_total_sensitivity_analysis_plot(
     fig.savefig(f_png, dpi=dpi_save, format="png")
 
 def live_print_culture_timeseries_with_weighting(
-    fileName, Data_list, property_varied, title_list, dpi_save, cmap
+    fileName, Data_list, property_varied, title_list, dpi_save, cmap,latex_bool = False
 ):
-
+    if latex_bool:
+        set_latex()
     fig, axes = plt.subplots(
         nrows=2, ncols=3, figsize=(14, 7), constrained_layout=True
     )
@@ -268,8 +285,10 @@ def print_live_intial_culture_networks_and_culture_timeseries(
     cmap,
     node_size,
     round_dec,
+    latex_bool = False
 ):
-
+    if latex_bool:
+        set_latex()
     y_title = r"Identity, $I_{t,n}$"
     fig, axes = plt.subplots(
         nrows=2, ncols=len(Data_list), figsize=(14, 7), constrained_layout=True
@@ -330,7 +349,10 @@ def print_live_intial_culture_networks_and_culture_timeseries(
     )
     fig.savefig(f_eps, dpi=dpi_save, format="eps")
 
-def plot_emissions_multi_ab_min_max_two_theta_reverse_add_green(fileName, emissions_difference_theta_one, emissions_difference_theta_two, theta_one,theta_two,mean_list, dpi_save, seed_reps):
+def plot_emissions_multi_ab_min_max_two_theta_reverse_add_green(fileName, emissions_difference_theta_one, emissions_difference_theta_two, theta_one,theta_two,mean_list, dpi_save, seed_reps,latex_bool = False):
+    if latex_bool:
+        set_latex()
+    
     fig, ax = plt.subplots(figsize=(10,7))    
 
     mu_emissions_difference_theta_one = emissions_difference_theta_one.mean(axis=1)
@@ -359,8 +381,9 @@ def plot_emissions_multi_ab_min_max_two_theta_reverse_add_green(fileName, emissi
     fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
     fig.savefig(f + ".png", dpi=dpi_save, format="png")
 
-def plot_beta_alt(f:str, a_b_combo_list: list ):
-
+def plot_beta_alt(f:str, a_b_combo_list: list,latex_bool = False ):
+    if latex_bool:
+        set_latex()
     fig, ax = plt.subplots(figsize=(10, 6))
 
     x = np.linspace(0,1,100)
@@ -376,9 +399,10 @@ def plot_beta_alt(f:str, a_b_combo_list: list ):
     fig.savefig(f + "%s" % (len(a_b_combo_list)) + ".eps", format="eps")
 
 def double_phase_diagram(
-    fileName, Z, Y_title, Y_param, variable_parameters_dict, cmap, dpi_save, levels
+    fileName, Z, Y_title, Y_param, variable_parameters_dict, cmap, dpi_save, levels,latex_bool = False
 ):
-
+    if latex_bool:
+        set_latex()
     fig, ax = plt.subplots(figsize=(10, 6), constrained_layout=True)
 
     col_dict = variable_parameters_dict["col"]
@@ -401,8 +425,9 @@ def double_phase_diagram(
     #fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
     fig.savefig(f + ".png", dpi=dpi_save, format="png")
     
-def plot_joint_cluster_micro(fileName, Data, clusters_index_lists,cluster_example_identity_list, vals_time_data, dpi_save, auto_bandwidth, bandwidth,cmap_multi, norm_zero_one,shuffle_colours) -> None:
-    
+def plot_joint_cluster_micro(fileName, Data, clusters_index_lists,cluster_example_identity_list, vals_time_data, dpi_save, auto_bandwidth, bandwidth,cmap_multi, norm_zero_one,shuffle_colours,latex_bool = False) -> None:
+    if latex_bool:
+        set_latex()
     fig, axes = plt.subplots(nrows = 1, ncols = 2, figsize = (10,6), constrained_layout=True)
 
     ###################################################
@@ -456,7 +481,9 @@ def plot_joint_cluster_micro(fileName, Data, clusters_index_lists,cluster_exampl
 
 ##############################################################
 #Single shot plots
-def plot_culture_timeseries(fileName, Data, dpi_save):
+def plot_culture_timeseries(fileName, Data, dpi_save,latex_bool = False):
+    if latex_bool:
+        set_latex()
     fig, ax = plt.subplots(figsize=(10,6))
     y_title = r"Identity, $I_{t,n}$"
 
@@ -480,7 +507,10 @@ def plot_individual_timeseries(
     property: str,
     dpi_save: int,
     ylim_low: int,
+    latex_bool = False
 ):
+    if latex_bool:
+        set_latex()
     fig, axes = plt.subplots(nrows=1, ncols=Data.M, figsize=(14, 7), sharey=True)
 
     for i, ax in enumerate(axes.flat):
@@ -500,14 +530,18 @@ def plot_individual_timeseries(
     f = plotName + "/plot_%s_timeseries.eps" % property
     fig.savefig(f, dpi=dpi_save, format="eps")
 
-def plot_value_timeseries(fileName: str, Data , dpi_save: int):
+def plot_value_timeseries(fileName: str, Data , dpi_save: int,latex_bool = False):
+    if latex_bool:
+        set_latex()
     y_title = r"Behavioural value, $B_{t,n,m}$"
     property = "history_behaviour_values"
     ylim_low = -1
 
     plot_individual_timeseries(fileName, Data, y_title, property, dpi_save, ylim_low)
 
-def plot_attitude_timeseries(fileName: str, Data, dpi_save: int):
+def plot_attitude_timeseries(fileName: str, Data, dpi_save: int,latex_bool = False):
+    if latex_bool:
+        set_latex()
     y_title = r"Behavioural attiude, $A_{t,n,m}$"
     property = "history_behaviour_attitudes"
     ylim_low = 0
@@ -522,8 +556,10 @@ def print_live_initial_culture_network(
     norm_zero_one,
     cmap,
     node_size,
+    latex_bool = False
 ):
-
+    if latex_bool:
+        set_latex()
     fig, ax = plt.subplots()
     
     G = nx.from_numpy_array(Data.history_weighting_matrix[0])
@@ -556,9 +592,10 @@ def print_live_initial_culture_network(
     fig.savefig(f + ".png", dpi=dpi_save, format="png")
 
 def plot_network_timeseries(
-    fileName: str, Data: Network, y_title: str, property: str, dpi_save: int
+    fileName: str, Data: Network, y_title: str, property: str, dpi_save: int,latex_bool = False
 ):
-
+    if latex_bool:
+        set_latex()
     fig, ax = plt.subplots(figsize=(10,6))
     data = eval("Data.%s" % property)
 
@@ -571,26 +608,34 @@ def plot_network_timeseries(
     f = plotName + "/" + property + "_timeseries.eps"
     fig.savefig(f, dpi=dpi_save, format="eps")
 
-def plot_cultural_range_timeseries(fileName: str, Data, dpi_save: int):
+def plot_cultural_range_timeseries(fileName: str, Data, dpi_save: int,latex_bool = False):
+    if latex_bool:
+        set_latex()
     y_title = "Identity variance"
     property = "history_var_culture"
     plot_network_timeseries(fileName, Data, y_title, property, dpi_save)
 
 def plot_weighting_matrix_convergence_timeseries(
-    fileName: str, Data, dpi_save: int
+    fileName: str, Data, dpi_save: int,latex_bool = False
 ):
+    if latex_bool:
+        set_latex()
     y_title = "Change in Agent Link Strength"
     property = "history_weighting_matrix_convergence"
     plot_network_timeseries(fileName, Data, y_title, property, dpi_save)
 
 def plot_total_carbon_emissions_timeseries(
-    fileName: str, Data, dpi_save: int
+    fileName: str, Data, dpi_save: int,latex_bool = False
 ):
+    if latex_bool:
+        set_latex()
     y_title = "Carbon Emissions"
     property = "history_total_carbon_emissions"
     plot_network_timeseries(fileName, Data, y_title, property, dpi_save)
 
-def plot_average_culture_timeseries(fileName: str, Data, dpi_save: int):
+def plot_average_culture_timeseries(fileName: str, Data, dpi_save: int,latex_bool = False):
+    if latex_bool:
+        set_latex()
     y_title = "Average identity"
     property = "history_average_culture"
 
@@ -607,9 +652,12 @@ def live_animate_culture_network_weighting_matrix(
     cmap_culture: Union[LinearSegmentedColormap, str],
     node_size: int,
     norm_zero_one: SymLogNorm,
-    save_bool = 0
+    save_bool = 0,
+    latex_bool = False
 ):
-    
+    if latex_bool:
+        set_latex()
+        
     def update(i, Data, axes, cmap_culture,cmap_weighting, layout, title):
 
         #axes[0].clear()
