@@ -9,10 +9,11 @@ Created: 10/10/2022
 
 # imports
 import string
+from matplotlib.lines import lineStyles
 import networkx as nx
 from networkx import Graph
 import numpy as np
-from pandas import DataFrame
+#from pandas import DataFrame
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from matplotlib.colors import Normalize, LinearSegmentedColormap, SymLogNorm
@@ -22,13 +23,13 @@ from matplotlib.cm import get_cmap
 from typing import Union
 #from pydlc import dense_lines
 from resources.network import Network
-import joypy
+#import joypy
 #from resources.utility import calc_num_clusters_auto_bandwidth
 from scipy.stats import gaussian_kde
 from scipy.signal import argrelextrema
 from sklearn.neighbors import KernelDensity
 from sklearn.cluster import MeanShift
-import pandas as pd
+#import pandas as pd
 from resources.utility import get_cluster_list
 
 
@@ -50,6 +51,105 @@ plt.rcParams.update({
 })
 
 # modules
+
+def plot_four(fileName, emissions_id_array_no_green_no_culture, emissions_id_array_no_green_culture, emissions_id_array_green_no_culture, emissions_id_array_green_culture, confirmation_bias,mean_list, dpi_save):
+
+    fig, ax = plt.subplots(figsize=(10,7)) 
+
+    print("emissions_id_array_no_green_no_culture ",emissions_id_array_no_green_no_culture, emissions_id_array_no_green_no_culture.shape)
+    mu_emissions_id_array_no_green_no_culture = emissions_id_array_no_green_no_culture.mean(axis=1)
+    min_emissions_id_array_no_green_no_culture = emissions_id_array_no_green_no_culture.min(axis=1)
+    max_emissions_id_array_no_green_no_culture = emissions_id_array_no_green_no_culture.max(axis=1)
+
+    mu_emissions_id_array_no_green_culture = emissions_id_array_no_green_culture.mean(axis=1)
+    min_emissions_id_array_no_green_culture = emissions_id_array_no_green_culture.min(axis=1)
+    max_emissions_id_array_no_green_culture = emissions_id_array_no_green_culture.max(axis=1)
+
+    mu_emissions_id_array_green_no_culture = emissions_id_array_green_no_culture.mean(axis=1)
+    min_emissions_id_array_green_no_culture = emissions_id_array_green_no_culture.min(axis=1)
+    max_emissions_id_array_green_no_culture = emissions_id_array_green_no_culture.max(axis=1)
+
+    mu_emissions_id_array_green_culture = emissions_id_array_green_culture.mean(axis=1)
+    min_emissions_id_array_green_culture = emissions_id_array_green_culture.min(axis=1)
+    max_emissions_id_array_green_culture = emissions_id_array_green_culture.max(axis=1)
+
+
+    # cultuer vs no culteur repsresneted black vs red
+    # green vs no green by solid vs dashed line
+    ax.plot(mean_list[::-1],mu_emissions_id_array_no_green_no_culture, linestyle="-", color='red', label = r"Behavioural independence, No green influencers")
+    ax.fill_between(mean_list[::-1], min_emissions_id_array_no_green_no_culture, max_emissions_id_array_no_green_no_culture, facecolor='red', alpha=0.5)
+
+    ax.plot(mean_list[::-1],mu_emissions_id_array_no_green_culture, linestyle="-", color='black', label = r"Behavioural dependence, No green influencers")
+    ax.fill_between(mean_list[::-1], min_emissions_id_array_no_green_culture, max_emissions_id_array_no_green_culture, facecolor='black', alpha=0.5)
+
+    ax.plot(mean_list[::-1],mu_emissions_id_array_green_no_culture, linestyle="--", color='red', label = r"Behavioural independence, Green influencers")
+    ax.fill_between(mean_list[::-1], min_emissions_id_array_green_no_culture, max_emissions_id_array_green_no_culture, facecolor='red', alpha=0.5)
+
+    ax.plot(mean_list[::-1],mu_emissions_id_array_green_culture, linestyle="-", color='black', label = r"Behavioural dependence, Green influencers")
+    ax.fill_between(mean_list[::-1], min_emissions_id_array_green_culture, max_emissions_id_array_green_culture, facecolor='black', alpha=0.5)
+
+    ax.legend()
+    plt.tight_layout()
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/plot_four_%s" % (len(mean_list))
+    fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
+
+
+
+def plot_four_compare(fileName, emissions_difference_matrix_compare_green, emissions_difference_matrix_compare_no_green, emissions_difference_matrix_compare_culture, emissions_difference_matrix_compare_no_culture, theta, mean_list, dpi_save):
+    fig, axes = plt.subplots(nrows = 2, ncols = 2,figsize=(10,7))    
+
+    mu_emissions_difference_matrix_compare_green = emissions_difference_matrix_compare_green.mean(axis=1)
+    min_emissions_difference_matrix_compare_green = emissions_difference_matrix_compare_green.min(axis=1)
+    max_emissions_difference_matrix_compare_green = emissions_difference_matrix_compare_green.max(axis=1)
+
+    mu_emissions_difference_matrix_compare_no_green = emissions_difference_matrix_compare_no_green.mean(axis=1)
+    min_emissions_difference_matrix_compare_no_green = emissions_difference_matrix_compare_no_green.min(axis=1)
+    max_emissions_difference_matrix_compare_no_green = emissions_difference_matrix_compare_no_green.max(axis=1)
+
+    mu_emissions_difference_matrix_compare_culture = emissions_difference_matrix_compare_culture.mean(axis=1)
+    min_emissions_difference_matrix_compare_culture = emissions_difference_matrix_compare_culture.min(axis=1)
+    max_emissions_difference_matrix_compare_culture = emissions_difference_matrix_compare_culture.max(axis=1)
+
+    mu_emissions_difference_matrix_compare_no_culture = emissions_difference_matrix_compare_no_culture.mean(axis=1)
+    min_emissions_difference_matrix_compare_no_culture = emissions_difference_matrix_compare_no_culture.min(axis=1)
+    max_emissions_difference_matrix_compare_no_culture = emissions_difference_matrix_compare_no_culture.max(axis=1)
+    
+    axes[0][0].plot(mean_list[::-1],mu_emissions_difference_matrix_compare_green, ls="", marker=".", linewidth = 0.5, color='blue', label = r"Confirmation bias $\theta = %s$"% (theta))
+    axes[0][0].fill_between(mean_list[::-1], min_emissions_difference_matrix_compare_green, max_emissions_difference_matrix_compare_green, facecolor='blue', alpha=0.5)
+    axes[0][0].set_title("CULTURE VS NO CULTURE WITH GREEN")
+    axes[0][0].set_xlabel(r"Initial attitude distance, $1-a_A/(a_A + b_A)$")
+    axes[0][0].set_ylabel( r"Relative $\%$ change in final emissions")
+    
+    axes[0][1].plot(mean_list[::-1],mu_emissions_difference_matrix_compare_no_green, ls="", marker=".", linewidth = 0.5, color='blue', label = r"Confirmation bias $\theta = %s$"% (theta))
+    axes[0][1].fill_between(mean_list[::-1], min_emissions_difference_matrix_compare_no_green, max_emissions_difference_matrix_compare_no_green, facecolor='blue', alpha=0.5)
+    axes[0][1].set_title("CULTURE VS NO CULTURE WITH  NO GREEN")
+    axes[0][1].set_xlabel(r"Initial attitude distance, $1-a_A/(a_A + b_A)$")
+    axes[0][1].set_ylabel( r"Relative $\%$ change in final emissions")
+
+    axes[1][0].plot(mean_list[::-1],mu_emissions_difference_matrix_compare_culture, ls="", marker=".", linewidth = 0.5, color='blue', label = r"Confirmation bias $\theta = %s$"% (theta))
+    axes[1][0].fill_between(mean_list[::-1], min_emissions_difference_matrix_compare_culture, max_emissions_difference_matrix_compare_culture, facecolor='blue', alpha=0.5)
+    axes[1][0].set_title("GREEN VS NO GREEN WITH CULTURE")
+    axes[1][0].set_xlabel(r"Initial attitude distance, $1-a_A/(a_A + b_A)$")
+    axes[1][0].set_ylabel( r"Relative $\%$ change in final emissions")
+
+    axes[1][1].plot(mean_list[::-1],mu_emissions_difference_matrix_compare_no_culture, ls="", marker=".", linewidth = 0.5, color='blue', label = r"Confirmation bias $\theta = %s$"% (theta))
+    axes[1][1].fill_between(mean_list[::-1], min_emissions_difference_matrix_compare_no_culture, max_emissions_difference_matrix_compare_no_culture, facecolor='blue', alpha=0.5)
+    axes[1][1].set_title("GREEN VS NO GREEN WITH CULTURE")
+    axes[1][1].set_xlabel(r"Initial attitude distance, $1-a_A/(a_A + b_A)$")
+    axes[1][1].set_ylabel( r"Relative $\%$ change in final emissions")
+
+    plt.tight_layout()
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/plot_four_compare_%s" % (len(mean_list))
+    fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
+
 def plot_emissions_no_culture_add_greens(fileName, emissions_list_no_culture_theta_one,emissions_list_culture_theta_one,  emissions_list_no_culture_theta_two,emissions_list_culture_theta_two, theta_one,theta_two,mean_list, dpi_save, seed_reps):
     fig, ax = plt.subplots(figsize=(10,7))    
     #IN THIS FUNCTION,  NO CULTURE = DEFAULT, CULTURE = ADD GREENS, CANT BE FUSSED TO CHANGE
@@ -82,6 +182,8 @@ def plot_emissions_no_culture_add_greens(fileName, emissions_list_no_culture_the
 
     ax.set_xlabel(r"Initial attitude distance, $1-a_A/(a_A + b_A)$")
     ax.set_ylabel( r"Relative $\%$ change in final emissions")
+    
+    ax.set_title("NO GREEN VS GREEN WITHOUT CULTURE")
     
     ax.legend(loc = "lower right")
     plt.tight_layout()
@@ -124,7 +226,8 @@ def plot_emissions_multi_ab_relative_all_add_green_two_theta(fileName, emissions
 
     ax.set_xlabel(r"Initial attitude distance, $1-a_A/(a_A + b_A)$")
     ax.set_ylabel( r"Relative $\%$ change in final emissions")
-    
+
+    ax.set_title("NO GREEN VS GREEN WITH CULTURE")
     ax.legend(loc = "lower right")
     plt.tight_layout()
 
@@ -376,6 +479,7 @@ def plot_emissions_multi_ab_min_max_two_theta_reverse_add_green(fileName, emissi
     ax.set_ylabel( r"Relative $\%$ change in final emissions")
     
     ax.legend(loc = "lower right")
+    ax.set_title("CULTURE VS NO CULTURE WITH GREEN")
     plt.tight_layout()
 
     plotName = fileName + "/Plots"
@@ -1241,112 +1345,6 @@ def plot_last_culture_vector_matrix(
     fig.savefig(f, dpi=dpi_save, format="png")
     # fig.savefig(f, dpi=dpi_save,format='eps')  
 
-def plot_last_culture_vector_joy(
-    fileName, Data_list, dpi_save, property_varied, property_varied_title, property_varied_vals, cmap, Data_list_bool, av_reps = 5
-):
-    labels = [str(i) for i in property_varied_vals]
-
-    if Data_list_bool:
-        Z = []
-        for i in range(len(Data_list)):
-            Z.append(np.asarray(Data_list[i].culture_list))
-        labels = [str(i) for i in property_varied_vals]
-        d = {l:v for l,v in zip(labels,Z)}
-        fig, axes = joypy.joyplot(d, colormap=cmap,)
-    else:
-        frames = []
-
-        """
-        Data_list_arr = np.asarray(Data_list).T#data listshape = (proerty varues, reps, individuals)
-        for j in range(av_reps):#5 is the number of reps
-            data = Data_list_arr[:,j,:]#pick out the reps
-            #print("data", data, data .shape)
-            #print("labels")
-            df = pd.DataFrame(data, columns=labels)
-            df = df.assign(av_rep=j)
-            frames.append(df)
-            #print("df",df, j)
-        frames.reverse()
-        result = pd.concat(frames)
-        
-        print("result",result)
-        fig, axes = joypy.joyplot(result, by="av_rep",legend=True, figsize=(10,6))#, , 
-        """
-        label_reps = [str(i) for i in range(av_reps)]
-        Data_list_arr = np.asarray(Data_list).T#data listshape = (proerty varues, reps, individuals)
-        for j in range(len(property_varied_vals)):
-            data = Data_list_arr[:,:,j]#pick out the reps
-            print("data", data, data .shape)
-            print("labels")
-            df = pd.DataFrame(data, columns=label_reps)
-            kwargs={"%s" % (property_varied): property_varied_vals[j]}
-            df = df.assign(**kwargs)
-            frames.append(df)
-            #print("df",df, j)
-        frames.reverse()
-        result = pd.concat(frames)
-        
-        print("result",result)
-        fig, axes = joypy.joyplot(result, by = property_varied,legend=True, figsize=(16,9))#, , 
-
-        #Z = []
-        #Z = Data_list#need to average over the different runs
-        #for i in range(len(Data_list)):
-        #    Z.append(np.mean(Data_list[i], axis= 0))
-
-    #Z_arr = np.asarray(Z)
-    #print("arrrray", Z_arr.shape)
-
-
-    #print("axes", axes)
-
-    axes[-1].set_xlabel(r"Identity, $I_{t,n}$")
-    for i in axes:
-        i.set_xlim(right = 1)
-    fig.supylabel(property_varied_title)
-
-    plotName = fileName + "/Plots"
-    f = (
-        plotName
-        + "/plot_last_culture_vector_joy_%s.png"
-        % property_varied
-    )
-    fig.savefig(f, dpi=dpi_save, format="png")
-    # fig.savefig(f, dpi=dpi_save,format='eps')  
-
-def plot_last_culture_vector_joy_hist(
-    fileName, Data_list, dpi_save, property_varied, property_varied_title, property_varied_vals, cmap,Data_list_bool
-):
-
-    if Data_list_bool:
-        Z = []
-        for i in range(len(Data_list)):
-            Z.append(np.asarray(Data_list[i].culture_list))
-    else:
-        Z = []
-        #Z = Data_list#need to average over the different runs
-        for i in range(len(Data_list)):
-            Z.append(np.mean(Data_list[i], axis= 0))
-
-    #Z_arr = np.asarray(Z)
-    labels = [str(i) for i in property_varied_vals]
-    d = {l:v for l,v in zip(labels,Z)}
-    fig, axes = joypy.joyplot(d, colormap=cmap, hist="True", bins=20, grid=True, overlap=0,)
-    #print("axes", axes)
-
-    axes[-1].set_xlabel(r"Identity, $I_{t,n}$")
-    #for i in axes:
-    #    i.set_xlim(right = 1)
-    fig.supylabel(property_varied_title)
-
-    plotName = fileName + "/Plots"
-    f = (
-        plotName
-        + "/plot_last_culture_vector_joy_hist_%s.png"
-        % property_varied
-    )
-    fig.savefig(f, dpi=dpi_save, format="png")
-    # fig.savefig(f, dpi=dpi_save,format='eps') 
 
 #####RUNPLOT PLOTS - SINGLE NETWORK
 def live_print_culture_timeseries_varynetwork_structure(
@@ -1824,14 +1822,14 @@ def plot_network_timeseries(
     fig.savefig(f, dpi=dpi_save, format="eps")
 
 
-def plot_cultural_range_timeseries(fileName: str, Data: DataFrame, dpi_save: int):
+def plot_cultural_range_timeseries(fileName: str, Data, dpi_save: int):
     y_title = "Identity variance"
     property = "history_var_culture"
     plot_network_timeseries(fileName, Data, y_title, property, dpi_save)
 
 
 def plot_weighting_matrix_convergence_timeseries(
-    fileName: str, Data: DataFrame, dpi_save: int
+    fileName: str, Data, dpi_save: int
 ):
     y_title = "Change in Agent Link Strength"
     property = "history_weighting_matrix_convergence"
@@ -1839,21 +1837,21 @@ def plot_weighting_matrix_convergence_timeseries(
 
 
 def plot_total_carbon_emissions_timeseries(
-    fileName: str, Data: DataFrame, dpi_save: int
+    fileName: str, Data, dpi_save: int
 ):
     y_title = "Carbon Emissions"
     property = "history_total_carbon_emissions"
     plot_network_timeseries(fileName, Data, y_title, property, dpi_save)
 
 
-def plot_green_adoption_timeseries(fileName: str, Data: DataFrame, dpi_save: int):
+def plot_green_adoption_timeseries(fileName: str, Data, dpi_save: int):
     y_title = "Green adoption %"
     property = "history_green_adoption"
 
     plot_network_timeseries(fileName, Data, y_title, property, dpi_save)
 
 
-def plot_average_culture_timeseries(fileName: str, Data: DataFrame, dpi_save: int):
+def plot_average_culture_timeseries(fileName: str, Data, dpi_save: int):
     y_title = "Average identity"
     property = "history_average_culture"
 
@@ -1910,7 +1908,7 @@ def plot_individual_timeseries(
 
 
 
-def plot_value_timeseries(fileName: str, Data: DataFrame, dpi_save: int):
+def plot_value_timeseries(fileName: str, Data, dpi_save: int):
     y_title = "Behavioural value, B"
     property = "history_behaviour_values"
     ylim_low = -1
@@ -1918,7 +1916,7 @@ def plot_value_timeseries(fileName: str, Data: DataFrame, dpi_save: int):
     plot_individual_timeseries(fileName, Data, y_title, property, dpi_save, ylim_low)
 
 
-def plot_attitude_timeseries(fileName: str, Data: DataFrame, dpi_save: int):
+def plot_attitude_timeseries(fileName: str, Data, dpi_save: int):
     y_title = "Behavioural attiude, A"
     property = "history_behaviour_attitudes"
     ylim_low = 0
@@ -1926,7 +1924,7 @@ def plot_attitude_timeseries(fileName: str, Data: DataFrame, dpi_save: int):
     plot_individual_timeseries(fileName, Data, y_title, property, dpi_save, ylim_low)
 
 
-def plot_threshold_timeseries(fileName: str, Data: DataFrame, dpi_save: int):
+def plot_threshold_timeseries(fileName: str, Data, dpi_save: int):
     y_title = "Behavioural threshold, T"
     property = "history_behaviour_thresholds"
     ylim_low = 0
@@ -2012,7 +2010,7 @@ def live_print_culture_timeseries_with_weighting(
     # fig.savefig(f, dpi=dpi_save,format='eps')
 
 def weighting_histogram(
-    fileName: str, Data: DataFrame, dpi_save,bin_num
+    fileName: str, Data, dpi_save,bin_num
 ):
     fig, ax = plt.subplots()
     # print("property = ", property)
@@ -2028,52 +2026,6 @@ def weighting_histogram(
     plotName = fileName + "/Plots"
     f = plotName + "/weighting_histogram.eps"
     fig.savefig(f, dpi=dpi_save,format='eps')
-
-def weighting_histogram_time(
-    fileName: str, Data: DataFrame, dpi_save,bin_num, skip_val
-):
-
-    arraytime = np.asarray(Data.history_time)
-    #print("arraytime",arraytime)
-    mask = arraytime%skip_val==0
-
-    #print("mask", mask)
-
-    masked_time = arraytime[mask]
-    #print("masked_time",masked_time)
-
-    weighting_array = np.asarray(Data.history_weighting_matrix)
-    #print("weighting_array",weighting_array)
-    masked_weighting = weighting_array[mask]
-    #print("masked_weighting",masked_weighting)
-
-    flat_data_list = []
-    for i in masked_weighting :
-        triu_weighting = np.triu(i)    
-        flat_data = (triu_weighting).flatten()
-        flat_data_list.append(list(flat_data))
-
-    #print("flat_data_list",flat_data_list)
-    #print("lens", len(flat_data_list), len(flat_data_list[0]))
-    #print("masked time", masked_time)
-    list_string  = [str(round(x)) for x in masked_time]
-
-    d = {l:v for l,v in zip(list_string,flat_data_list)}
-    #list_string = map(str, masked_time)
-    #print("list_string",list_string)
-    
-    fig, ax = joypy.joyplot(d)
-
-
-    #ax.hist(flat_data, density=True, bins = bin_num)  # density=False would make counts
-    #ax.set_xlabel(r"Social network weighting $\alpha_{n,k}$")
-    #ax.set_ylabel(r"Count")
-    #plt.tight_layout()
-
-    #plotName = fileName + "/Plots"
-    #f = plotName + "/weighting_histogram_time.eps"
-    #fig.savefig(f, dpi=dpi_save,format='eps')
-
 
 
 
@@ -4718,7 +4670,7 @@ def plot_behaviour_scatter(fileName,Data,property,dpi_save):
     f = plotName + "/plot_attitude_scatter.eps"
     fig.savefig(f, dpi=dpi_save,format='eps')
 
-def plot_weighting_link_timeseries(fileName: str, Data: DataFrame, y_title:str, dpi_save:int, min_val):
+def plot_weighting_link_timeseries(fileName: str, Data, y_title:str, dpi_save:int, min_val):
 
     fig, ax = plt.subplots(figsize=(10,6))
 
@@ -4738,7 +4690,7 @@ def plot_weighting_link_timeseries(fileName: str, Data: DataFrame, y_title:str, 
     fig.savefig(f, dpi=dpi_save,format='eps')
 
 def animate_culture_network_and_weighting(
-    fileName: str, Data: DataFrame, layout:str, cmap_culture: Union[LinearSegmentedColormap,str], node_size:int, interval:int, fps:int, norm_zero_one: SymLogNorm, round_dec:int, cmap_edge
+    fileName: str, Data, layout:str, cmap_culture: Union[LinearSegmentedColormap,str], node_size:int, interval:int, fps:int, norm_zero_one: SymLogNorm, round_dec:int, cmap_edge
 ):
 
     def update(i, G, pos, ax, cmap_culture):
@@ -4848,7 +4800,7 @@ def animate_behaviour_scatter(fileName,Data,property,norm_zero_one, cmap_culture
     ani.save(f, writer=writervideo)
 
 def print_culture_histogram(
-    fileName: str, Data: DataFrame, property:str, nrows:int, ncols:int, frames_list, round_dec, dpi_save,bin_num
+    fileName: str, Data, property:str, nrows:int, ncols:int, frames_list, round_dec, dpi_save,bin_num
 ):
     y_title = "Probability"
     #print(Data[property], Data[property].shape)
@@ -4869,7 +4821,7 @@ def print_culture_histogram(
     fig.savefig(f, dpi=dpi_save,format='eps')
 
     # make matrix animation
-def animate_weighting_matrix(fileName: str, Data: DataFrame, interval:int, fps:int, round_dec:int, cmap_weighting: Union[LinearSegmentedColormap,str]):
+def animate_weighting_matrix(fileName: str, Data, interval:int, fps:int, round_dec:int, cmap_weighting: Union[LinearSegmentedColormap,str]):
     def update(i):
         M = Data["network_weighting_matrix"][i]
         # print("next frame!",M)        
@@ -4904,7 +4856,7 @@ def animate_weighting_matrix(fileName: str, Data: DataFrame, interval:int, fps:i
 
 # make behaviour evolution plot
 def animate_behavioural_matrix(
-    fileName: str, Data: DataFrame, interval:int, fps:int, cmap_behaviour: Union[LinearSegmentedColormap,str], round_dec:int
+    fileName: str, Data, interval:int, fps:int, cmap_behaviour: Union[LinearSegmentedColormap,str], round_dec:int
 ):
     def update(i):
         M = Data["behaviour_value"][i]
@@ -4947,7 +4899,7 @@ def animate_behavioural_matrix(
 
 # animation of changing culture
 def animate_culture_network(
-    fileName: str, Data: DataFrame, layout:str, cmap_culture: Union[LinearSegmentedColormap,str], node_size:int, interval:int, fps:int, norm_zero_one: SymLogNorm, round_dec:int
+    fileName: str, Data, layout:str, cmap_culture: Union[LinearSegmentedColormap,str], node_size:int, interval:int, fps:int, norm_zero_one: SymLogNorm, round_dec:int
 ):
     def update(i, G, pos, ax, cmap_culture):
 
@@ -4999,7 +4951,7 @@ def animate_culture_network(
 
 
 def prints_behavioural_matrix(
-    fileName: str, Data: DataFrame, cmap_behaviour: Union[LinearSegmentedColormap,str], nrows:int, ncols:int, frames_list:list[int], round_dec:int, dpi_save:int
+    fileName: str, Data, cmap_behaviour: Union[LinearSegmentedColormap,str], nrows:int, ncols:int, frames_list:list[int], round_dec:int, dpi_save:int
 ):
 
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
@@ -5026,7 +4978,7 @@ def prints_behavioural_matrix(
     fig.savefig(f, dpi=dpi_save,format='eps')
 
 def print_network_social_component_matrix(
-    fileName: str, Data: DataFrame, cmap_behaviour: Union[LinearSegmentedColormap,str], nrows:int, ncols:int, frames_list:list[int], round_dec:int, dpi_save:int
+    fileName: str, Data, cmap_behaviour: Union[LinearSegmentedColormap,str], nrows:int, ncols:int, frames_list:list[int], round_dec:int, dpi_save:int
 ):
 
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
@@ -5057,7 +5009,7 @@ def print_network_social_component_matrix(
     fig.savefig(f, dpi=dpi_save,format='eps')
 
 def print_network_information_provision(
-    fileName: str, Data: DataFrame, cmap_behaviour: Union[LinearSegmentedColormap,str], nrows:int, ncols:int, frames_list:list[int], round_dec:int, dpi_save:int
+    fileName: str, Data, cmap_behaviour: Union[LinearSegmentedColormap,str], nrows:int, ncols:int, frames_list:list[int], round_dec:int, dpi_save:int
 ):
 
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
@@ -5092,7 +5044,7 @@ def print_network_information_provision(
 
 
 def prints_culture_network(
-    fileName: str, Data: DataFrame,layout:str, cmap_culture: LinearSegmentedColormap,node_size:int, nrows:int, ncols:int, norm_zero_one: SymLogNorm, frames_list:list[int], round_dec:int, dpi_save:int
+    fileName: str, Data,layout:str, cmap_culture: LinearSegmentedColormap,node_size:int, nrows:int, ncols:int, norm_zero_one: SymLogNorm, frames_list:list[int], round_dec:int, dpi_save:int
 ):
 
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
@@ -5134,7 +5086,7 @@ def prints_culture_network(
     f = fileName + "/Prints/prints_culture_network.eps"
     fig.savefig(f, dpi=dpi_save,format='eps')
 
-def plot_average_culture_timeseries(fileName: str, Data: DataFrame, dpi_save:int):
+def plot_average_culture_timeseries(fileName: str, Data, dpi_save:int):
     y_title = "Average Culture"
     property = "network_average_culture"
 
@@ -5155,7 +5107,7 @@ def plot_average_culture_timeseries(fileName: str, Data: DataFrame, dpi_save:int
     fig.savefig(f, dpi=dpi_save,format='eps')
 
 
-def plot_culture_timeseries(fileName: str, Data: DataFrame, dpi_save:int):
+def plot_culture_timeseries(fileName: str, Data, dpi_save:int):
 
     ##plot cultural evolution of agents
     fig, ax = plt.subplots(figsize=(10,6))
@@ -5174,7 +5126,7 @@ def plot_culture_timeseries(fileName: str, Data: DataFrame, dpi_save:int):
     fig.savefig(f, dpi=dpi_save,format='eps')
 
 # make animate_network_social_component_matrix
-def animate_network_social_component_matrix(fileName: str, Data: DataFrame, interval:int, fps:int, round_dec:int, cmap: Union[LinearSegmentedColormap,str], norm_zero_one):
+def animate_network_social_component_matrix(fileName: str, Data, interval:int, fps:int, round_dec:int, cmap: Union[LinearSegmentedColormap,str], norm_zero_one):
     
     def update(i):
         M = Data["network_social_component_matrix"][i]
@@ -5214,7 +5166,7 @@ def animate_network_social_component_matrix(fileName: str, Data: DataFrame, inte
 
     return ani
 
-def animate_network_information_provision(fileName: str, Data: DataFrame, interval:int, fps:int, round_dec:int, cmap: Union[LinearSegmentedColormap,str]):
+def animate_network_information_provision(fileName: str, Data, interval:int, fps:int, round_dec:int, cmap: Union[LinearSegmentedColormap,str]):
 
     def update(i):
         M = Data["behaviour_information_provision"][i]
@@ -5254,7 +5206,7 @@ def animate_network_information_provision(fileName: str, Data: DataFrame, interv
     ani.save(f, writer=writervideo)
     return ani
 
-def prints_behaviour_timeseries_plot(fileName: str, Data: DataFrame, property:str, y_title:str, nrows:int, ncols:int, dpi_save:int):
+def prints_behaviour_timeseries_plot(fileName: str, Data, property:str, y_title:str, nrows:int, ncols:int, dpi_save:int):
     PropertyData = Data[property].transpose()
 
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 7))
@@ -5275,7 +5227,7 @@ def prints_behaviour_timeseries_plot(fileName: str, Data: DataFrame, property:st
     fig.savefig(f, dpi=dpi_save,format='eps')
 
 def prints_behaviour_timeseries_plot_colour_culture(
-    fileName: str, Data: DataFrame, property:str, y_title:str, nrows:int, ncols:int, dpi_save:int, culture_cmap, norm_zero_one
+    fileName: str, Data, property:str, y_title:str, nrows:int, ncols:int, dpi_save:int, culture_cmap, norm_zero_one
 ):
 
     PropertyData = Data[property].T
@@ -5313,7 +5265,7 @@ def prints_behaviour_timeseries_plot_colour_culture(
     fig.savefig(f, dpi=dpi_save,format='eps')
 
 
-def standard_behaviour_timeseries_plot(fileName: str, Data: DataFrame, property:str, y_title:str, dpi_save:int):
+def standard_behaviour_timeseries_plot(fileName: str, Data, property:str, y_title:str, dpi_save:int):
     PropertyData = Data[property].transpose()
 
     fig, ax = plt.subplots(figsize=(10,6))
@@ -5329,19 +5281,19 @@ def standard_behaviour_timeseries_plot(fileName: str, Data: DataFrame, property:
     fig.savefig(f, dpi=dpi_save,format='eps')
 
 
-def plot_value_timeseries(fileName: str, Data: DataFrame, nrows:int, ncols:int, dpi_save:int,):
+def plot_value_timeseries(fileName: str, Data, nrows:int, ncols:int, dpi_save:int,):
     prints_behaviour_timeseries_plot(
         fileName, Data, "behaviour_value", "Trait Value", nrows, ncols, dpi_save, 
     )
 
 
-def plot_threshold_timeseries(fileName: str, Data: DataFrame, nrows:int, ncols:int, dpi_save:int,):
+def plot_threshold_timeseries(fileName: str, Data, nrows:int, ncols:int, dpi_save:int,):
     prints_behaviour_timeseries_plot(
         fileName, Data, "behaviour_threshold", "Threshold", nrows, ncols, dpi_save
     )
 
 
-def plot_attitude_timeseries(fileName: str, Data: DataFrame, nrows:int, ncols:int, dpi_save:int):
+def plot_attitude_timeseries(fileName: str, Data, nrows:int, ncols:int, dpi_save:int):
     
     #print(Data["behaviour_attitude"],np.shape(Data["behaviour_attitude"]))
 
@@ -5351,7 +5303,7 @@ def plot_attitude_timeseries(fileName: str, Data: DataFrame, nrows:int, ncols:in
     )
 
 
-def plot_av_carbon_emissions_timeseries(fileName: str, Data: DataFrame, dpi_save:int):
+def plot_av_carbon_emissions_timeseries(fileName: str, Data, dpi_save:int):
     y_title = "Carbon Emissions Per Individual"
     property = "individual_carbon_emissions"
 
