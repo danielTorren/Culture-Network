@@ -620,6 +620,7 @@ class Network:
             "guilty_individuals":self.guilty_individuals,
             "guilty_individual_power":self.guilty_individual_power,
             "moral_licensing": self.moral_licensing,
+            "alpha_change": self.alpha_change,
         }
 
         agent_list = [
@@ -882,9 +883,10 @@ class Network:
         weighting_matrix_list = []
 
         for m in range(self.M):
-            attitude_list = np.array([x.attitudes[m] for x in self.agent_list])
 
-            difference_matrix = np.subtract.outer(attitude_list, attitude_list)
+            attitude_star_list = np.array([x.attitudes_star[m] for x in self.agent_list])
+
+            difference_matrix = np.subtract.outer(attitude_star_list, attitude_star_list)
             #print("difference_matrix",difference_matrix)
 
             alpha_numerator = np.exp(

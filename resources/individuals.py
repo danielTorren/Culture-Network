@@ -132,6 +132,7 @@ class Individual:
         self.guilty_individual_bool = individual_params["guilty_individuals"]
         self.guilty_individual_power = individual_params["guilty_individual_power"]
         self.moral_licensing = individual_params["moral_licensing"]
+        self.alpha_change = individual_params["self.alpha_changes"]
         self.id = id_n
 
         self.green_fountain_state = 0
@@ -142,6 +143,12 @@ class Individual:
 
         self.av_behaviour_list = [self.av_behaviour] * self.culture_momentum
         self.culture = self.calc_culture()
+
+        if self.alpha_change == 2.0:
+            self.attitudes_matrix = np.tile(self.attitudes, self.culture_momentum)
+            print("self.attitudes_matrix",self.attitudes_matrix )
+            self.attitudes_star = self.calc_attitudes_star()
+            print("self.attitudes_star", self.attitudes_star)
 
         self.total_carbon_emissions,self.behavioural_carbon_emissions = self.calc_total_emissions()
 
@@ -171,6 +178,12 @@ class Individual:
         """
         self.av_behaviour_list.pop()
         self.av_behaviour_list.insert(0, self.av_behaviour)
+    
+    def update_attitudes_matrix(self):
+        a = self.attitudes + self.attitudes_matrix[-1,:]
+        print("popping before nad after ",self.attitudes_matrix, a)
+        self.attitudes_matrix =  a
+
 
     def calc_culture(self) -> float:
         """
@@ -187,6 +200,11 @@ class Individual:
 
         return np.matmul(
             self.normalized_discount_vector, self.av_behaviour_list
+        )  # here discount list is normalized
+    
+    def calc_attitudes_star(self):
+        return np.matmul(
+            self.normalized_discount_vector, self.attitudes_matrix
         )  # here discount list is normalized
 
     def update_values(self):
@@ -285,11 +303,13 @@ class Individual:
         self.update_values()
         self.update_attitudes(social_component)
 
-        self.calc_av_behaviour()
-
-        self.update_av_behaviour_list()
-
-        self.culture = self.calc_culture()
+        if self.alpha_change == 2.0:
+            self.update_attitudes_matrix()
+            self.attitudes_star = self.calc_attitudes_star()
+        else:
+            self.calc_av_behaviour()
+            self.update_av_behaviour_list()
+            self.culture = self.calc_culture()
 
         self.total_carbon_emissions, self.behavioural_carbon_emissions = self.calc_total_emissions()
 

@@ -66,7 +66,9 @@ from resources.plot import (
     plot_emissions_multi_ab_relative_all_add_green_two_theta,
     plot_emissions_no_culture_add_greens,
     plot_four_compare,
-    plot_four
+    plot_four,
+    plot_four_compare_one,
+    plot_four_two,
 )
 from resources.utility import (
     createFolder,
@@ -112,7 +114,7 @@ def gen_atttiudes_list(mean_list, sum_a_b):
 #fileName = "results/splitting_eco_warriors_multi_set_N_10_48_11__08_01_2023"#this is the identity one
 #fileName = "results/splitting_eco_warriors_multi_17_39_29__07_01_2023"#this is the NO identity one
 
-fileName = "results/green_influencers_culture_four_16_27_21__13_02_2023"
+fileName = "results/green_influencers_culture_four_16_40_33__13_02_2023"
 #
 #"results/splitting_eco_warriors_add_green_culture_compare_21_03_13__07_02_2023"
 
@@ -1287,6 +1289,8 @@ if __name__ == "__main__":
         print("SAVED AT: ", fileName_add_greens_no_culture_theta_one)
         plot_emissions_no_culture_add_greens(fileName_add_greens_no_culture_theta_one, emissions_list_default_theta_one, emissions_list_add_green_theta_one, emissions_list_default_theta_two, emissions_list_add_green_theta_two, base_params_theta_one["confirmation_bias"],base_params_theta_two["confirmation_bias"],   mean_list_theta_one,   dpi_save, len(base_params_theta_one["seed_list"])  ) 
     if ADD_GREENS_ALL_FOUR:
-        plot_four_compare(fileName, emissions_difference_matrix_compare_green, emissions_difference_matrix_compare_no_green, emissions_difference_matrix_compare_culture, emissions_difference_matrix_compare_no_culture, base_params["confirmation_bias"],mean_list, dpi_save)
-        plot_four(fileName, np.asarray(emissions_list_no_green_no_culture), np.asarray(emissions_list_no_green_culture), np.asarray(emissions_list_green_no_culture), np.asarray(emissions_list_green_culture), base_params["confirmation_bias"],mean_list, dpi_save)
+        #plot_four_compare(fileName, emissions_difference_matrix_compare_green, emissions_difference_matrix_compare_no_green, emissions_difference_matrix_compare_culture, emissions_difference_matrix_compare_no_culture, base_params["confirmation_bias"],mean_list, dpi_save)
+        #plot_four(fileName, np.asarray(emissions_list_no_green_no_culture), np.asarray(emissions_list_no_green_culture), np.asarray(emissions_list_green_no_culture), np.asarray(emissions_list_green_culture), base_params["confirmation_bias"],mean_list, dpi_save)
+        #plot_four_compare_one(fileName, emissions_difference_matrix_compare_green, emissions_difference_matrix_compare_no_green, emissions_difference_matrix_compare_culture, emissions_difference_matrix_compare_no_culture, mean_list, dpi_save)
+        plot_four_two(fileName, emissions_difference_matrix_compare_green, emissions_difference_matrix_compare_no_green, emissions_difference_matrix_compare_culture, emissions_difference_matrix_compare_no_culture, mean_list, dpi_save)
     plt.show()
