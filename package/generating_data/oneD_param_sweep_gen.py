@@ -11,8 +11,8 @@ Created: 10/10/2022
 # imports
 import json
 import numpy as np
-from resources.utility import createFolder,produce_name_datetime,save_object
-from resources.run import parallel_run
+from package.resources.utility import createFolder,produce_name_datetime,save_object
+from package.resources.run import parallel_run
 
 # modules
 def produce_param_list(params: dict, property_list: list, property: str) -> list[dict]:
@@ -28,7 +28,7 @@ def produce_param_list(params: dict, property_list: list, property: str) -> list
                 "delta_t": 1.0,#0.05,
                 "compression_factor": 10,
                 "save_data": True,
-                "alpha_change" : "C",
+                "alpha_change" : "dynamic_culturally_determined_weights",
                 "harsh_data": False,
                 "averaging_method": "Arithmetic",
                 "phi_lower": 0.001,
@@ -72,7 +72,7 @@ def produce_param_list(params: dict, property_list: list, property: str) -> list
 
 def main(
         RUN_TYPE = 0,
-        BASE_PARAMS_LOAD = "constants/base_params.json"
+        BASE_PARAMS_LOAD = "package/constants/base_params.json"
          ) -> str: 
 
     if RUN_TYPE == 0:

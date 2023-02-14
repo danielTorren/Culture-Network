@@ -9,10 +9,10 @@ Created: 10/10/2022
 import matplotlib.pyplot as plt
 from SALib.analyze import sobol
 import numpy.typing as npt
-from resources.utility import (
+from package.resources.utility import (
     load_object,
 )
-from resources.plot import (
+from package.resources.plot import (
     multi_scatter_seperate_total_sensitivity_analysis_plot,
 )
 
@@ -174,7 +174,7 @@ def Merge_dict_SA(data_sa_dict: dict, plot_dict: dict) -> dict:
             "emissions" : {"title": r"$E/NM$",  "colour": "r", "linestyle": "--"},
             "mu" : {"title": r"$\mu/NM$", "colour": "g", "linestyle": "-"},
             "var" : {"title": r"$\sigma^{2}$", "colour": "k", "linestyle": "*"},
-            "coefficient_of_variance" : {"title": r"$\sigma NM/\mu$", "colour": "b","linestyle": "-."},
+            "coefficient_of_variance" : {"title": r"$\sigma NM/\mu$", "colour": "static_culturally_determined_weights","linestyle": "-."},
         }
     Returns
     -------
@@ -281,3 +281,4 @@ def main(
     multi_scatter_seperate_total_sensitivity_analysis_plot(fileName, data_sa_dict_first,plot_outputs, titles, dpi_save, N_samples, "First")
 
     plt.show()
+

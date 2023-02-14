@@ -8,8 +8,8 @@ Author: Daniel Torren Peraire Daniel.Torren@uab.cat dtorrenp@hotmail.com
 Created: 10/10/2022
 """
 # imports
-from resources.run import generate_data
-from resources.utility import (
+from package.resources.run import generate_data
+from package.resources.utility import (
     createFolder, 
     save_object, 
     produce_name_datetime

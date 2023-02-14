@@ -8,10 +8,10 @@ Created: 10/10/2022
 # imports
 import matplotlib.pyplot as plt
 from matplotlib.cm import get_cmap
-from resources.plot import (
+from package.resources.plot import (
     double_phase_diagram
 )
-from resources.utility import (
+from package.resources.utility import (
     load_object
 )
 

@@ -16,7 +16,7 @@ import matplotlib.animation as animation
 from matplotlib.colors import Normalize, LinearSegmentedColormap, SymLogNorm
 from matplotlib.cm import get_cmap
 from typing import Union
-from model.network import Network
+from package.model.network import Network
 from scipy.stats import beta
 import numpy.typing as npt
 
@@ -733,3 +733,195 @@ def live_animate_culture_network_weighting_matrix(
         ani.save(f, writer=writervideo)
 
     return ani
+
+
+
+#########################################################################################################################################################################
+#PICK WHICH EVER YOU END UP USING FOR FINAL VERSION
+
+def plot_four_compare_one(fileName, emissions_difference_matrix_compare_green, emissions_difference_matrix_compare_no_green, emissions_difference_matrix_compare_culture, emissions_difference_matrix_compare_no_culture, mean_list, dpi_save):
+
+    fig, ax = plt.subplots(figsize=(10,7)) 
+
+    mu_emissions_difference_matrix_compare_green = emissions_difference_matrix_compare_green.mean(axis=1)
+    min_emissions_difference_matrix_compare_green = emissions_difference_matrix_compare_green.min(axis=1)
+    max_emissions_difference_matrix_compare_green = emissions_difference_matrix_compare_green.max(axis=1)
+
+    mu_emissions_difference_matrix_compare_no_green = emissions_difference_matrix_compare_no_green.mean(axis=1)
+    min_emissions_difference_matrix_compare_no_green = emissions_difference_matrix_compare_no_green.min(axis=1)
+    max_emissions_difference_matrix_compare_no_green = emissions_difference_matrix_compare_no_green.max(axis=1)
+
+    mu_emissions_difference_matrix_compare_culture = emissions_difference_matrix_compare_culture.mean(axis=1)
+    min_emissions_difference_matrix_compare_culture = emissions_difference_matrix_compare_culture.min(axis=1)
+    max_emissions_difference_matrix_compare_culture = emissions_difference_matrix_compare_culture.max(axis=1)
+
+    mu_emissions_difference_matrix_compare_no_culture = emissions_difference_matrix_compare_no_culture.mean(axis=1)
+    min_emissions_difference_matrix_compare_no_culture = emissions_difference_matrix_compare_no_culture.min(axis=1)
+    max_emissions_difference_matrix_compare_no_culture = emissions_difference_matrix_compare_no_culture.max(axis=1)
+
+
+    # cultuer vs no culteur repsresneted black vs red
+    # green vs no green by solid vs dashed line
+    ax.set_ylabel( r"Relative $\%$ change in final emissions")
+    ax.set_xlabel(r"Initial attitude distance, $1-a_A/(a_A + b_A)$")
+
+    ax.plot(mean_list[::-1],mu_emissions_difference_matrix_compare_green, ls="", marker="^", linewidth = 0.5, color='blue', label = r"CULTURE VS NO CULTURE WITH GREEN")
+    ax.fill_between(mean_list[::-1], min_emissions_difference_matrix_compare_green, max_emissions_difference_matrix_compare_green, facecolor='blue', alpha=0.5)
+
+    ax.plot(mean_list[::-1],mu_emissions_difference_matrix_compare_no_green, ls="", marker=".", linewidth = 0.5, color='blue', label = "CULTURE VS NO CULTURE WITH  NO GREEN")
+    ax.fill_between(mean_list[::-1], min_emissions_difference_matrix_compare_no_green, max_emissions_difference_matrix_compare_no_green, facecolor='blue', alpha=0.5)
+
+    ax.plot(mean_list[::-1],mu_emissions_difference_matrix_compare_culture, ls="", marker=".", linewidth = 0.5, color='black', label = "GREEN VS NO GREEN WITH CULTURE")
+    ax.fill_between(mean_list[::-1], min_emissions_difference_matrix_compare_culture, max_emissions_difference_matrix_compare_culture, facecolor='black', alpha=0.5)
+
+    ax.plot(mean_list[::-1],mu_emissions_difference_matrix_compare_no_culture, ls="", marker=".", linewidth = 0.5, color='red', label = "GREEN VS NO GREEN WITH NO CULTURE")
+    ax.fill_between(mean_list[::-1], min_emissions_difference_matrix_compare_no_culture, max_emissions_difference_matrix_compare_no_culture, facecolor='red', alpha=0.5)
+
+    ax.legend(loc = "upper left")
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/plot_four_compare_one_%s" % (len(mean_list))
+    fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
+
+def plot_four(fileName, emissions_id_array_no_green_no_culture, emissions_id_array_no_green_culture, emissions_id_array_green_no_culture, emissions_id_array_green_culture, confirmation_bias,mean_list, dpi_save):
+
+    fig, ax = plt.subplots(figsize=(10,7)) 
+
+    #print("emissions_id_array_no_green_no_culture ",emissions_id_array_no_green_no_culture, emissions_id_array_no_green_no_culture.shape)
+    mu_emissions_id_array_no_green_no_culture = emissions_id_array_no_green_no_culture.mean(axis=1)
+    min_emissions_id_array_no_green_no_culture = emissions_id_array_no_green_no_culture.min(axis=1)
+    max_emissions_id_array_no_green_no_culture = emissions_id_array_no_green_no_culture.max(axis=1)
+
+    mu_emissions_id_array_no_green_culture = emissions_id_array_no_green_culture.mean(axis=1)
+    min_emissions_id_array_no_green_culture = emissions_id_array_no_green_culture.min(axis=1)
+    max_emissions_id_array_no_green_culture = emissions_id_array_no_green_culture.max(axis=1)
+
+    mu_emissions_id_array_green_no_culture = emissions_id_array_green_no_culture.mean(axis=1)
+    min_emissions_id_array_green_no_culture = emissions_id_array_green_no_culture.min(axis=1)
+    max_emissions_id_array_green_no_culture = emissions_id_array_green_no_culture.max(axis=1)
+
+    mu_emissions_id_array_green_culture = emissions_id_array_green_culture.mean(axis=1)
+    min_emissions_id_array_green_culture = emissions_id_array_green_culture.min(axis=1)
+    max_emissions_id_array_green_culture = emissions_id_array_green_culture.max(axis=1)
+
+
+    # cultuer vs no culteur repsresneted black vs red
+    # green vs no green by solid vs dashed line
+    ax.plot(mean_list[::-1],mu_emissions_id_array_no_green_no_culture, ls="", marker=".", color='red', label = r"Behavioural independence, No green influencers")
+    ax.fill_between(mean_list[::-1], min_emissions_id_array_no_green_no_culture, max_emissions_id_array_no_green_no_culture, facecolor='red', alpha=0.5)
+
+    ax.plot(mean_list[::-1],mu_emissions_id_array_no_green_culture, ls="", marker=".", color='black', label = r"Behavioural dependence, No green influencers")
+    ax.fill_between(mean_list[::-1], min_emissions_id_array_no_green_culture, max_emissions_id_array_no_green_culture, facecolor='black', alpha=0.5)
+
+    ax.plot(mean_list[::-1],mu_emissions_id_array_green_no_culture, ls="", marker="^",color='red', label = r"Behavioural independence, Green influencers")
+    ax.fill_between(mean_list[::-1], min_emissions_id_array_green_no_culture, max_emissions_id_array_green_no_culture, facecolor='red', alpha=0.5)
+
+    ax.plot(mean_list[::-1],mu_emissions_id_array_green_culture, ls="", marker="^", color='black', label = r"Behavioural dependence, Green influencers")
+    ax.fill_between(mean_list[::-1], min_emissions_id_array_green_culture, max_emissions_id_array_green_culture, facecolor='black', alpha=0.5)
+
+
+    ax.set_xlabel(r"Initial attitude distance, $1-a_A/(a_A + b_A)$")
+    ax.set_ylabel( r"Final emissions, $E_{\tau}$")
+
+    ax.legend()
+    plt.tight_layout()
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/plot_four_%s" % (len(mean_list))
+    fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
+
+def plot_four_two(fileName, emissions_difference_matrix_compare_green, emissions_difference_matrix_compare_no_green, emissions_difference_matrix_compare_culture, emissions_difference_matrix_compare_no_culture, mean_list, dpi_save):
+    fig, axes = plt.subplots(nrows = 1, ncols = 2, figsize=(14,7), constrained_layout=True)    
+
+    mu_emissions_difference_matrix_compare_green = emissions_difference_matrix_compare_green.mean(axis=1)
+    min_emissions_difference_matrix_compare_green = emissions_difference_matrix_compare_green.min(axis=1)
+    max_emissions_difference_matrix_compare_green = emissions_difference_matrix_compare_green.max(axis=1)
+
+    mu_emissions_difference_matrix_compare_no_green = emissions_difference_matrix_compare_no_green.mean(axis=1)
+    min_emissions_difference_matrix_compare_no_green = emissions_difference_matrix_compare_no_green.min(axis=1)
+    max_emissions_difference_matrix_compare_no_green = emissions_difference_matrix_compare_no_green.max(axis=1)
+
+    mu_emissions_difference_matrix_compare_culture = emissions_difference_matrix_compare_culture.mean(axis=1)
+    min_emissions_difference_matrix_compare_culture = emissions_difference_matrix_compare_culture.min(axis=1)
+    max_emissions_difference_matrix_compare_culture = emissions_difference_matrix_compare_culture.max(axis=1)
+
+    mu_emissions_difference_matrix_compare_no_culture = emissions_difference_matrix_compare_no_culture.mean(axis=1)
+    min_emissions_difference_matrix_compare_no_culture = emissions_difference_matrix_compare_no_culture.min(axis=1)
+    max_emissions_difference_matrix_compare_no_culture = emissions_difference_matrix_compare_no_culture.max(axis=1)
+    
+    axes[0].plot(mean_list[::-1],mu_emissions_difference_matrix_compare_culture, ls="", marker=".", linewidth = 0.5, color='black', label = r"Inter-behavioural dependence")
+    axes[0].fill_between(mean_list[::-1], min_emissions_difference_matrix_compare_culture, max_emissions_difference_matrix_compare_culture, facecolor='black', alpha=0.5)
+    axes[0].set_title("Impact of green influencers")
+    axes[0].set_xlabel(r"Initial attitude distance, $1-a_A/(a_A + b_A)$")
+    axes[0].set_ylabel( r"Relative $\%$ change in final emissions")
+
+    axes[0].plot(mean_list[::-1],mu_emissions_difference_matrix_compare_no_culture, ls="", marker=".", linewidth = 0.5, color='red', label = r"Behavioural independence")
+    axes[0].fill_between(mean_list[::-1], min_emissions_difference_matrix_compare_no_culture, max_emissions_difference_matrix_compare_no_culture, facecolor='red', alpha=0.5)
+    axes[0].legend(loc = "upper center")
+
+    axes[1].plot(mean_list[::-1],mu_emissions_difference_matrix_compare_green, ls="", marker=".", linewidth = 0.5, color='green', label = r"Green influencers")
+    axes[1].fill_between(mean_list[::-1], min_emissions_difference_matrix_compare_green, max_emissions_difference_matrix_compare_green, facecolor='green', alpha=0.5)
+    axes[1].set_title("Impact of inter-behavioural dependence")
+    axes[1].set_xlabel(r"Initial attitude distance, $1-a_A/(a_A + b_A)$")
+    axes[1].set_ylabel( r"Relative $\%$ change in final emissions")
+    
+    axes[1].plot(mean_list[::-1],mu_emissions_difference_matrix_compare_no_green, ls="", marker=".", linewidth = 0.5, color='blue', label = r"No green influencers")
+    axes[1].fill_between(mean_list[::-1], min_emissions_difference_matrix_compare_no_green, max_emissions_difference_matrix_compare_no_green, facecolor='blue', alpha=0.5)
+    axes[1].legend(loc = "upper left")
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/plot_four_two_%s" % (len(mean_list))
+    fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
+def plot_four_compare(fileName, emissions_difference_matrix_compare_green, emissions_difference_matrix_compare_no_green, emissions_difference_matrix_compare_culture, emissions_difference_matrix_compare_no_culture, theta, mean_list, dpi_save):
+    fig, axes = plt.subplots(nrows = 2, ncols = 2, figsize=(10,10), sharey='row', sharex = True, constrained_layout=True)    
+
+    mu_emissions_difference_matrix_compare_green = emissions_difference_matrix_compare_green.mean(axis=1)
+    min_emissions_difference_matrix_compare_green = emissions_difference_matrix_compare_green.min(axis=1)
+    max_emissions_difference_matrix_compare_green = emissions_difference_matrix_compare_green.max(axis=1)
+
+    mu_emissions_difference_matrix_compare_no_green = emissions_difference_matrix_compare_no_green.mean(axis=1)
+    min_emissions_difference_matrix_compare_no_green = emissions_difference_matrix_compare_no_green.min(axis=1)
+    max_emissions_difference_matrix_compare_no_green = emissions_difference_matrix_compare_no_green.max(axis=1)
+
+    mu_emissions_difference_matrix_compare_culture = emissions_difference_matrix_compare_culture.mean(axis=1)
+    min_emissions_difference_matrix_compare_culture = emissions_difference_matrix_compare_culture.min(axis=1)
+    max_emissions_difference_matrix_compare_culture = emissions_difference_matrix_compare_culture.max(axis=1)
+
+    mu_emissions_difference_matrix_compare_no_culture = emissions_difference_matrix_compare_no_culture.mean(axis=1)
+    min_emissions_difference_matrix_compare_no_culture = emissions_difference_matrix_compare_no_culture.min(axis=1)
+    max_emissions_difference_matrix_compare_no_culture = emissions_difference_matrix_compare_no_culture.max(axis=1)
+    
+    axes[0][0].plot(mean_list[::-1],mu_emissions_difference_matrix_compare_green, ls="", marker="^", linewidth = 0.5, color='blue', label = r"Confirmation bias $\theta = %s$"% (theta))
+    axes[0][0].fill_between(mean_list[::-1], min_emissions_difference_matrix_compare_green, max_emissions_difference_matrix_compare_green, facecolor='blue', alpha=0.5)
+    axes[0][0].set_title("CULTURE VS NO CULTURE WITH GREEN")
+    #axes[0][0].set_xlabel(r"Initial attitude distance, $1-a_A/(a_A + b_A)$")
+    axes[0][0].set_ylabel( r"Relative $\%$ change in final emissions")
+    
+    axes[0][1].plot(mean_list[::-1],mu_emissions_difference_matrix_compare_no_green, ls="", marker=".", linewidth = 0.5, color='blue', label = r"Confirmation bias $\theta = %s$"% (theta))
+    axes[0][1].fill_between(mean_list[::-1], min_emissions_difference_matrix_compare_no_green, max_emissions_difference_matrix_compare_no_green, facecolor='blue', alpha=0.5)
+    axes[0][1].set_title("CULTURE VS NO CULTURE WITH NO GREEN")
+    #axes[0][1].set_xlabel(r"Initial attitude distance, $1-a_A/(a_A + b_A)$")
+    #axes[0][1].set_ylabel( r"Relative $\%$ change in final emissions")
+
+    axes[1][0].plot(mean_list[::-1],mu_emissions_difference_matrix_compare_culture, ls="", marker=".", linewidth = 0.5, color='black', label = r"Confirmation bias $\theta = %s$"% (theta))
+    axes[1][0].fill_between(mean_list[::-1], min_emissions_difference_matrix_compare_culture, max_emissions_difference_matrix_compare_culture, facecolor='black', alpha=0.5)
+    axes[1][0].set_title("GREEN VS NO GREEN WITH CULTURE")
+    axes[1][0].set_xlabel(r"Initial attitude distance, $1-a_A/(a_A + b_A)$")
+    axes[1][0].set_ylabel( r"Relative $\%$ change in final emissions")
+
+    axes[1][1].plot(mean_list[::-1],mu_emissions_difference_matrix_compare_no_culture, ls="", marker=".", linewidth = 0.5, color='red', label = r"Confirmation bias $\theta = %s$"% (theta))
+    axes[1][1].fill_between(mean_list[::-1], min_emissions_difference_matrix_compare_no_culture, max_emissions_difference_matrix_compare_no_culture, facecolor='red', alpha=0.5)
+    axes[1][1].set_title("GREEN VS NO GREEN WITH NO CULTURE")
+    axes[1][1].set_xlabel(r"Initial attitude distance, $1-a_A/(a_A + b_A)$")
+    #axes[1][1].set_ylabel( r"Relative $\%$ change in final emissions")
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/plot_four_compare_%s" % (len(mean_list))
+    fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")

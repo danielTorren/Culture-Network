@@ -13,7 +13,7 @@ import numpy as np
 import numpy.typing as npt
 from joblib import Parallel, delayed
 import multiprocessing
-from model.network import Network
+from package.model.network import Network
 
 # modules
 ####SINGLE SHOT RUN

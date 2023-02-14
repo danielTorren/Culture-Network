@@ -6,10 +6,10 @@ Created: 10/10/2022
 
 # imports
 import matplotlib.pyplot as plt
-from resources.plot import (
+from package.resources.plot import (
     plot_emissions_multi_ab_min_max_two_theta_reverse_add_green,
 )
-from resources.utility import (
+from package.resources.utility import (
     load_object,
 )
 

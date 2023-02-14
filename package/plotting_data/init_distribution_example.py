@@ -9,7 +9,7 @@ Created: 10/10/2022
 
 # imports
 import matplotlib.pyplot as plt
-from resources.plot import plot_beta_alt
+from package.resources.plot import plot_beta_alt
 
 # modules
 

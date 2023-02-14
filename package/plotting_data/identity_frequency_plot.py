@@ -5,8 +5,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import  Normalize
 from matplotlib.cm import get_cmap
-from resources.utility import save_object,load_object, get_cluster_list,calc_num_clusters_set_bandwidth
-from resources.plot import (
+from package.resources.utility import save_object,load_object, get_cluster_list,calc_num_clusters_set_bandwidth
+from package.resources.plot import (
     live_print_culture_timeseries_with_weighting,
     plot_joint_cluster_micro,
 

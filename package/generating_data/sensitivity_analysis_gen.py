@@ -10,12 +10,12 @@ import json
 import numpy as np
 from SALib.sample import saltelli
 import numpy.typing as npt
-from resources.utility import (
+from package.resources.utility import (
     createFolder,
     save_object,
     produce_name_datetime,
 )
-from resources.run import parallel_run_sa
+from package.resources.run import parallel_run_sa
 
 # modules
 def generate_problem(
@@ -138,8 +138,8 @@ def produce_param_list_SA(
 
 def main(
         N_samples = 1024,
-        BASE_PARAMS_LOAD = "constants/base_params.json",
-        VARIABLE_PARAMS_LOAD = "constants/variable_parameters_dict_SA.json"
+        BASE_PARAMS_LOAD = "package/constants/base_params.json",
+        VARIABLE_PARAMS_LOAD = "package/constants/variable_parameters_dict_SA.json"
          ) -> str: 
     
     calc_second_order = False
@@ -181,3 +181,10 @@ def main(
     save_object(calc_second_order, fileName + "/Data","calc_second_order")
 
     return fileName
+
+if __name__ == '__main__':
+    fileName_Figure_6 = main(
+    N_samples = 1024,
+    BASE_PARAMS_LOAD = "package/constants/base_params.json",
+    VARIABLE_PARAMS_LOAD = "package/constants/variable_parameters_dict_SA.json"
+)

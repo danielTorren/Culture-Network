@@ -12,12 +12,12 @@ import json
 import numpy as np
 from logging import raiseExceptions
 from matplotlib.colors import Normalize, LogNorm
-from resources.utility import (
+from package.resources.utility import (
     createFolder,
     save_object,
     produce_name_datetime,
 )
-from resources.run import (
+from package.resources.run import (
     parallel_run_sa,
 )
 
@@ -79,8 +79,8 @@ def generate_vals_variable_parameters_and_norms(variable_parameters_dict):
     return variable_parameters_dict
 
 def main(
-        BASE_PARAMS_LOAD = "constants/base_params.json",
-        VARIABLE_PARAMS_LOAD = "constants/variable_parameters_dict_2D.json"
+        BASE_PARAMS_LOAD = "package/constants/base_params.json",
+        VARIABLE_PARAMS_LOAD = "package/constants/variable_parameters_dict_2D.json"
     ) -> str: 
 
     # load base params
@@ -123,3 +123,9 @@ def main(
     save_object(results_emissions_change, fileName + "/Data", "results_emissions_change")
 
     return fileName
+
+if __name__ == '__main__':
+    fileName_Figure_11 = main(
+        BASE_PARAMS_LOAD = "package/constants/base_params.json",
+        VARIABLE_PARAMS_LOAD = "package/constants/variable_parameters_dict_2D.json"
+    )

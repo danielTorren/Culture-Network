@@ -38,6 +38,7 @@ class Green_influencer:
         self.culture = 1.00
         self.total_carbon_emissions,self.behavioural_carbon_emissions = self.calc_total_emissions()
         self.green_fountain_state = 1
+        self.attitudes_star = np.asarray(self.M*[1.00])
 
         if self.save_timeseries_data:
             self.history_behaviour_values = [list(self.values)]

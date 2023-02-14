@@ -4,19 +4,19 @@
 # imports
 import json
 import numpy as np
-from resources.utility import produce_name_datetime, createFolder,save_object
-from resources.run import parallel_run 
-from generating_data.oneD_param_sweep_gen import (
+from package.resources.utility import produce_name_datetime, createFolder,save_object
+from package.resources.run import parallel_run 
+from package.generating_data.oneD_param_sweep_gen import (
     produce_param_list,
 )
 
 def main(
-    BASE_PARAMS_LOAD = "constants/base_params_identity_frequency.json"
+    BASE_PARAMS_LOAD = "package/constants/base_params_identity_frequency.json"
 ) -> str: 
 
     property_varied = "alpha_change"
     title_list = [r"Static uniform $\alpha_{n,k}$", r"Static culturally determined $\alpha_{n,k}$", r"Dynamic culturally determined $\alpha_{n,k}$"]
-    property_values_list = ["A", "B", "C"]
+    property_values_list = ["static_uniform_weights", "static_culturally_determined_weights", "dynamic_culturally_determined_weights"]
 
     f = open(BASE_PARAMS_LOAD)
     base_params = json.load(f)

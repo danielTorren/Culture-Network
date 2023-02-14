@@ -8,8 +8,8 @@ Created: 10/10/2022
 # imports
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap, Normalize
-from resources.utility import load_object
-from resources.plot import (
+from package.resources.utility import load_object
+from package.resources.plot import (
     live_print_culture_timeseries,
     print_live_intial_culture_networks_and_culture_timeseries,
 

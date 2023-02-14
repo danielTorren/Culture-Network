@@ -8,8 +8,8 @@ Created: 10/10/2022
 # imports
 import matplotlib.pyplot as plt
 import numpy as np
-from resources.utility import save_object,load_object,calc_pos_clusters_set_bandwidth
-from resources.plot import (
+from package.resources.utility import save_object,load_object,calc_pos_clusters_set_bandwidth
+from package.resources.plot import (
     bifurcation_plot_culture_or_not,
 )
 

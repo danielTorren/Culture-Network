@@ -7,12 +7,12 @@ Created: 10/10/2022
 # imports
 import numpy as np
 import json
-from resources.utility import (
+from package.resources.utility import (
     createFolder,
     save_object,
     produce_name_datetime,
 )
-from resources.run import (
+from package.resources.run import (
     multi_stochstic_emissions_run_all_individual,
 )
 
@@ -30,7 +30,7 @@ def gen_atttiudes_list(mean_list, sum_a_b):
 
 
 def main(
-    BASE_PARAMS_LOAD = "constants/base_params_add_greens.json",
+    BASE_PARAMS_LOAD = "package/constants/base_params_add_greens.json",
     green_N = 20,
     mean_list_min = 0.01,
     mean_list_max = 0.99,
@@ -112,4 +112,25 @@ def main(
     save_object(emissions_difference_matrix,fileName + "/Data", "emissions_difference_matrix")
 
     return fileName
+
+if __name__ == '__main__':
+    fileName_Figure_9_low = main(
+        BASE_PARAMS_LOAD = "package/constants/base_params_add_greens.json",
+        green_N = 20,
+        mean_list_min = 0.01,
+        mean_list_max = 0.99,
+        mean_list_reps = 200,
+        sum_a_b = 4,
+        confirmation_bias = 5
+    )
+
+    fileName_Figure_9_high = main(
+        BASE_PARAMS_LOAD = "package/constants/base_params_add_greens.json",
+        green_N = 20,
+        mean_list_min = 0.01,
+        mean_list_max = 0.99,
+        mean_list_reps = 200,
+        sum_a_b = 4,
+        confirmation_bias = 20
+    )
 

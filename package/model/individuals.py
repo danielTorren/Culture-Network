@@ -113,14 +113,21 @@ class Individual:
 
         self.M = individual_params["M"]
         self.t = individual_params["t"]
-
         self.save_timeseries_data = individual_params["save_timeseries_data"]
         self.compression_factor = individual_params["compression_factor"]
         self.phi_array = individual_params["phi_array"]
+        self.alpha_change = individual_params["alpha_change"]
 
         self.id = id_n
 
         self.green_fountain_state = 0
+
+        if self.alpha_change == "behavioural_independence":
+            self.attitudes_matrix = np.tile(self.attitudes, (self.culture_momentum,1))
+            #print("self.attitudes_matrix",self.attitudes_matrix )
+            self.attitudes_star = self.calc_attitudes_star()
+            #print("self.attitudes_star", self.attitudes_star)
+
 
         self.values = self.attitudes - self.thresholds
         self.av_behaviour = np.mean(self.attitudes)
@@ -170,6 +177,16 @@ class Individual:
 
         return np.matmul(
             self.normalized_discount_vector, self.av_behaviour_list
+        )  # here discount list is normalized
+
+    def update_attitudes_matrix(self):       
+        #print("popping before ", self.attitudes_matrix, self.attitudes_matrix.shape)
+        self.attitudes_matrix =  np.vstack([np.asarray([self.attitudes]), self.attitudes_matrix[:-1,:]])
+        #print("popping after ", self.attitudes_matrix, self.attitudes_matrix.shape)
+
+    def calc_attitudes_star(self):
+        return np.matmul(
+            self.normalized_discount_vector, self.attitudes_matrix
         )  # here discount list is normalized
 
     def update_values(self):
@@ -255,11 +272,13 @@ class Individual:
         self.update_values()
         self.update_attitudes(social_component)
 
-        self.calc_av_behaviour()
-
-        self.update_av_behaviour_list()
-
-        self.culture = self.calc_culture()
+        if self.alpha_change == "behavioural_independence":
+            self.update_attitudes_matrix()
+            self.attitudes_star = self.calc_attitudes_star()
+        else:
+            self.calc_av_behaviour()
+            self.update_av_behaviour_list()
+            self.culture = self.calc_culture()
 
         self.total_carbon_emissions, self.behavioural_carbon_emissions = self.calc_total_emissions()
 

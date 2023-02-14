@@ -12,8 +12,8 @@ Created: 10/10/2022
 import numpy as np
 import networkx as nx
 import numpy.typing as npt
-from model.individuals import Individual
-from model.green_influencers import Green_influencer
+from package.model.individuals import Individual
+from package.model.green_influencers import Green_influencer
 
 # modules
 class Network:
@@ -222,7 +222,7 @@ class Network:
                 self.network,
             ) = self.create_weighting_matrix()
 
-        if self.alpha_change == "D":#independant behaviours
+        if self.alpha_change == "behavioural_independence":#independant behaviours
             self.weighting_matrix_list = [self.weighting_matrix]*self.M
 
         self.network_density = nx.density(self.network)
@@ -247,9 +247,9 @@ class Network:
 
         self.social_component_matrix = self.calc_social_component_matrix()
 
-        if self.alpha_change == ("B" or "C"):
+        if self.alpha_change == ("static_culturally_determined_weights" or "dynamic_culturally_determined_weights"):
             self.weighting_matrix, self.total_identity_differences,__ = self.update_weightings()
-        elif self.alpha_change == "D":#independent behaviours
+        elif self.alpha_change == "behavioural_independence":#independent behaviours
             self.weighting_matrix_list = self.update_weightings_list()
 
         self.init_total_carbon_emissions  = self.calc_total_emissions()
@@ -279,7 +279,7 @@ class Network:
             self.history_min_culture = [self.min_culture]
             self.history_max_culture = [self.max_culture]
             self.history_total_carbon_emissions = [self.total_carbon_emissions]
-            if self.alpha_change == ("B" or "C"):
+            if self.alpha_change == ("static_culturally_determined_weights" or "dynamic_culturally_determined_weights"):
                 self.history_total_identity_differences = [self.total_identity_differences]
 
     def normlize_matrix(self, matrix: npt.NDArray) -> npt.NDArray:
@@ -464,6 +464,7 @@ class Network:
             "save_timeseries_data": self.save_timeseries_data,
             "phi_array": self.phi_array,
             "compression_factor": self.compression_factor,
+            "alpha_change" : self.alpha_change
         }
 
         agent_list = [
@@ -556,7 +557,7 @@ class Network:
             NxM array giving the influence of social learning from neighbours for that time step
         """
 
-        if self.alpha_change == "D":
+        if self.alpha_change == "behavioural_independence":
             ego_influence = self.calc_ego_influence_degroot_independent()
         else:
             ego_influence = self.calc_ego_influence_degroot()           
@@ -648,9 +649,9 @@ class Network:
         weighting_matrix_list = []
 
         for m in range(self.M):
-            attitude_list = np.array([x.attitudes[m] for x in self.agent_list])
+            attitude_star_list = np.array([x.attitudes_star[m] for x in self.agent_list])
 
-            difference_matrix = np.subtract.outer(attitude_list, attitude_list)
+            difference_matrix = np.subtract.outer(attitude_star_list, attitude_star_list)
 
             alpha_numerator = np.exp(
                 -np.multiply(self.confirmation_bias, np.abs(difference_matrix))
@@ -759,7 +760,7 @@ class Network:
         self.history_min_culture.append(self.min_culture)
         self.history_max_culture.append(self.max_culture)
         self.history_total_carbon_emissions.append(self.total_carbon_emissions)
-        if self.alpha_change == ("B" or "C"):
+        if self.alpha_change == ("static_culturally_determined_weights" or "dynamic_culturally_determined_weights"):
             self.history_total_identity_differences.append(self.total_identity_differences)
 
     def next_step(self):
@@ -782,7 +783,7 @@ class Network:
         self.update_individuals()
 
         # update network parameters for next step
-        if self.alpha_change == "C":
+        if self.alpha_change == "dynamic_culturally_determined_weights":
             if self.save_timeseries_data:
                 (
                     self.weighting_matrix,
@@ -791,7 +792,7 @@ class Network:
                 ) = self.update_weightings()
             else:
                 self.weighting_matrix, self.total_identity_differences,__ = self.update_weightings()
-        elif self.alpha_change == "D":#independaent behaviours
+        elif self.alpha_change == "behavioural_independence":#independaent behaviours
             self.weighting_matrix_list = self.update_weightings_list()
 
         self.social_component_matrix = self.calc_social_component_matrix()

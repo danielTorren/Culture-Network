@@ -11,7 +11,7 @@ Created: 10/10/2022
 # imports
 import matplotlib.pyplot as plt
 import numpy as np
-from resources.plot import plot_discount_factors_delta
+from package.resources.plot import plot_discount_factors_delta
 
 def main(
     delta_t = 1,
