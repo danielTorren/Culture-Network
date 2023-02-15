@@ -9,7 +9,7 @@ Created: 10/10/2022
 import json
 import numpy as np
 from package.resources.utility import createFolder,produce_name_datetime,save_object,calc_pos_clusters_set_bandwidth
-from package.resources.run import one_seed_culture_data_run
+from package.resources.run import multi_seed_variance_data_run
 from package.generating_data.oneD_param_sweep_gen import (
     produce_param_list,
 )
@@ -42,14 +42,14 @@ def main(
     base_params["alpha_change"] = "dynamic_culturally_determined_weights"#Just to make sure
 
     params_list_identity = produce_param_list_polarisation(base_params, property_values_list, property_varied)
-    results_culture_lists_identity = one_seed_culture_data_run(params_list_identity)#list of lists lists [param set up, stochastic, cluster]
+    var_identity = multi_seed_variance_data_run(params_list_identity)#list of lists lists [param set up, stochastic, cluster]
 
     #####################################################################
     ####NO IDENTITY, ALPHA  = 2.0
 
     base_params["alpha_change"] = "behavioural_independence"#Now change to behavioural independence
     params_list_no_identity = produce_param_list_polarisation(base_params, property_values_list, property_varied)
-    results_culture_lists_no_identity = one_seed_culture_data_run(params_list_no_identity)#list of lists lists [param set up, stochastic, cluster]
+    var_no_identity = multi_seed_variance_data_run(params_list_no_identity)#list of lists lists [param set up, stochastic, cluster]
 
     ############################################################################
 
@@ -60,9 +60,8 @@ def main(
     createFolder(fileName)
 
     save_object(base_params, fileName + "/Data", "base_params")
-
-    save_object(results_culture_lists_identity, fileName + "/Data", "results_culture_lists_identity")
-    save_object(results_culture_lists_no_identity, fileName + "/Data", "results_culture_lists_no_identity")
+    save_object(var_identity , fileName + "/Data", "var_identity")
+    save_object(var_no_identity , fileName + "/Data", "var_no_identity")
     save_object(property_varied, fileName + "/Data", "property_varied")
     save_object(property_values_list, fileName + "/Data", "property_values_list")
 
@@ -70,13 +69,13 @@ def main(
     ####################################################
     #CALC THE VARIANCE OF A
     #print("results_culture_lists_identity",results_culture_lists_identity,results_culture_lists_identity.shape)
-    var_identity  = np.var(results_culture_lists_identity, axis=1)
-    var_no_identity  = np.var(results_culture_lists_no_identity, axis=1)
-    print("var_identity", var_identity)
-    print("var_no_identity", var_no_identity)
+    #var_identity  = np.var(results_culture_lists_identity, axis=1)
+    #var_no_identity  = np.var(results_culture_lists_no_identity, axis=1)
+    #print("var_identity", var_identity)
+    #print("var_no_identity", var_no_identity)
     
-    save_object(var_identity, fileName + "/Data", "var_identity")
-    save_object(var_no_identity, fileName + "/Data", "var_no_identity")
+    #save_object(var_identity, fileName + "/Data", "var_identity")
+    #save_object(var_no_identity, fileName + "/Data", "var_no_identity")
 
     return fileName
 

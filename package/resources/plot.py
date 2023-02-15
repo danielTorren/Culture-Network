@@ -738,26 +738,70 @@ def live_animate_culture_network_weighting_matrix(
 
 #########################################################################################################################################################################
 ###COSENSUS FORMATION
-def plot_consensus_formation(fileName,var_identity,var_no_identity ,property_values_list, dpi_save, latex_bool = False):
+
+def plot_consensus_formation_two(fileName_low_theta,fileName_high_theta,var_identity_low_theta,var_no_identity_low_theta,var_identity_high_theta,var_no_identity_high_theta,property_values_list,low_theta,high_theta, dpi_save, latex_bool = False):
     
     if latex_bool:
         set_latex()
     
-    fig, ax = plt.subplots(figsize=(10,6))
+    fig, axes = plt.subplots(nrows = 1 , ncols = 2, constrained_layout = True,figsize=(10,7))
+
+    axes[0].plot(property_values_list, var_no_identity_low_theta.mean(axis=1), linestyle="--", color='red', label = r"Behavioural independence")
+    axes[0].fill_between(property_values_list, var_no_identity_low_theta.min(axis=1),var_no_identity_low_theta.max(axis=1), facecolor='red', alpha=0.5)
+    axes[0].plot(property_values_list, var_identity_low_theta.mean(axis=1),  linestyle="-",color='black', label = r"Inter-behavioural dependance")
+    axes[0].fill_between(property_values_list, var_identity_low_theta.min(axis=1),var_identity_low_theta.max(axis=1), facecolor='black', alpha=0.5)
+    axes[0].set_xlabel(r"Initial attitude Beta, $a_A = b_A$")
+    axes[0].set_ylabel(r"Final Attiudes variance, $m = 1$")
+    axes[0].set_title(r"Confirmation bias $\theta = %s$" %(low_theta))
+    axes[0].set_xlim(min(property_values_list),max(property_values_list))
+    axes[0].legend()
+
+    axes[1].plot(property_values_list, var_no_identity_high_theta.mean(axis=1), linestyle="--", color='red', label = r"Behavioural independence")
+    axes[1].fill_between(property_values_list, var_no_identity_high_theta.min(axis=1),var_no_identity_high_theta.max(axis=1), facecolor='red', alpha=0.5)
+    axes[1].plot(property_values_list, var_identity_high_theta.mean(axis=1),  linestyle="-",color='black', label = r"Inter-behavioural dependance")
+    axes[1].fill_between(property_values_list, var_identity_high_theta.min(axis=1),var_identity_high_theta.max(axis=1), facecolor='black', alpha=0.5)
+    axes[1].set_xlabel(r"Initial attitude Beta, $a_A = b_A$")
+    axes[1].set_ylabel(r"Final Attiudes variance, $m = 1$")
+    axes[1].set_title(r"Confirmation bias $\theta = %s$" %(high_theta))
+    axes[1].set_xlim(min(property_values_list),max(property_values_list))
+    axes[1].legend()
+
+
+    plotName = fileName_low_theta + "/Plots"
+    f = plotName + "/plot_consensus_formation_two.eps"
+    fig.savefig(f, dpi=dpi_save, format="eps")
+
+    plotName = fileName_high_theta + "/Plots"
+    f = plotName + "/plot_consensus_formation_two.eps"
+    fig.savefig(f, dpi=dpi_save, format="eps")
+
+def plot_consensus_formation(fileName,var_identity,var_no_identity ,property_values_list, dpi_save,latex_bool = False):
+    
+    if latex_bool:
+        set_latex()
+    
+    fig, ax = plt.subplots()
     # bodge
     #print("var_identity,var_no_identity", var_identity,var_no_identity, var_identity,var_no_identity.shape)
     #print("property_values_list",property_values_list)
+    #print("var_identity,var_no_identity",var_identity,var_no_identity, var_identity,var_no_identity.shape)
+    #print("var_identity,var_no_identity.mean(axis=1)", var_identity,var_no_identity.mean(axis=1))
+    #print("var_identity,var_no_identity.min(axis=1)", var_identity,var_no_identity.min(axis=1))
 
-    ax.plot(property_values_list, var_identity,var_no_identity, linestyle="--", color='red',label = r"Behavioural independence")
-    ax.plot(property_values_list, var_identity,var_identity,  linestyle="-",color='black',label = r"Inter-behavioural dependance")
+    ax.plot(property_values_list, var_no_identity.mean(axis=1), linestyle="--", color='red', label = r"Behavioural independence")
+    ax.fill_between(property_values_list, var_no_identity.min(axis=1),var_no_identity.max(axis=1), facecolor='red', alpha=0.5)
+
+    ax.plot(property_values_list, var_identity.mean(axis=1),  linestyle="-",color='black', label = r"Inter-behavioural dependance")
+    ax.fill_between(property_values_list, var_identity.min(axis=1),var_identity.max(axis=1), facecolor='black', alpha=0.5)
+
     ax.set_xlabel(r"Initial attitude Beta, $a_A = b_A$")
     ax.set_ylabel(r"Final Attiudes variance, $m = 1$")
+    ax.set_xlim(min(property_values_list),max(property_values_list))
     ax.legend()
 
     plotName = fileName + "/Plots"
     f = plotName + "/plot_consensus_formation.eps"
     fig.savefig(f, dpi=dpi_save, format="eps")
-
 
 
 #PICK WHICH EVER YOU END UP USING FOR FINAL VERSION

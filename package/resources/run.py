@@ -67,6 +67,17 @@ def generate_multi_output_individual_emissions_list(params):
 
     return (emissions_list, emissions_id_individuals_lists)
 
+def generate_multi_output_variance(params):
+    """Individual specific emission and associated id to compare runs with and without behavioural interdependence"""
+
+    variance_list = []
+    for v in params["seed_list"]:
+        params["set_seed"] = v
+        data = generate_data(params)
+        variance_list.append(np.var([x.attitudes[0] for x in data.agent_list]))
+
+    return variance_list
+
 def generate_sensitivity_output(params: dict):
     """
     Generate data from a set of parameter contained in a dictionary. Average results over multiple stochastic seeds contained in params["seed_list"]
@@ -149,6 +160,19 @@ def one_seed_culture_data_run(
     )
 
     return np.asarray(results_culture_lists)#can't run with multiple different network sizes
+
+def multi_seed_variance_data_run(
+        params_dict: list[dict]
+) -> npt.NDArray:
+    num_cores = multiprocessing.cpu_count()
+    #res = [generate_sensitivity_output(i) for i in params_dict]
+    results_variance_lists = Parallel(n_jobs=num_cores, verbose=10)(
+
+        delayed(generate_multi_output_variance)(i) for i in params_dict
+    )
+
+    return np.asarray(results_variance_lists)#can't run with multiple different network sizes
+
 
 def parallel_run_sa(
     params_dict: dict[dict],

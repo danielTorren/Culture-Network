@@ -7,8 +7,7 @@ Created: 10/10/2022
 
 # imports
 import matplotlib.pyplot as plt
-import numpy as np
-from package.resources.utility import save_object,load_object
+from package.resources.utility import load_object
 from package.resources.plot import (
     plot_consensus_formation
 )
