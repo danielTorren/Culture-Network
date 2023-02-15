@@ -737,6 +737,29 @@ def live_animate_culture_network_weighting_matrix(
 
 
 #########################################################################################################################################################################
+###COSENSUS FORMATION
+def plot_consensus_formation(fileName,var_identity,var_no_identity ,property_values_list, dpi_save, latex_bool = False):
+    
+    if latex_bool:
+        set_latex()
+    
+    fig, ax = plt.subplots(figsize=(10,6))
+    # bodge
+    #print("var_identity,var_no_identity", var_identity,var_no_identity, var_identity,var_no_identity.shape)
+    #print("property_values_list",property_values_list)
+
+    ax.plot(property_values_list, var_identity,var_no_identity, linestyle="--", color='red',label = r"Behavioural independence")
+    ax.plot(property_values_list, var_identity,var_identity,  linestyle="-",color='black',label = r"Inter-behavioural dependance")
+    ax.set_xlabel(r"Initial attitude Beta, $a_A = b_A$")
+    ax.set_ylabel(r"Final Attiudes variance, $m = 1$")
+    ax.legend()
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/plot_consensus_formation.eps"
+    fig.savefig(f, dpi=dpi_save, format="eps")
+
+
+
 #PICK WHICH EVER YOU END UP USING FOR FINAL VERSION
 
 def plot_four_compare_one(fileName, emissions_difference_matrix_compare_green, emissions_difference_matrix_compare_no_green, emissions_difference_matrix_compare_culture, emissions_difference_matrix_compare_no_culture, mean_list, dpi_save):

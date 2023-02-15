@@ -23,33 +23,6 @@ def produce_param_list(params: dict, property_list: list, property: str) -> list
     ----------
     params: dict
         base parameters from which we vary e.g
-        params = {
-                "total_time": 2000,#200,
-                "delta_t": 1.0,#0.05,
-                "compression_factor": 10,
-                "save_data": True,
-                "alpha_change" : "dynamic_culturally_determined_weights",
-                "harsh_data": False,
-                "averaging_method": "Arithmetic",
-                "phi_lower": 0.001,
-                "phi_upper": 0.005,
-                "N": 20,
-                "M": 5,
-                "K": 10,
-                "prob_rewire": 0.2,#0.05,
-                "set_seed": 1,
-                "culture_momentum_real": 100,#5,
-                "learning_error_scale": 0.02,
-                "discount_factor": 0.8,
-                "present_discount_factor": 0.99,
-                "inverse_homophily": 0.2,#0.1,#1 is total mixing, 0 is no mixing
-                "homophilly_rate" : 1,
-                "confirmation_bias": -100,
-                "alpha_attitude": 0.1,
-                "beta_attitude": 0.1,
-                "alpha_threshold": 1,
-                "beta_threshold": 1,
-            }
             params["time_steps_max"] = int(params["total_time"] / params["delta_t"])
     porperty_list: list
         list of values for the property to be varied
