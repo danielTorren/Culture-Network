@@ -187,7 +187,7 @@ class Network:
         self.N = int(round(parameters["N"]))
         
         # culture
-        self.culture_momentum = parameters["culture_momentum"]
+        self.culture_momentum = int(round(parameters["culture_momentum"]))
 
         # time discounting
         self.discount_factor = parameters["discount_factor"]
