@@ -19,6 +19,7 @@ def main(
     fileName = "results/splitting_eco_warriors_single_add_greens_17_44_05__01_02_2023",
     dpi_save = 1200,
     levels = 10,
+    latex_bool = 0
 ) -> None:
         
     variable_parameters_dict = load_object(fileName + "/Data", "variable_parameters_dict")
@@ -30,6 +31,6 @@ def main(
 
     matrix_emissions = results_emissions.reshape((variable_parameters_dict["row"]["reps"], variable_parameters_dict["col"]["reps"]))
 
-    double_phase_diagram(fileName, matrix_emissions, r"Total normalised emissions $E/NM$", "emissions",variable_parameters_dict, get_cmap("Reds"),dpi_save, levels)  
+    double_phase_diagram(fileName, matrix_emissions, r"Total normalised emissions $E/NM$", "emissions",variable_parameters_dict, get_cmap("Reds"),dpi_save, levels,latex_bool = latex_bool)  
 
     plt.show()

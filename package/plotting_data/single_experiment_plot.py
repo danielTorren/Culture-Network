@@ -39,7 +39,8 @@ def main(
     no_samples = 10000,
     bandwidth = 0.01,
     shuffle_colours = True,
-    animation_save_bool = 0
+    animation_save_bool = 0,
+    latex_bool = 0
     ) -> None: 
 
     cmap_multi = get_cmap("plasma")
@@ -64,16 +65,17 @@ def main(
                 norm_zero_one,
                 cmap,
                 node_size
+                latex_bool = latex_bool
             )
 
-        plot_value_timeseries(fileName,Data,dpi_save)
-        plot_attitude_timeseries(fileName,Data,dpi_save)
+        plot_value_timeseries(fileName,Data,dpi_save,latex_bool = latex_bool)
+        plot_attitude_timeseries(fileName,Data,dpi_save,latex_bool = latex_bool)
     elif PLOT_NAME == "NETWORK":
-        plot_total_carbon_emissions_timeseries(fileName, Data, dpi_save)
-        plot_weighting_matrix_convergence_timeseries(fileName, Data, dpi_save)
+        plot_total_carbon_emissions_timeseries(fileName, Data, dpi_save,latex_bool = latex_bool)
+        plot_weighting_matrix_convergence_timeseries(fileName, Data, dpi_save,latex_bool = latex_bool)
         if Data.alpha_change != "behavioural_independence":
-            plot_cultural_range_timeseries(fileName, Data, dpi_save)
-            plot_average_culture_timeseries(fileName,Data,dpi_save)
+            plot_cultural_range_timeseries(fileName, Data, dpi_save,latex_bool = latex_bool)
+            plot_average_culture_timeseries(fileName,Data,dpi_save,latex_bool = latex_bool)
     elif PLOT_NAME == "ANIMATION":
         if Data.alpha_change != "behavioural_independence":
             anim = live_animate_culture_network_weighting_matrix(
@@ -87,7 +89,8 @@ def main(
                 cmap,
                 node_size,
                 norm_zero_one,
-                animation_save_bool
+                animation_save_bool,
+                latex_bool = latex_bool
             )
         else:
             print("No environmental identity")
@@ -96,7 +99,7 @@ def main(
         if Data.alpha_change != "behavioural_independence":
             s = np.linspace(0, 1,no_samples)
             clusters_index_lists, cluster_example_identity_list, vals_time_data = calc_groups(Data,s, bandwidth)#set it using input value
-            plot_joint_cluster_micro(fileName, Data, clusters_index_lists,cluster_example_identity_list, vals_time_data, dpi_save, 0, bandwidth,cmap_multi, norm_zero_one,shuffle_colours)
+            plot_joint_cluster_micro(fileName, Data, clusters_index_lists,cluster_example_identity_list, vals_time_data, dpi_save, 0, bandwidth,cmap_multi, norm_zero_one,shuffle_colours,latex_bool = latex_bool)
         else:
             print("No environmental identity")
 

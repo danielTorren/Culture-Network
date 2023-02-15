@@ -18,6 +18,7 @@ def main(
     culture_momentum = 101,
     delta_vals = [0.99,0.97,0.95,0.9,0.8],
     dpi_save = 1200,
+    latex_bool = 0
     ) -> None: 
 
     steps = int(culture_momentum / delta_t)
@@ -39,6 +40,7 @@ def main(
         time_list_plot,
         culture_momentum,
         dpi_save,
+        latex_bool = latex_bool
     )
 
     plt.show()

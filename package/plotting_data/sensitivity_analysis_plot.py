@@ -235,7 +235,8 @@ def analyze_results(
 def main(
     fileName = "results\SA_AV_reps_5_samples_15360_D_vars_13_N_samples_1024",
     plot_outputs = ['emissions','var',"emissions_change"],
-    dpi_save = 1200
+    dpi_save = 1200,
+    latex_bool = 0
     ) -> None: 
     
     plot_dict = {
@@ -278,7 +279,7 @@ def main(
     
     ###############################
 
-    multi_scatter_seperate_total_sensitivity_analysis_plot(fileName, data_sa_dict_first,plot_outputs, titles, dpi_save, N_samples, "First")
+    multi_scatter_seperate_total_sensitivity_analysis_plot(fileName, data_sa_dict_first,plot_outputs, titles, dpi_save, N_samples, "First", latex_bool = latex_bool)
 
     plt.show()
 

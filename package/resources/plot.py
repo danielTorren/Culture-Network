@@ -164,7 +164,7 @@ def bifurcation_plot_culture_or_not(fileName,cluster_pos_matrix_identity,cluster
 
     axes[0].set_xlabel(r"Confirmation bias, $\theta$")
     axes[1].set_xlabel(r"Confirmation bias, $\theta$")
-    axes[0].set_ylabel(r"Final identity clusters")
+    axes[0].set_ylabel(r"Final attitude clusters, $m = 1$")
     
     plotName = fileName + "/Plots"
     f = plotName + "/bifurcation_plot_%s" % (len(vals_list))

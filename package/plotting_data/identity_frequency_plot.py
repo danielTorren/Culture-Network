@@ -49,7 +49,8 @@ def main(
     micro_clusters_plot = 0,
     dpi_save = 1200,
     shuffle_colours = False,
-    bandwidth = 0.01
+    bandwidth = 0.01,
+    latex_bool = 0
     ) -> None: 
 
     norm_zero_one = Normalize(vmin=0, vmax=1)
@@ -63,7 +64,7 @@ def main(
     if alpha_change_plot:
         ################
         #FOR ALPHA CHANGE PLOT
-        live_print_culture_timeseries_with_weighting(fileName, data_list, property_varied, title_list, dpi_save, cmap_weighting)
+        live_print_culture_timeseries_with_weighting(fileName, data_list, property_varied, title_list, dpi_save, cmap_weighting, latex_bool = latex_bool)
     
     if micro_clusters_plot:
 
@@ -88,7 +89,7 @@ def main(
             bandwidth = load_object( fileName + "/Data", "bandwidth")
             auto_bandwidth = load_object( fileName + "/Data", "auto_bandwidth")
         
-        plot_joint_cluster_micro(fileName, data_list_reduc, clusters_index_lists,cluster_example_identity_list, vals_time_data, dpi_save, auto_bandwidth, bandwidth,cmap_multi, norm_zero_one,shuffle_colours)
+        plot_joint_cluster_micro(fileName, data_list_reduc, clusters_index_lists,cluster_example_identity_list, vals_time_data, dpi_save, auto_bandwidth, bandwidth,cmap_multi, norm_zero_one,shuffle_colours, latex_bool = latex_bool)
 
     plt.show()
 

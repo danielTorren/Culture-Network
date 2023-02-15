@@ -18,7 +18,8 @@ def main(
     bifurcation_plot_data_analysis = 0,
     dpi_save = 1200,
     no_samples = 10000,
-    bandwidth = 0.01
+    bandwidth = 0.01,
+    latex_bool = 0
     ) -> None: 
 
     results_culture_lists_identity = load_object(fileName + "/Data", "results_culture_lists_identity")
@@ -40,6 +41,6 @@ def main(
         cluster_pos_matrix_list_no_identity = load_object(fileName + "/Data", "cluster_pos_matrix_list_no_identity")
         cluster_pos_matrix_list_identity = load_object(fileName + "/Data", "cluster_pos_matrix_list_identity")
 
-    bifurcation_plot_culture_or_not(fileName,cluster_pos_matrix_list_identity,cluster_pos_matrix_list_no_identity,property_values_list, dpi_save)
+    bifurcation_plot_culture_or_not(fileName,cluster_pos_matrix_list_identity,cluster_pos_matrix_list_no_identity,property_values_list, dpi_save, latex_bool = latex_bool)
 
     plt.show()

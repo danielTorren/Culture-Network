@@ -14,11 +14,12 @@ from package.resources.plot import plot_beta_alt
 # modules
 
 def main(
-    a_b_combo_list = [[2,5],[2,2],[5,2]]
+    a_b_combo_list = [[2,5],[2,2],[5,2]],
+    latex_bool = 0
     ) -> None: 
 
     fileName = "results/plot_beta_distribution"
     
-    plot_beta_alt(fileName,a_b_combo_list)
+    plot_beta_alt(fileName,a_b_combo_list,latex_bool = latex_bool)
 
     plt.show()
