@@ -184,7 +184,7 @@ def main(
 
 if __name__ == '__main__':
     fileName_Figure_6 = main(
-    N_samples = 1024,
-    BASE_PARAMS_LOAD = "package/constants/base_params.json",
-    VARIABLE_PARAMS_LOAD = "package/constants/variable_parameters_dict_SA.json"
+    N_samples = 16,
+    BASE_PARAMS_LOAD = "package/constants/base_params_add_greens_SA.json",
+    VARIABLE_PARAMS_LOAD = "package/constants/variable_parameters_dict_SA_green.json"
 )
