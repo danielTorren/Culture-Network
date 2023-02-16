@@ -1,7 +1,7 @@
 {
 "M":{"property":"M","min":1,"max": 30, "title": "$M$", "round":1},
 "K":{"property":"K","min":5,"max":200 , "title": "$K$", "round":1},
-"culture_momentum":{"property":"culture_momentum","min":1,"max": 3000, "title": "$\\rho$", "round":1},
+"culture_inertia":{"property":"culture_inertia","min":1,"max": 3000, "title": "$\\rho$", "round":1},
 "learning_error_scale":{"property":"learning_error_scale","min":0.0,"max":1 , "title": "$\\epsilon$", "round":0},
 "a_attitude":{"property":"a_attitude","min":0.05, "max": 8, "title": "Initial attitude Beta $a_A$", "round":0},
 "b_attitude":{"property":"b_attitude","min":0.05, "max":8 , "title": "Initial attitude Beta $n_A$", "round":0},

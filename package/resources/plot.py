@@ -66,7 +66,7 @@ def plot_discount_factors_delta(
     delta_discount_list: list,
     delta_vals: list,
     time_list: npt.NDArray,
-    culture_momentum: float,
+    culture_inertia: float,
     dpi_save: int,
     latex_bool = False
 ) -> None:
@@ -83,7 +83,7 @@ def plot_discount_factors_delta(
         values of delta the discount parameter used in graph
     time_list: npt.NDArray
         time points used
-    culture_momentum: float
+    culture_inertia: float
         the number of steps into the past that are considered when individuals consider their identity
     dpi_save: int
         the dpi of image saved
@@ -107,7 +107,7 @@ def plot_discount_factors_delta(
 
     ax.set_xlabel(r"Time steps into past")
     ax.set_ylabel(r"Discount array, $D_t$")
-    ax.set_xticks(np.arange(0, -culture_momentum, step=-20))
+    ax.set_xticks(np.arange(0, -culture_inertia, step=-20))
     ax.legend()
 
     fig.savefig(f, dpi=dpi_save, format="eps")

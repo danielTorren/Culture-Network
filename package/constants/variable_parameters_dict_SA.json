@@ -2,7 +2,7 @@
     "N":{"property": "N","min":100,"max":1000, "title": "$N$", "round":1},
     "M":{"property":"M","min":1,"max": 30, "title": "$M$", "round":1},
     "K":{"property":"K","min":5,"max":99 , "title": "$K$", "round":1},
-    "culture_momentum_real":{"property":"culture_momentum_real","min":1,"max": 3000, "title": "$T_{\\rho}$", "round":0},
+    "culture_inertia_real":{"property":"culture_inertia_real","min":1,"max": 3000, "title": "$T_{\\rho}$", "round":0},
     "learning_error_scale":{"property":"learning_error_scale","min":0.0,"max":1 , "title": "$\\epsilon$", "round":0 },
     "a_attitude":{"property":"a_attitude","min":0.05, "max": 8, "title": "Initial attitude Beta $a_A$", "round":0},
     "b_attitude":{"property":"b_attitude","min":0.05, "max":8 , "title": "Initial attitude Beta $n_A$", "round":0},

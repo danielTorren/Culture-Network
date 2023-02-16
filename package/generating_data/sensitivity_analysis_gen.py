@@ -76,7 +76,7 @@ def generate_problem(
 
     ########################################
 
-    root = "senstivity_analysis"
+    root = "sensitivity_analysis"
     fileName = produce_name_datetime(root)
     print("fileName:", fileName)
 

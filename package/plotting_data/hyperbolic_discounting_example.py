@@ -15,13 +15,13 @@ from package.resources.plot import plot_discount_factors_delta
 
 def main(
     delta_t = 1,
-    culture_momentum = 101,
+    culture_inertia = 101,
     delta_vals = [0.99,0.97,0.95,0.9,0.8],
     dpi_save = 1200,
     latex_bool = 0
     ) -> None: 
 
-    steps = int(culture_momentum / delta_t)
+    steps = int(culture_inertia / delta_t)
     fileName = "results/plot_discount_factors_delta.eps"
 
     time_list = np.asarray([delta_t * x for x in range(steps)])
@@ -38,7 +38,7 @@ def main(
         delta_discount_list,
         delta_vals,
         time_list_plot,
-        culture_momentum,
+        culture_inertia,
         dpi_save,
         latex_bool = latex_bool
     )

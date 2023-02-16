@@ -51,12 +51,12 @@ class Network:
     prob_rewire: float
         Probability of rewiring connections in the social network from one indivdual to another. The greater this values
         the more long distance connections within the network exist. Domain = [0,1]
-    culture_momentum: float
+    culture_inertia: float
         the number of steps into the past that are considered when individuals consider their identity
     discount_factor: float
         the degree to which each previous time step has a decreasing importance to an individuals memory. Domain = [0,1]
     normalized_discount_array: npt.NDArray[float]
-        discounting time series that is the length of that agents culture_momentum. The array is row normalized so that each row sums to 1
+        discounting time series that is the length of that agents culture_inertia. The array is row normalized so that each row sums to 1
     confirmation_bias: float
         the extent to which individuals will only pay attention to other idividuals who are similar to them in social interactions
     learning_error_scale: float
@@ -187,7 +187,7 @@ class Network:
         self.N = int(round(parameters["N"]))
         
         # culture
-        self.culture_momentum = int(round(parameters["culture_momentum"]))
+        self.culture_inertia = int(round(parameters["culture_inertia"]))
 
         # time discounting
         self.discount_factor = parameters["discount_factor"]
@@ -314,7 +314,7 @@ class Network:
             row normalized truncated quasi-hyperbolic discount array
         """
 
-        discount_row = [(self.discount_factor)**(v) for v in range(self.culture_momentum)]
+        discount_row = [(self.discount_factor)**(v) for v in range(self.culture_inertia)]
         normalized_discount_array = (np.asarray(discount_row)/sum(discount_row))
 
 
@@ -472,7 +472,7 @@ class Network:
                 self.attitude_matrix_init[n],
                 self.threshold_matrix_init[n],
                 self.normalized_discount_array,
-                self.culture_momentum,
+                self.culture_inertia,
                 n
             )
             for n in range(self.N)

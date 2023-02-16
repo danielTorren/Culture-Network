@@ -64,7 +64,7 @@ def main(
                 layout,
                 norm_zero_one,
                 cmap,
-                node_size
+                node_size,
                 latex_bool = latex_bool
             )
 

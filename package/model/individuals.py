@@ -42,7 +42,7 @@ class Individual:
     av_behaviour_value
         mean value towards M behaviours at time t
     av_behaviour_list: list[float]
-        time series of past average attitude combined with values depending on action_observation_I, as far back as culture_momentum
+        time series of past average attitude combined with values depending on action_observation_I, as far back as culture_inertia
     culture: float
         identity of the individual, if > 0.5 it is considered green. Determines who individuals pay attention to. Domain = [0,1]
     total_carbon_emissions: float
@@ -85,7 +85,7 @@ class Individual:
         init_data_attitudes,
         init_data_thresholds,
         normalized_discount_vector,
-        culture_momentum,
+        culture_inertia,
         id_n,
     ):
         """
@@ -101,7 +101,7 @@ class Individual:
             array of inital thresholds generated previously from a beta distribution
         normalized_discount_vector: npt.NDArray[float]
             normalized single row of the discounts to individual memory when considering how the past influences current identity
-        culture_momentum: int
+        culture_inertia: int
             the number of steps into the past that are considered when calculating identity
 
         """
@@ -109,7 +109,7 @@ class Individual:
         self.attitudes = init_data_attitudes
         self.thresholds = init_data_thresholds
         self.normalized_discount_vector = normalized_discount_vector
-        self.culture_momentum = culture_momentum
+        self.culture_inertia = culture_inertia
 
         self.M = individual_params["M"]
         self.t = individual_params["t"]
@@ -123,7 +123,7 @@ class Individual:
         self.green_fountain_state = 0
 
         if self.alpha_change == "behavioural_independence":
-            self.attitudes_matrix = np.tile(self.attitudes, (self.culture_momentum,1))
+            self.attitudes_matrix = np.tile(self.attitudes, (self.culture_inertia,1))
             #print("self.attitudes_matrix",self.attitudes_matrix )
             self.attitudes_star = self.calc_attitudes_star()
             #print("self.attitudes_star", self.attitudes_star)
@@ -131,7 +131,7 @@ class Individual:
 
         self.values = self.attitudes - self.thresholds
         self.av_behaviour = np.mean(self.attitudes)
-        self.av_behaviour_list = [self.av_behaviour] * self.culture_momentum
+        self.av_behaviour_list = [self.av_behaviour] * self.culture_inertia
         self.culture = self.calc_culture()
         self.total_carbon_emissions,self.behavioural_carbon_emissions = self.calc_total_emissions()
 
