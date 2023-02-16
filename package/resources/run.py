@@ -90,18 +90,16 @@ def generate_sensitivity_output(params: dict):
     coefficient_variance_list = []
     emissions_change_list = []
 
-    norm_factor = params["N"] * params["M"]
-
     for v in params["seed_list"]:
         params["set_seed"] = v
         data = generate_data(params)
-
+        norm_factor = data.N * data.M
         # Insert more measures below that want to be used for evaluating the
         emissions_list.append(data.total_carbon_emissions / norm_factor)
         mean_list.append(data.average_culture)
         var_list.append(data.var_culture)
         coefficient_variance_list.append(data.std_culture / (data.average_culture))
-        emissions_change_list.append(np.abs(data.history_total_carbon_emissions[-1] - data.history_total_carbon_emissions[0])/norm_factor)
+        emissions_change_list.append(np.abs(data.total_carbon_emissions - data.init_total_carbon_emissions)/norm_factor)
 
     stochastic_norm_emissions = np.mean(emissions_list)
     stochastic_norm_mean = np.mean(mean_list)

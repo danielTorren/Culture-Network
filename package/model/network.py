@@ -265,7 +265,6 @@ class Network:
         ) = self.calc_network_culture()
 
         if self.save_timeseries_data:
-
             self.history_weighting_matrix = [self.weighting_matrix]
             self.history_social_component_matrix = [self.social_component_matrix]
             self.history_time = [self.t]
