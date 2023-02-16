@@ -107,6 +107,7 @@ class Individual:
         """
 
         self.attitudes = init_data_attitudes
+        self.initial_first_attitude = (self.attitudes[0]).copy()
         self.thresholds = init_data_thresholds
         self.normalized_discount_vector = normalized_discount_vector
         self.culture_inertia = culture_inertia
@@ -133,7 +134,8 @@ class Individual:
         self.av_behaviour = np.mean(self.attitudes)
         self.av_behaviour_list = [self.av_behaviour] * self.culture_inertia
         self.culture = self.calc_culture()
-        self.total_carbon_emissions,self.behavioural_carbon_emissions = self.calc_total_emissions()
+        self.initial_carbon_emissions,self.behavioural_carbon_emissions = self.calc_total_emissions()
+        self.total_carbon_emissions = self.initial_carbon_emissions
 
         if self.save_timeseries_data:
             self.history_behaviour_values = [list(self.values)]
