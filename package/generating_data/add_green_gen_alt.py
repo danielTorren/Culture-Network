@@ -34,7 +34,7 @@ def main(RUN = 1, fileName = "results/test",BASE_PARAMS_LOAD = "package/constant
         
         ###############################################################
         
-        mean_list = np.linspace(0.01,0.99, 2)
+        mean_list = np.linspace(0.01,0.99, 200)
         sum_a_b = 4#set the degree of polarisation? i think the more polarised the stronger the effect will be
 
         init_attitudes_list = gen_atttiudes_list(mean_list, sum_a_b)# GET THE LIST
@@ -94,7 +94,7 @@ def main(RUN = 1, fileName = "results/test",BASE_PARAMS_LOAD = "package/constant
         #############################################################
 
         #fileName = produceName(params, params_name)
-        root = "green_influencers_culture_four"
+        root = "green_influencers_culture_four_alt"
         fileName = produce_name_datetime(root)
         print("fileName:", fileName)
 
