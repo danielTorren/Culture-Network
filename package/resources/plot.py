@@ -837,8 +837,41 @@ def plot_id_change(fileName,attribute_difference_lists, initial_attribute_id_lis
     #fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
     fig.savefig(f + ".png", dpi=dpi_save, format="png")
 
+def plot_id_change_cases_single_av(fileName,attribute_difference_lists_cases, mean_list, dpi_save, y_val,y_val_save, case_name_list):
+    #assuming 4 cases
+    nrows = 2 
+    ncols = 2
+    fig, axes = plt.subplots(nrows = nrows , ncols = ncols,figsize=(10,7), constrained_layout = True) 
+    
+    cmap = get_cmap(name='viridis')
+    colours_list = [cmap(i) for i in mean_list] 
+    colour_adjust = Normalize(min(mean_list), max(mean_list))
+    
+    marker_list = ["o", "v", "*", "s","h"]
+
+
+    #print(" attribute_difference_lists_cases[i,j,:,k,0]",  attribute_difference_lists_cases.shape)
+    
+    for i, ax in enumerate(axes.flat):  
+        for j in range(len(mean_list)):
+                ax.scatter(x = attribute_difference_lists_cases[i,j,:,0,0], y = attribute_difference_lists_cases[i,j,:,0,1], color = colours_list[j])
+        ax.set_ylabel(r"Percentage change in %s" % (y_val))
+        ax.set_xlabel(r"Initial %s" % (y_val))
+        ax.set_title(r"%s" %(case_name_list[i]))
+
+    cbar = fig.colorbar(
+            plt.cm.ScalarMappable(cmap=cmap, norm=colour_adjust),
+            ax=axes.ravel().tolist(),
+    )
+    cbar.set_label(r"Inital attitude mean")
+
+    plotName = fileName + "/Prints"
+    f = plotName + "/plot_id_change_cases_sigle_av_%s" % (y_val_save)
+    #fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
 def plot_id_change_cases(fileName,attribute_difference_lists_cases,  mean_list, dpi_save, y_val, case_name_list,av_reps):
-    #assuming 4 inital stochastic values
+    #assuming 4 cases
     nrows = 2 
     ncols = 2
     fig, axes = plt.subplots(nrows = nrows , ncols = ncols,figsize=(10,7), constrained_layout = True) 
@@ -967,6 +1000,55 @@ def plot_four(fileName, emissions_id_array_no_green_no_culture, emissions_id_arr
     fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
     fig.savefig(f + ".png", dpi=dpi_save, format="png")
 
+def plot_four_two_attitude_abs(fileName, emissions_difference_matrix_compare_green, emissions_difference_matrix_compare_no_green, emissions_difference_matrix_compare_culture, emissions_difference_matrix_compare_no_culture, mean_list, dpi_save):
+    fig, axes = plt.subplots(nrows = 1, ncols = 2, figsize=(14,7), constrained_layout=True)    
+
+    mu_emissions_difference_matrix_compare_green = emissions_difference_matrix_compare_green.mean(axis=1)
+    min_emissions_difference_matrix_compare_green = emissions_difference_matrix_compare_green.min(axis=1)
+    max_emissions_difference_matrix_compare_green = emissions_difference_matrix_compare_green.max(axis=1)
+
+    mu_emissions_difference_matrix_compare_no_green = emissions_difference_matrix_compare_no_green.mean(axis=1)
+    min_emissions_difference_matrix_compare_no_green = emissions_difference_matrix_compare_no_green.min(axis=1)
+    max_emissions_difference_matrix_compare_no_green = emissions_difference_matrix_compare_no_green.max(axis=1)
+
+    mu_emissions_difference_matrix_compare_culture = emissions_difference_matrix_compare_culture.mean(axis=1)
+    min_emissions_difference_matrix_compare_culture = emissions_difference_matrix_compare_culture.min(axis=1)
+    max_emissions_difference_matrix_compare_culture = emissions_difference_matrix_compare_culture.max(axis=1)
+
+    mu_emissions_difference_matrix_compare_no_culture = emissions_difference_matrix_compare_no_culture.mean(axis=1)
+    min_emissions_difference_matrix_compare_no_culture = emissions_difference_matrix_compare_no_culture.min(axis=1)
+    max_emissions_difference_matrix_compare_no_culture = emissions_difference_matrix_compare_no_culture.max(axis=1)
+    
+    axes[0].plot(mean_list[::-1],mu_emissions_difference_matrix_compare_culture, ls="", marker=".", linewidth = 0.5, color='black', label = r"Inter-behavioural dependence")
+    axes[0].fill_between(mean_list[::-1], min_emissions_difference_matrix_compare_culture, max_emissions_difference_matrix_compare_culture, facecolor='black', alpha=0.5)
+    axes[0].set_title("Impact of green influencers")
+    axes[0].set_xlabel(r"Initial attitude distance, $1-a_A/(a_A + b_A)$")
+    axes[0].set_ylabel( r"Change in final attitudes")
+
+    axes[0].plot(mean_list[::-1],mu_emissions_difference_matrix_compare_no_culture, ls="", marker=".", linewidth = 0.5, color='red', label = r"Behavioural independence")
+    axes[0].fill_between(mean_list[::-1], min_emissions_difference_matrix_compare_no_culture, max_emissions_difference_matrix_compare_no_culture, facecolor='red', alpha=0.5)
+    axes[0].legend(loc = "upper center")
+
+    #axes[0].set_yscale("log")
+
+    axes[1].plot(mean_list[::-1],mu_emissions_difference_matrix_compare_green, ls="", marker=".", linewidth = 0.5, color='green', label = r"Green influencers")
+    axes[1].fill_between(mean_list[::-1], min_emissions_difference_matrix_compare_green, max_emissions_difference_matrix_compare_green, facecolor='green', alpha=0.5)
+    axes[1].set_title("Impact of inter-behavioural dependence")
+    axes[1].set_xlabel(r"Initial attitude distance, $1-a_A/(a_A + b_A)$")
+    axes[1].set_ylabel( r"Change in final attitudes")
+    
+    axes[1].plot(mean_list[::-1],mu_emissions_difference_matrix_compare_no_green, ls="", marker=".", linewidth = 0.5, color='blue', label = r"No green influencers")
+    axes[1].fill_between(mean_list[::-1], min_emissions_difference_matrix_compare_no_green, max_emissions_difference_matrix_compare_no_green, facecolor='blue', alpha=0.5)
+    axes[1].legend(loc = "upper left")
+
+    #axes[1].set_yscale("log")
+
+    plotName = fileName + "/Plots"
+    f = plotName + "/plot_four_two_attitude_abs_%s" % (len(mean_list))
+    fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+    fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
+
 def plot_four_two_attitude(fileName, emissions_difference_matrix_compare_green, emissions_difference_matrix_compare_no_green, emissions_difference_matrix_compare_culture, emissions_difference_matrix_compare_no_culture, mean_list, dpi_save):
     fig, axes = plt.subplots(nrows = 1, ncols = 2, figsize=(14,7), constrained_layout=True)    
 
@@ -996,6 +1078,8 @@ def plot_four_two_attitude(fileName, emissions_difference_matrix_compare_green, 
     axes[0].fill_between(mean_list[::-1], min_emissions_difference_matrix_compare_no_culture, max_emissions_difference_matrix_compare_no_culture, facecolor='red', alpha=0.5)
     axes[0].legend(loc = "upper center")
 
+    axes[0].set_yscale("log")
+
     axes[1].plot(mean_list[::-1],mu_emissions_difference_matrix_compare_green, ls="", marker=".", linewidth = 0.5, color='green', label = r"Green influencers")
     axes[1].fill_between(mean_list[::-1], min_emissions_difference_matrix_compare_green, max_emissions_difference_matrix_compare_green, facecolor='green', alpha=0.5)
     axes[1].set_title("Impact of inter-behavioural dependence")
@@ -1006,8 +1090,10 @@ def plot_four_two_attitude(fileName, emissions_difference_matrix_compare_green, 
     axes[1].fill_between(mean_list[::-1], min_emissions_difference_matrix_compare_no_green, max_emissions_difference_matrix_compare_no_green, facecolor='blue', alpha=0.5)
     axes[1].legend(loc = "upper left")
 
+    axes[1].set_yscale("log")
+
     plotName = fileName + "/Plots"
-    f = plotName + "/plot_four_two_attitude%s" % (len(mean_list))
+    f = plotName + "/plot_four_two_attitude_%s" % (len(mean_list))
     fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
     fig.savefig(f + ".png", dpi=dpi_save, format="png")
 
