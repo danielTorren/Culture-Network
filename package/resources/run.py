@@ -57,20 +57,13 @@ def generate_multi_output_individual_emissions_list(params):
     """Individual specific emission and associated id to compare runs with and without behavioural interdependence"""
 
     emissions_list = []
-    emissions_id_individuals_lists = []
-    initial_individual_carbon_emissions_id_list = []
-    first_attitude_id_list = []
-    initial_first_attitude_id_list = []
-
+    carbon_emissions_not_influencer = []
     for v in params["seed_list"]:
         params["set_seed"] = v
         data = generate_data(params)
         emissions_list.append(data.total_carbon_emissions)
-        emissions_id_individuals_lists.append({x.id:x.total_carbon_emissions for x in data.agent_list if not x.green_fountain_state})
-        initial_individual_carbon_emissions_id_list.append({x.id:x.initial_carbon_emissions for x in data.agent_list if not x.green_fountain_state})
-        first_attitude_id_list.append({x.id:x.attitudes[0] for x in data.agent_list if not x.green_fountain_state})
-        initial_first_attitude_id_list.append({x.id:x.initial_first_attitude for x in data.agent_list if not x.green_fountain_state})
-    return (emissions_list, emissions_id_individuals_lists, initial_individual_carbon_emissions_id_list,first_attitude_id_list,initial_first_attitude_id_list)
+        carbon_emissions_not_influencer.append(sum(x.total_carbon_emissions for x in data.agent_list if not x.green_fountain_state))
+    return (emissions_list, carbon_emissions_not_influencer)
 
 def generate_multi_output_variance(params):
     """Individual specific emission and associated id to compare runs with and without behavioural interdependence"""
@@ -137,18 +130,16 @@ def parallel_run(params_dict: dict[dict]) -> list[Network]:
 def multi_stochstic_emissions_run_all_individual(
         params_dict: list[dict]
 ) -> npt.NDArray:
-
-
     num_cores = multiprocessing.cpu_count()
-    res = [generate_multi_output_individual_emissions_list(i) for i in params_dict]
-    #res = Parallel(n_jobs=num_cores, verbose=10)(
-    #    delayed(generate_multi_output_individual_emissions_list)(i) for i in params_dict
-    #)
-    results_total_carbon_emissions,results_individual_carbon_emissions_id,results_initial_individual_carbon_emissions_id,results_first_attitude_id_list,results_initial_first_attitude_id_list = zip(
+    #res = [generate_multi_output_individual_emissions_list(i) for i in params_dict]
+    res = Parallel(n_jobs=num_cores, verbose=10)(
+        delayed(generate_multi_output_individual_emissions_list)(i) for i in params_dict
+    )
+    emissions_list, carbon_emissions_not_influencer = zip(
         *res
     )
 
-    return np.asarray(results_total_carbon_emissions),np.asarray(results_individual_carbon_emissions_id), np.asarray(results_initial_individual_carbon_emissions_id),np.asarray(results_first_attitude_id_list),np.asarray(results_initial_first_attitude_id_list)
+    return np.asarray(emissions_list),np.asarray(carbon_emissions_not_influencer)
 
 def one_seed_culture_data_run(
         params_dict: list[dict]
