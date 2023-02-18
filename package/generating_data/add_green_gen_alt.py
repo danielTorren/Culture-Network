@@ -33,7 +33,7 @@ def calc_attribute_percentage_change(carbon_emissions_not_influencer_no_green_no
     return emissions_difference_stochastic_compare_green,emissions_difference_stochastic_compare_no_green,emissions_difference_stochastic_compare_culture,emissions_difference_stochastic_compare_no_culture
 
 
-def main(RUN = 1, fileName = "results/green_influencers_culture_four_alt_19_37_22__16_02_2023",BASE_PARAMS_LOAD = "package/constants/base_params_alt.json",dpi_save = 1200, param_vary_reps = 100,green_N = 20,sum_a_b = 2):    
+def main(RUN = 1, fileName = "results/green_influencers_culture_four_alt_19_37_22__16_02_2023",BASE_PARAMS_LOAD = "package/constants/base_params_alt.json",dpi_save = 1200, param_vary_reps = 100,green_N = 20,sum_a_b = 2, confirmation_bias = 5):    
     
     if RUN:
         f = open(BASE_PARAMS_LOAD)
@@ -46,6 +46,8 @@ def main(RUN = 1, fileName = "results/green_influencers_culture_four_alt_19_37_2
 
         init_attitudes_list = gen_atttiudes_list(mean_list, sum_a_b)# GET THE LIST
 
+
+        base_params["confirmation_bias"] = confirmation_bias
         ##########################################################################################
         ####################################################################
         # NOW DO ADDING GREENS
@@ -171,4 +173,4 @@ def main(RUN = 1, fileName = "results/green_influencers_culture_four_alt_19_37_2
 
 if __name__ == '__main__':
 
-    main(RUN = 1, fileName = "results/green_influencers_culture_four_alt_19_37_22__16_02_2023",BASE_PARAMS_LOAD = "package/constants/base_params_alt.json",dpi_save = 1200, param_vary_reps = 100,green_N = 20,sum_a_b = 2)
+    main(RUN = 1, fileName = "results/green_influencers_culture_four_alt_19_37_22__16_02_2023",BASE_PARAMS_LOAD = "package/constants/base_params_alt.json",dpi_save = 1200, param_vary_reps = 100, green_N = 20, sum_a_b = 6, confirmation_bias = 5)
