@@ -15,5 +15,7 @@
     "learning_error_scale": 0.02,
     "discount_factor": 0.95,
     "homophily": 0.95,
+    "a_threshold": 1,
+    "b_threshold": 1,
     "green_N": 0
 }
