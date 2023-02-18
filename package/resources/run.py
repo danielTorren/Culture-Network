@@ -65,7 +65,6 @@ def generate_multi_output_individual_emissions_list(params):
     for v in params["seed_list"]:
         params["set_seed"] = v
         data = generate_data(params)
-
         emissions_list.append(data.total_carbon_emissions)
         emissions_id_individuals_lists.append({x.id:x.total_carbon_emissions for x in data.agent_list if not x.green_fountain_state})
         initial_individual_carbon_emissions_id_list.append({x.id:x.initial_carbon_emissions for x in data.agent_list if not x.green_fountain_state})
@@ -141,10 +140,10 @@ def multi_stochstic_emissions_run_all_individual(
 
 
     num_cores = multiprocessing.cpu_count()
-    #results_carbon_emissions = [generate_single_stochastic_output(i) for i in params_dict]
-    res = Parallel(n_jobs=num_cores, verbose=10)(
-        delayed(generate_multi_output_individual_emissions_list)(i) for i in params_dict
-    )
+    res = [generate_multi_output_individual_emissions_list(i) for i in params_dict]
+    #res = Parallel(n_jobs=num_cores, verbose=10)(
+    #    delayed(generate_multi_output_individual_emissions_list)(i) for i in params_dict
+    #)
     results_total_carbon_emissions,results_individual_carbon_emissions_id,results_initial_individual_carbon_emissions_id,results_first_attitude_id_list,results_initial_first_attitude_id_list = zip(
         *res
     )

@@ -14,6 +14,7 @@ import networkx as nx
 import numpy.typing as npt
 from package.model.individuals import Individual
 from package.model.green_influencers import Green_influencer
+from package.model.one_m_green_influencer import Individual_one_m_green_influencer
 
 # modules
 class Network:
@@ -209,18 +210,11 @@ class Network:
         )
 
         # create network
-        if self.green_N>0:
-            (
-                self.adjacency_matrix,
-                self.weighting_matrix,
-                self.network,
-            ) = self.create_weighting_matrix_add_greens()
-        else:
-            (
-                self.adjacency_matrix,
-                self.weighting_matrix,
-                self.network,
-            ) = self.create_weighting_matrix()
+        (
+            self.adjacency_matrix,
+            self.weighting_matrix,
+            self.network,
+        ) = self.create_weighting_matrix()
 
         if self.alpha_change == "behavioural_independence":#independant behaviours
             self.weighting_matrix_list = [self.weighting_matrix]*self.M
@@ -236,14 +230,15 @@ class Network:
             self.attitude_matrix_init,
             self.threshold_matrix_init,
         ) = self.generate_init_data_behaviours()#self.generate_init_data_behaviours_two_types()#
-        
+
         self.agent_list = self.create_agent_list()
 
+        #print("green_N", self.green_N)
         if self.green_N > 0:
-            self.add_green_fountains_list()
-            self.N = len(self.agent_list)
-
-        self.shuffle_agent_list()#partial shuffle of the list based on culture
+            self.replace_green_fountains()
+            self.shuffle_agent_list_with_green_influencers()#partial shuffle of the list based on culture
+        else:
+            self.shuffle_agent_list()#partial shuffle of the list based on culture
 
         self.social_component_matrix = self.calc_social_component_matrix()
 
@@ -280,6 +275,56 @@ class Network:
             self.history_total_carbon_emissions = [self.total_carbon_emissions]
             if self.alpha_change == ("static_culturally_determined_weights" or "dynamic_culturally_determined_weights"):
                 self.history_total_identity_differences = [self.total_identity_differences]
+
+    def replace_green_fountains(self):
+
+        # get the greenest people to begin with then switch out their behaviours for a green one?
+
+        #print("BEFORE",[x.attitudes for x in self.agent_list] )
+
+        #order the agents by greenst culture
+        self.agent_list.sort(key=lambda x: x.culture)
+        self.agent_list.reverse()
+        #print("AFTER THE SORT CULTURE",[x.culture for x in self.agent_list] )
+        #print("AFTER THE SORT",[x.attitudes for x in self.agent_list] )
+        #create the replica agents
+
+        individual_params = {
+            "t": self.t,
+            "M": self.M,
+            "save_timeseries_data": self.save_timeseries_data,
+            "phi_array": self.phi_array,
+            "compression_factor": self.compression_factor,
+            "alpha_change" : self.alpha_change
+        }
+
+        agent_green_influencer_list = [
+            Individual_one_m_green_influencer(
+                individual_params,
+                self.agent_list[n].attitudes,
+                self.agent_list[n].thresholds,
+                self.normalized_discount_array,
+                self.culture_inertia,
+                self.agent_list[n].id
+            )
+            for n in range(self.green_N)
+        ]
+
+        #print("BEFORE after align",[x.attitudes for x in self.agent_list] )
+
+        #print("BEFORE INFLUE", [x.attitudes for x in agent_green_influencer_list])
+        #print("YO,self.agent_list[:self.green_N]",self.agent_list[:self.green_N])
+        self.agent_list[:self.green_N] = agent_green_influencer_list
+        #print("YO AFTER,self.agent_list[:self.green_N]",self.agent_list[:self.green_N])
+
+        self.agent_list.reverse()
+        #print("AFTER", [x.attitudes for x in self.agent_list] )
+        #listOfElems = [x.id for x in self.agent_list]
+        #print(len(listOfElems) == len(set(listOfElems)))
+        #quit()
+
+
+
 
     def normlize_matrix(self, matrix: npt.NDArray) -> npt.NDArray:
         """
@@ -496,6 +541,10 @@ class Network:
     def shuffle_agent_list(self): 
         #make list cirucalr then partial shuffle it
         self.agent_list.sort(key=lambda x: x.culture)#sorted by culture
+        self.circular_agent_list()#agent list is now circular in terms of culture
+        self.partial_shuffle_agent_list()#partial shuffle of the list
+
+    def shuffle_agent_list_with_green_influencers(self):#already sorted by culture , so dont need to do it again, want to ensure inter run comparability even if it introduces a little les homophily?
         self.circular_agent_list()#agent list is now circular in terms of culture
         self.partial_shuffle_agent_list()#partial shuffle of the list
 
