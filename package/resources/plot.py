@@ -904,7 +904,167 @@ def plot_id_change_cases(fileName,attribute_difference_lists_cases,  mean_list, 
     #fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
     fig.savefig(f + ".png", dpi=dpi_save, format="png")
 
+##############################################################################################
 
+def plot_diff_confirmation(data_dict_list,fileName_list, dpi_save, latex_bool = 0):
+    if latex_bool:
+        set_latex()
+    
+    fig, axes = plt.subplots(nrows = 1, ncols = len(data_dict_list), figsize=(14,7), constrained_layout=True, sharey=True) 
+
+    axes[0].set_ylabel( r"Relative $\%$ change in final emissions")
+    for i, ax in enumerate(axes.flat):
+        mean_list =  data_dict_list[i]["mean_list"]
+        mu_emissions_difference_matrix_compare_culture = data_dict_list[i]["emissions_difference_matrix_compare_culture"].mean(axis=1)
+        min_emissions_difference_matrix_compare_culture = data_dict_list[i]["emissions_difference_matrix_compare_culture"].min(axis=1)
+        max_emissions_difference_matrix_compare_culture = data_dict_list[i]["emissions_difference_matrix_compare_culture"].max(axis=1)
+
+        mu_emissions_difference_matrix_compare_no_culture = data_dict_list[i]["emissions_difference_matrix_compare_no_culture"].mean(axis=1)
+        min_emissions_difference_matrix_compare_no_culture = data_dict_list[i]["emissions_difference_matrix_compare_no_culture"].min(axis=1)
+        max_emissions_difference_matrix_compare_no_culture = data_dict_list[i]["emissions_difference_matrix_compare_no_culture"].max(axis=1)
+    
+        ax.plot(mean_list[::-1],mu_emissions_difference_matrix_compare_culture, ls="", marker=".", linewidth = 0.5, color='black', label = r"Inter-behavioural dependence")
+        ax.fill_between(mean_list[::-1], min_emissions_difference_matrix_compare_culture, max_emissions_difference_matrix_compare_culture, facecolor='black', alpha=0.5)
+        ax.plot(mean_list[::-1],mu_emissions_difference_matrix_compare_no_culture, ls="", marker=".", linewidth = 0.5, color='red', label = r"Behavioural independence")
+        ax.fill_between(mean_list[::-1], min_emissions_difference_matrix_compare_no_culture, max_emissions_difference_matrix_compare_no_culture, facecolor='red', alpha=0.5)
+        
+       
+        ax.set_xlabel(r"Initial attitude distance, $1-a_A/(a_A + b_A)$")
+        ax.set_title(r"Confirmation bias, $\theta = %s$" % ( data_dict_list[i]["base_params"]["confirmation_bias"]))
+
+    axes[1].legend()
+
+    for fileName in fileName_list:
+        plotName = fileName + "/Plots"
+        f = plotName + "/plot_diff_confirmation_%s" % (len(mean_list))
+        fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+        fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
+def plot_emissions_comparison(data_dict_list,fileName_list, dpi_save, latex_bool = 0):
+    if latex_bool:
+        set_latex()
+
+    fig, axes = plt.subplots(nrows = 1, ncols = len(data_dict_list), figsize=(14,7), constrained_layout=True, sharey=True)
+
+    axes[0].set_ylabel(r"Final emissions, $E_{\tau}$")
+
+    for i, ax in enumerate(axes.flat):
+        mean_list =  data_dict_list[i]["mean_list"]
+
+        mu_emissions_id_array_no_green_no_culture =  data_dict_list[i]["carbon_emissions_not_influencer_no_green_no_culture"].mean(axis=1)
+        min_emissions_id_array_no_green_no_culture =  data_dict_list[i]["carbon_emissions_not_influencer_no_green_no_culture"].min(axis=1)
+        max_emissions_id_array_no_green_no_culture =  data_dict_list[i]["carbon_emissions_not_influencer_no_green_no_culture"].max(axis=1)
+
+        mu_emissions_id_array_no_green_culture =  data_dict_list[i]["carbon_emissions_not_influencer_no_green_culture"].mean(axis=1)
+        min_emissions_id_array_no_green_culture =  data_dict_list[i]["carbon_emissions_not_influencer_no_green_culture"].min(axis=1)
+        max_emissions_id_array_no_green_culture =  data_dict_list[i]["carbon_emissions_not_influencer_no_green_culture"].max(axis=1)
+
+        mu_emissions_id_array_green_no_culture =  data_dict_list[i]["carbon_emissions_not_influencer_green_no_culture"].mean(axis=1)
+        min_emissions_id_array_green_no_culture =  data_dict_list[i]["carbon_emissions_not_influencer_green_no_culture"].min(axis=1)
+        max_emissions_id_array_green_no_culture =  data_dict_list[i]["carbon_emissions_not_influencer_green_no_culture"].max(axis=1)
+
+        mu_emissions_id_array_green_culture =  data_dict_list[i]["carbon_emissions_not_influencer_green_culture"].mean(axis=1)
+        min_emissions_id_array_green_culture =  data_dict_list[i]["carbon_emissions_not_influencer_green_culture"].min(axis=1)
+        max_emissions_id_array_green_culture =  data_dict_list[i]["carbon_emissions_not_influencer_green_culture"].max(axis=1)
+
+        # cultuer vs no culteur repsresneted black vs red
+        # green vs no green by solid vs dashed line
+        ax.plot(mean_list[::-1],mu_emissions_id_array_no_green_no_culture, ls="", marker=".", color='red', label = r"Behavioural independence, No green influencers")
+        ax.fill_between(mean_list[::-1], min_emissions_id_array_no_green_no_culture, max_emissions_id_array_no_green_no_culture, facecolor='red', alpha=0.5)
+
+        ax.plot(mean_list[::-1],mu_emissions_id_array_no_green_culture, ls="", marker=".", color='black', label = r"Behavioural dependence, No green influencers")
+        ax.fill_between(mean_list[::-1], min_emissions_id_array_no_green_culture, max_emissions_id_array_no_green_culture, facecolor='black', alpha=0.5)
+
+        ax.plot(mean_list[::-1],mu_emissions_id_array_green_no_culture, ls="", marker="^",color='red', label = r"Behavioural independence, Green influencers")
+        ax.fill_between(mean_list[::-1], min_emissions_id_array_green_no_culture, max_emissions_id_array_green_no_culture, facecolor='red', alpha=0.5)
+
+        ax.plot(mean_list[::-1],mu_emissions_id_array_green_culture, ls="", marker="^", color='black', label = r"Behavioural dependence, Green influencers")
+        ax.fill_between(mean_list[::-1], min_emissions_id_array_green_culture, max_emissions_id_array_green_culture, facecolor='black', alpha=0.5)
+        
+        
+        ax.set_xlabel(r"Initial attitude distance, $1-a_A/(a_A + b_A)$")
+        ax.set_title(r"Confirmation bias, $\theta = %s$" % ( data_dict_list[i]["base_params"]["confirmation_bias"]))
+
+    axes[1].legend()
+
+    for fileName in fileName_list:
+        plotName = fileName + "/Plots"
+        f = plotName + "/plot_emissions_comparison_%s" % (len(mean_list))
+        fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+        fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
+def plot_diff_emissions_comparison(data_dict_list,fileName_list, dpi_save, latex_bool = 0):
+    if latex_bool:
+        set_latex()
+
+    fig, axes = plt.subplots(nrows = 2, ncols = len(data_dict_list), figsize=(14,12), constrained_layout=True, sharey="row", sharex="col")
+
+    axes[0][0].set_ylabel(r"Final emissions, $E_{\tau}$")
+    axes[1][0].set_ylabel( r"Relative $\%$ change in final emissions")
+
+    for i, ax in enumerate(axes[0]):
+        mean_list =  data_dict_list[i]["mean_list"]
+
+        mu_emissions_id_array_no_green_no_culture =  data_dict_list[i]["carbon_emissions_not_influencer_no_green_no_culture"].mean(axis=1)
+        min_emissions_id_array_no_green_no_culture =  data_dict_list[i]["carbon_emissions_not_influencer_no_green_no_culture"].min(axis=1)
+        max_emissions_id_array_no_green_no_culture =  data_dict_list[i]["carbon_emissions_not_influencer_no_green_no_culture"].max(axis=1)
+
+        mu_emissions_id_array_no_green_culture =  data_dict_list[i]["carbon_emissions_not_influencer_no_green_culture"].mean(axis=1)
+        min_emissions_id_array_no_green_culture =  data_dict_list[i]["carbon_emissions_not_influencer_no_green_culture"].min(axis=1)
+        max_emissions_id_array_no_green_culture =  data_dict_list[i]["carbon_emissions_not_influencer_no_green_culture"].max(axis=1)
+
+        mu_emissions_id_array_green_no_culture =  data_dict_list[i]["carbon_emissions_not_influencer_green_no_culture"].mean(axis=1)
+        min_emissions_id_array_green_no_culture =  data_dict_list[i]["carbon_emissions_not_influencer_green_no_culture"].min(axis=1)
+        max_emissions_id_array_green_no_culture =  data_dict_list[i]["carbon_emissions_not_influencer_green_no_culture"].max(axis=1)
+
+        mu_emissions_id_array_green_culture =  data_dict_list[i]["carbon_emissions_not_influencer_green_culture"].mean(axis=1)
+        min_emissions_id_array_green_culture =  data_dict_list[i]["carbon_emissions_not_influencer_green_culture"].min(axis=1)
+        max_emissions_id_array_green_culture =  data_dict_list[i]["carbon_emissions_not_influencer_green_culture"].max(axis=1)
+
+        # cultuer vs no culteur repsresneted black vs red
+        # green vs no green by solid vs dashed line
+        ax.plot(mean_list[::-1],mu_emissions_id_array_no_green_culture, ls="", marker=".", color='black', label = r"Inter-behavioural dependence, No green influencers")
+        ax.fill_between(mean_list[::-1], min_emissions_id_array_no_green_culture, max_emissions_id_array_no_green_culture, facecolor='black', alpha=0.5)
+        
+        ax.plot(mean_list[::-1],mu_emissions_id_array_no_green_no_culture, ls="", marker=".", color='red', label = r"Behavioural independence, No green influencers")
+        ax.fill_between(mean_list[::-1], min_emissions_id_array_no_green_no_culture, max_emissions_id_array_no_green_no_culture, facecolor='red', alpha=0.5)
+
+        ax.plot(mean_list[::-1],mu_emissions_id_array_green_culture, ls="", marker="^", color='black', label = r"Inter-behavioural dependence, Green influencers")
+        ax.fill_between(mean_list[::-1], min_emissions_id_array_green_culture, max_emissions_id_array_green_culture, facecolor='black', alpha=0.5)
+        
+        ax.plot(mean_list[::-1],mu_emissions_id_array_green_no_culture, ls="", marker="^",color='red', label = r"Behavioural independence, Green influencers")
+        ax.fill_between(mean_list[::-1], min_emissions_id_array_green_no_culture, max_emissions_id_array_green_no_culture, facecolor='red', alpha=0.5)
+
+        
+        ax.set_title(r"Confirmation bias, $\theta = %s$" % ( data_dict_list[i]["base_params"]["confirmation_bias"]))
+
+    for i, ax in enumerate(axes[1]):
+        mean_list =  data_dict_list[i]["mean_list"]
+        mu_emissions_difference_matrix_compare_culture = data_dict_list[i]["emissions_difference_matrix_compare_culture"].mean(axis=1)
+        min_emissions_difference_matrix_compare_culture = data_dict_list[i]["emissions_difference_matrix_compare_culture"].min(axis=1)
+        max_emissions_difference_matrix_compare_culture = data_dict_list[i]["emissions_difference_matrix_compare_culture"].max(axis=1)
+
+        mu_emissions_difference_matrix_compare_no_culture = data_dict_list[i]["emissions_difference_matrix_compare_no_culture"].mean(axis=1)
+        min_emissions_difference_matrix_compare_no_culture = data_dict_list[i]["emissions_difference_matrix_compare_no_culture"].min(axis=1)
+        max_emissions_difference_matrix_compare_no_culture = data_dict_list[i]["emissions_difference_matrix_compare_no_culture"].max(axis=1)
+    
+        ax.plot(mean_list[::-1],mu_emissions_difference_matrix_compare_culture, ls="", marker=".", linewidth = 0.5, color='black', label = r"Inter-behavioural dependence")
+        ax.fill_between(mean_list[::-1], min_emissions_difference_matrix_compare_culture, max_emissions_difference_matrix_compare_culture, facecolor='black', alpha=0.5)
+        ax.plot(mean_list[::-1],mu_emissions_difference_matrix_compare_no_culture, ls="", marker=".", linewidth = 0.5, color='red', label = r"Behavioural independence")
+        ax.fill_between(mean_list[::-1], min_emissions_difference_matrix_compare_no_culture, max_emissions_difference_matrix_compare_no_culture, facecolor='red', alpha=0.5)
+        
+        ax.set_xlabel(r"Initial attitude distance, $1-a_A/(a_A + b_A)$")
+
+    axes[0][1].legend(fontsize="small")
+    axes[1][1].legend()
+
+    for fileName in fileName_list:
+        plotName = fileName + "/Plots"
+        f = plotName + "/plot_diff_emissions_comparison_%s" % (len(mean_list))
+        fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+        fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
+##############################################################################################
 
 def plot_four_compare_one(fileName, emissions_difference_matrix_compare_green, emissions_difference_matrix_compare_no_green, emissions_difference_matrix_compare_culture, emissions_difference_matrix_compare_no_culture, mean_list, dpi_save):
 
