@@ -182,5 +182,4 @@ def main(RUN = 1, fileName = "results/green_influencers_culture_four_alt_19_37_2
     return fileName
 
 if __name__ == '__main__':
-
-    main(RUN = 1, fileName = "results/green_influencers_culture_four_alt_19_37_22__16_02_2023",BASE_PARAMS_LOAD = "package/constants/base_params_alt.json",dpi_save = 1200, param_vary_reps = 50, green_N = 20, sum_a_b = 6, confirmation_bias = 5)
+    main(RUN = 1, fileName = "results/green_influencers_culture_four_alt_19_37_22__16_02_2023",BASE_PARAMS_LOAD = "package/constants/base_params_alt.json",dpi_save = 1200, param_vary_reps = 200, green_N = 20, sum_a_b = 6, confirmation_bias = 40)
