@@ -15,6 +15,10 @@ from package.resources.plot import (
     plot_four_two
 )
 
+def calc_new_K(K,N, N_green):
+    new_K = (K*(N + N_green - 1))/(N - 1)
+    return int(round(new_K))
+
 def gen_atttiudes_list(mean_list, sum_a_b):
     init_attitudes_list = []
     for i in mean_list:
@@ -49,14 +53,19 @@ def main(RUN = 1, fileName = "results/green_influencers_culture_four_alt_19_37_2
 
         base_params["confirmation_bias"] = confirmation_bias
         ##########################################################################################
-        ####################################################################
-        # NOW DO ADDING GREENS
-        
+        # ADDING GREENS
+
         base_params_green_culture = base_params.copy()
         base_params_green_no_culture = base_params.copy()
 
         base_params_green_culture["green_N"] = green_N
         base_params_green_no_culture["green_N"] = green_N
+
+        base_params_green_culture["green_N"] = green_N
+        base_params_green_no_culture["green_N"] = green_N
+        green_K = calc_new_K(base_params_green_culture["K"],base_params_green_culture["N"], green_N)
+        base_params_green_culture["K"] = green_K
+        base_params_green_no_culture["K"] = green_K
 
         params_list_green_culture = []
         base_params_green_culture["alpha_change"] = "dynamic_culturally_determined_weights"
@@ -141,6 +150,7 @@ def main(RUN = 1, fileName = "results/green_influencers_culture_four_alt_19_37_2
         save_object(base_params, fileName + "/Data", "base_params")
         save_object(init_attitudes_list,fileName + "/Data", "init_attitudes_list")
         save_object(green_N, fileName + "/Data", "green_N")
+        save_object(green_K, fileName + "/Data", "green_K")   
         
     else:
         emissions_list_no_green_no_culture = load_object( fileName + "/Data", "emissions_list_no_green_no_culture")
@@ -173,4 +183,4 @@ def main(RUN = 1, fileName = "results/green_influencers_culture_four_alt_19_37_2
 
 if __name__ == '__main__':
 
-    main(RUN = 1, fileName = "results/green_influencers_culture_four_alt_19_37_22__16_02_2023",BASE_PARAMS_LOAD = "package/constants/base_params_alt.json",dpi_save = 1200, param_vary_reps = 100, green_N = 20, sum_a_b = 6, confirmation_bias = 5)
+    main(RUN = 1, fileName = "results/green_influencers_culture_four_alt_19_37_22__16_02_2023",BASE_PARAMS_LOAD = "package/constants/base_params_alt.json",dpi_save = 1200, param_vary_reps = 50, green_N = 20, sum_a_b = 6, confirmation_bias = 5)
