@@ -123,11 +123,8 @@ def main(RUN = 1, fileName = "results/green_influencers_culture_four_alt_19_37_2
         emissions_list_no_green_no_culture, carbon_emissions_not_influencer_no_green_no_culture = multi_stochstic_emissions_run_all_individual(params_list_no_green_no_culture)
         emissions_list_no_green_culture, carbon_emissions_not_influencer_no_green_culture = multi_stochstic_emissions_run_all_individual(params_list_no_green_culture)
 
-        print("DONE,",emissions_list_green_no_culture.shape,  carbon_emissions_not_influencer_green_no_culture.shape )
-
         ####################################################################################
         emissions_difference_matrix_compare_green,emissions_difference_matrix_compare_no_green,emissions_difference_matrix_compare_culture,emissions_difference_matrix_compare_no_culture = calc_attribute_percentage_change(carbon_emissions_not_influencer_no_green_no_culture,carbon_emissions_not_influencer_no_green_culture,carbon_emissions_not_influencer_green_no_culture,carbon_emissions_not_influencer_green_culture,mean_list,base_params)
-        print("LETS GET SAVIN")
         createFolder(fileName)
 
         save_object(emissions_list_no_green_no_culture, fileName + "/Data", "emissions_list_no_green_no_culture")
