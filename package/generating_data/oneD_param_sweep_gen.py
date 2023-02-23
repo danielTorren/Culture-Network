@@ -3,7 +3,7 @@ A module that use input data to generate data from multiple social networks vary
 between simulations so that the differences may be compared. 
 
 
-Author: Daniel Torren Peraire Daniel.Torren@uab.cat dtorrenp@hotmail.com
+
 
 Created: 10/10/2022
 """

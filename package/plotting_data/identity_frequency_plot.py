@@ -7,23 +7,23 @@ from matplotlib.colors import  Normalize
 from matplotlib.cm import get_cmap
 from package.resources.utility import save_object,load_object, get_cluster_list,calc_num_clusters_set_bandwidth
 from package.resources.plot import (
-    live_print_culture_timeseries_with_weighting,
+    live_print_identity_timeseries_with_weighting,
     plot_joint_cluster_micro,
 
 )
 from scipy.signal import argrelextrema
 
 def calc_groups( Data,s, bandwidth) :
+    """Where are the clusers in the final identity distribution"""
+    identity_data = np.asarray([Data.agent_list[n].identity for n in range(Data.N)])
 
-    culture_data = np.asarray([Data.agent_list[n].culture for n in range(Data.N)])
-
-    kde, e = calc_num_clusters_set_bandwidth(culture_data,s,bandwidth)
+    kde, e = calc_num_clusters_set_bandwidth(identity_data,s,bandwidth)
     
 
     mi = argrelextrema(e, np.less)[0]#list of minimum values in the kde
     ma = argrelextrema(e, np.greater)[0]#list of minimum values in the kde
     
-    clusters_index_lists = get_cluster_list(culture_data,s, Data.N, mi)
+    clusters_index_lists = get_cluster_list(identity_data,s, Data.N, mi)
 
     time_vals_data = []
     for t in range(len(Data.history_time)):
@@ -64,7 +64,7 @@ def main(
     if alpha_change_plot:
         ################
         #FOR ALPHA CHANGE PLOT
-        live_print_culture_timeseries_with_weighting(fileName, data_list, property_varied, title_list, dpi_save, cmap_weighting, latex_bool = latex_bool)
+        live_print_identity_timeseries_with_weighting(fileName, data_list, property_varied, title_list, dpi_save, cmap_weighting, latex_bool = latex_bool)
     
     if micro_clusters_plot:
 

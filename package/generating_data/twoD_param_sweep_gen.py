@@ -3,7 +3,7 @@ A module that use input data to generate data from multiple social networks vary
 between simulations so that the differences may be compared. Useful for comparing the influences of these parameters
 on each other to generate phase diagrams.
 
-Author: Daniel Torren Peraire Daniel.Torren@uab.cat dtorrenp@hotmail.com
+
 
 Created: 10/10/2022
 """
@@ -32,7 +32,7 @@ def produce_param_list_n_double(
     params_dict: dict,
         dictionary of parameters used to generate attributes, dict used for readability instead of super long list of input parameters.
     variable_parameters_dict: dict[dict]
-        dictionary of dictionaries containing details for range of parameters to vary. e.g.
+        dictionary of dictionaries containing details for range of parameters to vary.
 
     Returns
     -------

@@ -1,7 +1,5 @@
 """Plot multiple single simulations varying a single parameter
 
-Author: Daniel Torren Peraire Daniel.Torren@uab.cat dtorrenp@hotmail.com
-
 Created: 10/10/2022
 """
 
@@ -10,8 +8,8 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap, Normalize
 from package.resources.utility import load_object
 from package.resources.plot import (
-    live_print_culture_timeseries,
-    print_live_intial_culture_networks_and_culture_timeseries,
+    live_print_identity_timeseries,
+    print_live_initial_identity_networks_and_identity_timeseries,
 
 )
 
@@ -39,8 +37,8 @@ def main(
 
     if GRAPH_TYPE == 0:
         #FOR POLARISATION A,B PLOT
-        live_print_culture_timeseries(fileName, data_list, property_varied, dpi_save, latex_bool = latex_bool)
+        live_print_identity_timeseries(fileName, data_list, property_varied, dpi_save, latex_bool = latex_bool)
     elif GRAPH_TYPE == 1:
         #FOR HOMOPHILY PLOT
-        print_live_intial_culture_networks_and_culture_timeseries(fileName, data_list, dpi_save, property_values_list, property_varied_title, norm_zero_one, cmap, node_size,round_dec, latex_bool = latex_bool)
+        print_live_initial_identity_networks_and_identity_timeseries(fileName, data_list, dpi_save, property_values_list, property_varied_title, norm_zero_one, cmap, node_size,round_dec, latex_bool = latex_bool)
     plt.show()

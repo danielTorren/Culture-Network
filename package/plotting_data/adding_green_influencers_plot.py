@@ -1,61 +1,42 @@
 """Plot data from runs including effect of green influencers
-Author: Daniel Torren Peraire Daniel.Torren@uab.cat dtorrenp@hotmail.com
 
 Created: 10/10/2022
 """
-
-# imports
 import matplotlib.pyplot as plt
-from package.resources.plot import (
-    plot_emissions_multi_ab_min_max_two_theta_reverse_add_green,
-)
 from package.resources.utility import (
-    load_object,
+    load_object
+)
+from package.resources.plot import (
+    plot_diff_emissions_comparison
 )
 
-def calc_new_K(K,N, N_green):
-    new_K = (K*(N + N_green - 1))/(N - 1)
-    return int(round(new_K))
+def load_data(fileName):
+    data_dict = {}
+    data_dict["carbon_emissions_not_influencer_no_green_no_identity"] = load_object( fileName + "/Data", "carbon_emissions_not_influencer_no_green_no_identity")
+    data_dict["carbon_emissions_not_influencer_no_green_identity"] = load_object( fileName + "/Data", "carbon_emissions_not_influencer_no_green_identity")
+    data_dict["carbon_emissions_not_influencer_green_no_identity"] = load_object( fileName + "/Data", "carbon_emissions_not_influencer_green_no_identity")
+    data_dict["carbon_emissions_not_influencer_green_identity"] = load_object( fileName + "/Data", "carbon_emissions_not_influencer_green_identity")
 
-def gen_atttiudes_list(mean_list, sum_a_b):
-    init_attitudes_list = []
-    for i in mean_list:
-        a = i*sum_a_b
-        b = sum_a_b - a
-        init_attitudes_list.append([a,b])
-    return init_attitudes_list
+    data_dict["emissions_difference_matrix_compare_green"] = load_object(fileName + "/Data", "emissions_difference_matrix_compare_green")
+    data_dict["emissions_difference_matrix_compare_no_green"] = load_object(fileName + "/Data", "emissions_difference_matrix_compare_no_green")
+    data_dict["emissions_difference_matrix_compare_identity"] = load_object(fileName + "/Data", "emissions_difference_matrix_compare_identity")
+    data_dict["emissions_difference_matrix_compare_no_identity"] = load_object(fileName + "/Data", "emissions_difference_matrix_compare_no_identity")
 
-def main(
-    fileName_add_greens_theta_one = "results/splitting_eco_warriors_single_add_greens_17_44_05__01_02_2023",
-    fileName_add_greens_theta_two = "results/splitting_eco_warriors_single_add_greens_17_44_05__01_02_2023",
-    dpi_save = 1200,
-    latex_bool = 0
-    ) -> None: 
+    data_dict["mean_list"] = load_object( fileName + "/Data", "mean_list")
+    data_dict["sum_a_b"]  = load_object( fileName + "/Data", "sum_a_b")
+    data_dict["base_params"] = load_object( fileName + "/Data", "base_params")
+    data_dict["init_attitudes_list"] = load_object(fileName + "/Data", "init_attitudes_list")
+    data_dict["green_N"]= load_object( fileName + "/Data", "green_N")
+    return data_dict
 
-    #emissions_list_default_theta_one = load_object( fileName_add_greens_theta_one + "/Data", "emissions_list_default")
-    #emissions_list_add_green_theta_one  = load_object( fileName_add_greens_theta_one + "/Data", "emissions_list_add_green")
-    #emissions_id_list_individual_default_theta_one = load_object( fileName_add_greens_theta_one + "/Data", "emissions_id_list_individual_default")
-    #emissions_id_list_individual_add_green_theta_one  = load_object( fileName_add_greens_theta_one + "/Data", "emissions_id_list_individual_add_green")
-    base_params_theta_one = load_object( fileName_add_greens_theta_one + "/Data", "base_params")
-    #init_attitudes_list_theta_one = load_object(fileName_add_greens_theta_one + "/Data", "init_attitudes_list")
-    mean_list_theta_one = load_object(fileName_add_greens_theta_one + "/Data", "mean_list")
-    #sum_a_b_theta_one = load_object(fileName_add_greens_theta_one + "/Data", "sum_a_b")
-    #green_N_theta_one = load_object( fileName_add_greens_theta_one + "/Data", "green_N")
-    #green_K_theta_one = load_object(fileName_add_greens_theta_one + "/Data", "green_K")
-    emissions_difference_matrix_theta_one = load_object(fileName_add_greens_theta_one + "/Data", "emissions_difference_matrix")
+def main(fileName_list = ["results/green_influencers_identity_four_alt_23_06_54__18_02_2023","results/green_influencers_identity_four_alt_23_06_03__18_02_2023","results/green_influencers_identity_four_alt_23_03_50__18_02_2023"],dpi_save = 1200, latex_bool = 0):    
 
-    #emissions_list_default_theta_two = load_object( fileName_add_greens_theta_two + "/Data", "emissions_list_default")
-    #emissions_list_add_green_theta_two  = load_object( fileName_add_greens_theta_two + "/Data", "emissions_list_add_green")
-    #emissions_id_list_individual_default_theta_two = load_object( fileName_add_greens_theta_two + "/Data", "emissions_id_list_individual_default")
-    #emissions_id_list_individual_add_green_theta_two  = load_object( fileName_add_greens_theta_two + "/Data", "emissions_id_list_individual_add_green")
-    base_params_theta_two = load_object( fileName_add_greens_theta_two + "/Data", "base_params")
-    #init_attitudes_list_theta_two = load_object(fileName_add_greens_theta_two + "/Data", "init_attitudes_list")
-    #mean_list_theta_two = load_object(fileName_add_greens_theta_two + "/Data", "mean_list")
-    #sum_a_b_theta_two = load_object(fileName_add_greens_theta_two + "/Data", "sum_a_b")
-    #green_N_theta_two = load_object( fileName_add_greens_theta_two + "/Data", "green_N")
-    #green_K_theta_two = load_object(fileName_add_greens_theta_two + "/Data", "green_K")
-    emissions_difference_matrix_theta_two = load_object(fileName_add_greens_theta_two + "/Data", "emissions_difference_matrix")
+    data_dict_list = []
+    for fileName in fileName_list:
+        data_dict_list.append(load_data(fileName))
 
-    plot_emissions_multi_ab_min_max_two_theta_reverse_add_green(fileName_add_greens_theta_one,   emissions_difference_matrix_theta_one,    emissions_difference_matrix_theta_two, base_params_theta_one["confirmation_bias"],base_params_theta_two["confirmation_bias"],   mean_list_theta_one,   dpi_save, len(base_params_theta_one["seed_list"]),latex_bool = latex_bool )
-    
-    plt.show()
+    plot_diff_emissions_comparison(data_dict_list, fileName_list,dpi_save, latex_bool = latex_bool)
+    plt.show()  
+
+if __name__ == '__main__':
+    main(fileName_list = ["results/green_influencers_identity_four_alt_23_06_54__18_02_2023","results/green_influencers_identity_four_alt_23_06_03__18_02_2023","results/green_influencers_identity_four_alt_23_03_50__18_02_2023"],dpi_save = 1200, latex_bool = 0)

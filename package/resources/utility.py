@@ -1,8 +1,6 @@
 """Contains functions that are not crucial to the simulation itself and are shared amongst files.
 A module that aides in preparing folders, saving, loading and generating data for plots.
 
-Author: Daniel Torren Peraire Daniel.Torren@uab.cat dtorrenp@hotmail.com
-
 Created: 10/10/2022
 """
 
@@ -100,33 +98,33 @@ def load_object(fileName, objectName) -> dict:
         data = pickle.load(f)
     return data
 
-def calc_pos_clusters_set_bandwidth(culture_data,s,bandwidth):
-    kde, e = calc_num_clusters_set_bandwidth(culture_data,s,bandwidth)
+def calc_pos_clusters_set_bandwidth(identity_data,s,bandwidth):
+    kde, e = calc_num_clusters_set_bandwidth(identity_data,s,bandwidth)
     ma = argrelextrema(e, np.greater)[0]
     list_identity_clusters = s[ma]
     return list_identity_clusters
 
-def calc_num_clusters_set_bandwidth(culture_data,s,bandwidth):
-    X_reshape = culture_data.reshape(-1, 1)
+def calc_num_clusters_set_bandwidth(identity_data,s,bandwidth):
+    X_reshape = identity_data.reshape(-1, 1)
     kde = KernelDensity(kernel='gaussian', bandwidth=bandwidth).fit(X_reshape)
     e = kde.score_samples(s.reshape(-1,1))
     return kde, e
     
-def get_cluster_list(culture_data,s, N, mi):
+def get_cluster_list(identity_data,s, N, mi):
 
     index_list = np.arange(N)
 
     #left edge
-    left_mask = (culture_data < s[mi][0])
+    left_mask = (identity_data < s[mi][0])
     clusters_index_lists = [list(index_list[left_mask])]
 
     #  all middle cluster
     for i_cluster in range(len(mi)-1):
-        center_mask = ((culture_data >= s[mi][i_cluster])*(culture_data <= s[mi][i_cluster+1]))
+        center_mask = ((identity_data >= s[mi][i_cluster])*(identity_data <= s[mi][i_cluster+1]))
         clusters_index_lists.append(list(index_list[center_mask]))
 
     # most right cluster
-    right_mask = (culture_data >= s[mi][-1])
+    right_mask = (identity_data >= s[mi][-1])
     clusters_index_lists.append(list(index_list[right_mask]))
 
     return clusters_index_lists

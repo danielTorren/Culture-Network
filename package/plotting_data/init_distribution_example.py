@@ -1,8 +1,8 @@
 """Generate plot of beta distribution
 A module that generates a plot of beta distribution according to input data. Useful for visualising
-the intial conditions used in the mode for attitudes and thresholds.
+the initial conditions used in the mode for attitudes and thresholds.
 
-Author: Daniel Torren Peraire Daniel.Torren@uab.cat dtorrenp@hotmail.com
+
 
 Created: 10/10/2022
 """

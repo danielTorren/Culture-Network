@@ -2,7 +2,7 @@
 A module that use input data to run the simulation for a given number of timesteps.
 Multiple simulations at once in parallel can also be run. 
 
-Author: Daniel Torren Peraire Daniel.Torren@uab.cat dtorrenp@hotmail.com
+
 
 Created: 10/10/2022
 """
@@ -65,17 +65,6 @@ def generate_multi_output_individual_emissions_list(params):
         carbon_emissions_not_influencer.append(sum(x.total_carbon_emissions for x in data.agent_list if not x.green_fountain_state))
     return (emissions_list, carbon_emissions_not_influencer)
 
-def generate_multi_output_variance(params):
-    """Individual specific emission and associated id to compare runs with and without behavioural interdependence"""
-
-    variance_list = []
-    for v in params["seed_list"]:
-        params["set_seed"] = v
-        data = generate_data(params)
-        variance_list.append(np.var([x.attitudes[0] for x in data.agent_list]))
-
-    return variance_list
-
 def generate_sensitivity_output(params: dict):
     """
     Generate data from a set of parameter contained in a dictionary. Average results over multiple stochastic seeds contained in params["seed_list"]
@@ -94,9 +83,9 @@ def generate_sensitivity_output(params: dict):
         norm_factor = data.N * data.M
         # Insert more measures below that want to be used for evaluating the
         emissions_list.append(data.total_carbon_emissions / norm_factor)
-        mean_list.append(data.average_culture)
-        var_list.append(data.var_culture)
-        coefficient_variance_list.append(data.std_culture / (data.average_culture))
+        mean_list.append(data.average_identity)
+        var_list.append(data.var_identity)
+        coefficient_variance_list.append(data.std_identity / (data.average_identity))
         emissions_change_list.append(np.abs(data.total_carbon_emissions - data.init_total_carbon_emissions)/norm_factor)
 
     stochastic_norm_emissions = np.mean(emissions_list)
@@ -112,7 +101,6 @@ def generate_sensitivity_output(params: dict):
         stochastic_norm_coefficient_variance,
         stochastic_norm_emissions_change
     )
-
 
 def parallel_run(params_dict: dict[dict]) -> list[Network]:
     """
@@ -141,30 +129,18 @@ def multi_stochstic_emissions_run_all_individual(
 
     return np.asarray(emissions_list),np.asarray(carbon_emissions_not_influencer)
 
-def one_seed_culture_data_run(
+def one_seed_identity_data_run(
         params_dict: list[dict]
 ) -> npt.NDArray:
 
     num_cores = multiprocessing.cpu_count()
     #res = [generate_sensitivity_output(i) for i in params_dict]
-    results_culture_lists = Parallel(n_jobs=num_cores, verbose=10)(
+    results_identity_lists = Parallel(n_jobs=num_cores, verbose=10)(
 
         delayed(generate_first_behaviour_lists_one_seed_output)(i) for i in params_dict
     )
 
-    return np.asarray(results_culture_lists)#can't run with multiple different network sizes
-
-def multi_seed_variance_data_run(
-        params_dict: list[dict]
-) -> npt.NDArray:
-    num_cores = multiprocessing.cpu_count()
-    #res = [generate_sensitivity_output(i) for i in params_dict]
-    results_variance_lists = Parallel(n_jobs=num_cores, verbose=10)(
-
-        delayed(generate_multi_output_variance)(i) for i in params_dict
-    )
-
-    return np.asarray(results_variance_lists)#can't run with multiple different network sizes
+    return np.asarray(results_identity_lists)#can't run with multiple different network sizes
 
 
 def parallel_run_sa(

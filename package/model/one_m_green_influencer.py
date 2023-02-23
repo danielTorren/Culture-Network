@@ -1,8 +1,6 @@
 """Define individual agent class
-A module that defines "individuals" that have vectors of attitudes towards behaviours whose evolution
-is determined through weighted social interactions.
-
-Author: Daniel Torren Peraire Daniel.Torren@uab.cat dtorrenp@hotmail.com
+A module that defines " green influencers individuals" that have vectors of attitudes towards behaviours whose evolution
+is determined through weighted social interactions, but have one perfect green behaviour (the first) that is socially inert.
 
 Created: 10/10/2022
 """
@@ -42,8 +40,8 @@ class Individual_one_m_green_influencer:
     av_behaviour_value
         mean value towards M behaviours at time t
     av_behaviour_list: list[float]
-        time series of past average attitude combined with values depending on action_observation_I, as far back as culture_inertia
-    culture: float
+        time series of past average attitude combined with values depending on action_observation_I, as far back as cultural_inertia
+    identity: float
         identity of the individual, if > 0.5 it is considered green. Determines who individuals pay attention to. Domain = [0,1]
     total_carbon_emissions: float
         total carbon emissions of that individual due to their behaviour
@@ -55,7 +53,7 @@ class Individual_one_m_green_influencer:
         timeseries of past behavioural thresholds, static in the current model version
     self.history_av_behaviour: list[float]
         timeseries of past average behavioural attitudes
-    self.history_culture: list[float]
+    self.history_identity: list[float]
         timeseries of past identity values
     self.history_carbon_emissions: list[float]
         timeseries of past individual total emissions
@@ -64,7 +62,7 @@ class Individual_one_m_green_influencer:
     -------
     update_av_behaviour_list():
         Update moving average of past behaviours, inserting present value and 0th index and removing the oldest value
-    calc_culture() -> float:
+    calc_identity() -> float:
         Calculate the individual identity from past average attitudes weighted by the truncated quasi-hyperbolic discounting factor
     update_values():
         Update the behavioural values of an individual with the new attitudinal or threshold values
@@ -85,7 +83,7 @@ class Individual_one_m_green_influencer:
         init_data_attitudes,
         init_data_thresholds,
         normalized_discount_vector,
-        culture_inertia,
+        cultural_inertia,
         id_n,
     ):
         """
@@ -96,12 +94,12 @@ class Individual_one_m_green_influencer:
         individual_params: dict,
             useful parameters from the network
         init_data_attitudes: npt.NDArray[float]
-            array of inital attitudes generated previously from a beta distribution, evolves over time
+            array of initial attitudes generated previously from a beta distribution, evolves over time
         init_data_thresholds: npt.NDArray[float]
-            array of inital thresholds generated previously from a beta distribution
+            array of initial thresholds generated previously from a beta distribution
         normalized_discount_vector: npt.NDArray[float]
             normalized single row of the discounts to individual memory when considering how the past influences current identity
-        culture_inertia: int
+        cultural_inertia: int
             the number of steps into the past that are considered when calculating identity
 
         """
@@ -110,7 +108,7 @@ class Individual_one_m_green_influencer:
         self.initial_first_attitude = (self.attitudes[0]).copy()
         self.thresholds = init_data_thresholds
         self.normalized_discount_vector = normalized_discount_vector
-        self.culture_inertia = culture_inertia
+        self.cultural_inertia = cultural_inertia
 
         self.M = individual_params["M"]
         self.t = individual_params["t"]
@@ -130,16 +128,13 @@ class Individual_one_m_green_influencer:
         ##################################################
 
         if self.alpha_change == "behavioural_independence":
-            self.attitudes_matrix = np.tile(self.attitudes, (self.culture_inertia,1))
-            #print("self.attitudes_matrix",self.attitudes_matrix )
+            self.attitudes_matrix = np.tile(self.attitudes, (self.cultural_inertia,1))
             self.attitudes_star = self.calc_attitudes_star()
-            #print("self.attitudes_star", self.attitudes_star)
-
 
         self.values = self.attitudes - self.thresholds
         self.av_behaviour = np.mean(self.attitudes)
-        self.av_behaviour_list = [self.av_behaviour] * self.culture_inertia
-        self.culture = self.calc_culture()
+        self.av_behaviour_list = [self.av_behaviour] * self.cultural_inertia
+        self.identity = self.calc_identity()
         self.initial_carbon_emissions,self.behavioural_carbon_emissions = self.calc_total_emissions()
         self.total_carbon_emissions = self.initial_carbon_emissions
 
@@ -148,7 +143,7 @@ class Individual_one_m_green_influencer:
             self.history_behaviour_attitudes = [list(self.attitudes)]
             self.history_behaviour_thresholds = [list(self.thresholds)]
             self.history_av_behaviour = [self.av_behaviour]
-            self.history_culture = [self.culture]
+            self.history_identity = [self.identity]
             self.history_carbon_emissions = [self.total_carbon_emissions]
             self.history_behavioural_carbon_emissions = [self.behavioural_carbon_emissions]
 
@@ -170,7 +165,7 @@ class Individual_one_m_green_influencer:
         self.av_behaviour_list.pop()
         self.av_behaviour_list.insert(0, self.av_behaviour)
 
-    def calc_culture(self) -> float:
+    def calc_identity(self) -> float:
         """
         Calculate the individual identity from past average attitudes weighted by the truncated quasi-hyperbolic discounting factor
 
@@ -188,9 +183,7 @@ class Individual_one_m_green_influencer:
         )  # here discount list is normalized
 
     def update_attitudes_matrix(self):       
-        #print("popping before ", self.attitudes_matrix, self.attitudes_matrix.shape)
         self.attitudes_matrix =  np.vstack([np.asarray([self.attitudes]), self.attitudes_matrix[:-1,:]])
-        #print("popping after ", self.attitudes_matrix, self.attitudes_matrix.shape)
 
     def calc_attitudes_star(self):
         return np.matmul(
@@ -256,7 +249,7 @@ class Individual_one_m_green_influencer:
         self.history_behaviour_values.append(list(self.values))
         self.history_behaviour_attitudes.append(list(self.attitudes))
         self.history_behaviour_thresholds.append(list(self.thresholds))
-        self.history_culture.append(self.culture)
+        self.history_identity.append(self.identity)
         self.history_av_behaviour.append(self.av_behaviour)
         self.history_carbon_emissions.append(self.total_carbon_emissions)
         self.history_behavioural_carbon_emissions.append(self.behavioural_carbon_emissions)
@@ -287,7 +280,7 @@ class Individual_one_m_green_influencer:
         else:
             self.calc_av_behaviour()
             self.update_av_behaviour_list()
-            self.culture = self.calc_culture()
+            self.identity = self.calc_identity()
 
         self.total_carbon_emissions, self.behavioural_carbon_emissions = self.calc_total_emissions()
 

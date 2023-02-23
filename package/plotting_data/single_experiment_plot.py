@@ -1,7 +1,5 @@
 """Plots a single simulation to produce data which is saved and plotted 
 
-Author: Daniel Torren Peraire Daniel.Torren@uab.cat dtorrenp@hotmail.com
-
 Created: 10/10/2022
 """
 # imports
@@ -14,16 +12,16 @@ from package.resources.utility import (
 )
 from package.plotting_data.identity_frequency_plot import calc_groups
 from package.resources.plot import (
-    plot_culture_timeseries,
+    plot_identity_timeseries,
     plot_value_timeseries,
     plot_attitude_timeseries,
     plot_total_carbon_emissions_timeseries,
     plot_weighting_matrix_convergence_timeseries,
     plot_cultural_range_timeseries,
-    plot_average_culture_timeseries,
+    plot_average_identity_timeseries,
     plot_joint_cluster_micro,
-    print_live_initial_culture_network,
-    live_animate_culture_network_weighting_matrix,
+    print_live_initial_identity_network,
+    live_animate_identity_network_weighting_matrix,
 )
 
 
@@ -56,8 +54,8 @@ def main(
     ###PLOTS
     if PLOT_NAME == "INDIVIDUAL":
         if Data.alpha_change != "behavioural_independence":
-            plot_culture_timeseries(fileName, Data, dpi_save)
-            print_live_initial_culture_network(
+            plot_identity_timeseries(fileName, Data, dpi_save)
+            print_live_initial_identity_network(
                 fileName,
                 Data,
                 dpi_save,
@@ -75,10 +73,10 @@ def main(
         plot_weighting_matrix_convergence_timeseries(fileName, Data, dpi_save,latex_bool = latex_bool)
         if Data.alpha_change != "behavioural_independence":
             plot_cultural_range_timeseries(fileName, Data, dpi_save,latex_bool = latex_bool)
-            plot_average_culture_timeseries(fileName,Data,dpi_save,latex_bool = latex_bool)
+            plot_average_identity_timeseries(fileName,Data,dpi_save,latex_bool = latex_bool)
     elif PLOT_NAME == "ANIMATION":
         if Data.alpha_change != "behavioural_independence":
-            anim = live_animate_culture_network_weighting_matrix(
+            anim = live_animate_identity_network_weighting_matrix(
                 fileName,
                 Data,
                 cmap_weighting,

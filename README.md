@@ -1,5 +1,3 @@
- - **Code associated with working paper, "An agent-based model of cultural change for a low-carbon transition" available at https://ssrn.com/abstract=4344035.**
-
 ## Folder structure:
 Inside the package folder, you will find a set of folders that include the core model itself, running, plotting and other utility code. Additionally, there are two jupyter notebooks. The first of which, "produce_figures.ipynb" is a guide to reproduce the figures found in the paper, some of these require substantial run times. Secondly, there is "model_playground.ipynb" which allows you to test out a single model run for a variety of different parameter inputs and produce different plots and animations to analyse that experiment.
 
@@ -33,5 +31,3 @@ The python files that the core model is built of may be found in package/model, 
 	python -m jupyter notebook
 	```  
 7. Finally, have a play around with both the model parameters in "model_playground.ipynb" and reproduce paper figures using "produce_figures.ipynb".
-
-For any questions please contact Daniel Torren Peraire at Daniel.Torren@uab.cat.

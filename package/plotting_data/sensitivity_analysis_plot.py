@@ -1,7 +1,5 @@
 """Performs sobol sensitivity analysis on the model. 
 
-Author: Daniel Torren Peraire Daniel.Torren@uab.cat dtorrenp@hotmail.com
-
 Created: 10/10/2022
 """
 
@@ -169,13 +167,7 @@ def Merge_dict_SA(data_sa_dict: dict, plot_dict: dict) -> dict:
         Dictionary of dictionaries of data associated with each output measure from the sensitivity analysis for a specific sobol index
     plot_dict: dict
         data structure that contains specifics about how a plot should look for each output measure from the sensitivity analysis
-        e.g
-        plot_dict = {
-            "emissions" : {"title": r"$E/NM$",  "colour": "r", "linestyle": "--"},
-            "mu" : {"title": r"$\mu/NM$", "colour": "g", "linestyle": "-"},
-            "var" : {"title": r"$\sigma^{2}$", "colour": "k", "linestyle": "*"},
-            "coefficient_of_variance" : {"title": r"$\sigma NM/\mu$", "colour": "static_culturally_determined_weights","linestyle": "-."},
-        }
+
     Returns
     -------
     data_sa_dict: dict

@@ -1,9 +1,8 @@
 """Create social network with individuals
 A module that use input data to generate a social network containing individuals who each have multiple 
-behaviours. The weighting of indivdiuals within the social network is determined by the identity distance 
+behaviours. The weighting of individuals within the social network is determined by the identity distance 
 between neighbours. The simulation evolves over time saving data at set intervals to reduce data output.
 
-Author: Daniel Torren Peraire Daniel.Torren@uab.cat dtorrenp@hotmail.com
 
 Created: 10/10/2022
 """
@@ -13,7 +12,6 @@ import numpy as np
 import networkx as nx
 import numpy.typing as npt
 from package.model.individuals import Individual
-from package.model.green_influencers import Green_influencer
 from package.model.one_m_green_influencer import Individual_one_m_green_influencer
 
 # modules
@@ -52,12 +50,12 @@ class Network:
     prob_rewire: float
         Probability of rewiring connections in the social network from one indivdual to another. The greater this values
         the more long distance connections within the network exist. Domain = [0,1]
-    culture_inertia: float
+    cultural_inertia: float
         the number of steps into the past that are considered when individuals consider their identity
     discount_factor: float
         the degree to which each previous time step has a decreasing importance to an individuals memory. Domain = [0,1]
     normalized_discount_array: npt.NDArray[float]
-        discounting time series that is the length of that agents culture_inertia. The array is row normalized so that each row sums to 1
+        discounting time series that is the length of that agents cultural_inertia. The array is row normalized so that each row sums to 1
     confirmation_bias: float
         the extent to which individuals will only pay attention to other idividuals who are similar to them in social interactions
     learning_error_scale: float
@@ -70,13 +68,13 @@ class Network:
     shuffle_reps: int
         the number of time indivdiuals swap positions within the social network, note that this doesn't affect the actual network structure
     a_attitude,bb_attitude, a_threshold, b_threshold: float
-        parameters used to generate the beta distribution for the intial agent attitudes and threholds for each behaviour respectively.
+        parameters used to generate the beta distribution for the initial agent attitudes and threholds for each behaviour respectively.
         The same distribution is used for all agents and behaviours
     attitude_matrix_init: npt.NDArray[float]
-        array of shape (N,M) with the intial values of the attitudes of each agent towards M behaviours which then evolve over time. Used to generated
+        array of shape (N,M) with the initial values of the attitudes of each agent towards M behaviours which then evolve over time. Used to generated
         Indivdual objects
     threshold_matrix_init: npt.NDArray[float]
-        array of shape (N,M) with the intial values of the thresholds of each agent towards M behaviours, these are static. Used to generated
+        array of shape (N,M) with the initial values of the thresholds of each agent towards M behaviours, these are static. Used to generated
         Indivdual objects
     agent_list: list[Individual]
         list of Individuals objects containing behaviours of each individual
@@ -89,15 +87,15 @@ class Network:
         a networkx watts strogatz small world graph
     social_component_matrix: npt.NDArray[float]
         NxM array of influence of neighbours on an individual's attitudes towards M behaviours
-    average_culture: float
+    average_identity: float
         average identity of society
-    std_culture : float
+    std_identity : float
         standard deviation of agent identies at time t
-    var_culture: float
+    var_identity: float
         variance of agent identies at time t
-    min_culture: float
+    min_identity: float
         minimum individual identity at time t
-    max_culture: float
+    max_identity: float
         maximum individual idenity at time t
     weighting_matrix_convergence: float
         total change in agent link strength from previous to current step, a measure of convergece should tend to zero
@@ -107,20 +105,20 @@ class Network:
         time series of weighting_matrix
     history_social_component_matrix: list[npt.NDArray[float]]
         time series of social_component_matrix
-    history_var_culture: list[float]
-        time series of var_culture
+    history_var_identity: list[float]
+        time series of var_identity
     history_time: list[float]
         time series of time
     history_total_carbon_emission: list[float]
         time series of total_carbon_emissions in the system, not the carbon_emissions for each behaviour
     history_weighting_matrix_convergence: list[float]
         time series of weighting_matrix_convergence
-    history_average_culture: list[float]
-        time series of average agent culture
-    history_std_culture: list[float]
-        time series of std_culture
-    history_min_culture: list[float]
-        time series of min_culture
+    history_average_identity: list[float]
+        time series of average agent identity
+    history_std_identity: list[float]
+        time series of std_identity
+    history_min_identity: list[float]
+        time series of min_identity
     
 
     Methods
@@ -149,7 +147,7 @@ class Network:
         Update the link strength array according to the new agent identities
     calc_total_emissions() -> int:
         Calculate total carbon emissions of N*M behaviours
-    calc_network_culture() ->  tuple[float, float, float, float]:
+    calc_network_identity() ->  tuple[float, float, float, float]:
         Return various identity properties
     update_individuals():
         Update Individual objects with new information
@@ -173,7 +171,7 @@ class Network:
         self.set_seed = parameters["set_seed"]
         np.random.seed(self.set_seed)
 
-        self.K = int(round(parameters["K"]))  # round due to the sampling method producing floats in the Sobol Sensitivity Analysis (SA)
+        self.K = int(round(parameters["K"]))  # round due to the sampling method producing floats in the Sobol Sensitivity Analysis
         self.prob_rewire = parameters["prob_rewire"]
         self.alpha_change = parameters["alpha_change"]
         self.save_timeseries_data = parameters["save_timeseries_data"]
@@ -187,8 +185,8 @@ class Network:
         self.M = int(round(parameters["M"]))
         self.N = int(round(parameters["N"]))
         
-        # culture
-        self.culture_inertia = int(round(parameters["culture_inertia"]))
+        # identity
+        self.cultural_inertia = int(round(parameters["cultural_inertia"]))
 
         # time discounting
         self.discount_factor = parameters["discount_factor"]
@@ -223,7 +221,7 @@ class Network:
                 self.network,
             ) = self.create_weighting_matrix()
 
-        if self.alpha_change == "behavioural_independence":#independant behaviours
+        if self.alpha_change == "behavioural_independence":
             self.weighting_matrix_list = [self.weighting_matrix]*self.M
 
         self.network_density = nx.density(self.network)
@@ -236,7 +234,7 @@ class Network:
         (
             self.attitude_matrix_init,
             self.threshold_matrix_init,
-        ) = self.generate_init_data_behaviours()#self.generate_init_data_behaviours_two_types()#
+        ) = self.generate_init_data_behaviours()
 
         self.agent_list = self.create_agent_list()
 
@@ -244,7 +242,7 @@ class Network:
             self.add_green_influencers_list()
             self.N = len(self.agent_list)
 
-        self.shuffle_agent_list()#partial shuffle of the list based on culture
+        self.shuffle_agent_list()#partial shuffle of the list based on identity
 
         self.social_component_matrix = self.calc_social_component_matrix()
 
@@ -257,13 +255,13 @@ class Network:
         self.total_carbon_emissions = self.init_total_carbon_emissions
 
         (
-                self.culture_list,
-                self.average_culture,
-                self.std_culture,
-                self.var_culture,
-                self.min_culture,
-                self.max_culture,
-        ) = self.calc_network_culture()
+                self.identity_list,
+                self.average_identity,
+                self.std_identity,
+                self.var_identity,
+                self.min_identity,
+                self.max_identity,
+        ) = self.calc_network_identity()
 
         if self.save_timeseries_data:
             self.history_weighting_matrix = [self.weighting_matrix]
@@ -273,11 +271,11 @@ class Network:
             self.history_weighting_matrix_convergence = [
                 self.weighting_matrix_convergence
             ]
-            self.history_average_culture = [self.average_culture]
-            self.history_std_culture = [self.std_culture]
-            self.history_var_culture = [self.var_culture]
-            self.history_min_culture = [self.min_culture]
-            self.history_max_culture = [self.max_culture]
+            self.history_average_identity = [self.average_identity]
+            self.history_std_identity = [self.std_identity]
+            self.history_var_identity = [self.var_identity]
+            self.history_min_identity = [self.min_identity]
+            self.history_max_identity = [self.max_identity]
             self.history_total_carbon_emissions = [self.total_carbon_emissions]
             if self.alpha_change == ("static_culturally_determined_weights" or "dynamic_culturally_determined_weights"):
                 self.history_total_identity_differences = [self.total_identity_differences]
@@ -315,7 +313,7 @@ class Network:
             row normalized truncated quasi-hyperbolic discount array
         """
 
-        discount_row = [(self.discount_factor)**(v) for v in range(self.culture_inertia)]
+        discount_row = [(self.discount_factor)**(v) for v in range(self.cultural_inertia)]
         normalized_discount_array = (np.asarray(discount_row)/sum(discount_row))
 
 
@@ -340,7 +338,7 @@ class Network:
             a networkx watts strogatz small world graph
         """
 
-        G = nx.watts_strogatz_graph(n=self.N, k=self.K, p=self.prob_rewire, seed=self.set_seed)  # Watts–Strogatz small-world graph,watts_strogatz_graph( n, k, p[, seed])
+        G = nx.watts_strogatz_graph(n=self.N, k=self.K, p=self.prob_rewire, seed=self.set_seed)
 
         weighting_matrix = nx.to_numpy_array(G)
 
@@ -371,7 +369,7 @@ class Network:
             a networkx watts strogatz small world graph
         """
 
-        G = nx.watts_strogatz_graph(n=self.N+self.green_N, k=self.K, p=self.prob_rewire, seed=self.set_seed)  # Watts–Strogatz small-world graph,watts_strogatz_graph( n, k, p[, seed])
+        G = nx.watts_strogatz_graph(n=self.N+self.green_N, k=self.K, p=self.prob_rewire, seed=self.set_seed)
 
         weighting_matrix = nx.to_numpy_array(G)
 
@@ -474,7 +472,7 @@ class Network:
                 self.attitude_matrix_init[n],
                 self.threshold_matrix_init[n],
                 self.normalized_discount_array,
-                self.culture_inertia,
+                self.cultural_inertia,
                 n
             )
             for n in range(self.N)
@@ -510,7 +508,7 @@ class Network:
                 attitude_list_green_N[n],
                 threshold_list_green_N[n],
                 self.normalized_discount_array,
-                self.culture_inertia,
+                self.cultural_inertia,
                 self.N + n
             )
             for n in range(self.green_N)
@@ -521,8 +519,8 @@ class Network:
 
     def shuffle_agent_list(self): 
         #make list cirucalr then partial shuffle it
-        self.agent_list.sort(key=lambda x: x.culture)#sorted by culture
-        self.circular_agent_list()#agent list is now circular in terms of culture
+        self.agent_list.sort(key=lambda x: x.identity)#sorted by identity
+        self.circular_agent_list()#agent list is now circular in terms of identity
         self.partial_shuffle_agent_list()#partial shuffle of the list
 
     def calc_ego_influence_degroot(self) -> npt.NDArray:
@@ -630,9 +628,9 @@ class Network:
         total_difference: float
             total element wise difference between the previous weighting arrays
         """
-        culture_list = np.array([x.culture for x in self.agent_list])
+        identity_list = np.array([x.identity for x in self.agent_list])
 
-        difference_matrix = np.subtract.outer(culture_list, culture_list)
+        difference_matrix = np.subtract.outer(identity_list, identity_list)
 
         alpha_numerator = np.exp(
             -np.multiply(self.confirmation_bias, np.abs(difference_matrix))
@@ -656,7 +654,7 @@ class Network:
             )
             return norm_weighting_matrix, total_identity_differences, total_difference 
         else:
-            return norm_weighting_matrix, total_identity_differences, 0 # BODGE! bodge for mypy
+            return norm_weighting_matrix, total_identity_differences, 0
     
     def update_weightings_list(self):
         """
@@ -713,7 +711,7 @@ class Network:
         )
         return total_network_emissions
 
-    def calc_network_culture(self) -> tuple[float, float, float, float]:
+    def calc_network_identity(self) -> tuple[float, float, float, float]:
         """
         Return various identity properties, such as mean, variance, min and max
 
@@ -723,26 +721,26 @@ class Network:
 
         Returns
         -------
-        culture_list: list
-            list of individuals culture 
-        culture_mean: float
+        identity_list: list
+            list of individuals identity 
+        identity_mean: float
             mean of network identity at time step t
-        culture_std: float
+        identity_std: float
             std of network identity at time step t
-        culture_variance: float
+        identity_variance: float
             variance of network identity at time step t
-        culture_max: float
+        identity_max: float
             max of network identity at time step t
-        culture_min: float
+        identity_min: float
             min of network identity at time step t
         """
-        culture_list = [x.culture for x in self.agent_list]
-        culture_mean = np.mean(culture_list)
-        culture_std = np.std(culture_list)
-        culture_variance = np.var(culture_list)
-        culture_max = max(culture_list)
-        culture_min = min(culture_list)
-        return (culture_list,culture_mean, culture_std, culture_variance, culture_max, culture_min)
+        identity_list = [x.identity for x in self.agent_list]
+        identity_mean = np.mean(identity_list)
+        identity_std = np.std(identity_list)
+        identity_variance = np.var(identity_list)
+        identity_max = max(identity_list)
+        identity_min = min(identity_list)
+        return (identity_list,identity_mean, identity_std, identity_variance, identity_max, identity_min)
 
     def update_individuals(self):
         """
@@ -779,11 +777,11 @@ class Network:
         self.history_weighting_matrix_convergence.append(
             self.weighting_matrix_convergence
         )
-        self.history_average_culture.append(self.average_culture)
-        self.history_std_culture.append(self.std_culture)
-        self.history_var_culture.append(self.var_culture)
-        self.history_min_culture.append(self.min_culture)
-        self.history_max_culture.append(self.max_culture)
+        self.history_average_identity.append(self.average_identity)
+        self.history_std_identity.append(self.std_identity)
+        self.history_var_identity.append(self.var_identity)
+        self.history_min_identity.append(self.min_identity)
+        self.history_max_identity.append(self.max_identity)
         self.history_total_carbon_emissions.append(self.total_carbon_emissions)
         if self.alpha_change == ("static_culturally_determined_weights" or "dynamic_culturally_determined_weights"):
             self.history_total_identity_differences.append(self.total_identity_differences)
@@ -817,19 +815,19 @@ class Network:
                 ) = self.update_weightings()
             else:
                 self.weighting_matrix, self.total_identity_differences,__ = self.update_weightings()
-        elif self.alpha_change == "behavioural_independence":#independaent behaviours
+        elif self.alpha_change == "behavioural_independence":#independent behaviours
             self.weighting_matrix_list = self.update_weightings_list()
 
         self.social_component_matrix = self.calc_social_component_matrix()
         self.total_carbon_emissions = self.calc_total_emissions()
         (
-                self.culture_list,
-                self.average_culture,
-                self.std_culture,
-                self.var_culture,
-                self.min_culture,
-                self.max_culture,
-        ) = self.calc_network_culture()
+                self.identity_list,
+                self.average_identity,
+                self.std_identity,
+                self.var_identity,
+                self.min_identity,
+                self.max_identity,
+        ) = self.calc_network_identity()
         
         if (self.t % self.compression_factor == 0) and (self.save_timeseries_data):
             self.save_timeseries_data_network()

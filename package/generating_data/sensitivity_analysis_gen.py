@@ -1,6 +1,6 @@
 """Generate data for sensitivity analysis
 
-Author: Daniel Torren Peraire Daniel.Torren@uab.cat dtorrenp@hotmail.com
+
 
 Created: 10/10/2022
 """
