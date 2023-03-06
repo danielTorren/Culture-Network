@@ -347,6 +347,34 @@ def print_live_initial_identity_networks_and_identity_timeseries(
     )
     fig.savefig(f_eps, dpi=dpi_save, format="eps")
 
+def plot_single(data_dict_list,fileName_list, dpi_save, latex_bool = 1):
+    if latex_bool:
+        set_latex()
+
+    fig, ax = plt.subplots(figsize=(10,7))
+    ax.set_ylabel( r"Relative $\%$ change in final emissions, $\% \Delta E_{\tau}$")
+    ax.set_xlabel(r"Initial attitude distance between green- and non-influencers")
+    mean_list =  data_dict_list[0]["mean_list"]
+    mu_emissions_difference_matrix_compare_identity = data_dict_list[0]["emissions_difference_matrix_compare_identity"].mean(axis=1)
+    min_emissions_difference_matrix_compare_identity = data_dict_list[0]["emissions_difference_matrix_compare_identity"].min(axis=1)
+    max_emissions_difference_matrix_compare_identity = data_dict_list[0]["emissions_difference_matrix_compare_identity"].max(axis=1)
+
+    mu_emissions_difference_matrix_compare_no_identity = data_dict_list[0]["emissions_difference_matrix_compare_no_identity"].mean(axis=1)
+    min_emissions_difference_matrix_compare_no_identity = data_dict_list[0]["emissions_difference_matrix_compare_no_identity"].min(axis=1)
+    max_emissions_difference_matrix_compare_no_identity = data_dict_list[0]["emissions_difference_matrix_compare_no_identity"].max(axis=1)
+
+    ax.plot(mean_list[::-1],mu_emissions_difference_matrix_compare_identity, ls="-", linewidth = 0.5, color='black', label = r"Inter-behavioural dependence")
+    ax.fill_between(mean_list[::-1], min_emissions_difference_matrix_compare_identity, max_emissions_difference_matrix_compare_identity, facecolor='black', alpha=0.5)
+    ax.plot(mean_list[::-1],mu_emissions_difference_matrix_compare_no_identity, ls="--", linewidth = 0.5, color='red', label = r"Behavioural independence")
+    ax.fill_between(mean_list[::-1], min_emissions_difference_matrix_compare_no_identity, max_emissions_difference_matrix_compare_no_identity, facecolor='red', alpha=0.5)
+    ax.legend(loc = "lower right")
+
+    for fileName in fileName_list:
+        plotName = fileName + "/Plots"
+        f = plotName + "/plot_single_%s" % (len(mean_list))
+        fig.savefig(f + ".eps", dpi=dpi_save, format="eps")
+        fig.savefig(f + ".png", dpi=dpi_save, format="png")
+
 def plot_diff_emissions_comparison(data_dict_list,fileName_list, dpi_save, latex_bool = 0):
     if latex_bool:
         set_latex()
