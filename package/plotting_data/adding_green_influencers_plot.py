@@ -36,8 +36,8 @@ def main(fileName_list = ["results/green_influencers_culture_four_alt_18_00_22__
     for fileName in fileName_list:
         data_dict_list.append(load_data(fileName))
 
-    #plot_diff_emissions_comparison(data_dict_list, fileName_list,dpi_save, latex_bool = latex_bool)
-    plot_single(data_dict_list, fileName_list,dpi_save)
+    plot_diff_emissions_comparison(data_dict_list, fileName_list,dpi_save, latex_bool = latex_bool)
+    #plot_single(data_dict_list, fileName_list,dpi_save)
     plt.show()  
 
 if __name__ == '__main__':

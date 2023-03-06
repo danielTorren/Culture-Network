@@ -11,6 +11,7 @@ Created: 10/10/2022
 import numpy as np
 import networkx as nx
 import numpy.typing as npt
+from sklearn.metrics.pairwise import euclidean_distances
 from package.model.individuals import Individual
 from package.model.one_m_green_influencer import Individual_one_m_green_influencer
 
@@ -612,6 +613,25 @@ class Network:
         total_difference = (np.abs(difference_matrix)).sum()
         return total_difference
 
+    def calc_weighting_matrix_attribute(self,attribute_array):
+
+        difference_matrix =  euclidean_distances(attribute_array,attribute_array)
+
+        alpha_numerator = np.exp(
+            -np.multiply(self.confirmation_bias, difference_matrix)
+        )
+        #print("alpha numerator", alpha_numerator)
+
+        non_diagonal_weighting_matrix = (
+            self.adjacency_matrix*alpha_numerator
+        )  # We want onlythose values that have network connections
+
+        norm_weighting_matrix = self.normlize_matrix(
+            non_diagonal_weighting_matrix
+        )  # normalize the matrix row wise
+    
+        return norm_weighting_matrix,difference_matrix
+
     def update_weightings(self) -> tuple[npt.NDArray, float]:
         """
         Update the link strength array according to the new agent identities
@@ -629,20 +649,8 @@ class Network:
             total element wise difference between the previous weighting arrays
         """
         identity_list = np.array([x.identity for x in self.agent_list])
-
-        difference_matrix = np.subtract.outer(identity_list, identity_list)
-
-        alpha_numerator = np.exp(
-            -np.multiply(self.confirmation_bias, np.abs(difference_matrix))
-        )
-
-        non_diagonal_weighting_matrix = (
-            self.adjacency_matrix * alpha_numerator
-        )  # We want only those values that have network connections
-
-        norm_weighting_matrix = self.normlize_matrix(
-            non_diagonal_weighting_matrix
-        )  # normalize the matrix row wise
+        identity_array = np.asarray(identity_list).reshape(-1, 1)
+        norm_weighting_matrix, difference_matrix = self.calc_weighting_matrix_attribute(identity_array)
 
         #for total_identity_differences
         difference_matrix_real_connections = abs(self.adjacency_matrix * difference_matrix)
@@ -673,20 +681,8 @@ class Network:
 
         for m in range(self.M):
             attitude_star_list = np.array([x.attitudes_star[m] for x in self.agent_list])
-
-            difference_matrix = np.subtract.outer(attitude_star_list, attitude_star_list)
-
-            alpha_numerator = np.exp(
-                -np.multiply(self.confirmation_bias, np.abs(difference_matrix))
-            )
-
-            non_diagonal_weighting_matrix = (
-                self.adjacency_matrix * alpha_numerator
-            )  # We want only those values that have network connections
-
-            norm_weighting_matrix = self.normlize_matrix(
-                non_diagonal_weighting_matrix
-            )  # normalize the matrix row wise
+            attitude_star_array = np.asarray(attitude_star_list).reshape(-1, 1)
+            norm_weighting_matrix, __ = self.calc_weighting_matrix_attribute(attitude_star_array)
 
             weighting_matrix_list.append(norm_weighting_matrix)
 
