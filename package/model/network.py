@@ -171,7 +171,7 @@ class Network:
         self.set_seed = parameters["set_seed"]
         np.random.seed(self.set_seed)
 
-        self.K = int(round(parameters["K"]))  # round due to the sampling method producing floats in the Sobol Sensitivity Analysis
+        #self.K = int(round(parameters["K"]))  # round due to the sampling method producing floats in the Sobol Sensitivity Analysis
         self.prob_rewire = parameters["prob_rewire"]
         self.alpha_change = parameters["alpha_change"]
         self.save_timeseries_data = parameters["save_timeseries_data"]
@@ -182,8 +182,10 @@ class Network:
 
         # network
         self.green_N = int(round(parameters["green_N"]))
+        self.network_density = parameters["network_density"]
         self.M = int(round(parameters["M"]))
         self.N = int(round(parameters["N"]))
+        self.K = int(round((self.N - 1)*self.network_density))
         
         # identity
         self.cultural_inertia = int(round(parameters["cultural_inertia"]))
@@ -200,6 +202,7 @@ class Network:
         self.phi_lower = parameters["phi_lower"]
         self.phi_upper = parameters["phi_upper"]
         self.phi_array = np.linspace(self.phi_lower, self.phi_upper, num=self.M)
+        self.clipping_epsilon = parameters["clipping_epsilon"]
 
         # network homophily
         self.homophily = parameters["homophily"]  # 0-1
@@ -226,15 +229,23 @@ class Network:
 
         self.network_density = nx.density(self.network)
         
-        self.a_attitude = parameters["a_attitude"]
-        self.b_attitude = parameters["b_attitude"]
+        #self.a_attitude = parameters["a_attitude"]
+        #self.b_attitude = parameters["b_attitude"]
         self.a_threshold = parameters["a_threshold"]
         self.b_threshold = parameters["b_threshold"]
 
+        #(
+        #    self.attitude_matrix_init,
+        #    self.threshold_matrix_init,
+        #) = self.generate_init_data_behaviours()
+
+        self.a_identity = parameters["a_identity"]
+        self.b_identity = parameters["b_identity"]
+        self.var_low_carbon_attitude = parameters["var_low_carbon_attitude"]
         (
             self.attitude_matrix_init,
             self.threshold_matrix_init,
-        ) = self.generate_init_data_behaviours()
+        ) = self.generate_init_data_behaviours_alt()
 
         self.agent_list = self.create_agent_list()
 
@@ -442,6 +453,22 @@ class Network:
         threshold_matrix = np.asarray(threshold_list)
 
         return attitude_matrix, threshold_matrix
+    
+    def generate_init_data_behaviours_alt(self) -> tuple[npt.NDArray, npt.NDArray]:
+
+        indentities_beta = np.random.beta( self.a_identity, self.b_identity, size=self.N)
+
+        attitude_uncapped = np.asarray([np.random.normal(identity,self.var_low_carbon_attitude, size=self.M) for identity in  indentities_beta])
+
+        attitude_matrix = np.clip(attitude_uncapped, 0 + self.clipping_epsilon, 1- self.clipping_epsilon)
+
+        threshold_list = [
+            np.random.beta(self.a_threshold, self.b_threshold, size=self.M)
+            for n in range(self.N)
+        ]
+        threshold_matrix = np.asarray(threshold_list)
+
+        return attitude_matrix,threshold_matrix #,individual_budget_matrix#, norm_service_preference_matrix,  low_carbon_substitutability_matrix ,prices_high_carbon_matrix
 
     def create_agent_list(self) -> list[Individual]:
         """
@@ -483,15 +510,17 @@ class Network:
     def add_green_influencers_list(self):
         """Add green influencers to agent list"""
 
-        attitude_list_green_N = [
-            np.random.beta(self.a_attitude, self.b_attitude, size=self.M)
-            for n in range(self.green_N)
-        ]
+        indentities_beta = np.random.beta( self.a_identity, self.b_identity, size=self.green_N)
 
-        threshold_list_green_N  = [
+        attitude_uncapped = np.asarray([np.random.normal(identity,self.var_low_carbon_attitude, size=self.M) for identity in  indentities_beta])
+
+        attitude_list_green_N = np.clip(attitude_uncapped, 0 + self.clipping_epsilon, 1- self.clipping_epsilon)
+
+        threshold_list = [
             np.random.beta(self.a_threshold, self.b_threshold, size=self.M)
             for n in range(self.green_N)
         ]
+        threshold_list_green_N = np.asarray(threshold_list)
 
         individual_params = {
             "t": self.t,

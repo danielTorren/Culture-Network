@@ -1,4 +1,4 @@
 {
-    "row":{"property":"a_attitude","min":0.05, "max": 8, "title": "Initial attitude Beta $a_A$","divisions": "linear", "reps": 64}, 
-    "col":{"property":"b_attitude","min":0.05, "max": 8, "title": "Initial attitude Beta $b_A$","divisions": "linear", "reps": 64} 
+    "row":{"property":"a_identity","min":0.05, "max": 8, "title": "Initial identity Beta $a_I$","divisions": "linear", "reps": 64}, 
+    "col":{"property":"b_identity","min":0.05, "max": 8, "title": "Initial identity Beta $b_I$","divisions": "linear", "reps": 64} 
 }

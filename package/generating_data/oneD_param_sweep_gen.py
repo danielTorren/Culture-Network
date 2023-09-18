@@ -50,8 +50,8 @@ def main(
 
     if RUN_TYPE == 0:
         #FOR POLARISATION A,B PLOT
-        property_varied = "a_attitude"
-        property_varied_title = "Attitude Beta parameters, (a,b)"
+        property_varied = "a_identity"
+        property_varied_title = "Indentity Beta parameters, (a,b)"
         property_values_list = np.asarray([0.05, 0.3, 2.0])
     elif RUN_TYPE == 1:
         ###############################
@@ -72,16 +72,16 @@ def main(
         case_2 = params.copy()
         case_3 = params.copy()
 
-        case_3["a_attitude"] = 0.05
-        case_3["b_attitude"] = 0.05
+        case_3["a_identity"] = 0.05
+        case_3["b_identity"] = 0.05
         case_3["confirmation_bias"] = 40
 
-        case_2["a_attitude"] = 0.3
-        case_2["b_attitude"] = 0.3  
+        case_2["a_identity"] = 0.3
+        case_2["b_identity"] = 0.3  
         case_2["confirmation_bias"] = 18
 
-        case_1["a_attitude"] = 2.0
-        case_1["b_attitude"] = 2.0
+        case_1["a_identity"] = 2.0
+        case_1["b_identity"] = 2.0
         case_1["confirmation_bias"] = 10
 
         params_list = [case_1, case_2, case_3]

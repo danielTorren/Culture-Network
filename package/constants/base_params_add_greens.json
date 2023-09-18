@@ -9,7 +9,7 @@
     "set_seed": 1,
     "N": 200,
     "M": 3,
-    "K": 20,
+    "network_density": 0.1,
     "prob_rewire": 0.1,
     "cultural_inertia": 1000,
     "learning_error_scale": 0.02,
@@ -17,5 +17,7 @@
     "homophily": 0.95,
     "a_threshold": 1,
     "b_threshold": 1,
-    "green_N": 0
+    "green_N": 0,
+    "var_low_carbon_attitude": 0.03,
+    "clipping_epsilon": 1e-4
 }

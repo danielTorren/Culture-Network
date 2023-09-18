@@ -21,12 +21,12 @@ def calc_new_K(K,N, N_green):
 
 def gen_atttiudes_list(mean_list, sum_a_b):
     """From a list of mean distribution values calc the corresponding a and  b values for a given polarisation"""
-    init_attitudes_list = []
+    init_identity_list = []
     for i in mean_list:
         a = i*sum_a_b
         b = sum_a_b - a
-        init_attitudes_list.append([a,b])
-    return init_attitudes_list
+        init_identity_list.append([a,b])
+    return init_identity_list
 
 def calc_attribute_percentage_change(carbon_emissions_not_influencer_no_green_no_identity,carbon_emissions_not_influencer_no_green_identity,carbon_emissions_not_influencer_green_no_identity,carbon_emissions_not_influencer_green_identity,mean_list,base_params):
 
@@ -48,7 +48,7 @@ def main(RUN = 1,BASE_PARAMS_LOAD = "package/constants/base_params_add_greens.js
         
         mean_list = np.linspace(0.01,0.99, param_vary_reps)
 
-        init_attitudes_list = gen_atttiudes_list(mean_list, sum_a_b)# GET THE LIST
+        init_identity_list = gen_atttiudes_list(mean_list, sum_a_b)# GET THE LIST
 
         base_params["confirmation_bias"] = confirmation_bias
         ##########################################################################################
@@ -69,18 +69,18 @@ def main(RUN = 1,BASE_PARAMS_LOAD = "package/constants/base_params_add_greens.js
 
         params_list_green_identity = []
         base_params_green_identity["alpha_change"] = "dynamic_culturally_determined_weights"
-        for i in init_attitudes_list:
+        for i in init_identity_list:
             #print("i",i)
-            base_params_green_identity["a_attitude"] = i[0]
-            base_params_green_identity["b_attitude"] = i[1]
+            base_params_green_identity["a_identity"] = i[0]
+            base_params_green_identity["b_identity"] = i[1]
             params_list_green_identity.append(base_params_green_identity.copy())
 
         params_list_green_no_identity  = []
         base_params_green_no_identity["alpha_change"] = "behavioural_independence"
-        for i in init_attitudes_list:
+        for i in init_identity_list:
             #print("i",i)
-            base_params_green_no_identity["a_attitude"] = i[0]
-            base_params_green_no_identity["b_attitude"] = i[1]
+            base_params_green_no_identity["a_identity"] = i[0]
+            base_params_green_no_identity["b_identity"] = i[1]
             params_list_green_no_identity.append(base_params_green_no_identity.copy())
 
 
@@ -93,18 +93,18 @@ def main(RUN = 1,BASE_PARAMS_LOAD = "package/constants/base_params_add_greens.js
         
         params_list_no_green_identity = []
         base_params_no_green_identity["alpha_change"] = "dynamic_culturally_determined_weights"
-        for i in init_attitudes_list:
+        for i in init_identity_list:
             #print("i",i)
-            base_params_no_green_identity["a_attitude"] = i[0]
-            base_params_no_green_identity["b_attitude"] = i[1]
+            base_params_no_green_identity["a_identity"] = i[0]
+            base_params_no_green_identity["b_identity"] = i[1]
             params_list_no_green_identity.append(base_params_no_green_identity.copy())
 
         params_list_no_green_no_identity  = []
         base_params_no_green_no_identity["alpha_change"] = "behavioural_independence"
-        for i in init_attitudes_list:
+        for i in init_identity_list:
             #print("i",i)
-            base_params_no_green_no_identity["a_attitude"] = i[0]
-            base_params_no_green_no_identity["b_attitude"] = i[1]
+            base_params_no_green_no_identity["a_identity"] = i[0]
+            base_params_no_green_no_identity["b_identity"] = i[1]
             params_list_no_green_no_identity.append(base_params_no_green_no_identity.copy())
 
         #############################################################
@@ -145,7 +145,7 @@ def main(RUN = 1,BASE_PARAMS_LOAD = "package/constants/base_params_add_greens.js
         save_object(mean_list, fileName + "/Data", "mean_list")
         save_object(sum_a_b , fileName + "/Data", "sum_a_b")
         save_object(base_params, fileName + "/Data", "base_params")
-        save_object(init_attitudes_list,fileName + "/Data", "init_attitudes_list")
+        save_object(init_identity_list,fileName + "/Data", "init_identity_list")
         save_object(green_N, fileName + "/Data", "green_N")
         save_object(green_K, fileName + "/Data", "green_K")   
     return fileName
