@@ -20,9 +20,9 @@ def main(
 ) -> None:
         
     variable_parameters_dict = load_object(fileName + "/Data", "variable_parameters_dict")
-    results_emissions = load_object(fileName + "/Data", "results_emissions")
+    results_emissions_flow = load_object(fileName + "/Data", "results_emissions_flow")
 
-    matrix_emissions = results_emissions.reshape((variable_parameters_dict["row"]["reps"], variable_parameters_dict["col"]["reps"]))
+    matrix_emissions = results_emissions_flow.reshape((variable_parameters_dict["row"]["reps"], variable_parameters_dict["col"]["reps"]))
 
     double_phase_diagram(fileName, matrix_emissions, r"Total normalised emissions $E/NM$", "emissions",variable_parameters_dict, get_cmap("Reds"),dpi_save, levels,latex_bool = latex_bool)  
 

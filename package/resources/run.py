@@ -53,17 +53,17 @@ def generate_first_behaviour_lists_one_seed_output(params):
     data = generate_data(params)
     return [x.attitudes[0] for x in data.agent_list]
 
-def generate_multi_output_individual_emissions_list(params):
+def generate_multi_output_individual_emissions_flow_list(params):
     """Individual specific emission and associated id to compare runs with and without behavioural interdependence"""
 
-    emissions_list = []
+    emissions_flow_list = []
     carbon_emissions_not_influencer = []
     for v in params["seed_list"]:
         params["set_seed"] = v
         data = generate_data(params)
-        emissions_list.append(data.total_carbon_emissions)
+        emissions_flow_list.append(data.total_carbon_emissions)
         carbon_emissions_not_influencer.append(sum(x.total_carbon_emissions for x in data.agent_list if not x.green_fountain_state))
-    return (emissions_list, carbon_emissions_not_influencer)
+    return (emissions_flow_list, carbon_emissions_not_influencer)
 
 def generate_sensitivity_output(params: dict):
     """
@@ -71,35 +71,39 @@ def generate_sensitivity_output(params: dict):
 
     """
 
-    emissions_list = []
+    emissions_flow_list = []
     mean_list = []
     var_list = []
     coefficient_variance_list = []
     emissions_change_list = []
+    emissions_stock_list = []
 
     for v in params["seed_list"]:
         params["set_seed"] = v
         data = generate_data(params)
         norm_factor = data.N * data.M
         # Insert more measures below that want to be used for evaluating the
-        emissions_list.append(data.total_carbon_emissions / norm_factor)
+        emissions_flow_list.append(data.total_carbon_emissions_flow / norm_factor)
         mean_list.append(data.average_identity)
         var_list.append(data.var_identity)
         coefficient_variance_list.append(data.std_identity / (data.average_identity))
-        emissions_change_list.append(np.abs(data.total_carbon_emissions - data.init_total_carbon_emissions)/norm_factor)
+        emissions_change_list.append(np.abs(data.total_carbon_emissions_flow - data.init_total_carbon_emissions)/norm_factor)
+        emissions_stock_list.append(data.total_carbon_emissions_stock/norm_factor)
 
-    stochastic_norm_emissions = np.mean(emissions_list)
+    stochastic_norm_emissions_flow = np.mean(emissions_flow_list)
     stochastic_norm_mean = np.mean(mean_list)
     stochastic_norm_var = np.mean(var_list)
     stochastic_norm_coefficient_variance = np.mean(coefficient_variance_list)
     stochastic_norm_emissions_change = np.mean(emissions_change_list)
+    stochastic_norm_emissions_stock= np.mean(emissions_stock_list)
 
     return (
-        stochastic_norm_emissions,
+        stochastic_norm_emissions_flow,
         stochastic_norm_mean,
         stochastic_norm_var,
         stochastic_norm_coefficient_variance,
-        stochastic_norm_emissions_change
+        stochastic_norm_emissions_change,
+        stochastic_norm_emissions_stock
     )
 
 def parallel_run(params_dict: dict[dict]) -> list[Network]:
@@ -119,15 +123,15 @@ def multi_stochstic_emissions_run_all_individual(
         params_dict: list[dict]
 ) -> npt.NDArray:
     num_cores = multiprocessing.cpu_count()
-    #res = [generate_multi_output_individual_emissions_list(i) for i in params_dict]
+    #res = [generate_multi_output_individual_emissions_flow_list(i) for i in params_dict]
     res = Parallel(n_jobs=num_cores, verbose=10)(
-        delayed(generate_multi_output_individual_emissions_list)(i) for i in params_dict
+        delayed(generate_multi_output_individual_emissions_flow_list)(i) for i in params_dict
     )
-    emissions_list, carbon_emissions_not_influencer = zip(
+    emissions_flow_list, carbon_emissions_not_influencer = zip(
         *res
     )
 
-    return np.asarray(emissions_list),np.asarray(carbon_emissions_not_influencer)
+    return np.asarray(emissions_flow_list),np.asarray(carbon_emissions_not_influencer)
 
 def one_seed_identity_data_run(
         params_dict: list[dict]
@@ -158,14 +162,15 @@ def parallel_run_sa(
     res = Parallel(n_jobs=num_cores, verbose=10)(
         delayed(generate_sensitivity_output)(i) for i in params_dict
     )
-    results_emissions, results_mean, results_var, results_coefficient_variance, results_emissions_change = zip(
+    results_emissions_flow, results_mean, results_var, results_coefficient_variance, results_emissions_flow_change, results_emissions_stock = zip(
         *res
     )
 
     return (
-        np.asarray(results_emissions),
+        np.asarray(results_emissions_flow),
         np.asarray(results_mean),
         np.asarray(results_var),
         np.asarray(results_coefficient_variance),
-        np.asarray(results_emissions_change)
+        np.asarray(results_emissions_flow_change),
+        np.asarray(results_emissions_stock)
     )

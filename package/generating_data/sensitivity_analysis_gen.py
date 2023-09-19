@@ -8,7 +8,7 @@ Created: 10/10/2022
 # imports
 import json
 import numpy as np
-from SALib.sample import saltelli
+from SALib.sample import sobol
 import numpy.typing as npt
 from package.resources.utility import (
     createFolder,
@@ -83,7 +83,7 @@ def generate_problem(
     createFolder(fileName)
 
     # GENERATE PARAMETER VALUES
-    param_values = saltelli.sample(
+    param_values = sobol.sample(
         problem, N_samples, calc_second_order=calc_second_order
     )  # NumPy matrix. #N(2D +2) samples where N is 1024 and D is the number of parameters
 
@@ -165,18 +165,19 @@ def main(
         param_values, base_params, variable_parameters_dict
     )
 
-    Y_emissions, Y_mu, Y_var, Y_coefficient_of_variance, Y_emissions_change = parallel_run_sa(
+    Y_emissions_flow, Y_mu, Y_var, Y_coefficient_of_variance, Y_emissions_flow_change, Y_emissions_stock = parallel_run_sa(
         params_list_sa
     )
     save_object(base_params, fileName + "/Data", "base_params")
     save_object(params_list_sa, fileName + "/Data", "params_list_sa")
     save_object(variable_parameters_dict, fileName + "/Data", "variable_parameters_dict")
     save_object(problem, fileName + "/Data", "problem")
-    save_object(Y_emissions, fileName + "/Data", "Y_emissions")
+    save_object(Y_emissions_flow, fileName + "/Data", "Y_emissions_flow")
     save_object(Y_mu, fileName + "/Data", "Y_mu")
     save_object(Y_var, fileName + "/Data", "Y_var")
     save_object(Y_coefficient_of_variance, fileName + "/Data", "Y_coefficient_of_variance")
-    save_object(Y_emissions_change, fileName + "/Data", "Y_emissions_change")
+    save_object(Y_emissions_flow_change, fileName + "/Data", "Y_emissions_flow_change")
+    save_object(Y_emissions_stock, fileName + "/Data", "Y_emissions_stock")
     save_object(N_samples , fileName + "/Data","N_samples")
     save_object(calc_second_order, fileName + "/Data","calc_second_order")
 
@@ -184,7 +185,7 @@ def main(
 
 if __name__ == '__main__':
     fileName_Figure_6 = main(
-    N_samples = 16,
-    BASE_PARAMS_LOAD = "package/constants/base_params_add_greens_SA.json",
-    VARIABLE_PARAMS_LOAD = "package/constants/variable_parameters_dict_SA_green.json"
+    N_samples = 2,
+    BASE_PARAMS_LOAD = "package/constants/base_params_SA.json",
+    VARIABLE_PARAMS_LOAD = "package/constants/variable_parameters_dict_SA.json"
 )

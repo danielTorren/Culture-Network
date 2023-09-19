@@ -145,7 +145,7 @@ class Network:
         Calculate the total change in link strength over one time step
     update_weightings()-> float:
         Update the link strength array according to the new agent identities
-    calc_total_emissions() -> int:
+    calc_total_emissions_flow() -> int:
         Calculate total carbon emissions of N*M behaviours
     calc_network_identity() ->  tuple[float, float, float, float]:
         Return various identity properties
@@ -262,8 +262,9 @@ class Network:
         elif self.alpha_change == "behavioural_independence":#independent behaviours
             self.weighting_matrix_list = self.update_weightings_list()
 
-        self.init_total_carbon_emissions  = self.calc_total_emissions()
-        self.total_carbon_emissions = self.init_total_carbon_emissions
+        self.init_total_carbon_emissions  = self.calc_total_emissions_flow()
+        self.total_carbon_emissions_flow = self.init_total_carbon_emissions
+        self.total_carbon_emissions_stock = self.init_total_carbon_emissions
 
         (
                 self.identity_list,
@@ -287,7 +288,8 @@ class Network:
             self.history_var_identity = [self.var_identity]
             self.history_min_identity = [self.min_identity]
             self.history_max_identity = [self.max_identity]
-            self.history_total_carbon_emissions = [self.total_carbon_emissions]
+            self.history_total_carbon_emissions_flow = [self.total_carbon_emissions_flow]
+            self.history_total_carbon_emissions_stock = [self.total_carbon_emissions_stock]
             if self.alpha_change == ("static_culturally_determined_weights" or "dynamic_culturally_determined_weights"):
                 self.history_total_identity_differences = [self.total_identity_differences]
 
@@ -722,7 +724,7 @@ class Network:
         return weighting_matrix_list
 
 
-    def calc_total_emissions(self) -> int:
+    def calc_total_emissions_flow(self) -> int:
         """
         Calculate total carbon emissions of N*M behaviours
 
@@ -736,7 +738,7 @@ class Network:
             total network emissions from each Individual object
         """
         total_network_emissions = sum(
-            [x.total_carbon_emissions for x in self.agent_list]
+            [x.individual_carbon_emissions_flow for x in self.agent_list]
         )
         return total_network_emissions
 
@@ -811,7 +813,8 @@ class Network:
         self.history_var_identity.append(self.var_identity)
         self.history_min_identity.append(self.min_identity)
         self.history_max_identity.append(self.max_identity)
-        self.history_total_carbon_emissions.append(self.total_carbon_emissions)
+        self.history_total_carbon_emissions_flow.append(self.total_carbon_emissions_flow)
+        self.history_total_carbon_emissions_stock.append(self.total_carbon_emissions_stock)
         if self.alpha_change == ("static_culturally_determined_weights" or "dynamic_culturally_determined_weights"):
             self.history_total_identity_differences.append(self.total_identity_differences)
 
@@ -848,7 +851,8 @@ class Network:
             self.weighting_matrix_list = self.update_weightings_list()
 
         self.social_component_matrix = self.calc_social_component_matrix()
-        self.total_carbon_emissions = self.calc_total_emissions()
+        self.total_carbon_emissions_flow = self.calc_total_emissions_flow()
+        self.total_carbon_emissions_stock += self.total_carbon_emissions_flow
         (
                 self.identity_list,
                 self.average_identity,

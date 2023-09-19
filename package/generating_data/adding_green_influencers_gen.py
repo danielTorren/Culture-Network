@@ -117,20 +117,20 @@ def main(RUN = 1,BASE_PARAMS_LOAD = "package/constants/base_params_add_greens.js
         ##############################################################################
         #DO THE RUNS
         #GREENS
-        emissions_list_green_no_identity, carbon_emissions_not_influencer_green_no_identity  = multi_stochstic_emissions_run_all_individual(params_list_green_no_identity)        
-        emissions_list_green_identity, carbon_emissions_not_influencer_green_identity = multi_stochstic_emissions_run_all_individual(params_list_green_identity)
+        emissions_flow_list_green_no_identity, carbon_emissions_not_influencer_green_no_identity  = multi_stochstic_emissions_run_all_individual(params_list_green_no_identity)        
+        emissions_flow_list_green_identity, carbon_emissions_not_influencer_green_identity = multi_stochstic_emissions_run_all_individual(params_list_green_identity)
         #NO GREENS
-        emissions_list_no_green_no_identity, carbon_emissions_not_influencer_no_green_no_identity = multi_stochstic_emissions_run_all_individual(params_list_no_green_no_identity)
-        emissions_list_no_green_identity, carbon_emissions_not_influencer_no_green_identity = multi_stochstic_emissions_run_all_individual(params_list_no_green_identity)
+        emissions_flow_list_no_green_no_identity, carbon_emissions_not_influencer_no_green_no_identity = multi_stochstic_emissions_run_all_individual(params_list_no_green_no_identity)
+        emissions_flow_list_no_green_identity, carbon_emissions_not_influencer_no_green_identity = multi_stochstic_emissions_run_all_individual(params_list_no_green_identity)
 
         ####################################################################################
         emissions_difference_matrix_compare_green,emissions_difference_matrix_compare_no_green,emissions_difference_matrix_compare_identity,emissions_difference_matrix_compare_no_identity = calc_attribute_percentage_change(carbon_emissions_not_influencer_no_green_no_identity,carbon_emissions_not_influencer_no_green_identity,carbon_emissions_not_influencer_green_no_identity,carbon_emissions_not_influencer_green_identity,mean_list,base_params)
         createFolder(fileName)
 
-        save_object(emissions_list_no_green_no_identity, fileName + "/Data", "emissions_list_no_green_no_identity")
-        save_object(emissions_list_no_green_identity, fileName + "/Data", "emissions_list_no_green_identity")
-        save_object(emissions_list_green_no_identity, fileName + "/Data", "emissions_list_green_no_identity")
-        save_object(emissions_list_green_identity, fileName + "/Data", "emissions_list_green_identity")
+        save_object(emissions_flow_list_no_green_no_identity, fileName + "/Data", "emissions_flow_list_no_green_no_identity")
+        save_object(emissions_flow_list_no_green_identity, fileName + "/Data", "emissions_flow_list_no_green_identity")
+        save_object(emissions_flow_list_green_no_identity, fileName + "/Data", "emissions_flow_list_green_no_identity")
+        save_object(emissions_flow_list_green_identity, fileName + "/Data", "emissions_flow_list_green_identity")
 
         save_object(carbon_emissions_not_influencer_no_green_no_identity, fileName + "/Data", "carbon_emissions_not_influencer_no_green_no_identity")
         save_object(carbon_emissions_not_influencer_no_green_identity, fileName + "/Data", "carbon_emissions_not_influencer_no_green_identity")
