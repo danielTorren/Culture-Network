@@ -1,7 +1,7 @@
 {
     "save_timeseries_data": 0, 
     "alpha_change" : "dynamic_culturally_determined_weights",
-    "time_steps_max": 30,
+    "time_steps_max": 3000,
     "phi_lower": 0.01,
     "phi_upper": 0.05,
     "compression_factor": 10,
