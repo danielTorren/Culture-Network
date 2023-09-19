@@ -178,8 +178,8 @@ def Merge_dict_SA(data_sa_dict: dict, plot_dict: dict) -> dict:
     data_sa_dict: dict
         the joined dictionary of dictionaries
     """
-    print("data_sa_dict",data_sa_dict.keys())
-    print("plot_dict",plot_dict.keys())
+    #print("data_sa_dict",data_sa_dict.keys())
+    #print("plot_dict",plot_dict.keys())
 
     for i in data_sa_dict.keys():
         for v in plot_dict[i].keys():
@@ -237,7 +237,7 @@ def analyze_results(
 
 def main(
     fileName,
-    plot_outputs = ['emissions_flow','var',"emissions_flow_change,emissions_stock"],
+    plot_outputs = ["emissions_flow","var","emissions_flow_change","emissions_stock"],
     dpi_save = 1200,
     latex_bool = 0,
     plot_dict = {
@@ -258,6 +258,7 @@ def main(
         r"Initial attitude Beta, $b_A$",
         r"Initial threshold Beta, $a_T$",
         r"Initial threshold Beta, $b_T$",
+        r"Variance low carbon attitude",
         r"Discount factor, $\delta$",
         r"Attribute homophily, $h$",
         r"Confirmation bias, $\theta$"
@@ -289,7 +290,7 @@ def main(
 if __name__ == '__main__':
     main(
     fileName = "results/sensitivity_analysis_11_47_12__19_09_2023",
-    plot_outputs = ['emissions_flow','var',"emissions_flow_change,emissions_stock"],
+    plot_outputs = ["emissions_flow","var","emissions_flow_change","emissions_stock"],
     dpi_save = 1200,
     latex_bool = 0,
         plot_dict = {
@@ -310,6 +311,7 @@ if __name__ == '__main__':
         r"Initial attitude Beta, $b_A$",
         r"Initial threshold Beta, $a_T$",
         r"Initial threshold Beta, $b_T$",
+        r"Variance low carbon attitude",
         r"Discount factor, $\delta$",
         r"Attribute homophily, $h$",
         r"Confirmation bias, $\theta$"

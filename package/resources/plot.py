@@ -179,12 +179,15 @@ def multi_scatter_seperate_total_sensitivity_analysis_plot(
     if latex_bool:
         set_latex()
 
+    #print("len(dict_list)",len(dict_list))
+
     fig, axes = plt.subplots(ncols=len(dict_list), nrows=1, constrained_layout=True , sharey=True,figsize=(12, 6))#,#sharex=True# figsize=(14, 7) # len(list(data_dict.keys())))
     
     plt.rc('ytick', labelsize=4) 
 
     for i, ax in enumerate(axes.flat):
         if order == "First":
+            print(len(data_dict[dict_list[i]]["data"]["S1"].tolist()), len(names),len(data_dict[dict_list[i]]["yerr"]["S1"].tolist()))
             ax.errorbar(
                 data_dict[dict_list[i]]["data"]["S1"].tolist(),
                 names,
