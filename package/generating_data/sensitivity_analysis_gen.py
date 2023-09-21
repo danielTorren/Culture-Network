@@ -10,6 +10,7 @@ import json
 import numpy as np
 from SALib.sample import sobol
 import numpy.typing as npt
+from copy import deepcopy
 from package.resources.utility import (
     createFolder,
     save_object,
@@ -61,8 +62,8 @@ def generate_problem(
     else:
         samples = N_samples * (D_vars + 2)
 
-    print("samples: ", samples)
-    print("Total runs: ",samples*AV_reps)
+    #print("samples: ", samples)
+    
 
     names_list = [x["property"] for x in variable_parameters_dict.values()]
     bounds_list = [[x["min"], x["max"]] for x in variable_parameters_dict.values()]
@@ -76,23 +77,23 @@ def generate_problem(
 
     ########################################
 
-    root = "sensitivity_analysis"
-    fileName = produce_name_datetime(root)
-    print("fileName:", fileName)
-
-    createFolder(fileName)
-
     # GENERATE PARAMETER VALUES
     param_values = sobol.sample(
         problem, N_samples, calc_second_order=calc_second_order
-    )  # NumPy matrix. #N(2D +2) samples where N is 1024 and D is the number of parameters
+    )  
+    # NumPy matrix. #N(D +2) samples where N is 1024 and D is the number of parameters
+    # N * (2D + 2) if calc_second_order
 
-    print("round_variable_list:",round_variable_list)
+    #print("param_values before round",param_values, param_values.shape)
+    #print("samples",samples)
+    #print("quant", param_values.shape[0]*param_values.shape[1] )
+
+    #print("round_variable_list:",round_variable_list)
     for i in round_variable_list:
-        index_round = problem["names"].index(i)
+        index_round = problem["names"].index(i)        
         param_values[:,index_round] = np.round(param_values[:,index_round])
 
-    return problem, fileName, param_values
+    return problem, param_values, samples
 
 def produce_param_list_SA(
     param_values: npt.NDArray, base_params: dict, variable_parameters_dict: dict[dict]
@@ -165,20 +166,18 @@ def produce_param_list_SA_flat(
     """
 
     params_list = []
-    for i, X in enumerate(param_values):
-        base_params_copy = (
-            base_params.copy()
-        )  # copy it as we dont want the changes from one experiment influencing another
-        variable_parameters_dict_toList = list(
-            variable_parameters_dict.values()
-        )  # turn it too a list so we can loop through it as X is just an array not a dict
-        for v in range(len(X)):  # loop through the properties to be changed
-            base_params_copy[variable_parameters_dict_toList[v]["property"]] = X[
-                v
-            ]  # replace the base variable value with the new value for that experiment
-            for k in base_params["seed_list"]:
-                base_params_copy["set_seed"] = k
-                params_list.append(base_params_copy)
+    for i, X in enumerate(param_values):#for each of the sample runs, X is the contents parameter wise of each run
+        base_params_copy = deepcopy(base_params)  # copy it as we dont want the changes from one experiment influencing another
+        variable_parameters_dict_toList = list(variable_parameters_dict.values())  # turn it too a list so we can loop through it as X is just an array not a dict
+        
+        #This matches up the variables with the names
+        for j,val in enumerate(X):  # loop through the properties to be changed
+            base_params_copy[variable_parameters_dict_toList[j]["property"]] = val  # replace the base variable value with the new value for that experiment
+
+        #this mutliplies for the different seeds
+        for k in base_params_copy["seed_list"]:#NEED IT TO BE SIDE BY SIDE!!!!
+            base_params_copy["set_seed"] = k
+            params_list.append(base_params_copy)
     return params_list
 
 def calc_average_vals(flat_result, param_reps,seed_reps):
@@ -205,11 +204,16 @@ def main(
 
     ##AVERAGE RUNS
     AV_reps = len(base_params["seed_list"])
-    print("Average reps: ", AV_reps)
+    
 
-    problem, fileName, param_values = generate_problem(
+    problem, param_values, param_reps = generate_problem(
         variable_parameters_dict, N_samples, AV_reps, calc_second_order
     )
+
+    print("Dynamic variables: ", len(variable_parameters_dict))
+    print("Average reps: ", AV_reps)
+    print("Samples: ",param_reps)
+    print("Total runs: ", param_reps*AV_reps)
     
     #ALT FLAT
     seed_reps = len(base_params["seed_list"])
@@ -217,18 +221,11 @@ def main(
     params_list_sa = produce_param_list_SA_flat(
         param_values, base_params, variable_parameters_dict
     )
-    param_reps = round(len(params_list_sa)/seed_reps)
-    print("Total reps", len(params_list_sa))
-    print("Param reps",param_reps)
-
     Y_emissions_flow_flat, Y_mu_flat, Y_var_flat, Y_coefficient_of_variance_flat, Y_emissions_flow_change_flat, Y_emissions_stock_flat = parallel_run_sa_flat(
         params_list_sa
     )
 
-    #print("Y_emissions_flow_flat",Y_emissions_flow_flat)
     Y_emissions_flow = calc_average_vals(Y_emissions_flow_flat, param_reps,seed_reps)
-    #print("Y_emissions_flow",Y_emissions_flow)
-
     Y_mu = calc_average_vals(Y_mu_flat, param_reps,seed_reps)
     Y_var = calc_average_vals(Y_var_flat, param_reps,seed_reps)
     Y_coefficient_of_variance = calc_average_vals(Y_coefficient_of_variance_flat, param_reps,seed_reps)
@@ -245,6 +242,12 @@ def main(
         params_list_sa
     )
     """
+
+    root = "sensitivity_analysis"
+    fileName = produce_name_datetime(root)
+    print("fileName:", fileName)
+
+    createFolder(fileName)
 
     save_object(base_params, fileName + "/Data", "base_params")
     save_object(params_list_sa, fileName + "/Data", "params_list_sa")

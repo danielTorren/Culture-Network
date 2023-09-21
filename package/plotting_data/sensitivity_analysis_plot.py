@@ -289,7 +289,7 @@ def main(
 
 if __name__ == '__main__':
     main(
-    fileName = "results/sensitivity_analysis_11_47_12__19_09_2023",
+    fileName = "results/sensitivity_analysis_15_04_20__21_09_2023",
     plot_outputs = ["emissions_flow","var","emissions_flow_change","emissions_stock"],
     dpi_save = 1200,
     latex_bool = 0,
@@ -304,14 +304,14 @@ if __name__ == '__main__':
     titles = [
         r"Number of individuals, $N$", 
         r"Number of behaviours, $M$", 
-        r"Mean neighbours, $K$",
+        r"Network density",
         r"Cultural inertia, $\rho$",
-        r"Social learning error, $ \sigma_{ \varepsilon}$ ",
-        r"Initial attitude Beta, $a_A$",
-        r"Initial attitude Beta, $b_A$",
+        r"Social learning error, $\sigma_{ \varepsilon}$ ",
+        r"Initial identity Beta, $a_I$",
+        r"Initial identity Beta, $b_I$",
         r"Initial threshold Beta, $a_T$",
         r"Initial threshold Beta, $b_T$",
-        r"Variance low carbon attitude",
+        r"Initial variance low carbon attitude, $\sigma^{2}_{A}$",
         r"Discount factor, $\delta$",
         r"Attribute homophily, $h$",
         r"Confirmation bias, $\theta$"
