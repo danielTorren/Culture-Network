@@ -264,6 +264,10 @@ class Network:
         elif self.alpha_change == "behavioural_independence":#independent behaviours
             self.weighting_matrix_list = self.update_weightings_list()
 
+        if self.weighting_matrix.shape == (0,0):
+            print("self.weighting_matrix.shape",self.weighting_matrix)
+            print("START",self.parameters_input)
+
         self.init_total_carbon_emissions  = self.calc_total_emissions_flow()
         self.total_carbon_emissions_flow = self.init_total_carbon_emissions
         self.total_carbon_emissions_stock = self.init_total_carbon_emissions
@@ -549,7 +553,6 @@ class Network:
 
         self.agent_list.extend(agent_green_influencer_list)
 
-
     def shuffle_agent_list(self): 
         #make list cirucalr then partial shuffle it
         self.agent_list.sort(key=lambda x: x.identity)#sorted by identity
@@ -583,9 +586,13 @@ class Network:
             return neighbour_influence
         except ValueError as e:
             print("Matrix multiplication error:", e)
+            print("Shape of self.weighting_matrix:", self.weighting_matrix)
             print("Shape of self.weighting_matrix:", self.weighting_matrix.shape)
             print("Shape of behavioural_attitude_matrix:", behavioural_attitude_matrix.shape)
+            print("Shape of behavioural_attitude_matrix:", behavioural_attitude_matrix)
             print("self.parameters_input",self.parameters_input)
+            print("identities", np.array([x.identity for x in self.agent_list]))
+            quit()
             raise  # Reraise the exception to terminate the program or handle it as needed
 
         
