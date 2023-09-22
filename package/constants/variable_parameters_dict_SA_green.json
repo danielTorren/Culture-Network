@@ -9,7 +9,7 @@
     "b_identity":{"property":"b_identity","min":0.05, "max":8 , "title": "Initial identity Beta $b_I$", "round":0},
     "a_threshold":{"property":"a_threshold","min":0.05, "max": 8, "title": "Initial threshold Beta $a_T$", "round":0},
     "b_threshold":{"property":"b_threshold","min":0.05, "max": 8, "title": "Initial threshold Beta $b_T$", "round":0},
-    "var_low_carbon_attitude": {"property":"var_low_carbon_attitude","min":0.001, "max": 0.5, "title": "var_low_carbon_attitude", "round":0},
+    "std_low_carbon_attitude": {"property":"std_low_carbon_attitude","min":0.01, "max": 0.1, "title": "std_low_carbon_attitude", "round":0},
     "discount_factor":{"property":"discount_factor","min":0.0, "max":1.0 , "title": "$\\delta$", "round":0},
     "homophily": {"property": "homophily","min": 0.0,"max": 1.0,"title": "$h$", "round":0},
     "confirmation_bias":{"property":"confirmation_bias","min":-50.0, "max":200 , "title": "$\\theta$", "round":0}

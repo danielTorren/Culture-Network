@@ -243,7 +243,7 @@ class Network:
 
         self.a_identity = parameters["a_identity"]
         self.b_identity = parameters["b_identity"]
-        self.var_low_carbon_attitude = parameters["var_low_carbon_attitude"]
+        self.std_low_carbon_attitude = parameters["std_low_carbon_attitude"]
         (
             self.attitude_matrix_init,
             self.threshold_matrix_init,
@@ -264,7 +264,7 @@ class Network:
         elif self.alpha_change == "behavioural_independence":#independent behaviours
             self.weighting_matrix_list = self.update_weightings_list()
 
-        if self.weighting_matrix.shape == (0,0):
+        if not self.weighting_matrix.shape:
             print("self.weighting_matrix.shape",self.weighting_matrix)
             print("START",self.parameters_input)
 
@@ -466,7 +466,7 @@ class Network:
 
         indentities_beta = np.random.beta( self.a_identity, self.b_identity, size=self.N)
 
-        attitude_uncapped = np.asarray([np.random.normal(identity,self.var_low_carbon_attitude, size=self.M) for identity in  indentities_beta])
+        attitude_uncapped = np.asarray([np.random.normal(identity,self.std_low_carbon_attitude, size=self.M) for identity in  indentities_beta])
 
         attitude_matrix = np.clip(attitude_uncapped, 0 + self.clipping_epsilon, 1- self.clipping_epsilon)
 
@@ -520,7 +520,7 @@ class Network:
 
         indentities_beta = np.random.beta( self.a_identity, self.b_identity, size=self.green_N)
 
-        attitude_uncapped = np.asarray([np.random.normal(identity,self.var_low_carbon_attitude, size=self.M) for identity in  indentities_beta])
+        attitude_uncapped = np.asarray([np.random.normal(identity,self.std_low_carbon_attitude, size=self.M) for identity in  indentities_beta])
 
         attitude_list_green_N = np.clip(attitude_uncapped, 0 + self.clipping_epsilon, 1- self.clipping_epsilon)
 
@@ -585,6 +585,7 @@ class Network:
             neighbour_influence = np.matmul(self.weighting_matrix, behavioural_attitude_matrix)
             return neighbour_influence
         except ValueError as e:
+            
             print("Matrix multiplication error:", e)
             print("Shape of self.weighting_matrix:", self.weighting_matrix)
             print("Shape of self.weighting_matrix:", self.weighting_matrix.shape)
@@ -592,7 +593,7 @@ class Network:
             print("Shape of behavioural_attitude_matrix:", behavioural_attitude_matrix)
             print("self.parameters_input",self.parameters_input)
             print("identities", np.array([x.identity for x in self.agent_list]))
-            quit()
+            #quit()
             raise  # Reraise the exception to terminate the program or handle it as needed
 
         
@@ -685,9 +686,16 @@ class Network:
 
         difference_matrix = np.subtract.outer(identity_list, identity_list)
 
+        if not difference_matrix:
+            print("difference_matrix",difference_matrix, difference_matrix.shape)
+            
+
         alpha_numerator = np.exp(
             -np.multiply(self.confirmation_bias, np.abs(difference_matrix))
         )
+
+        if not alpha_numerator:
+            print("alpha_numerator",alpha_numerator, alpha_numerator.shape)
 
         non_diagonal_weighting_matrix = (
             self.adjacency_matrix * alpha_numerator
@@ -696,6 +704,9 @@ class Network:
         norm_weighting_matrix = self.normlize_matrix(
             non_diagonal_weighting_matrix
         )  # normalize the matrix row wise
+
+        if not norm_weighting_matrix:
+            print("norm_weighting_matrix",norm_weighting_matrix, norm_weighting_matrix.shape)
 
         #for total_identity_differences
         difference_matrix_real_connections = abs(self.adjacency_matrix * difference_matrix)

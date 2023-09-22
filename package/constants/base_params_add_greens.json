@@ -18,6 +18,6 @@
     "a_threshold": 1,
     "b_threshold": 1,
     "green_N": 0,
-    "var_low_carbon_attitude": 0.03,
+    "std_low_carbon_attitude": 0.03,
     "clipping_epsilon": 1e-4
 }
