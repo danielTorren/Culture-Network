@@ -168,6 +168,8 @@ class Network:
 
         """
 
+        self.parameters_input = parameters#useful to check all inputs
+
         self.set_seed = parameters["set_seed"]
         np.random.seed(self.set_seed)
 
@@ -567,13 +569,26 @@ class Network:
         neighbour_influence: npt.NDArray
             NxM array where each row represents the influence of an Individual listening to its neighbours regarding their
             behavioural attitude opinions, this influence is weighted by the weighting_matrix
-        """
+        
 
         behavioural_attitude_matrix = np.asarray([n.attitudes for n in self.agent_list])
         neighbour_influence = np.matmul(self.weighting_matrix, behavioural_attitude_matrix)
-        
         return neighbour_influence
 
+        """
+
+        try:
+            behavioural_attitude_matrix = np.asarray([n.attitudes for n in self.agent_list])
+            neighbour_influence = np.matmul(self.weighting_matrix, behavioural_attitude_matrix)
+            return neighbour_influence
+        except ValueError as e:
+            print("Matrix multiplication error:", e)
+            print("Shape of self.weighting_matrix:", self.weighting_matrix.shape)
+            print("Shape of behavioural_attitude_matrix:", behavioural_attitude_matrix.shape)
+            print("self.parameters_input",self.parameters_input)
+            raise  # Reraise the exception to terminate the program or handle it as needed
+
+        
     def calc_ego_influence_degroot_independent(self) -> npt.NDArray:
         """
         Calculate the influence of neighbours using the Degroot model of weighted aggregation, BEHAVIOURS INDEPENDANT ("alpha_change" case D)
