@@ -68,7 +68,7 @@ class Individual_one_m_green_influencer:
         Update the behavioural values of an individual with the new attitudinal or threshold values
     update_attitudes(social_component):
         Update behavioural attitudes with social influence of neighbours mediated by the social susceptabilty of each behaviour phi
-    calc_total_emissions():
+    calc_total_emissions_flow():
         return total emissions of individual based on behavioural values
     save_timeseries_data_individual():
         Save time series data
@@ -135,8 +135,9 @@ class Individual_one_m_green_influencer:
         self.av_behaviour = np.mean(self.attitudes)
         self.av_behaviour_list = [self.av_behaviour] * self.cultural_inertia
         self.identity = self.calc_identity()
-        self.initial_carbon_emissions,self.behavioural_carbon_emissions = self.calc_total_emissions()
-        self.total_carbon_emissions = self.initial_carbon_emissions
+        self.initial_carbon_emissions,self.behavioural_carbon_emissions = self.calc_total_emissions_flow()
+        self.individual_carbon_emissions_flow = self.initial_carbon_emissions
+
 
         if self.save_timeseries_data:
             self.history_behaviour_values = [list(self.values)]
@@ -144,7 +145,7 @@ class Individual_one_m_green_influencer:
             self.history_behaviour_thresholds = [list(self.thresholds)]
             self.history_av_behaviour = [self.av_behaviour]
             self.history_identity = [self.identity]
-            self.history_carbon_emissions = [self.total_carbon_emissions]
+            self.history_individual_carbon_emissions_flow = [self.individual_carbon_emissions_flow]
             self.history_behavioural_carbon_emissions = [self.behavioural_carbon_emissions]
 
     def calc_av_behaviour(self):
@@ -219,7 +220,7 @@ class Individual_one_m_green_influencer:
         self.attitudes = (1 - self.phi_array)*self.attitudes + (self.phi_array)*(social_component)
         self.attitudes[self.m_green] = 1.0
 
-    def calc_total_emissions(self):
+    def calc_total_emissions_flow(self):
         """
         Return total emissions of individual based on behavioural values
 
@@ -251,7 +252,7 @@ class Individual_one_m_green_influencer:
         self.history_behaviour_thresholds.append(list(self.thresholds))
         self.history_identity.append(self.identity)
         self.history_av_behaviour.append(self.av_behaviour)
-        self.history_carbon_emissions.append(self.total_carbon_emissions)
+        self.history_individual_carbon_emissions_flow.append(self.individual_carbon_emissions_flow)
         self.history_behavioural_carbon_emissions.append(self.behavioural_carbon_emissions)
 
     def next_step(self, t: int, social_component: npt.NDArray):
@@ -282,7 +283,7 @@ class Individual_one_m_green_influencer:
             self.update_av_behaviour_list()
             self.identity = self.calc_identity()
 
-        self.total_carbon_emissions, self.behavioural_carbon_emissions = self.calc_total_emissions()
+        self.individual_carbon_emissions_flow, self.behavioural_carbon_emissions = self.calc_total_emissions_flow()
 
         if (self.save_timeseries_data) and (self.t % self.compression_factor == 0):
             self.save_timeseries_data_individual()

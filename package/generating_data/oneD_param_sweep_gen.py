@@ -98,3 +98,9 @@ def main(
     save_object(property_values_list, fileName + "/Data", "property_values_list")
 
     return fileName
+
+if __name__ == '__main__':
+    fileName_Figure_4 = main(
+        RUN_TYPE = 0,
+        BASE_PARAMS_LOAD = "package/constants/base_params.json"
+        )

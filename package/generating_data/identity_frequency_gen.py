@@ -38,3 +38,7 @@ def main(
 
     return fileName
 
+if __name__ == '__main__':
+    main(
+        BASE_PARAMS_LOAD = "package/constants/base_params_identity_frequency.json"
+    )

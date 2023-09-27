@@ -14,6 +14,7 @@ from package.resources.utility import (
     save_object, 
     produce_name_datetime
 )
+import json
 
 def main(
     base_params
@@ -30,3 +31,13 @@ def main(
     save_object(base_params, fileName + "/Data", "base_params")
 
     return fileName
+
+if __name__ == '__main__':
+    BASE_PARAMS_LOAD = "package/constants/base_params_single_run.json"
+    # load base params
+    f = open(BASE_PARAMS_LOAD)
+    base_params = json.load(f)
+
+    fileName = main(
+        base_params = base_params
+    )
