@@ -1,6 +1,6 @@
 {
     "N":{"property": "N","min":100,"max":1000, "title": "$N$", "round":1},
-    "green_N":{"property": "green_N","min":0,"max":100, "title": "green_N", "round":1},
+    "green_N":{"property": "green_N","min":1,"max":100, "title": "green_N", "round":1},
     "M":{"property":"M","min":1,"max": 30, "title": "$M$", "round":1},
     "K":{"property":"K","min":5,"max":99 , "title": "$K$", "round":1},
     "cultural_inertia":{"property":"cultural_inertia","min":1,"max": 3000, "title": "$\\rho$", "round":1},
