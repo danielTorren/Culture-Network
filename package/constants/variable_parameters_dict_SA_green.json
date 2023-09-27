@@ -3,7 +3,7 @@
     "N":{"property": "N","min":100,"max":1000, "title": "$N$", "round":1},
     "M":{"property":"M","min":1,"max": 30, "title": "$M$", "round":1},
     "network_density":{"property":"network_density","min":0,"max":1, "title": "Network density", "round":0},
-    "cultural_inertia":{"property":"cultural_inertia","min":1,"max": 3000, "title": "$T_{\\rho}$", "round":0},
+    "cultural_inertia":{"property":"cultural_inertia","min":1,"max": 3000, "title": "$T_{\\rho}$", "round":1},
     "learning_error_scale":{"property":"learning_error_scale","min":0.0,"max":1 , "title": "$\\epsilon$", "round":0 },
     "a_identity":{"property":"a_identity","min":0.05, "max": 8, "title": "Initial identity Beta $a_I$", "round":0},
     "b_identity":{"property":"b_identity","min":0.05, "max":8 , "title": "Initial identity Beta $b_I$", "round":0},

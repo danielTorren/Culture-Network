@@ -91,7 +91,7 @@ def generate_problem(
     #print("round_variable_list:",round_variable_list)
     for i in round_variable_list:
         index_round = problem["names"].index(i)        
-        param_values[:,index_round] = np.round(param_values[:,index_round])
+        param_values[:,index_round] = int(np.round(param_values[:,index_round]))
 
     return problem, param_values, samples
 
