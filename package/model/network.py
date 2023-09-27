@@ -479,6 +479,8 @@ class Network:
         ]
 
         return agent_list
+    
+    
         
     def add_green_influencers_list(self):
         """Add green influencers to agent list"""
