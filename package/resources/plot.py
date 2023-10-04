@@ -185,6 +185,7 @@ def multi_scatter_seperate_total_sensitivity_analysis_plot(
 
     for i, ax in enumerate(axes.flat):
         if order == "First":
+            #print(" FIRST data_dict[dict_list[i]]",data_dict[dict_list[i]])
             ax.errorbar(
                 data_dict[dict_list[i]]["data"]["S1"].tolist(),
                 names,
@@ -195,6 +196,8 @@ def multi_scatter_seperate_total_sensitivity_analysis_plot(
                 label=data_dict[dict_list[i]]["title"],
             )
         else:
+            #print("data_dict[dict_list[i]]",data_dict[dict_list[i]])
+            #quit()
             ax.errorbar(
                 data_dict[dict_list[i]]["data"]["ST"].tolist(),
                 names,

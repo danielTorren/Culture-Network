@@ -279,10 +279,12 @@ def main(
     data_sa_dict_total, data_sa_dict_first = get_plot_data(problem, Y_emissions_flow, Y_mu, Y_var, Y_coefficient_of_variance,Y_emissions_flow_change,Y_emissions_stock, calc_second_order)
 
     data_sa_dict_first = Merge_dict_SA(data_sa_dict_first, plot_dict)
+    data_sa_dict_total = Merge_dict_SA(data_sa_dict_total, plot_dict)
     
     ###############################
 
     multi_scatter_seperate_total_sensitivity_analysis_plot(fileName, data_sa_dict_first,plot_outputs, titles, dpi_save, N_samples, "First", latex_bool = latex_bool)
+    multi_scatter_seperate_total_sensitivity_analysis_plot(fileName, data_sa_dict_total,plot_outputs, titles, dpi_save, N_samples, "Total", latex_bool = latex_bool)
 
     plt.show()
 
