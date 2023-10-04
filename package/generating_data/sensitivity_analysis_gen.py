@@ -62,7 +62,7 @@ def generate_problem(
     else:
         samples = N_samples * (D_vars + 2)
 
-    #print("samples: ", samples)
+    print("samples: ", samples)
     
 
     names_list = [x["property"] for x in variable_parameters_dict.values()]
@@ -188,10 +188,11 @@ def calc_average_vals(flat_result, param_reps,seed_reps):
 def main(
         N_samples = 1024,
         BASE_PARAMS_LOAD = "package/constants/base_params.json",
-        VARIABLE_PARAMS_LOAD = "package/constants/variable_parameters_dict_SA.json"
+        VARIABLE_PARAMS_LOAD = "package/constants/variable_parameters_dict_SA.json",
+        calc_second_order = False
          ) -> str: 
     
-    calc_second_order = False
+    
 
     # load base params
     f = open(BASE_PARAMS_LOAD)
@@ -268,5 +269,6 @@ if __name__ == '__main__':
     fileName_Figure_6 = main(
     N_samples = 4,
     BASE_PARAMS_LOAD = "package/constants/base_params_SA.json",
-    VARIABLE_PARAMS_LOAD = "package/constants/variable_parameters_dict_SA.json"
+    VARIABLE_PARAMS_LOAD = "package/constants/variable_parameters_dict_SA.json",
+    calc_second_order = False
 )
