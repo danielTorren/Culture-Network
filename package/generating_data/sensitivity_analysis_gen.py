@@ -215,7 +215,7 @@ def main(
     print("Average reps: ", AV_reps)
     print("Samples: ",param_reps)
     print("Total runs: ", param_reps*AV_reps)
-    
+    print("Second order calc", calc_second_order)
     #ALT FLAT
     seed_reps = len(base_params["seed_list"])
 

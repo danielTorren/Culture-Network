@@ -230,6 +230,40 @@ def multi_scatter_seperate_total_sensitivity_analysis_plot(
     fig.savefig(f, dpi=dpi_save, format="eps")
     fig.savefig(f_png, dpi=dpi_save, format="png")
 
+def prints_SA_matrix(
+    FILENAME, Data:dict, title_list, cmap, nrows, ncols, dpi_save, labels, title_property, Y_property
+):
+
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(18, 7))# constrained_layout=True 
+    fig.suptitle(title_property)
+    
+    #Data = [Data["data"],Data["yerr"] ]
+
+    type_matrix = ["index","confidence"]
+    for i, ax in enumerate(axes.flat):
+        matrix = ax.matshow(
+            Data[i],
+            cmap=cmap,
+            aspect="auto",
+        )
+        ax.set_title(title_list[i])
+        # colour bar axes
+        cbar = fig.colorbar(
+            matrix, ax=ax, label = "Second order sobol %s: %s" % (type_matrix[i],title_property)
+        )  # This does a mapabble on the fly i think, not sure
+        xaxis = np.arange(len(labels))
+        ax.set_xticks(xaxis)
+        ax.set_yticks(xaxis)
+        ax.set_xticklabels(labels, rotation=45)
+        ax.set_yticklabels(labels, rotation=45)
+    
+    plotName = FILENAME + "/Prints"
+    #f = plotName + "/" + "%s_prints_SA_matrix_property_%s.eps" % (len(labels), Y_property)
+    f_png = plotName + "/" + "%s_prints_SA_matrix_property_%s.png" % (len(labels), Y_property)
+    #fig.savefig(f, dpi=dpi_save, format="eps")
+    fig.savefig(f_png, dpi=dpi_save, format="png")
+
+
 def live_print_identity_timeseries_with_weighting(
     fileName, Data_list, property_varied, title_list, dpi_save, cmap,latex_bool = False
 ):
