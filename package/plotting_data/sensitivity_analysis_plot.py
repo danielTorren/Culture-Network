@@ -12,11 +12,8 @@ from package.resources.utility import (
     load_object,
 )
 from package.resources.plot import (
-    multi_scatter_seperate_total_sensitivity_analysis_plot,prints_SA_matrix
+    multi_scatter_seperate_total_sensitivity_analysis_plot
 )
-import numpy as np
-from matplotlib.cm import get_cmap
-import matplotlib.colors as mcolors
 
 def prep_data(
     Si,
@@ -292,9 +289,6 @@ def analyze_results(
 
     return Si_emissions_flow , Si_mu , Si_var , Si_coefficient_of_variance,Si_emissions_flow_change, Si_emissions_stock
 
-
-
-
 def main(
     fileName,
     plot_outputs = ["emissions_flow","var","emissions_flow_change"],
@@ -321,26 +315,30 @@ def main(
         r"Discount factor, $\delta$",
         r"Attribute homophily, $h$",
         r"Confirmation bias, $\theta$"
-    ]
+    ],
+    old_run = False
     ) -> None: 
 
-
-    problem = load_object(fileName + "/Data", "problem")
-    Y_emissions_flow = load_object(fileName + "/Data", "Y_emissions_flow")
-    Y_mu = load_object(fileName + "/Data", "Y_mu")
-    Y_var = load_object(fileName + "/Data", "Y_var")
-    Y_coefficient_of_variance = load_object(fileName + "/Data", "Y_coefficient_of_variance")
-    Y_emissions_flow_change = load_object(fileName + "/Data", "Y_emissions_flow_change")
-    Y_emissions_stock = load_object(fileName + "/Data", "Y_emissions_stock")
-    N_samples = load_object(fileName + "/Data","N_samples" )
-    calc_second_order = load_object(fileName + "/Data", "calc_second_order")
-    
-    if calc_second_order:
-        data_sa_dict_total, data_sa_dict_first, data_sa_dict_second  = get_plot_data(problem, Y_emissions_flow, Y_mu, Y_var, Y_coefficient_of_variance,Y_emissions_flow_change,Y_emissions_stock, calc_second_order)
-        #print("DONE", data_sa_dict_total, data_sa_dict_first, data_sa_dict_second)
-        data_sa_dict_second = Merge_dict_SA(data_sa_dict_second, plot_dict)
+    if old_run: 
+        Y_emissions_flow = load_object(fileName + "/Data", "Y_emissions")
+        Y_mu = load_object(fileName + "/Data", "Y_mu")
+        Y_var = load_object(fileName + "/Data", "Y_var")
+        Y_coefficient_of_variance = load_object(fileName + "/Data", "Y_coefficient_of_variance")
+        Y_emissions_flow_change = load_object(fileName + "/Data", "Y_emissions_change")
+        Y_emissions_stock = load_object(fileName + "/Data", "Y_emissions")#use simply as a place holder due to lack of data
     else:
-        data_sa_dict_total, data_sa_dict_first = get_plot_data(problem, Y_emissions_flow, Y_mu, Y_var, Y_coefficient_of_variance,Y_emissions_flow_change,Y_emissions_stock, calc_second_order)
+        Y_emissions_flow = load_object(fileName + "/Data", "Y_emissions_flow")
+        Y_mu = load_object(fileName + "/Data", "Y_mu")
+        Y_var = load_object(fileName + "/Data", "Y_var")
+        Y_coefficient_of_variance = load_object(fileName + "/Data", "Y_coefficient_of_variance")
+        Y_emissions_flow_change = load_object(fileName + "/Data", "Y_emissions_flow_change")
+        Y_emissions_stock = load_object(fileName + "/Data", "Y_emissions_stock")
+        N_samples = load_object(fileName + "/Data","N_samples" )
+        calc_second_order = load_object(fileName + "/Data", "calc_second_order")
+    
+    problem = load_object(fileName + "/Data", "problem")
+    
+    data_sa_dict_total, data_sa_dict_first = get_plot_data(problem, Y_emissions_flow, Y_mu, Y_var, Y_coefficient_of_variance,Y_emissions_flow_change,Y_emissions_stock, calc_second_order)
 
     data_sa_dict_first = Merge_dict_SA(data_sa_dict_first, plot_dict)
     data_sa_dict_total = Merge_dict_SA(data_sa_dict_total, plot_dict)
@@ -349,36 +347,12 @@ def main(
     #print(data_sa_dict_first, titles)
     multi_scatter_seperate_total_sensitivity_analysis_plot(fileName, data_sa_dict_first,plot_outputs, titles, dpi_save, N_samples, "First", latex_bool = latex_bool)
     multi_scatter_seperate_total_sensitivity_analysis_plot(fileName, data_sa_dict_total,plot_outputs, titles, dpi_save, N_samples, "Total", latex_bool = latex_bool)
-    
-    
-    if calc_second_order:
-        Browns = mcolors.LinearSegmentedColormap.from_list('white_to_brown', ['#FFFFFF', '#A52A2A'], N=256)
-
-        Si_emissions_flow , Si_mu , Si_var , Si_coefficient_of_variance,Si_emissions_flow_change, Si_emissions_stock = analyze_results(problem,Y_emissions_flow, Y_mu, Y_var, Y_coefficient_of_variance,Y_emissions_flow_change,Y_emissions_stock,calc_second_order) 
-        
-        second_order_data_emissions_flow = [np.asarray(Si_emissions_flow["S2"]),np.asarray(Si_emissions_flow["S2_conf"])]
-        second_order_data_var = [np.asarray(Si_var["S2"]),np.asarray(Si_var["S2_conf"])]
-        second_order_data_emissions_flow_change = [np.asarray(Si_emissions_flow_change["S2"]),np.asarray(Si_emissions_flow_change["S2_conf"])]
-    
-        title_list = ["S2","S2_conf"]
-        nrows = 1
-        ncols = 2
-
-        prints_SA_matrix(fileName, second_order_data_emissions_flow, title_list,get_cmap("Reds"),nrows, ncols, dpi_save,titles,r"$E/NM$", "Emissions")
-        prints_SA_matrix(fileName, second_order_data_var,title_list,get_cmap("Blues"),nrows, ncols, dpi_save, titles,r"$\sigma^{2}$", "var")
-        prints_SA_matrix(fileName, second_order_data_emissions_flow_change,title_list,Browns,nrows, ncols, dpi_save,titles,r"$\Delta E/NM$", "Emissions_flow_change")
-
-        #prints_SA_matrix(fileName, data_sa_dict_second["emissions_flow"],title_list,get_cmap("Reds"),nrows, ncols, dpi_save,titles,r"$E/NM$", "Emissions")
-        #prints_SA_matrix(fileName, data_sa_dict_second["mu"],title_list,get_cmap("Greens"),nrows, ncols, dpi_save, titles,r"$\mu$", "mu")
-        #prints_SA_matrix(fileName, data_sa_dict_second["var"],title_list,get_cmap("Blues"),nrows, ncols, dpi_save, titles,r"$\sigma^{2}$", "var")
-        #prints_SA_matrix(fileName, data_sa_dict_second["coefficient_of_variance"],title_list,get_cmap("Oranges"),nrows, ncols, dpi_save, titles,r"$\sigma/\mu$", "coefficient_of_var")        
-        #prints_SA_matrix(fileName, data_sa_dict_second["emissions_flow_change"],title_list,Browns,nrows, ncols, dpi_save,titles,r"$\Delta E/NM$", "Emissions_flow_change")
 
     plt.show()
 
 if __name__ == '__main__':
     main(
-    fileName = "results/sensitivity_analysis_00_49_43__07_10_2023",
+    fileName = "results/SA_AV_reps_5_samples_15360_D_vars_13_N_samples_1024",
     plot_outputs = ["emissions_flow","var","emissions_flow_change"],
     dpi_save = 1200,
     latex_bool = 0,
@@ -403,5 +377,6 @@ if __name__ == '__main__':
         r"Discount factor, $\delta$",
         r"Attribute homophily, $h$",
         r"Confirmation bias, $\theta$"
-    ]
+    ],
+    old_run = True
 )

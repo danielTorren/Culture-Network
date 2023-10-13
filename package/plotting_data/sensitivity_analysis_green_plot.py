@@ -6,81 +6,12 @@ Created: 10/10/2022
 # imports
 from package.plotting_data.sensitivity_analysis_plot import main
 
-"""
-titles = [
-    r"Number of green influencers, $N_G$", 
-    r"Number of individuals, $N$", 
-    r"Number of behaviours, $M$", 
-    r"Mean neighbours, $K$",
-    r"Cultural inertia, $\rho$",
-    r"Social learning error, $ \sigma_{ \varepsilon}$ ",
-    r"Discount factor, $\delta$",
-    r"Attribute homophily, $h$",
-    r"Confirmation bias, $\theta$"
-]
-titles = [
-    r"Number of green influencers, $N_G$", 
-    r"Number of individuals, $N$", 
-    r"Number of behaviours, $M$", 
-    r"Mean neighbours, $K$",
-    r"Cultural inertia, $\rho$",
-    r"Social learning error, $ \sigma_{ \varepsilon}$ ",
-    r"Initial attitude Beta, $a_A$",
-    r"Initial attitude Beta, $b_A$",
-    r"Initial threshold Beta, $a_T$",
-    r"Initial threshold Beta, $b_T$",
-    r"Discount factor, $\delta$",
-    r"Attribute homophily, $h$",
-    r"Confirmation bias, $\theta$"
-]
-
-    titles = [
-        r"Number of green influencers, $N_G$", 
-        r"Number of individuals, $N$", 
-        r"Number of behaviours, $M$", 
-        r"Mean neighbours, $K$",
-        r"Cultural inertia, $\rho$",
-        r"Social learning error, $ \sigma_{ \varepsilon}$ ",
-        r"Discount factor, $\delta$",
-        r"Attribute homophily, $h$",
-        r"Confirmation bias, $\theta$"
-    ]
-    titles = [
-        r"$N_G$", 
-        r"$N$", 
-        r"$M$", 
-        r"$K$",
-        r"$\rho$",
-        r"$\sigma_{ \varepsilon}$ ",
-        r"$\delta$",
-        r"$h$",
-        r"$\theta$"
-    ]
-        titles = [
-        r"$N_G$", 
-        r"Number of individuals, $N$", 
-        r"Number of behaviours, $M$", 
-        r"Mean neighbours, $K$",
-        r"Cultural inertia, $\rho$",
-        r"Social learning error, $ \sigma_{ \varepsilon}$ ",
-        r"Initial attitude Beta, $a_A$",
-        r"Initial attitude Beta, $b_A$",
-        r"Initial threshold Beta, $a_T$",
-        r"Initial threshold Beta, $b_T$",
-        r"Discount factor, $\delta$",
-        r"Attribute homophily, $h$",
-        r"Confirmation bias, $\theta$"
-    ]
-
-"""
-
 if __name__ == '__main__':
     main(
-    #fileName = "results/sensitivity_analysis_00_49_43__07_10_2023",
     fileName = "results/sensitivity_analysis_06_06_42__04_10_2023",
     plot_outputs = ["emissions_flow","var","emissions_flow_change"],
     dpi_save = 1200,
-    latex_bool = 0,
+    latex_bool = 1,
     plot_dict = {
         "emissions_flow": {"title": r"$E/NM$", "colour": "red", "linestyle": "--"},
         "mu": {"title": r"$\mu_{I}$", "colour": "blue", "linestyle": "-"},

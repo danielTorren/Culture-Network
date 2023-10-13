@@ -125,10 +125,7 @@ class Individual:
 
         if self.alpha_change == "behavioural_independence":
             self.attitudes_matrix = np.tile(self.attitudes, (self.cultural_inertia,1))
-            #print("self.attitudes_matrix",self.attitudes_matrix )
             self.attitudes_star = self.calc_attitudes_star()
-            #print("self.attitudes_star", self.attitudes_star)
-
 
         self.values = self.attitudes - self.thresholds
         self.av_behaviour = np.mean(self.attitudes)
@@ -182,9 +179,7 @@ class Individual:
         )  # here discount list is normalized
 
     def update_attitudes_matrix(self):       
-        #print("popping before ", self.attitudes_matrix, self.attitudes_matrix.shape)
         self.attitudes_matrix =  np.vstack([np.asarray([self.attitudes]), self.attitudes_matrix[:-1,:]])
-        #print("popping after ", self.attitudes_matrix, self.attitudes_matrix.shape)
 
     def calc_attitudes_star(self):
         return np.matmul(
