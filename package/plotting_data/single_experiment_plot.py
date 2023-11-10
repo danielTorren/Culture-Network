@@ -68,12 +68,15 @@ def main(
 
         plot_value_timeseries(fileName,Data,dpi_save,latex_bool = latex_bool)
         plot_attitude_timeseries(fileName,Data,dpi_save,latex_bool = latex_bool)
+        plt.show()
     elif PLOT_NAME == "NETWORK":
         plot_total_carbon_emissions_timeseries(fileName, Data, dpi_save,latex_bool = latex_bool)
         plot_weighting_matrix_convergence_timeseries(fileName, Data, dpi_save,latex_bool = latex_bool)
         if Data.alpha_change != "behavioural_independence":
             plot_cultural_range_timeseries(fileName, Data, dpi_save,latex_bool = latex_bool)
             plot_average_identity_timeseries(fileName,Data,dpi_save,latex_bool = latex_bool)
+
+        plt.show()
     elif PLOT_NAME == "ANIMATION":
         if Data.alpha_change != "behavioural_independence":
             anim = live_animate_identity_network_weighting_matrix(
@@ -90,6 +93,7 @@ def main(
                 animation_save_bool,
                 latex_bool = latex_bool
             )
+            plt.show()
         else:
             print("No environmental identity")
 
@@ -100,5 +104,5 @@ def main(
             plot_joint_cluster_micro(fileName, Data, clusters_index_lists,cluster_example_identity_list, vals_time_data, dpi_save, 0, bandwidth,cmap_multi, norm_zero_one,shuffle_colours,latex_bool = latex_bool)
         else:
             print("No environmental identity")
-
-    plt.show()
+        plt.show()
+    

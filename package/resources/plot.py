@@ -705,7 +705,7 @@ def plot_total_carbon_emissions_timeseries(
     if latex_bool:
         set_latex()
     y_title = "Carbon Emissions"
-    property = "history_total_carbon_emissions"
+    property = "history_total_carbon_emissions_flow"
     plot_network_timeseries(fileName, Data, y_title, property, dpi_save)
 
 def plot_average_identity_timeseries(fileName: str, Data, dpi_save: int,latex_bool = False):

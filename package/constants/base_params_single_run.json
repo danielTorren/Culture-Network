@@ -5,20 +5,20 @@
     "phi_lower": 0.01,
     "phi_upper": 0.05,
     "compression_factor": 10,
+    "seed_list": [1,2,3,4,5],
     "set_seed": 1,
     "N": 200,
     "M": 3,
-    "network_density": 0.1,
+    "K": 20,
     "prob_rewire": 0.1,
     "cultural_inertia": 1000,
     "learning_error_scale": 0.02,
     "discount_factor": 0.95,
     "homophily": 0.95,
-    "confirmation_bias": 20,
-    "a_attitude": 1,
-    "b_attitude": 1,
+    "confirmation_bias": 18,
+    "a_attitude": 0.3,
+    "b_attitude": 0.3,
     "a_threshold": 1,
     "b_threshold": 1,
-    "green_N": 0,
-    "clipping_epsilon": 1e-4
-}
+    "green_N": 0
+} 
